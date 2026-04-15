@@ -46,9 +46,33 @@ Open [http://localhost:3000](http://localhost:3000).
 - `npm run typecheck` - run TypeScript checks
 - `npm run build` - create a production build
 
+## Render deployment
+
+This repo now mirrors the backend deployment shape used in
+[`PedroGalveias/farms`](https://github.com/PedroGalveias/farms):
+
+- GitHub Actions workflow at `.github/workflows/render.yml`
+- deploys on tags matching `v**`
+- can also be triggered manually with `workflow_dispatch`
+- validates the production build before deployment
+- triggers Render using a deploy hook URL stored in GitHub Actions secrets
+
+Required GitHub secret:
+
+- `RENDER_DEPLOY_HOOK_URL`
+- Render health check path: `/api/health`
+
+Typical release flow:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
 ## Project structure
 
 - `app/page.tsx` - server-rendered entry point that loads farms and service health
+- `app/api/health/route.ts` - frontend liveness endpoint for Render and uptime checks
 - `app/api/farms/route.ts` - local route handler used by the create flow
 - `components/` - UI building blocks for the directory shell, toolbar, cards, and dialog
 - `lib/farms-service.ts` - backend access layer
