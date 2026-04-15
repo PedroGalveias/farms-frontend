@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useDeferredValue, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
+  ArrowRight,
   CheckCircle2,
   Leaf,
   Map,
@@ -169,6 +171,26 @@ export default function FarmsPageShell({
                 Quick search for available products at the nearest farms.
               </h1>
 
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-forest shadow-[0_14px_34px_rgba(18,39,31,0.18)] transition hover:bg-[#f7fbf1]"
+                  href="/quick-search"
+                >
+                  <Search className="h-4 w-4" />
+                  Open quick search
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+
+                <button
+                  className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/16"
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  type="button"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add a farm
+                </button>
+              </div>
+
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
                 <article className="rounded-[1.6rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">
@@ -235,6 +257,13 @@ export default function FarmsPageShell({
                       quick category chips, and filters tuned for fast narrowing
                       instead of extra page chrome.
                     </p>
+                    <Link
+                      className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20"
+                      href="/quick-search"
+                    >
+                      Try the quick-search flow
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </div>
                 </div>
               </article>
