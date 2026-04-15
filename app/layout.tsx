@@ -14,6 +14,14 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   description: "A Swiss farm search tool!",
+  icons: {
+    apple: "/apple-icon.png",
+    icon: [
+      { sizes: "any", url: "/favicon.ico" },
+      { sizes: "512x512", type: "image/png", url: "/icon.png" },
+    ],
+    shortcut: "/favicon.ico",
+  },
   title: {
     default: "Swiss farms",
     template: "%s | farms",

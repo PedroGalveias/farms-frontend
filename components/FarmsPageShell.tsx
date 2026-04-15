@@ -168,7 +168,8 @@ export default function FarmsPageShell({
               </div>
 
               <h1 className="mt-6 max-w-3xl text-5xl leading-[0.92] sm:text-6xl">
-                Quick search for available products at the nearest farms.
+                Find the specific products at the nearest farm using quick
+                search mode.
               </h1>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -177,7 +178,7 @@ export default function FarmsPageShell({
                   href="/quick-search"
                 >
                   <Search className="h-4 w-4" />
-                  Open quick search
+                  Open Quick Search Mode
                   <ArrowRight className="h-4 w-4" />
                 </Link>
 
@@ -194,37 +195,37 @@ export default function FarmsPageShell({
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
                 <article className="rounded-[1.6rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">
-                    Entries
+                    Total of
                   </p>
                   <p className="mt-3 text-4xl font-semibold">
                     {initialFarms.length}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-white/70">
-                    Farms ready to browse in one search-first list.
+                    Farms ready to browse.
                   </p>
                 </article>
 
                 <article className="rounded-[1.6rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">
-                    Coverage
+                    Farms in
                   </p>
                   <p className="mt-3 text-4xl font-semibold">
                     {cantonOptions.length}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-white/70">
-                    Swiss cantons represented in the directory.
+                    different Swiss cantons.
                   </p>
                 </article>
 
                 <article className="rounded-[1.6rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">
-                    Quick scan
+                    Popular now
                   </p>
                   <p className="mt-3 text-2xl font-semibold">
                     {quickCategories.slice(0, 2).join(" · ") || "Fresh data"}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-white/70">
-                    Popular categories available as one-tap shortcuts below.
+                    there are many other categories available.
                   </p>
                 </article>
               </div>
@@ -249,19 +250,15 @@ export default function FarmsPageShell({
                     <Search className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="mt-3 text-3xl leading-none">
-                      The directory is the homepage.
-                    </h2>
+                    <h2 className="mt-3 text-3xl leading-none">Homepage</h2>
                     <p className="mt-4 text-sm leading-7 text-white/78">
-                      The search panel sits directly below, with large input,
-                      quick category chips, and filters tuned for fast narrowing
-                      instead of extra page chrome.
+                      Search panel
                     </p>
                     <Link
                       className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20"
                       href="/quick-search"
                     >
-                      Try the quick-search flow
+                      Quick Search Mode
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
@@ -306,7 +303,7 @@ export default function FarmsPageShell({
               <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-700" />
               <div>
                 <h2 className="text-lg font-semibold text-amber-950">
-                  The directory could not be loaded from the backend.
+                  The farm data could not be loaded.
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-amber-900/85">
                   {loadError}
@@ -357,12 +354,12 @@ export default function FarmsPageShell({
               </p>
               <h2 className="mt-4 text-4xl leading-none text-forest">
                 {initialFarms.length === 0
-                  ? "No farms are available yet."
+                  ? "No farms are availble yet."
                   : "No farms match the current filters."}
               </h2>
               <p className="mt-4 text-sm leading-7 text-ink/70">
                 {initialFarms.length === 0
-                  ? "When the backend data is available again, new farms will appear here automatically."
+                  ? "Farms data is unavailable at the moment."
                   : "Try clearing one of the filters or broadening the search term."}
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
