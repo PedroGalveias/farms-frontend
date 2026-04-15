@@ -1,4 +1,4 @@
-import FarmsPageShell from "@/components/FarmsPageShell";
+import QuickSearchExperience from "@/components/QuickSearchExperience";
 import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
 import type { ServiceStatus } from "@/types/farm";
 
@@ -16,7 +16,7 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
-export default async function HomePage() {
+export default async function QuickSearchPage() {
   const [healthResult, farmsResult] = await Promise.allSettled([
     getFarmsHealth(),
     getFarms(),
@@ -27,7 +27,7 @@ export default async function HomePage() {
     farmsResult.status === "rejected"
       ? getErrorMessage(
           farmsResult.reason,
-          "Unable to load the farm data right now.",
+          "Unable to load the farm directory right now.",
         )
       : null;
 
@@ -40,8 +40,8 @@ export default async function HomePage() {
   }
 
   return (
-    <FarmsPageShell
-      initialFarms={farms}
+    <QuickSearchExperience
+      farms={farms}
       loadError={loadError}
       serviceStatus={serviceStatus}
     />
