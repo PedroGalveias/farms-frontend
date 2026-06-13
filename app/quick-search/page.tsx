@@ -1,4 +1,4 @@
-import QuickSearchExperience from "@/components/QuickSearchExperience";
+import QuickSearchExperience from "@/components/quick-search/QuickSearchExperience";
 import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
 import type { ServiceStatus } from "@/types/farm";
 

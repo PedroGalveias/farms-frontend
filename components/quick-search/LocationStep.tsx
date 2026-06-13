@@ -1,0 +1,173 @@
+"use client";
+
+import { useId, type KeyboardEvent } from "react";
+import {
+  Crosshair,
+  LoaderCircle,
+  Locate,
+  MapPin,
+  Navigation,
+  X,
+} from "lucide-react";
+import type { QuickSearchCoordinates } from "@/lib/quick-search";
+
+export type GeoState = "idle" | "locating" | "ready" | "error";
+
+interface CantonOption {
+  code: string;
+  name: string;
+}
+
+interface LocationStepProps {
+  cantonOptions: CantonOption[];
+  geoMessage: string | null;
+  geoState: GeoState;
+  locationInput: string;
+  onClearGeolocation: () => void;
+  onContinue: () => void;
+  onLocationInputChange: (value: string) => void;
+  onRequestGeolocation: () => void;
+  sharedCoordinates: QuickSearchCoordinates | null;
+  typedCoordinates: QuickSearchCoordinates | null;
+}
+
+export default function LocationStep({
+  cantonOptions,
+  geoMessage,
+  geoState,
+  locationInput,
+  onClearGeolocation,
+  onContinue,
+  onLocationInputChange,
+  onRequestGeolocation,
+  sharedCoordinates,
+  typedCoordinates,
+}: LocationStepProps) {
+  const inputId = useId();
+
+  const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      onContinue();
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-[28px] font-bold tracking-[-0.035em] text-ink">
+          Where are you?
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-ink/55">
+          Sort farms by distance from you — or skip this and search all of
+          Switzerland.
+        </p>
+      </div>
+
+      {sharedCoordinates ? (
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-pine/20 bg-pine/[0.07] px-4 py-3.5">
+          <span className="flex items-center gap-2.5 text-sm font-bold text-pine">
+            <Navigation className="h-4 w-4" />
+            Using your current location
+          </span>
+          <button
+            aria-label="Stop using current location"
+            className="rounded-full p-1.5 text-ink/40 transition hover:bg-ink/5 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            onClick={onClearGeolocation}
+            type="button"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ) : (
+        <button
+          className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-pine/25 bg-pine/[0.07] px-5 py-3.5 text-sm font-bold text-pine transition duration-200 hover:bg-pine/[0.12] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-pine/30 disabled:cursor-wait disabled:opacity-70"
+          disabled={geoState === "locating"}
+          onClick={onRequestGeolocation}
+          type="button"
+        >
+          {geoState === "locating" ? (
+            <LoaderCircle className="h-4 w-4 animate-spin" />
+          ) : (
+            <Locate className="h-4 w-4" />
+          )}
+          {geoState === "locating" ? "Locating…" : "Use my current location"}
+        </button>
+      )}
+
+      {geoState === "error" && geoMessage ? (
+        <div
+          className="rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
+          role="status"
+        >
+          {geoMessage}
+        </div>
+      ) : null}
+
+      <div className="flex items-center gap-3 text-xs font-semibold text-ink/35">
+        <span aria-hidden="true" className="h-px flex-1 bg-line" />
+        or type a place
+        <span aria-hidden="true" className="h-px flex-1 bg-line" />
+      </div>
+
+      <div>
+        <label className="sr-only" htmlFor={inputId}>
+          Town, ZIP code, canton, or coordinates
+        </label>
+        <div className="relative">
+          <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/30" />
+          <input
+            autoComplete="off"
+            className="w-full rounded-2xl border border-transparent bg-tone py-3.5 pl-12 pr-4 text-base font-medium text-ink placeholder:font-normal placeholder:text-ink/35 transition duration-300 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10"
+            id={inputId}
+            onChange={(event) => onLocationInputChange(event.target.value)}
+            onKeyDown={handleInputKeyDown}
+            placeholder="Aarau, 5000, Bern or 47.3925, 8.0457"
+            type="text"
+            value={locationInput}
+          />
+        </div>
+
+        {typedCoordinates && !sharedCoordinates ? (
+          <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-pine/10 px-3 py-1.5 text-xs font-semibold text-pine">
+            <Crosshair className="h-3.5 w-3.5" />
+            Coordinates detected — results will be sorted by distance
+          </p>
+        ) : null}
+      </div>
+
+      {cantonOptions.length > 0 ? (
+        <div>
+          <p className="text-xs font-semibold text-ink/40">
+            Cantons with farms
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {cantonOptions.map(({ code, name }) => {
+              const isActive =
+                locationInput.trim().toLowerCase() === name.toLowerCase();
+
+              return (
+                <button
+                  aria-pressed={isActive}
+                  className={`rounded-full border px-3.5 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                    isActive
+                      ? "border-ink bg-ink text-cloud shadow-[0_8px_20px_-8px_rgba(20,22,27,0.5)]"
+                      : "border-line bg-cloud text-ink/70 hover:border-ink/30 hover:text-ink"
+                  }`}
+                  key={code}
+                  onClick={() => onLocationInputChange(isActive ? "" : name)}
+                  type="button"
+                >
+                  <span className={isActive ? "text-cloud/60" : "text-ink/35"}>
+                    {code}
+                  </span>{" "}
+                  {name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}

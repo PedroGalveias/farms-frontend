@@ -22,7 +22,7 @@ npm install
 2. Create a local environment file:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
 3. Point `FARMS_API_BASE_URL` at your backend:

@@ -1,3 +1,4 @@
+import { getCantonName } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
 const CURATED_PRODUCTS = [
@@ -15,54 +16,20 @@ const CURATED_PRODUCTS = [
   "Organic",
 ] as const;
 
-function normalizeSearchValue(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .replace(/\beggs\b/g, "egg")
-    .replace(/\bfruits\b/g, "fruit")
-    .replace(/\bvegetables\b/g, "vegetable")
-    .replace(/\bjuices\b/g, "juice")
-    .trim();
-}
+export type QuickSearchMatchMode = "all" | "any";
 
-function categoriesMatch(leftValue: string, rightValue: string) {
-  const left = normalizeSearchValue(leftValue);
-  const right = normalizeSearchValue(rightValue);
-
-  return left.includes(right) || right.includes(left);
-}
-
-function haversineDistanceKm(
-  firstLatitude: number,
-  firstLongitude: number,
-  secondLatitude: number,
-  secondLongitude: number,
-) {
-  const earthRadiusKm = 6371;
-  const toRadians = (value: number) => (value * Math.PI) / 180;
-  const latitudeDelta = toRadians(secondLatitude - firstLatitude);
-  const longitudeDelta = toRadians(secondLongitude - firstLongitude);
-  const firstPointLatitude = toRadians(firstLatitude);
-  const secondPointLatitude = toRadians(secondLatitude);
-
-  const a =
-    Math.sin(latitudeDelta / 2) * Math.sin(latitudeDelta / 2) +
-    Math.cos(firstPointLatitude) *
-      Math.cos(secondPointLatitude) *
-      Math.sin(longitudeDelta / 2) *
-      Math.sin(longitudeDelta / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return earthRadiusKm * c;
+export interface QuickSearchCoordinates {
+  latitude: number;
+  longitude: number;
 }
 
 export interface QuickSearchLocation {
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  } | null;
+  coordinates: QuickSearchCoordinates | null;
+  label: string;
+}
+
+export interface QuickSearchProduct {
+  farmCount: number;
   label: string;
 }
 
@@ -73,114 +40,220 @@ export interface QuickSearchResult {
   matchedProducts: string[];
 }
 
-export function parseQuickSearchCoordinates(input: string) {
-  const coordinateMatch =
-    input.match(
-      /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/,
-    );
+function normalizeSearchValue(value: string) {
+  // NFD + stripping combining marks folds Swiss place-name diacritics
+  // (Zürich → zurich, Genève → geneve) so typed queries match addresses.
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\beggs\b/g, "egg")
+    .replace(/\bfruits\b/g, "fruit")
+    .replace(/\bvegetables\b/g, "vegetable")
+    .replace(/\bjuices\b/g, "juice")
+    .trim();
+}
+
+export function productMatchesCategory(product: string, category: string) {
+  const left = normalizeSearchValue(product);
+  const right = normalizeSearchValue(category);
+
+  if (left.length === 0 || right.length === 0) {
+    return false;
+  }
+
+  return left.includes(right) || right.includes(left);
+}
+
+function farmMatchesProduct(farm: Farm, product: string) {
+  return farm.categories.some((category) =>
+    productMatchesCategory(product, category),
+  );
+}
+
+function haversineDistanceKm(
+  from: QuickSearchCoordinates,
+  to: QuickSearchCoordinates,
+) {
+  const earthRadiusKm = 6371;
+  const toRadians = (value: number) => (value * Math.PI) / 180;
+  const latitudeDelta = toRadians(to.latitude - from.latitude);
+  const longitudeDelta = toRadians(to.longitude - from.longitude);
+
+  const a =
+    Math.sin(latitudeDelta / 2) * Math.sin(latitudeDelta / 2) +
+    Math.cos(toRadians(from.latitude)) *
+      Math.cos(toRadians(to.latitude)) *
+      Math.sin(longitudeDelta / 2) *
+      Math.sin(longitudeDelta / 2);
+
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export function parseQuickSearchCoordinates(
+  input: string,
+): QuickSearchCoordinates | null {
+  const coordinateMatch = input.match(
+    /^\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*$/,
+  );
 
   if (!coordinateMatch) {
     return null;
   }
 
-  return {
-    latitude: Number.parseFloat(coordinateMatch[1]),
-    longitude: Number.parseFloat(coordinateMatch[2]),
-  };
+  const latitude = Number.parseFloat(coordinateMatch[1]);
+  const longitude = Number.parseFloat(coordinateMatch[2]);
+
+  if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+    return null;
+  }
+
+  return { latitude, longitude };
 }
 
-export function getQuickSearchProducts(farms: Farm[]) {
-  const products = new Map<string, string>();
+export function getQuickSearchProducts(farms: Farm[]): QuickSearchProduct[] {
+  const productsByNormalizedLabel = new Map<string, QuickSearchProduct>();
 
-  for (const product of CURATED_PRODUCTS) {
-    products.set(normalizeSearchValue(product), product);
+  for (const label of CURATED_PRODUCTS) {
+    productsByNormalizedLabel.set(normalizeSearchValue(label), {
+      farmCount: 0,
+      label,
+    });
   }
 
   for (const farm of farms) {
     for (const category of farm.categories) {
       const normalized = normalizeSearchValue(category);
 
-      if (!products.has(normalized)) {
-        products.set(normalized, category);
+      if (normalized.length > 0 && !productsByNormalizedLabel.has(normalized)) {
+        productsByNormalizedLabel.set(normalized, {
+          farmCount: 0,
+          label: category,
+        });
       }
     }
   }
 
-  return [...products.values()];
+  for (const product of productsByNormalizedLabel.values()) {
+    product.farmCount = farms.filter((farm) =>
+      farmMatchesProduct(farm, product.label),
+    ).length;
+  }
+
+  return [...productsByNormalizedLabel.values()].sort(
+    (left, right) =>
+      right.farmCount - left.farmCount || left.label.localeCompare(right.label),
+  );
+}
+
+function getLocationScore(
+  farm: Farm,
+  normalizedQuery: string,
+  queryTokens: string[],
+) {
+  if (normalizedQuery.length === 0) {
+    return 0;
+  }
+
+  const haystack = normalizeSearchValue(
+    `${farm.address} ${farm.canton} ${getCantonName(farm.canton)}`,
+  );
+
+  if (haystack.includes(normalizedQuery)) {
+    return 3;
+  }
+
+  if (
+    queryTokens.length > 1 &&
+    queryTokens.every((token) => haystack.includes(token))
+  ) {
+    return 2;
+  }
+
+  if (
+    queryTokens.some((token) => token.length > 1 && haystack.includes(token))
+  ) {
+    return 1;
+  }
+
+  return 0;
 }
 
 export function getQuickSearchResults({
   farms,
   location,
+  matchMode,
   selectedProducts,
 }: {
   farms: Farm[];
   location: QuickSearchLocation;
+  matchMode: QuickSearchMatchMode;
   selectedProducts: string[];
-}) {
-  const typedLocation = location.label.trim();
-  const typedLocationNormalized = normalizeSearchValue(typedLocation);
+}): QuickSearchResult[] {
+  if (selectedProducts.length === 0) {
+    return [];
+  }
 
-  const results = farms
-    .map((farm) => {
-      const matchedProducts = selectedProducts.filter((product) =>
-        farm.categories.some((category) => categoriesMatch(product, category)),
-      );
+  const normalizedQuery = location.coordinates
+    ? ""
+    : normalizeSearchValue(location.label);
+  const queryTokens = normalizedQuery.split(" ").filter(Boolean);
 
-      if (matchedProducts.length !== selectedProducts.length) {
-        return null;
-      }
+  const results: QuickSearchResult[] = [];
 
-      let distanceKm: number | null = null;
-      if (location.coordinates) {
-        const coordinates = parseQuickSearchCoordinates(farm.coordinates);
+  for (const farm of farms) {
+    const matchedProducts = selectedProducts.filter((product) =>
+      farmMatchesProduct(farm, product),
+    );
 
-        if (coordinates) {
-          distanceKm = haversineDistanceKm(
-            location.coordinates.latitude,
-            location.coordinates.longitude,
-            coordinates.latitude,
-            coordinates.longitude,
-          );
-        }
-      }
+    const matchesSelection =
+      matchMode === "all"
+        ? matchedProducts.length === selectedProducts.length
+        : matchedProducts.length > 0;
 
-      let locationScore = 0;
-      if (typedLocationNormalized.length > 0 && !location.coordinates) {
-        const searchableFarmLocation = normalizeSearchValue(
-          `${farm.address} ${farm.canton}`,
-        );
-
-        if (searchableFarmLocation.includes(typedLocationNormalized)) {
-          locationScore = 3;
-        } else if (
-          farm.canton.toLowerCase() === typedLocation.trim().toLowerCase()
-        ) {
-          locationScore = 2;
-        }
-      }
-
-      return {
-        distanceKm,
-        farm,
-        locationScore,
-        matchedProducts,
-      } satisfies QuickSearchResult;
-    })
-    .filter((result): result is QuickSearchResult => result !== null);
-
-  return results.sort((leftResult, rightResult) => {
-    if (location.coordinates && leftResult.distanceKm !== null && rightResult.distanceKm !== null) {
-      return leftResult.distanceKm - rightResult.distanceKm;
+    if (!matchesSelection) {
+      continue;
     }
 
-    if (!location.coordinates && typedLocationNormalized.length > 0) {
-      if (rightResult.locationScore !== leftResult.locationScore) {
-        return rightResult.locationScore - leftResult.locationScore;
+    let distanceKm: number | null = null;
+
+    if (location.coordinates) {
+      const farmCoordinates = parseQuickSearchCoordinates(farm.coordinates);
+
+      if (farmCoordinates) {
+        distanceKm = haversineDistanceKm(location.coordinates, farmCoordinates);
       }
     }
 
-    return leftResult.farm.name.localeCompare(rightResult.farm.name);
+    results.push({
+      distanceKm,
+      farm,
+      locationScore: getLocationScore(farm, normalizedQuery, queryTokens),
+      matchedProducts,
+    });
+  }
+
+  return results.sort((left, right) => {
+    if (left.distanceKm !== null && right.distanceKm !== null) {
+      if (left.distanceKm !== right.distanceKm) {
+        return left.distanceKm - right.distanceKm;
+      }
+    } else if (left.distanceKm !== null) {
+      return -1;
+    } else if (right.distanceKm !== null) {
+      return 1;
+    }
+
+    if (right.locationScore !== left.locationScore) {
+      return right.locationScore - left.locationScore;
+    }
+
+    if (right.matchedProducts.length !== left.matchedProducts.length) {
+      return right.matchedProducts.length - left.matchedProducts.length;
+    }
+
+    return left.farm.name.localeCompare(right.farm.name);
   });
 }
 

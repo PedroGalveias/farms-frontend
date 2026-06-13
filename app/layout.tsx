@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { Geist, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-manrope",
+  variable: "--font-geist",
 });
 
-const fraunces = Fraunces({
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument",
 });
 
 export const metadata: Metadata = {
-  description: "A Swiss farm search tool!",
+  description: "Fresh products, direct from Swiss farms — find what you need at the farm nearest to you.",
   icons: {
     apple: "/apple-icon.png",
     icon: [
@@ -35,8 +37,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} ${fraunces.variable}`}>
-        {children}
+      <body className={`${geist.variable} ${instrumentSerif.variable}`}>
+        <div className="relative z-[1]">{children}</div>
       </body>
     </html>
   );
