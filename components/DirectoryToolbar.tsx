@@ -6,7 +6,6 @@ import {
   RefreshCw,
   RotateCcw,
   Search,
-  SlidersHorizontal,
   X,
 } from "lucide-react";
 import { getCantonName } from "@/lib/farms";
@@ -40,7 +39,17 @@ interface DirectoryToolbarProps {
 }
 
 const fieldClassName =
-  "mt-2 w-full rounded-2xl border border-white/60 bg-white/90 px-4 py-3 text-sm text-ink shadow-[0_12px_28px_rgba(31,42,33,0.06)] transition placeholder:text-ink/35 focus:border-accent focus:ring-2 focus:ring-accent/20";
+  "w-full rounded-2xl border border-line bg-cloud px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:text-ink/35 placeholder:font-normal focus:border-pine/50 focus:ring-4 focus:ring-pine/10";
+
+const filterChipClassName =
+  "inline-flex items-center gap-1.5 rounded-full bg-tone px-3 py-1.5 text-xs font-semibold text-ink/65 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20";
+
+const viewToggleClassName = (isActive: boolean) =>
+  `inline-flex flex-1 items-center justify-center rounded-xl px-3.5 py-2.5 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
+    isActive
+      ? "bg-ink text-cloud shadow-[0_4px_12px_-4px_rgba(20,22,27,0.5)]"
+      : "text-ink/40 hover:text-ink/70"
+  }`;
 
 export default function DirectoryToolbar({
   activeFiltersCount,
@@ -69,57 +78,41 @@ export default function DirectoryToolbar({
   viewMode,
 }: DirectoryToolbarProps) {
   return (
-    <section className="sticky top-4 z-20 rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(246,245,234,0.96))] p-5 shadow-[0_28px_70px_rgba(31,42,33,0.1)] backdrop-blur sm:p-7">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-meadow/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-forest">
-            <SlidersHorizontal className="h-4 w-4" />
-            Search farms quickly
-          </div>
-          <div>
-            <h2 className="text-3xl leading-none text-forest sm:text-[2.2rem]">
-              Find the right farm in a few seconds
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/70">
-              Start with a broad search, then refine with canton and category
-              filters. Everything here is built around fast scanning and quick
-              narrowing.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 text-sm text-ink/70">
-          <span className="rounded-full bg-forest/8 px-3 py-2 font-semibold text-forest">
+    <section className="sticky top-[84px] z-20 rounded-[30px] border border-line bg-cloud/85 p-4 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_28px_60px_-32px_rgba(20,22,27,0.28)] backdrop-blur-2xl sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <h2 className="text-xl font-bold tracking-[-0.03em] text-ink">
+          Browse the directory
+        </h2>
+        <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
+          <span className="rounded-full bg-tone px-3 py-1.5 text-ink/70">
             {resultsCount} shown
           </span>
-          <span className="rounded-full bg-sun/25 px-3 py-2 font-medium text-forest">
+          <span className="rounded-full bg-tone px-3 py-1.5 text-ink/40">
             {totalCount} total
           </span>
-          <span className="rounded-full bg-sky/25 px-3 py-2 font-medium text-forest">
-            {activeFiltersCount > 0
-              ? `${activeFiltersCount} filters active`
-              : "No filters applied"}
-          </span>
+          {activeFiltersCount > 0 ? (
+            <span className="rounded-full bg-pine/10 px-3 py-1.5 text-pine">
+              {activeFiltersCount}{" "}
+              {activeFiltersCount === 1 ? "filter" : "filters"}
+            </span>
+          ) : null}
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 xl:grid-cols-[1.9fr_1fr_1fr_auto_auto]">
+      <div className="mt-4 grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
         <label className="relative block">
-          <span className="text-sm font-semibold text-forest">Search farms</span>
-          <Search className="pointer-events-none absolute left-5 top-[3.2rem] h-5 w-5 text-ink/35" />
+          <span className="sr-only">Search farms</span>
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
           <input
-            className={`${fieldClassName} min-h-14 pl-[3.25rem] text-base`}
+            className={`${fieldClassName} pl-11`}
             onChange={(event) => onSearchTermChange(event.target.value)}
-            placeholder="Search by farm name, address, or produce"
+            placeholder="Search by name, address, or produce"
             value={searchTerm}
           />
-          <p className="mt-2 text-sm text-ink/56">
-            Try produce names, locations, or part of a farm name.
-          </p>
         </label>
 
         <label className="block">
-          <span className="text-sm font-semibold text-forest">Canton</span>
+          <span className="sr-only">Canton</span>
           <select
             className={fieldClassName}
             onChange={(event) => onSelectedCantonChange(event.target.value)}
@@ -135,7 +128,7 @@ export default function DirectoryToolbar({
         </label>
 
         <label className="block">
-          <span className="text-sm font-semibold text-forest">Category</span>
+          <span className="sr-only">Category</span>
           <select
             className={fieldClassName}
             onChange={(event) => onSelectedCategoryChange(event.target.value)}
@@ -150,69 +143,56 @@ export default function DirectoryToolbar({
           </select>
         </label>
 
-        <label className="block">
-          <span className="text-sm font-semibold text-forest">Sort by</span>
-          <div className="relative">
-            <ArrowDownWideNarrow className="pointer-events-none absolute left-4 top-1/2 mt-1 h-4 w-4 -translate-y-1/2 text-ink/35" />
-            <select
-              className={`${fieldClassName} pl-10`}
-              onChange={(event) =>
-                onSortOptionChange(event.target.value as FarmSortOption)
-              }
-              value={sortOption}
-            >
-              <option value="newest">Newest first</option>
-              <option value="name">Farm name</option>
-              <option value="canton">Canton</option>
-            </select>
-          </div>
+        <label className="relative block">
+          <span className="sr-only">Sort by</span>
+          <ArrowDownWideNarrow className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
+          <select
+            className={`${fieldClassName} pl-11`}
+            onChange={(event) =>
+              onSortOptionChange(event.target.value as FarmSortOption)
+            }
+            value={sortOption}
+          >
+            <option value="newest">Newest first</option>
+            <option value="name">Farm name</option>
+            <option value="canton">Canton</option>
+          </select>
         </label>
 
-        <div className="flex items-end">
-          <div className="flex min-h-14 w-full items-center gap-1 rounded-2xl border border-border bg-white/70 p-1 shadow-[0_12px_28px_rgba(31,42,33,0.06)]">
-            <button
-              aria-label="Show list layout"
-              aria-pressed={viewMode === "list"}
-              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold transition ${
-                viewMode === "list"
-                  ? "bg-forest text-white"
-                  : "text-ink/72 hover:bg-forest/5"
-              }`}
-              onClick={() => onViewModeChange("list")}
-              type="button"
-            >
-              <List className="h-4 w-4" />
-              List
-            </button>
-            <button
-              aria-label="Show grid layout"
-              aria-pressed={viewMode === "grid"}
-              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold transition ${
-                viewMode === "grid"
-                  ? "bg-forest text-white"
-                  : "text-ink/72 hover:bg-forest/5"
-              }`}
-              onClick={() => onViewModeChange("grid")}
-              type="button"
-            >
-              <LayoutGrid className="h-4 w-4" />
-              Grid
-            </button>
-          </div>
+        <div className="flex items-center gap-1 rounded-2xl bg-tone p-1">
+          <button
+            aria-label="Show list layout"
+            aria-pressed={viewMode === "list"}
+            className={viewToggleClassName(viewMode === "list")}
+            onClick={() => onViewModeChange("list")}
+            type="button"
+          >
+            <List className="h-4 w-4" />
+          </button>
+          <button
+            aria-label="Show grid layout"
+            aria-pressed={viewMode === "grid"}
+            className={viewToggleClassName(viewMode === "grid")}
+            onClick={() => onViewModeChange("grid")}
+            type="button"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
-      <div className="mt-5 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div className="mt-3.5 flex flex-col gap-3 px-1 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-2">
           {quickCategories.map((category) => {
             const isActive = selectedCategory === category;
 
             return (
               <button
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                aria-pressed={isActive}
+                className={`rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                   isActive
-                    ? "bg-forest text-white shadow-[0_12px_30px_rgba(31,77,59,0.2)]"
-                    : "bg-meadow/14 text-forest hover:bg-meadow/22"
+                    ? "border-ink bg-ink text-cloud shadow-[0_8px_20px_-8px_rgba(20,22,27,0.5)]"
+                    : "border-line bg-cloud text-ink/60 hover:border-ink/25 hover:text-ink"
                 }`}
                 key={category}
                 onClick={() => onSelectQuickCategory(category)}
@@ -224,44 +204,44 @@ export default function DirectoryToolbar({
           })}
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           <button
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-white/70 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-forest/5 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-4 py-2 text-[13px] font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={activeFiltersCount === 0}
             onClick={onReset}
             type="button"
           >
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw className="h-3.5 w-3.5" />
             Reset
           </button>
 
           <button
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-forest px-4 py-3 text-sm font-semibold text-white transition hover:bg-forest-muted disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-4 py-2 text-[13px] font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={onRefresh}
             type="button"
           >
             <RefreshCw
-              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`}
             />
             {isRefreshing ? "Refreshing" : "Refresh"}
           </button>
 
           <button
-            className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#c26e33]"
+            className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[13px] font-bold text-cloud shadow-[0_8px_20px_-8px_rgba(20,22,27,0.5)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
             onClick={onCreateFarm}
             type="button"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             Add a farm
           </button>
         </div>
       </div>
 
       {activeFiltersCount > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3.5 flex flex-wrap gap-2 border-t border-line px-1 pt-3.5">
           {searchTerm.trim() ? (
             <button
-              className="inline-flex items-center gap-2 rounded-full bg-accent-soft px-3 py-2 text-sm font-medium text-forest transition hover:bg-[#ebc99c]"
+              className={filterChipClassName}
               onClick={onClearSearchTerm}
               type="button"
             >
@@ -272,7 +252,7 @@ export default function DirectoryToolbar({
 
           {selectedCanton !== "all" ? (
             <button
-              className="inline-flex items-center gap-2 rounded-full bg-sky/28 px-3 py-2 text-sm font-medium text-forest transition hover:bg-sky/36"
+              className={filterChipClassName}
               onClick={onClearCanton}
               type="button"
             >
@@ -283,7 +263,7 @@ export default function DirectoryToolbar({
 
           {selectedCategory !== "all" ? (
             <button
-              className="inline-flex items-center gap-2 rounded-full bg-meadow/18 px-3 py-2 text-sm font-medium text-forest transition hover:bg-meadow/26"
+              className={filterChipClassName}
               onClick={onClearCategory}
               type="button"
             >

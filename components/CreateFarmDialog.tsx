@@ -18,7 +18,10 @@ interface CreateFarmDialogProps {
 }
 
 const fieldClassName =
-  "mt-2 w-full rounded-2xl border border-border bg-white px-4 py-3 text-sm text-ink shadow-sm transition placeholder:text-ink/35 focus:border-accent focus:ring-2 focus:ring-accent/20";
+  "mt-2 w-full rounded-2xl border border-transparent bg-tone px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:font-normal placeholder:text-ink/35 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.08em] text-ink/55";
 
 export default function CreateFarmDialog({
   open,
@@ -140,52 +143,47 @@ export default function CreateFarmDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-forest/45 px-4 py-6 backdrop-blur-sm"
+      className="qs-backdrop fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 py-6 backdrop-blur-md"
       onClick={handleBackdropClick}
       role="presentation"
     >
       <div
         aria-labelledby="create-farm-heading"
         aria-modal="true"
-        className="w-full max-w-4xl overflow-hidden rounded-[2rem] border border-white/60 bg-surface shadow-[0_40px_120px_rgba(31,42,33,0.22)]"
+        className="qs-sheet max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[32px] border border-line bg-cloud shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)]"
         role="dialog"
       >
-        <div className="border-b border-border bg-forest px-6 py-5 text-white sm:px-8">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/65">
-                New entry
-              </p>
-              <h2
-                className="mt-3 text-4xl leading-none"
-                id="create-farm-heading"
-              >
-                Add new farm
-              </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">
-                Swiss canton codes, Swiss coordinates, and at least one
-                category.
-              </p>
-            </div>
-
-            <button
-              aria-label="Close create farm dialog"
-              className="rounded-full border border-white/15 bg-white/10 p-2 text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isSubmitting}
-              onClick={onClose}
-              type="button"
+        <div className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-pine">
+              New entry
+            </p>
+            <h2
+              className="mt-2.5 text-4xl font-extrabold leading-[0.95] tracking-[-0.04em] text-ink"
+              id="create-farm-heading"
             >
-              <X className="h-5 w-5" />
-            </button>
+              Add a farm
+            </h2>
+            <p className="mt-3 max-w-md text-sm leading-6 text-ink/50">
+              A Swiss canton, Swiss coordinates, and at least one category.
+            </p>
           </div>
+
+          <button
+            aria-label="Close create farm dialog"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/60 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isSubmitting}
+            onClick={onClose}
+            type="button"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        <form className="p-6 sm:p-8" onSubmit={handleSubmit}>
+        <form className="px-6 pb-7 pt-6 sm:px-8 sm:pb-8" onSubmit={handleSubmit}>
           <div className="grid gap-5 md:grid-cols-2">
             <label className="block">
-              <span className="text-sm font-semibold text-forest">
-                Farm name
-              </span>
+              <span className={labelClassName}>Farm name</span>
               <input
                 className={fieldClassName}
                 name="name"
@@ -194,12 +192,12 @@ export default function CreateFarmDialog({
                 value={values.name}
               />
               {errors.name ? (
-                <p className="mt-2 text-sm text-rose-700">{errors.name}</p>
+                <p className="mt-2 text-sm text-rose-600">{errors.name}</p>
               ) : null}
             </label>
 
             <label className="block">
-              <span className="text-sm font-semibold text-forest">Address</span>
+              <span className={labelClassName}>Address</span>
               <input
                 className={fieldClassName}
                 name="address"
@@ -210,12 +208,12 @@ export default function CreateFarmDialog({
                 value={values.address}
               />
               {errors.address ? (
-                <p className="mt-2 text-sm text-rose-700">{errors.address}</p>
+                <p className="mt-2 text-sm text-rose-600">{errors.address}</p>
               ) : null}
             </label>
 
             <label className="block">
-              <span className="text-sm font-semibold text-forest">Canton</span>
+              <span className={labelClassName}>Canton</span>
               <select
                 className={fieldClassName}
                 name="canton"
@@ -232,15 +230,13 @@ export default function CreateFarmDialog({
                 ))}
               </select>
               {errors.canton ? (
-                <p className="mt-2 text-sm text-rose-700">{errors.canton}</p>
+                <p className="mt-2 text-sm text-rose-600">{errors.canton}</p>
               ) : null}
             </label>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="block">
-                <span className="text-sm font-semibold text-forest">
-                  Latitude
-                </span>
+                <span className={labelClassName}>Latitude</span>
                 <input
                   className={fieldClassName}
                   inputMode="decimal"
@@ -252,16 +248,14 @@ export default function CreateFarmDialog({
                   value={values.latitude}
                 />
                 {errors.latitude ? (
-                  <p className="mt-2 text-sm text-rose-700">
+                  <p className="mt-2 text-sm text-rose-600">
                     {errors.latitude}
                   </p>
                 ) : null}
               </label>
 
               <label className="block">
-                <span className="text-sm font-semibold text-forest">
-                  Longitude
-                </span>
+                <span className={labelClassName}>Longitude</span>
                 <input
                   className={fieldClassName}
                   inputMode="decimal"
@@ -273,7 +267,7 @@ export default function CreateFarmDialog({
                   value={values.longitude}
                 />
                 {errors.longitude ? (
-                  <p className="mt-2 text-sm text-rose-700">
+                  <p className="mt-2 text-sm text-rose-600">
                     {errors.longitude}
                   </p>
                 ) : null}
@@ -282,11 +276,9 @@ export default function CreateFarmDialog({
           </div>
 
           <label className="mt-5 block">
-            <span className="text-sm font-semibold text-forest">
-              Categories
-            </span>
+            <span className={labelClassName}>Categories</span>
             <textarea
-              className={`${fieldClassName} min-h-32 resize-y`}
+              className={`${fieldClassName} min-h-28 resize-y`}
               name="categories"
               onChange={(event) =>
                 setFieldValue("categories", event.target.value)
@@ -294,19 +286,19 @@ export default function CreateFarmDialog({
               placeholder="Organic, Fruit, Vegetables, Eggs"
               value={values.categories}
             />
-            <p className="mt-2 text-sm text-ink/60">
+            <p className="mt-2 text-sm text-ink/40">
               Separate categories with commas or line breaks.
             </p>
             {errors.categories ? (
-              <p className="mt-2 text-sm text-rose-700">{errors.categories}</p>
+              <p className="mt-2 text-sm text-rose-600">{errors.categories}</p>
             ) : null}
           </label>
 
           {categoryPreview.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-1.5">
               {categoryPreview.map((category) => (
                 <span
-                  className="rounded-full bg-forest/8 px-3 py-1 text-sm font-medium text-forest"
+                  className="rounded-full bg-tone px-3 py-1 text-sm font-medium text-ink/70"
                   key={category}
                 >
                   {category}
@@ -316,14 +308,14 @@ export default function CreateFarmDialog({
           ) : null}
 
           {serverError ? (
-            <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+            <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
               {serverError}
             </div>
           ) : null}
 
-          <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
+          <div className="mt-7 flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:justify-end">
             <button
-              className="rounded-full border border-border px-5 py-3 text-sm font-semibold text-ink transition hover:bg-forest/5 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isSubmitting}
               onClick={onClose}
               type="button"
@@ -331,7 +323,7 @@ export default function CreateFarmDialog({
               Close
             </button>
             <button
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c96f3d] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isSubmitting}
               type="submit"
             >
