@@ -20,6 +20,10 @@ jobs:
   verify:
     name: Lint, test & build
     runs-on: ubuntu-latest
+    # pull-requests: write lets the coverage report be posted as a PR comment.
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -39,8 +43,14 @@ jobs:
       - name: Type-check
         run: npm run typecheck
 
-      - name: Test
-        run: npm run test
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Report coverage on PR
+        # Runs even if the coverage thresholds failed, so the numbers are still
+        # surfaced on the pull request. Skipped for non-PR (push) events.
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: davelosert/vitest-coverage-report-action@v2
 
       - name: Build
         run: npm run build
