@@ -17,7 +17,9 @@ function AnimatedDistance({ km }: { km: number }) {
   }
 
   if (km < 10) {
-    return <CountUp decimals={1} durationMs={900} suffix=" km away" value={km} />;
+    return (
+      <CountUp decimals={1} durationMs={900} suffix=" km away" value={km} />
+    );
   }
 
   return <CountUp durationMs={900} suffix=" km away" value={Math.round(km)} />;

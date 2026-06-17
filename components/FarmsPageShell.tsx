@@ -290,7 +290,6 @@ export default function FarmsPageShell({
                   {t("cta_addFarm")}
                 </button>
               </div>
-
             </div>
 
             <ImageSlot

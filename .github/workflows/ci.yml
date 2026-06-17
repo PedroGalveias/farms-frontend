@@ -1,0 +1,146 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded runs for the same ref (e.g. rapid pushes to a PR).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Lint, type-check, test, and build. Runs on every push and pull request,
+  # and gates the deploy job below.
+  verify:
+    name: Lint, test & build
+    runs-on: ubuntu-latest
+    # pull-requests: write lets the coverage report be posted as a PR comment.
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Report coverage on PR
+        # Runs even if the coverage thresholds failed, so the numbers are still
+        # surfaced on the pull request. Skipped for non-PR (push) events.
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: davelosert/vitest-coverage-report-action@v2
+
+      - name: Upload coverage report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          if-no-files-found: ignore
+
+      - name: Build
+        run: npm run build
+
+  # End-to-end smoke tests against a production build in a real browser.
+  e2e:
+    name: E2E smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve Playwright version
+        id: playwright
+        run: |
+          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # Cache the ~100 MB browser download, keyed on the Playwright version so
+      # it's reused across back-to-back runs and invalidated on upgrade.
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright.outputs.version }}
+
+      # On a cache hit the browser is already present — only the OS-level
+      # dependencies (not cached) need installing, which is fast.
+      - name: Install Playwright (browser + OS deps)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright OS deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+  # Trigger a Render deploy only after checks pass, and only for pushes
+  # (or manual runs) on the default branch. Pull requests never deploy.
+  deploy:
+    name: Deploy to Render
+    needs: [verify, e2e]
+    if: >-
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+      && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: render
+    permissions:
+      contents: read
+      deployments: write
+    concurrency:
+      group: render
+      cancel-in-progress: true
+    steps:
+      - name: Trigger deploy hook
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$deploy_url" ]; then
+            echo "::error::RENDER_DEPLOY_HOOK_URL secret is not set." >&2
+            exit 1
+          fi
+          curl -fsS "$deploy_url"

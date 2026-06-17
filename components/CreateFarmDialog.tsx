@@ -180,7 +180,10 @@ export default function CreateFarmDialog({
           </button>
         </div>
 
-        <form className="px-6 pb-7 pt-6 sm:px-8 sm:pb-8" onSubmit={handleSubmit}>
+        <form
+          className="px-6 pb-7 pt-6 sm:px-8 sm:pb-8"
+          onSubmit={handleSubmit}
+        >
           <div className="grid gap-5 md:grid-cols-2">
             <label className="block">
               <span className={labelClassName}>Farm name</span>

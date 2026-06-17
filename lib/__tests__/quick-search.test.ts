@@ -1,0 +1,208 @@
+import { describe, expect, it } from "vitest";
+import {
+  formatQuickSearchDistance,
+  getNearestFarm,
+  getQuickSearchProducts,
+  getQuickSearchResults,
+  parseQuickSearchCoordinates,
+  productMatchesCategory,
+} from "@/lib/quick-search";
+import type { Farm } from "@/types/farm";
+
+function makeFarm(overrides: Partial<Farm> = {}): Farm {
+  return {
+    id: "f1",
+    name: "Test Farm",
+    address: "Main Street 1, 3000 Bern",
+    canton: "BE",
+    coordinates: "46.9480,7.4474",
+    categories: ["Vegetables"],
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: null,
+    ...overrides,
+  };
+}
+
+describe("parseQuickSearchCoordinates", () => {
+  it("parses comma-separated coordinates", () => {
+    expect(parseQuickSearchCoordinates("46.948,7.447")).toEqual({
+      latitude: 46.948,
+      longitude: 7.447,
+    });
+  });
+
+  it("parses semicolon-separated and whitespace-padded input", () => {
+    expect(parseQuickSearchCoordinates("  -12.5 ; 100.25 ")).toEqual({
+      latitude: -12.5,
+      longitude: 100.25,
+    });
+  });
+
+  it("rejects non-coordinate strings", () => {
+    expect(parseQuickSearchCoordinates("Bern")).toBeNull();
+    expect(parseQuickSearchCoordinates("")).toBeNull();
+  });
+
+  it("rejects out-of-range latitude/longitude", () => {
+    expect(parseQuickSearchCoordinates("91,7")).toBeNull();
+    expect(parseQuickSearchCoordinates("46,181")).toBeNull();
+  });
+});
+
+describe("productMatchesCategory", () => {
+  it("matches case-insensitively and folds diacritics", () => {
+    expect(productMatchesCategory("vegetables", "Vegetables")).toBe(true);
+    expect(productMatchesCategory("Gemüse", "gemuse")).toBe(true);
+  });
+
+  it("normalizes singular/plural synonyms", () => {
+    expect(productMatchesCategory("egg", "Eggs")).toBe(true);
+    expect(productMatchesCategory("fruit", "Fruits")).toBe(true);
+  });
+
+  it("does not match unrelated products", () => {
+    expect(productMatchesCategory("Dairy", "Vegetables")).toBe(false);
+  });
+
+  it("returns false for empty input", () => {
+    expect(productMatchesCategory("", "Vegetables")).toBe(false);
+    expect(productMatchesCategory("Dairy", "")).toBe(false);
+  });
+});
+
+describe("getNearestFarm", () => {
+  const near = makeFarm({ id: "near", coordinates: "46.95,7.45" });
+  const far = makeFarm({ id: "far", coordinates: "47.3769,8.5417" });
+
+  it("returns the closest farm with its distance", () => {
+    const result = getNearestFarm([far, near], {
+      latitude: 46.95,
+      longitude: 7.45,
+    });
+    expect(result?.farm.id).toBe("near");
+    expect(result?.distanceKm).toBeGreaterThanOrEqual(0);
+    expect(result?.distanceKm).toBeLessThan(1);
+  });
+
+  it("skips farms with unparseable coordinates", () => {
+    const broken = makeFarm({ id: "broken", coordinates: "not-a-coord" });
+    const result = getNearestFarm([broken, far], {
+      latitude: 47.37,
+      longitude: 8.54,
+    });
+    expect(result?.farm.id).toBe("far");
+  });
+
+  it("returns null when no farm has valid coordinates", () => {
+    const broken = makeFarm({ coordinates: "x" });
+    expect(getNearestFarm([broken], { latitude: 46, longitude: 7 })).toBeNull();
+    expect(getNearestFarm([], { latitude: 46, longitude: 7 })).toBeNull();
+  });
+});
+
+describe("getQuickSearchResults", () => {
+  const bern = makeFarm({
+    id: "bern",
+    name: "Bern Farm",
+    coordinates: "46.9480,7.4474",
+    categories: ["Vegetables", "Dairy"],
+  });
+  const zurich = makeFarm({
+    id: "zurich",
+    name: "Zurich Farm",
+    canton: "ZH",
+    address: "Feldweg 3, 8001 Zürich",
+    coordinates: "47.3769,8.5417",
+    categories: ["Vegetables"],
+  });
+
+  it("returns nothing when no products are selected", () => {
+    expect(
+      getQuickSearchResults({
+        farms: [bern, zurich],
+        location: { coordinates: null, label: "" },
+        matchMode: "any",
+        selectedProducts: [],
+      }),
+    ).toEqual([]);
+  });
+
+  it("sorts by distance, nearest first, when coordinates are given", () => {
+    const results = getQuickSearchResults({
+      farms: [zurich, bern],
+      location: {
+        coordinates: { latitude: 46.95, longitude: 7.45 },
+        label: "",
+      },
+      matchMode: "any",
+      selectedProducts: ["Vegetables"],
+    });
+    expect(results.map((r) => r.farm.id)).toEqual(["bern", "zurich"]);
+    expect(results[0].distanceKm).toBeLessThan(results[1].distanceKm!);
+  });
+
+  it("matchMode 'all' requires every selected product", () => {
+    const results = getQuickSearchResults({
+      farms: [bern, zurich],
+      location: { coordinates: null, label: "" },
+      matchMode: "all",
+      selectedProducts: ["Vegetables", "Dairy"],
+    });
+    expect(results.map((r) => r.farm.id)).toEqual(["bern"]);
+  });
+
+  it("matchMode 'any' includes farms with at least one product", () => {
+    const results = getQuickSearchResults({
+      farms: [bern, zurich],
+      location: { coordinates: null, label: "" },
+      matchMode: "any",
+      selectedProducts: ["Vegetables", "Dairy"],
+    });
+    expect(results.map((r) => r.farm.id).sort()).toEqual(["bern", "zurich"]);
+  });
+
+  it("ranks text-location matches by relevance score", () => {
+    const results = getQuickSearchResults({
+      farms: [bern, zurich],
+      location: { coordinates: null, label: "Zürich" },
+      matchMode: "any",
+      selectedProducts: ["Vegetables"],
+    });
+    expect(results[0].farm.id).toBe("zurich");
+    expect(results[0].locationScore).toBeGreaterThan(results[1].locationScore);
+  });
+});
+
+describe("getQuickSearchProducts", () => {
+  it("includes curated products and counts farms", () => {
+    const products = getQuickSearchProducts([
+      makeFarm({ categories: ["Vegetables"] }),
+      makeFarm({ categories: ["Vegetables", "Dairy"] }),
+    ]);
+    const vegetables = products.find((p) => p.label === "Vegetables");
+    const dairy = products.find((p) => p.label === "Dairy");
+    expect(vegetables?.farmCount).toBe(2);
+    expect(dairy?.farmCount).toBe(1);
+  });
+
+  it("sorts by farm count descending", () => {
+    const products = getQuickSearchProducts([
+      makeFarm({ categories: ["Dairy"] }),
+      makeFarm({ categories: ["Dairy"] }),
+      makeFarm({ categories: ["Vegetables"] }),
+    ]);
+    expect(products[0].label).toBe("Dairy");
+  });
+});
+
+describe("formatQuickSearchDistance", () => {
+  it("returns null for null distance", () => {
+    expect(formatQuickSearchDistance(null)).toBeNull();
+  });
+
+  it("renders sub-kilometre, one-decimal, and rounded ranges", () => {
+    expect(formatQuickSearchDistance(0.4)).toBe("Less than 1 km away");
+    expect(formatQuickSearchDistance(3.45)).toBe("3.5 km away");
+    expect(formatQuickSearchDistance(42.6)).toBe("43 km away");
+  });
+});

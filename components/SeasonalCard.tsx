@@ -8,18 +8,102 @@ import type { Locale } from "@/lib/i18n";
 // season here. Emoji are language-neutral; names stay in English to match the
 // app's product/category data. Approximate, in the spirit of a Saisonkalender.
 const SWISS_SEASONAL: string[][] = [
-  ["🍎 Apples", "🍐 Pears", "🥬 Cabbage", "🥕 Carrots", "🧅 Onions", "🥔 Potatoes"],
-  ["🍎 Apples", "🥬 Cabbage", "🥕 Carrots", "🧅 Onions", "🥔 Potatoes", "🥬 Lamb's lettuce"],
-  ["🥕 Carrots", "🥬 Spinach", "🥗 Lettuce", "🍎 Apples", "🌿 Chives", "🥬 Lamb's lettuce"],
-  ["🥬 Asparagus", "🥗 Lettuce", "🌱 Spinach", "🌶️ Radishes", "🌿 Rhubarb", "🥕 Carrots"],
-  ["🍓 Strawberries", "🥬 Asparagus", "🥗 Lettuce", "🌿 Rhubarb", "🫛 Peas", "🌶️ Radishes"],
-  ["🍓 Strawberries", "🍒 Cherries", "🥒 Cucumbers", "🥗 Lettuce", "🫛 Peas", "🍑 Apricots"],
-  ["🍒 Cherries", "🍑 Apricots", "🫐 Berries", "🍅 Tomatoes", "🥒 Cucumbers", "🫑 Peppers"],
-  ["🍑 Peaches", "🫐 Plums", "🍅 Tomatoes", "🌽 Corn", "🫑 Peppers", "🫛 Beans"],
-  ["🍇 Grapes", "🍎 Apples", "🍐 Pears", "🎃 Pumpkins", "🍅 Tomatoes", "🌽 Corn"],
-  ["🍎 Apples", "🍐 Pears", "🍇 Grapes", "🎃 Pumpkins", "🥬 Cabbage", "🍄 Mushrooms"],
-  ["🍎 Apples", "🍐 Pears", "🎃 Pumpkins", "🥬 Cabbage", "🥕 Carrots", "🥔 Potatoes"],
-  ["🍎 Apples", "🍐 Pears", "🥬 Cabbage", "🥕 Carrots", "🥔 Potatoes", "🥬 Lamb's lettuce"],
+  [
+    "🍎 Apples",
+    "🍐 Pears",
+    "🥬 Cabbage",
+    "🥕 Carrots",
+    "🧅 Onions",
+    "🥔 Potatoes",
+  ],
+  [
+    "🍎 Apples",
+    "🥬 Cabbage",
+    "🥕 Carrots",
+    "🧅 Onions",
+    "🥔 Potatoes",
+    "🥬 Lamb's lettuce",
+  ],
+  [
+    "🥕 Carrots",
+    "🥬 Spinach",
+    "🥗 Lettuce",
+    "🍎 Apples",
+    "🌿 Chives",
+    "🥬 Lamb's lettuce",
+  ],
+  [
+    "🥬 Asparagus",
+    "🥗 Lettuce",
+    "🌱 Spinach",
+    "🌶️ Radishes",
+    "🌿 Rhubarb",
+    "🥕 Carrots",
+  ],
+  [
+    "🍓 Strawberries",
+    "🥬 Asparagus",
+    "🥗 Lettuce",
+    "🌿 Rhubarb",
+    "🫛 Peas",
+    "🌶️ Radishes",
+  ],
+  [
+    "🍓 Strawberries",
+    "🍒 Cherries",
+    "🥒 Cucumbers",
+    "🥗 Lettuce",
+    "🫛 Peas",
+    "🍑 Apricots",
+  ],
+  [
+    "🍒 Cherries",
+    "🍑 Apricots",
+    "🫐 Berries",
+    "🍅 Tomatoes",
+    "🥒 Cucumbers",
+    "🫑 Peppers",
+  ],
+  [
+    "🍑 Peaches",
+    "🫐 Plums",
+    "🍅 Tomatoes",
+    "🌽 Corn",
+    "🫑 Peppers",
+    "🫛 Beans",
+  ],
+  [
+    "🍇 Grapes",
+    "🍎 Apples",
+    "🍐 Pears",
+    "🎃 Pumpkins",
+    "🍅 Tomatoes",
+    "🌽 Corn",
+  ],
+  [
+    "🍎 Apples",
+    "🍐 Pears",
+    "🍇 Grapes",
+    "🎃 Pumpkins",
+    "🥬 Cabbage",
+    "🍄 Mushrooms",
+  ],
+  [
+    "🍎 Apples",
+    "🍐 Pears",
+    "🎃 Pumpkins",
+    "🥬 Cabbage",
+    "🥕 Carrots",
+    "🥔 Potatoes",
+  ],
+  [
+    "🍎 Apples",
+    "🍐 Pears",
+    "🥬 Cabbage",
+    "🥕 Carrots",
+    "🥔 Potatoes",
+    "🥬 Lamb's lettuce",
+  ],
 ];
 
 const INTL_LOCALE: Record<Locale, string> = {
@@ -68,7 +152,9 @@ export default function SeasonalCard() {
             </span>
           ))}
         </div>
-        <p className="mt-3 text-xs leading-5 text-ink/50">{t("season_promo")}</p>
+        <p className="mt-3 text-xs leading-5 text-ink/50">
+          {t("season_promo")}
+        </p>
       </div>
     </div>
   );

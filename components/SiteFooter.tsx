@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowUpRight, Github } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import GitHubIcon from "@/components/icons/GitHubIcon";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 const FARMS_SERVICE_REPO = "https://github.com/PedroGalveias/farms";
@@ -32,7 +33,7 @@ export default function SiteFooter() {
               rel="noreferrer"
               target="_blank"
             >
-              <Github className="h-4 w-4 text-ink/40 transition-colors group-hover:text-pine" />
+              <GitHubIcon className="h-4 w-4 text-ink/40 transition-colors group-hover:text-pine" />
               {t("footer_farmsService")}
               <HoverArrow />
             </a>
@@ -42,7 +43,7 @@ export default function SiteFooter() {
               rel="noreferrer"
               target="_blank"
             >
-              <Github className="h-4 w-4 text-ink/40 transition-colors group-hover:text-pine" />
+              <GitHubIcon className="h-4 w-4 text-ink/40 transition-colors group-hover:text-pine" />
               {t("footer_farmsFrontend")}
               <HoverArrow />
             </a>
