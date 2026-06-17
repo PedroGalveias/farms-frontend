@@ -376,7 +376,9 @@ export default function QuickSearchExperience({
     <span
       className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ${statusPill.className}`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full pulse-dot ${statusPill.dotClassName}`} />
+      <span
+        className={`h-1.5 w-1.5 rounded-full pulse-dot ${statusPill.dotClassName}`}
+      />
       {statusPill.label}
     </span>
   );
@@ -385,145 +387,144 @@ export default function QuickSearchExperience({
     <div className="relative overflow-clip">
       <div className="lg:flex lg:h-dvh lg:overflow-hidden">
         <div className="relative z-10 mx-auto w-full max-w-xl px-4 pb-12 pt-4 sm:px-6 sm:pt-8 lg:mx-0 lg:flex lg:h-dvh lg:w-[560px] lg:max-w-none lg:shrink-0 lg:flex-col lg:justify-center lg:px-12 lg:py-0">
-        <div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-xs font-semibold text-ink/60">
-              <Sparkles className="h-3.5 w-3.5 text-pine" />
-              Quick search
-            </span>
-            {serviceStatus !== "online" ? statusBadge : null}
+          <div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-xs font-semibold text-ink/60">
+                <Sparkles className="h-3.5 w-3.5 text-pine" />
+                Quick search
+              </span>
+              {serviceStatus !== "online" ? statusBadge : null}
+            </div>
+            <h1 className="mt-5 text-[clamp(2.75rem,11vw,4rem)] font-extrabold leading-[0.92] tracking-[-0.045em] text-ink">
+              What do you need <span className="text-pine">today?</span>
+            </h1>
+            <p className="mt-4 max-w-md text-[15px] leading-7 text-ink/55">
+              Set where you are, pick what you’re after — get the farms that
+              have it, nearest first.
+            </p>
           </div>
-          <h1 className="mt-5 text-[clamp(2.75rem,11vw,4rem)] font-extrabold leading-[0.92] tracking-[-0.045em] text-ink">
-            What do you need{" "}
-            <span className="text-pine">today?</span>
-          </h1>
-          <p className="mt-4 max-w-md text-[15px] leading-7 text-ink/55">
-            Set where you are, pick what you’re after — get the farms that have
-            it, nearest first.
-          </p>
-        </div>
 
-        {loadError ? (
+          {loadError ? (
+            <div
+              className="mt-6 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
+              role="status"
+            >
+              The farm data is not fully available right now. You can still
+              explore the flow, but live results may be limited.
+            </div>
+          ) : null}
+
           <div
-            className="mt-6 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
-            role="status"
+            aria-label="Quick search steps"
+            className="relative mt-8 h-[clamp(460px,calc(100dvh-400px),640px)] lg:h-[clamp(520px,calc(100dvh-360px),660px)]"
+            role="group"
           >
-            The farm data is not fully available right now. You can still
-            explore the flow, but live results may be limited.
-          </div>
-        ) : null}
+            {STEPS.map((meta, index) => {
+              const isCurrent = index === currentIndex;
+              const isStacked = index < currentIndex;
+              const Icon = meta.icon;
 
-        <div
-          aria-label="Quick search steps"
-          className="relative mt-8 h-[clamp(460px,calc(100dvh-400px),640px)] lg:h-[clamp(520px,calc(100dvh-360px),660px)]"
-          role="group"
-        >
-          {STEPS.map((meta, index) => {
-            const isCurrent = index === currentIndex;
-            const isStacked = index < currentIndex;
-            const Icon = meta.icon;
+              return (
+                <article
+                  aria-hidden={index > currentIndex}
+                  className="absolute inset-x-0 top-0 flex h-[calc(100%-112px)] origin-top flex-col overflow-hidden rounded-[32px] border border-line bg-cloud shadow-[0_1px_2px_rgba(20,22,27,0.05),0_36px_64px_-24px_rgba(20,22,27,0.3)] outline-none transition-[transform,opacity] duration-[650ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
+                  key={meta.id}
+                  ref={(node) => {
+                    cardRefs.current[index] = node;
+                  }}
+                  style={getCardStyle(index)}
+                  tabIndex={-1}
+                >
+                  {isStacked ? (
+                    <button
+                      className="group flex h-14 w-full shrink-0 items-center gap-3 px-5 text-left transition hover:bg-tone/40 focus-visible:bg-tone sm:px-6"
+                      onClick={() => goToStep(meta.id)}
+                      type="button"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-pine/10 text-pine">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="shrink-0 text-sm font-bold text-ink">
+                        {meta.label}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm text-ink/45">
+                        {stepSummaries[meta.id]}
+                      </span>
+                      <Pencil className="h-3.5 w-3.5 shrink-0 text-ink/30 transition group-hover:text-ink/70" />
+                    </button>
+                  ) : (
+                    <div className="flex h-14 shrink-0 items-center gap-3 border-b border-line px-5 sm:px-6">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-pine/10 text-pine">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="text-sm font-bold text-ink">
+                        {meta.label}
+                      </span>
+                      <span className="ml-auto text-xs font-semibold text-ink/35">
+                        Step {index + 1} of 3
+                      </span>
+                    </div>
+                  )}
 
-            return (
-              <article
-                aria-hidden={index > currentIndex}
-                className="absolute inset-x-0 top-0 flex h-[calc(100%-112px)] origin-top flex-col overflow-hidden rounded-[32px] border border-line bg-cloud shadow-[0_1px_2px_rgba(20,22,27,0.05),0_36px_64px_-24px_rgba(20,22,27,0.3)] outline-none transition-[transform,opacity] duration-[650ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
-                key={meta.id}
-                ref={(node) => {
-                  cardRefs.current[index] = node;
-                }}
-                style={getCardStyle(index)}
-                tabIndex={-1}
-              >
-                {isStacked ? (
+                  <div
+                    aria-hidden={!isCurrent}
+                    className="flex min-h-0 flex-1 flex-col"
+                    inert={isCurrent ? undefined : true}
+                  >
+                    <div className="flex-1 overflow-y-auto px-5 pb-4 pt-5 sm:px-6">
+                      {renderStepBody(meta.id)}
+                    </div>
+                    <div className="shrink-0 border-t border-line px-5 py-4 sm:px-6">
+                      {renderStepFooter(meta.id)}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+
+            {STEPS.map((meta, index) => {
+              if (index === 0) {
+                return null;
+              }
+
+              const isVisible = index > currentIndex;
+              const enabled = isStepEnabled(index);
+              const Icon = meta.icon;
+
+              return (
+                <div
+                  aria-hidden={!isVisible}
+                  className="absolute inset-x-0 flex h-14 items-end transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
+                  key={`upcoming-${meta.id}`}
+                  style={{
+                    bottom: (STEPS.length - 1 - index) * PEEK_PX,
+                    opacity: isVisible ? 1 : 0,
+                    pointerEvents: isVisible ? "auto" : "none",
+                    transform: isVisible ? "translateY(0)" : "translateY(14px)",
+                  }}
+                >
                   <button
-                    className="group flex h-14 w-full shrink-0 items-center gap-3 px-5 text-left transition hover:bg-tone/40 focus-visible:bg-tone sm:px-6"
+                    className="flex h-12 w-full items-center gap-3 rounded-2xl border border-line bg-cloud/60 px-5 text-left transition enabled:hover:bg-cloud disabled:cursor-not-allowed sm:px-6"
+                    disabled={!isVisible || !enabled}
                     onClick={() => goToStep(meta.id)}
                     type="button"
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-pine/10 text-pine">
-                      <Icon className="h-4 w-4" />
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-tone text-ink/40">
+                      <Icon className="h-3.5 w-3.5" />
                     </span>
-                    <span className="shrink-0 text-sm font-bold text-ink">
+                    <span
+                      className={`text-sm font-semibold ${enabled ? "text-ink/55" : "text-ink/30"}`}
+                    >
                       {meta.label}
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-sm text-ink/45">
-                      {stepSummaries[meta.id]}
+                    <span className="ml-auto text-xs text-ink/30">
+                      {enabled ? "Up next" : "Pick products first"}
                     </span>
-                    <Pencil className="h-3.5 w-3.5 shrink-0 text-ink/30 transition group-hover:text-ink/70" />
                   </button>
-                ) : (
-                  <div className="flex h-14 shrink-0 items-center gap-3 border-b border-line px-5 sm:px-6">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-pine/10 text-pine">
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <span className="text-sm font-bold text-ink">
-                      {meta.label}
-                    </span>
-                    <span className="ml-auto text-xs font-semibold text-ink/35">
-                      Step {index + 1} of 3
-                    </span>
-                  </div>
-                )}
-
-                <div
-                  aria-hidden={!isCurrent}
-                  className="flex min-h-0 flex-1 flex-col"
-                  inert={isCurrent ? undefined : true}
-                >
-                  <div className="flex-1 overflow-y-auto px-5 pb-4 pt-5 sm:px-6">
-                    {renderStepBody(meta.id)}
-                  </div>
-                  <div className="shrink-0 border-t border-line px-5 py-4 sm:px-6">
-                    {renderStepFooter(meta.id)}
-                  </div>
                 </div>
-              </article>
-            );
-          })}
-
-          {STEPS.map((meta, index) => {
-            if (index === 0) {
-              return null;
-            }
-
-            const isVisible = index > currentIndex;
-            const enabled = isStepEnabled(index);
-            const Icon = meta.icon;
-
-            return (
-              <div
-                aria-hidden={!isVisible}
-                className="absolute inset-x-0 flex h-14 items-end transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
-                key={`upcoming-${meta.id}`}
-                style={{
-                  bottom: (STEPS.length - 1 - index) * PEEK_PX,
-                  opacity: isVisible ? 1 : 0,
-                  pointerEvents: isVisible ? "auto" : "none",
-                  transform: isVisible ? "translateY(0)" : "translateY(14px)",
-                }}
-              >
-                <button
-                  className="flex h-12 w-full items-center gap-3 rounded-2xl border border-line bg-cloud/60 px-5 text-left transition enabled:hover:bg-cloud disabled:cursor-not-allowed sm:px-6"
-                  disabled={!isVisible || !enabled}
-                  onClick={() => goToStep(meta.id)}
-                  type="button"
-                >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-tone text-ink/40">
-                    <Icon className="h-3.5 w-3.5" />
-                  </span>
-                  <span
-                    className={`text-sm font-semibold ${enabled ? "text-ink/55" : "text-ink/30"}`}
-                  >
-                    {meta.label}
-                  </span>
-                  <span className="ml-auto text-xs text-ink/30">
-                    {enabled ? "Up next" : "Pick products first"}
-                  </span>
-                </button>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
         </div>
 
         <DiscoveryPanel step={step} selectedProducts={selectedProducts} />

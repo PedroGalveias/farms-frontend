@@ -235,7 +235,8 @@ const fr: Dict = {
   chip_category: "Catégorie :",
   results_farms: "{n} fermes",
   results_showing: "{shown} sur {total} affichées",
-  results_updateAsYouType: "Les résultats se mettent à jour au fur et à mesure.",
+  results_updateAsYouType:
+    "Les résultats se mettent à jour au fur et à mesure.",
   results_loadMore: "Charger plus",
   results_left: "encore {n}",
   empty_noneAvailable: "Aucune ferme disponible pour l'instant.",
@@ -251,7 +252,8 @@ const fr: Dict = {
   footer_source: "Code source",
   footer_farmsService: "Service Farms",
   footer_farmsFrontend: "Frontend Farms",
-  footer_tagline: "Pensé pour la route — œufs, fruits et tout ce qui est frais.",
+  footer_tagline:
+    "Pensé pour la route — œufs, fruits et tout ce qui est frais.",
 };
 
 const it: Dict = {
@@ -322,8 +324,7 @@ const it: Dict = {
   empty_noneMatch: "Nessuna fattoria corrisponde ai filtri attuali.",
   empty_noneAvailableSub:
     "I dati delle fattorie non sono al momento disponibili. Torna presto, oppure aggiungi la prima fattoria.",
-  empty_noneMatchSub:
-    "Prova a rimuovere un filtro o ad ampliare la ricerca.",
+  empty_noneMatchSub: "Prova a rimuovere un filtro o ad ampliare la ricerca.",
   empty_addFirst: "Aggiungi la prima fattoria",
   empty_clearFilters: "Cancella i filtri",
   error_heading: "Impossibile caricare i dati delle fattorie.",
@@ -396,7 +397,8 @@ const rm: Dict = {
   chip_category: "Categoria:",
   results_farms: "{n} fattorias",
   results_showing: "{shown} da {total} mussadas",
-  results_updateAsYouType: "Ils resultats vegnan actualisads cura che ti tippas.",
+  results_updateAsYouType:
+    "Ils resultats vegnan actualisads cura che ti tippas.",
   results_loadMore: "Chargiar dapli",
   results_left: "anc {n}",
   empty_noneAvailable: "Anc naginas fattorias disponiblas.",

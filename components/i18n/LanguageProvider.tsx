@@ -15,7 +15,10 @@ import {
   type Locale,
 } from "@/lib/i18n";
 
-type Translate = (key: string, vars?: Record<string, string | number>) => string;
+type Translate = (
+  key: string,
+  vars?: Record<string, string | number>,
+) => string;
 
 interface LanguageContextValue {
   locale: Locale;

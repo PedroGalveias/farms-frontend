@@ -1,0 +1,42 @@
+name: Security audit
+
+permissions:
+  contents: read
+
+on:
+  # Daily, plus whenever dependencies change, plus on demand.
+  schedule:
+    - cron: "0 6 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Gate: fail only on high/critical advisories in *production* dependencies
+      # (dev-only tooling advisories, e.g. the esbuild dev server, don't ship).
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      # Informational: full report (incl. dev deps) without failing the run.
+      - name: Full audit report
+        if: always()
+        run: npm audit || true

@@ -13,8 +13,7 @@ export default function NotFoundPage() {
           className="rise-in mt-5 max-w-3xl text-[clamp(3rem,9vw,6rem)] font-extrabold leading-[0.9] tracking-[-0.045em] text-ink"
           style={{ ["--rise-delay" as string]: "80ms" }}
         >
-          This page wandered{" "}
-          <span className="text-pine">off the map.</span>
+          This page wandered <span className="text-pine">off the map.</span>
         </h1>
         <p
           className="rise-in mt-6 max-w-xl text-lg leading-8 text-ink/55"
