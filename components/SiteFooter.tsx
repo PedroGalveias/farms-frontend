@@ -1,40 +1,52 @@
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+"use client";
+
+import { ArrowUpRight, Github } from "lucide-react";
+import { useT } from "@/components/i18n/LanguageProvider";
+
+const FARMS_SERVICE_REPO = "https://github.com/PedroGalveias/farms";
+const FARMS_FRONTEND_REPO = "https://github.com/PedroGalveias/farms-frontend";
+
+const footerLinkClassName =
+  "group inline-flex items-center gap-1.5 font-semibold text-ink/70 transition-colors hover:text-ink";
+
+function HoverArrow() {
+  return (
+    <ArrowUpRight className="h-3.5 w-3.5 opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" />
+  );
+}
 
 export default function SiteFooter() {
+  const t = useT();
+
   return (
     <footer className="relative mt-32 overflow-hidden border-t border-line/70">
       <div className="mx-auto max-w-6xl px-5 pb-12 pt-16 sm:px-8">
-        <div className="flex flex-col gap-12 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-sm">
-            <p className="flex items-center text-3xl font-extrabold tracking-[-0.04em] text-ink">
-              farms<span className="text-pine-bright">.</span>
-            </p>
-            <p className="mt-4 text-[15px] leading-7 text-ink/50">
-              Fresh products, direct from Swiss farms — find what you need at the
-              farm nearest to you.
-            </p>
+        <div className="text-[15px]">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-ink/35">
+            {t("footer_source")}
+          </p>
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-8">
+            <a
+              className={footerLinkClassName}
+              href={FARMS_SERVICE_REPO}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <Github className="h-4 w-4 text-ink/40 transition-colors group-hover:text-pine" />
+              {t("footer_farmsService")}
+              <HoverArrow />
+            </a>
+            <a
+              className={footerLinkClassName}
+              href={FARMS_FRONTEND_REPO}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <Github className="h-4 w-4 text-ink/40 transition-colors group-hover:text-pine" />
+              {t("footer_farmsFrontend")}
+              <HoverArrow />
+            </a>
           </div>
-
-          <nav
-            aria-label="Footer navigation"
-            className="grid grid-cols-2 gap-x-16 gap-y-3 text-[15px]"
-          >
-            <Link
-              className="group inline-flex items-center gap-1 font-semibold text-ink/70 transition-colors hover:text-ink"
-              href="/"
-            >
-              Directory
-              <ArrowUpRight className="h-3.5 w-3.5 opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" />
-            </Link>
-            <Link
-              className="group inline-flex items-center gap-1 font-semibold text-ink/70 transition-colors hover:text-ink"
-              href="/quick-search"
-            >
-              Quick search
-              <ArrowUpRight className="h-3.5 w-3.5 opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" />
-            </Link>
-          </nav>
         </div>
 
         {/* Oversized wordmark — a quiet, confident signature. */}
@@ -46,8 +58,8 @@ export default function SiteFooter() {
         </div>
 
         <div className="mt-6 flex flex-col gap-2 border-t border-line/70 pt-6 text-xs text-ink/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Swiss farms directory</p>
-          <p>Made for the road — eggs, fruit, and everything fresh.</p>
+          <p>© {new Date().getFullYear()} farms</p>
+          <p>{t("footer_tagline")}</p>
         </div>
       </div>
     </footer>

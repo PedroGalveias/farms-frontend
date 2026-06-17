@@ -1,19 +1,22 @@
 import { getCantonName } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
+// The 13 product groups the farm dataset categorises into (German groups
+// mapped to English). Backends should send these as `Farm.categories`.
 const CURATED_PRODUCTS = [
-  "Milk",
-  "Cheese",
-  "Ham",
-  "Honey",
   "Fruits",
-  "Fruit juice",
-  "Eggs",
   "Vegetables",
-  "Bread",
-  "Jam",
-  "Meat",
-  "Organic",
+  "Dairy",
+  "Meat & poultry",
+  "Honey & sweeteners",
+  "Bakery",
+  "Drinks",
+  "Preserves",
+  "Nuts & oils",
+  "Grains",
+  "Flowers & plants",
+  "Fish & seafood",
+  "Other",
 ] as const;
 
 export type QuickSearchMatchMode = "all" | "any";
@@ -255,6 +258,27 @@ export function getQuickSearchResults({
 
     return left.farm.name.localeCompare(right.farm.name);
   });
+}
+
+export function getNearestFarm(
+  farms: Farm[],
+  coordinates: QuickSearchCoordinates,
+): { farm: Farm; distanceKm: number } | null {
+  let nearest: { farm: Farm; distanceKm: number } | null = null;
+
+  for (const farm of farms) {
+    const farmCoordinates = parseQuickSearchCoordinates(farm.coordinates);
+    if (!farmCoordinates) {
+      continue;
+    }
+
+    const distanceKm = haversineDistanceKm(coordinates, farmCoordinates);
+    if (!nearest || distanceKm < nearest.distanceKm) {
+      nearest = { farm, distanceKm };
+    }
+  }
+
+  return nearest;
 }
 
 export function formatQuickSearchDistance(distanceKm: number | null) {

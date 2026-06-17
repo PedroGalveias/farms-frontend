@@ -143,7 +143,7 @@ export default function CreateFarmDialog({
 
   return (
     <div
-      className="qs-backdrop fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 py-6 backdrop-blur-md"
+      className="qs-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-md"
       onClick={handleBackdropClick}
       role="presentation"
     >

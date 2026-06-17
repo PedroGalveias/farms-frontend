@@ -1,13 +1,10 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Compass, Search } from "lucide-react";
 import SiteFooter from "@/components/SiteFooter";
-import SiteHeader from "@/components/SiteHeader";
 
 export default function NotFoundPage() {
   return (
     <div className="relative overflow-clip">
-      <SiteHeader />
-
       <main className="mx-auto max-w-5xl px-5 pt-16 sm:px-8 sm:pt-24">
         <p className="rise-in text-xs font-bold uppercase tracking-[0.18em] text-pine">
           Error 404
@@ -17,9 +14,7 @@ export default function NotFoundPage() {
           style={{ ["--rise-delay" as string]: "80ms" }}
         >
           This page wandered{" "}
-          <span className="font-accent font-normal text-pine">
-            off the map.
-          </span>
+          <span className="text-pine">off the map.</span>
         </h1>
         <p
           className="rise-in mt-6 max-w-xl text-lg leading-8 text-ink/55"

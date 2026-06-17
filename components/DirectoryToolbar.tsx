@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArrowDownWideNarrow,
   LayoutGrid,
@@ -9,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { getCantonName } from "@/lib/farms";
+import { useT } from "@/components/i18n/LanguageProvider";
 import type { DirectoryViewMode, FarmSortOption } from "@/types/farm";
 
 interface DirectoryToolbarProps {
@@ -77,23 +80,24 @@ export default function DirectoryToolbar({
   totalCount,
   viewMode,
 }: DirectoryToolbarProps) {
+  const t = useT();
+
   return (
     <section className="sticky top-[84px] z-20 rounded-[30px] border border-line bg-cloud/85 p-4 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_28px_60px_-32px_rgba(20,22,27,0.28)] backdrop-blur-2xl sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
         <h2 className="text-xl font-bold tracking-[-0.03em] text-ink">
-          Browse the directory
+          {t("toolbar_title")}
         </h2>
         <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
           <span className="rounded-full bg-tone px-3 py-1.5 text-ink/70">
-            {resultsCount} shown
+            {t("toolbar_shown", { n: resultsCount })}
           </span>
           <span className="rounded-full bg-tone px-3 py-1.5 text-ink/40">
-            {totalCount} total
+            {t("toolbar_total", { n: totalCount })}
           </span>
           {activeFiltersCount > 0 ? (
             <span className="rounded-full bg-pine/10 px-3 py-1.5 text-pine">
-              {activeFiltersCount}{" "}
-              {activeFiltersCount === 1 ? "filter" : "filters"}
+              {t("toolbar_filters", { n: activeFiltersCount })}
             </span>
           ) : null}
         </div>
@@ -106,7 +110,7 @@ export default function DirectoryToolbar({
           <input
             className={`${fieldClassName} pl-11`}
             onChange={(event) => onSearchTermChange(event.target.value)}
-            placeholder="Search by name, address, or produce"
+            placeholder={t("toolbar_searchPlaceholder")}
             value={searchTerm}
           />
         </label>
@@ -118,7 +122,7 @@ export default function DirectoryToolbar({
             onChange={(event) => onSelectedCantonChange(event.target.value)}
             value={selectedCanton}
           >
-            <option value="all">All cantons</option>
+            <option value="all">{t("toolbar_allCantons")}</option>
             {cantonOptions.map((canton) => (
               <option key={canton} value={canton}>
                 {canton} · {getCantonName(canton)}
@@ -134,7 +138,7 @@ export default function DirectoryToolbar({
             onChange={(event) => onSelectedCategoryChange(event.target.value)}
             value={selectedCategory}
           >
-            <option value="all">All categories</option>
+            <option value="all">{t("toolbar_allCategories")}</option>
             {categoryOptions.map((category) => (
               <option key={category} value={category}>
                 {category}
@@ -153,9 +157,9 @@ export default function DirectoryToolbar({
             }
             value={sortOption}
           >
-            <option value="newest">Newest first</option>
-            <option value="name">Farm name</option>
-            <option value="canton">Canton</option>
+            <option value="newest">{t("sort_newest")}</option>
+            <option value="name">{t("sort_name")}</option>
+            <option value="canton">{t("sort_canton")}</option>
           </select>
         </label>
 
@@ -212,7 +216,7 @@ export default function DirectoryToolbar({
             type="button"
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            Reset
+            {t("toolbar_reset")}
           </button>
 
           <button
@@ -223,7 +227,7 @@ export default function DirectoryToolbar({
             <RefreshCw
               className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`}
             />
-            {isRefreshing ? "Refreshing" : "Refresh"}
+            {isRefreshing ? t("toolbar_refreshing") : t("toolbar_refresh")}
           </button>
 
           <button
@@ -232,7 +236,7 @@ export default function DirectoryToolbar({
             type="button"
           >
             <Plus className="h-3.5 w-3.5" />
-            Add a farm
+            {t("cta_addFarm")}
           </button>
         </div>
       </div>
@@ -245,7 +249,7 @@ export default function DirectoryToolbar({
               onClick={onClearSearchTerm}
               type="button"
             >
-              Search: {searchTerm.trim()}
+              {t("chip_search")} {searchTerm.trim()}
               <X className="h-3.5 w-3.5" />
             </button>
           ) : null}
@@ -256,7 +260,7 @@ export default function DirectoryToolbar({
               onClick={onClearCanton}
               type="button"
             >
-              Canton: {getCantonName(selectedCanton)}
+              {t("chip_canton")} {getCantonName(selectedCanton)}
               <X className="h-3.5 w-3.5" />
             </button>
           ) : null}
@@ -267,7 +271,7 @@ export default function DirectoryToolbar({
               onClick={onClearCategory}
               type="button"
             >
-              Category: {selectedCategory}
+              {t("chip_category")} {selectedCategory}
               <X className="h-3.5 w-3.5" />
             </button>
           ) : null}
