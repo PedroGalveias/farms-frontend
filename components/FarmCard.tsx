@@ -1,5 +1,8 @@
+"use client";
+
 import { ArrowUpRight, MapPin } from "lucide-react";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
+import { useT } from "@/components/i18n/LanguageProvider";
 import type { DirectoryViewMode, Farm } from "@/types/farm";
 
 interface FarmCardProps {
@@ -43,6 +46,7 @@ function CategoryChips({
 }
 
 export default function FarmCard({ farm, variant = "grid" }: FarmCardProps) {
+  const t = useT();
   const { latitude, longitude } = splitCoordinates(farm.coordinates);
   const mapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(
     farm.coordinates,
@@ -68,7 +72,7 @@ export default function FarmCard({ farm, variant = "grid" }: FarmCardProps) {
 
           <div className="space-y-1.5 text-sm text-ink/50">
             <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink/35">
-              Added {formatFarmDate(farm.created_at)}
+              {t("card_added")} {formatFarmDate(farm.created_at)}
             </p>
             <a
               className="inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
@@ -112,7 +116,7 @@ export default function FarmCard({ farm, variant = "grid" }: FarmCardProps) {
 
       <div className="mt-5 flex items-center justify-between gap-3 text-xs">
         <span className="font-semibold uppercase tracking-[0.1em] text-ink/35">
-          Added {formatFarmDate(farm.created_at)}
+          {t("card_added")} {formatFarmDate(farm.created_at)}
         </span>
         <a
           className="inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"

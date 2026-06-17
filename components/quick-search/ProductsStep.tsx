@@ -77,9 +77,9 @@ export default function ProductsStep({
           return (
             <button
               aria-pressed={isSelected}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                 isSelected
-                  ? "border-ink bg-ink text-cloud shadow-[0_8px_20px_-8px_rgba(20,22,27,0.5)]"
+                  ? "-translate-y-0.5 border-ink bg-ink text-cloud shadow-[0_10px_22px_-8px_rgba(20,22,27,0.55)]"
                   : `border-line bg-cloud text-ink/75 hover:border-ink/30 hover:text-ink ${
                       isUnavailable ? "opacity-45" : ""
                     }`
@@ -88,7 +88,7 @@ export default function ProductsStep({
               onClick={() => onToggleProduct(product.label)}
               type="button"
             >
-              {isSelected ? <Check className="h-3.5 w-3.5" /> : null}
+              {isSelected ? <Check className="check-pop h-3.5 w-3.5" /> : null}
               {product.label}
               {product.farmCount > 0 ? (
                 <span

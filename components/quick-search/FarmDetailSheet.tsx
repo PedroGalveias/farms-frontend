@@ -11,9 +11,11 @@ import {
 import { ExternalLink, X } from "lucide-react";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { productMatchesCategory } from "@/lib/quick-search";
+import { supportsViewTransitions } from "@/lib/view-transition";
 import type { Farm } from "@/types/farm";
 
 const DRAG_CLOSE_THRESHOLD_PX = 110;
+const SNAP_THRESHOLD_PX = 44;
 
 interface FarmDetailSheetProps {
   farm: Farm;
@@ -29,8 +31,14 @@ export default function FarmDetailSheet({
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartYRef = useRef<number | null>(null);
+  const lastDeltaRef = useRef(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  // Mobile bottom-sheet snap: peek (~52vh) and full (~92vh).
+  const [expanded, setExpanded] = useState(false);
+  // When the browser morphs the row into the sheet via a View Transition, skip
+  // the CSS rise so the two animations don't fight.
+  const [useViewTransition] = useState(() => supportsViewTransitions());
 
   useEffect(() => {
     const previouslyFocused =
@@ -40,6 +48,9 @@ export default function FarmDetailSheet({
     const previousOverflow = document.body.style.overflow;
 
     document.body.style.overflow = "hidden";
+    // Signal the mobile tab bar to slide out so it doesn't obscure the sheet's
+    // own controls (Maps / Close). It slides back in on cleanup.
+    document.body.classList.add("sheet-open");
     closeButtonRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -52,6 +63,7 @@ export default function FarmDetailSheet({
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.body.classList.remove("sheet-open");
       document.removeEventListener("keydown", handleKeyDown);
       previouslyFocused?.focus();
     };
@@ -68,7 +80,10 @@ export default function FarmDetailSheet({
       return;
     }
 
-    setDragOffset(Math.max(0, event.clientY - dragStartYRef.current));
+    const delta = event.clientY - dragStartYRef.current;
+    lastDeltaRef.current = delta;
+    // Only translate downward; upward drags are read as an "expand" gesture.
+    setDragOffset(Math.max(0, delta));
   };
 
   const handleDragEnd = () => {
@@ -76,13 +91,18 @@ export default function FarmDetailSheet({
       return;
     }
 
+    const delta = lastDeltaRef.current;
     dragStartYRef.current = null;
+    lastDeltaRef.current = 0;
     setIsDragging(false);
+    setDragOffset(0);
 
-    if (dragOffset > DRAG_CLOSE_THRESHOLD_PX) {
+    if (delta > DRAG_CLOSE_THRESHOLD_PX) {
       onClose();
-    } else {
-      setDragOffset(0);
+    } else if (delta < -SNAP_THRESHOLD_PX) {
+      setExpanded(true);
+    } else if (delta > SNAP_THRESHOLD_PX && expanded) {
+      setExpanded(false);
     }
   };
 
@@ -97,7 +117,7 @@ export default function FarmDetailSheet({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
       <button
         aria-label="Close farm details"
-        className="qs-backdrop absolute inset-0 bg-ink/40 backdrop-blur-md"
+        className="qs-backdrop absolute inset-0 bg-black/50 backdrop-blur-md"
         onClick={onClose}
         type="button"
       />
@@ -105,14 +125,17 @@ export default function FarmDetailSheet({
       <div
         aria-labelledby={titleId}
         aria-modal="true"
-        className={`qs-sheet relative max-h-[88vh] w-full max-w-xl overflow-y-auto rounded-t-[32px] border border-line bg-cloud shadow-[0_-16px_60px_rgba(20,22,27,0.3)] sm:rounded-[32px] sm:shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)] ${
+        className={`relative w-full max-w-xl overflow-y-auto rounded-t-[32px] border border-line bg-cloud shadow-[0_-16px_60px_rgba(20,22,27,0.3)] sm:rounded-[32px] sm:shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)] ${
+          expanded ? "max-h-[92vh]" : "max-h-[52vh]"
+        } sm:max-h-[88vh] ${useViewTransition ? "" : "qs-sheet"} ${
           isDragging
             ? ""
-            : "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            : "transition-[transform,max-height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         }`}
         role="dialog"
         style={{
           transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
+          viewTransitionName: "qs-farm",
         }}
       >
         <div

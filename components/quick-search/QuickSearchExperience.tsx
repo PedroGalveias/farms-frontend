@@ -20,7 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import SiteFooter from "@/components/SiteFooter";
-import SiteHeader from "@/components/SiteHeader";
+import DiscoveryPanel from "@/components/quick-search/DiscoveryPanel";
 import FarmDetailSheet from "@/components/quick-search/FarmDetailSheet";
 import LocationStep, {
   type GeoState,
@@ -28,6 +28,7 @@ import LocationStep, {
 import ProductsStep from "@/components/quick-search/ProductsStep";
 import ResultsStep from "@/components/quick-search/ResultsStep";
 import { getCantonName, getUniqueFarmCantons } from "@/lib/farms";
+import { runViewTransition } from "@/lib/view-transition";
 import {
   getQuickSearchProducts,
   getQuickSearchResults,
@@ -235,8 +236,12 @@ export default function QuickSearchExperience({
     goToStep("location");
   };
 
+  const openFarm = useCallback((farm: Farm, sourceEl?: HTMLElement | null) => {
+    runViewTransition(() => setActiveFarm(farm), sourceEl);
+  }, []);
+
   const closeFarmSheet = useCallback(() => {
-    setActiveFarm(null);
+    runViewTransition(() => setActiveFarm(null));
   }, []);
 
   const stepSummaries: Record<QuickSearchStep, string> = {
@@ -317,7 +322,7 @@ export default function QuickSearchExperience({
         matchMode={matchMode}
         onEditProducts={() => goToStep("products")}
         onMatchModeChange={setMatchMode}
-        onOpenFarm={setActiveFarm}
+        onOpenFarm={openFarm}
         results={results}
         revealKey={resultsVisit}
         selectedProducts={selectedProducts}
@@ -378,17 +383,19 @@ export default function QuickSearchExperience({
 
   return (
     <div className="relative overflow-clip">
-      <SiteHeader active="quick-search" statusBadge={statusBadge} />
-
-      <div className="relative mx-auto w-full max-w-xl px-4 pb-12 pt-8 sm:px-6 sm:pt-12">
+      <div className="lg:flex lg:h-dvh lg:overflow-hidden">
+        <div className="relative z-10 mx-auto w-full max-w-xl px-4 pb-12 pt-4 sm:px-6 sm:pt-8 lg:mx-0 lg:flex lg:h-dvh lg:w-[560px] lg:max-w-none lg:shrink-0 lg:flex-col lg:justify-center lg:px-12 lg:py-0">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-xs font-semibold text-ink/60">
-            <Sparkles className="h-3.5 w-3.5 text-pine" />
-            Quick search
-          </span>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-xs font-semibold text-ink/60">
+              <Sparkles className="h-3.5 w-3.5 text-pine" />
+              Quick search
+            </span>
+            {serviceStatus !== "online" ? statusBadge : null}
+          </div>
           <h1 className="mt-5 text-[clamp(2.75rem,11vw,4rem)] font-extrabold leading-[0.92] tracking-[-0.045em] text-ink">
             What do you need{" "}
-            <span className="font-accent font-normal text-pine">today?</span>
+            <span className="text-pine">today?</span>
           </h1>
           <p className="mt-4 max-w-md text-[15px] leading-7 text-ink/55">
             Set where you are, pick what you’re after — get the farms that have
@@ -408,7 +415,7 @@ export default function QuickSearchExperience({
 
         <div
           aria-label="Quick search steps"
-          className="relative mt-8 h-[clamp(520px,calc(100dvh-360px),660px)]"
+          className="relative mt-8 h-[clamp(460px,calc(100dvh-400px),640px)] lg:h-[clamp(520px,calc(100dvh-360px),660px)]"
           role="group"
         >
           {STEPS.map((meta, index) => {
@@ -517,9 +524,14 @@ export default function QuickSearchExperience({
             );
           })}
         </div>
+        </div>
+
+        <DiscoveryPanel step={step} selectedProducts={selectedProducts} />
       </div>
 
-      <SiteFooter />
+      <div className="lg:hidden">
+        <SiteFooter />
+      </div>
 
       {activeFarm ? (
         <FarmDetailSheet

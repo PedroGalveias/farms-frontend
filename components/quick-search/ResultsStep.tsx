@@ -1,15 +1,27 @@
 "use client";
 
 import { ChevronRight, Leaf, MapPin, Navigation } from "lucide-react";
+import CountUp from "@/components/motion/CountUp";
 import { getCantonName } from "@/lib/farms";
 import {
-  formatQuickSearchDistance,
   productMatchesCategory,
   type QuickSearchLocation,
   type QuickSearchMatchMode,
   type QuickSearchResult,
 } from "@/lib/quick-search";
 import type { Farm } from "@/types/farm";
+
+function AnimatedDistance({ km }: { km: number }) {
+  if (km < 1) {
+    return <>Less than 1 km away</>;
+  }
+
+  if (km < 10) {
+    return <CountUp decimals={1} durationMs={900} suffix=" km away" value={km} />;
+  }
+
+  return <CountUp durationMs={900} suffix=" km away" value={Math.round(km)} />;
+}
 
 const MAX_VISIBLE_CATEGORIES = 4;
 
@@ -18,7 +30,7 @@ interface ResultsStepProps {
   matchMode: QuickSearchMatchMode;
   onEditProducts: () => void;
   onMatchModeChange: (mode: QuickSearchMatchMode) => void;
-  onOpenFarm: (farm: Farm) => void;
+  onOpenFarm: (farm: Farm, sourceEl?: HTMLElement | null) => void;
   results: QuickSearchResult[];
   revealKey: number;
   selectedProducts: string[];
@@ -113,12 +125,12 @@ function ResultRow({
   selectedProducts,
 }: {
   index: number;
-  onOpen: (farm: Farm) => void;
+  onOpen: (farm: Farm, sourceEl?: HTMLElement | null) => void;
   result: QuickSearchResult;
   selectedProducts: string[];
 }) {
   const { farm } = result;
-  const distanceLabel = formatQuickSearchDistance(result.distanceKm);
+  const hasDistance = result.distanceKm !== null;
 
   const isCategoryMatched = (category: string) =>
     selectedProducts.some((product) =>
@@ -138,17 +150,18 @@ function ResultRow({
     >
       <button
         className="group w-full rounded-[20px] border border-line bg-cloud p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-[0_18px_36px_-16px_rgba(20,22,27,0.28)] focus-visible:ring-2 focus-visible:ring-ink/20"
-        onClick={() => onOpen(farm)}
+        data-cursor="Open"
+        onClick={(event) => onOpen(farm, event.currentTarget)}
         type="button"
       >
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-semibold text-ink/40">
             {farm.canton} · {getCantonName(farm.canton)}
           </p>
-          {distanceLabel ? (
+          {hasDistance ? (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-pine/10 px-2.5 py-1 text-xs font-bold text-pine">
               <Navigation className="h-3 w-3" />
-              {distanceLabel}
+              <AnimatedDistance km={result.distanceKm as number} />
             </span>
           ) : (
             <ChevronRight className="h-4 w-4 shrink-0 text-ink/25 transition group-hover:translate-x-0.5 group-hover:text-ink/50" />
