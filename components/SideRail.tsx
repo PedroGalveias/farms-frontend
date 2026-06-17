@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Github, LayoutGrid, Search } from "lucide-react";
+import { LayoutGrid, Search } from "lucide-react";
+import GitHubIcon from "@/components/icons/GitHubIcon";
 import Logo from "@/components/Logo";
 import LanguageMenu from "@/components/LanguageMenu";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -79,7 +80,7 @@ export default function SideRail() {
           target="_blank"
           title={t("rail_source")}
         >
-          <Github className="h-5 w-5" />
+          <GitHubIcon className="h-5 w-5" />
         </a>
       </div>
     </aside>
