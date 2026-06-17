@@ -1,25 +1,46 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--font-geist);
-  --font-display: var(--font-geist);
-  --font-accent: var(--font-instrument);
+/* Raw palette — redefined under .dark so every token flips at runtime. */
+:root {
+  --ink: #14161b;
+  --pine: #1c7c47;
+  --pine-bright: #21a05a;
+  --paper: #f4f4ef;
+  --line: #e4e3da;
+  --tone: #ebeae3;
+  --cloud: #ffffff;
+  --rail: #14161b;
+  color-scheme: light;
+}
 
-  /* Core palette — light, precise, one green accent. */
-  --color-ink: #14161b;
-  --color-pine: #1c7c47;
-  --color-pine-bright: #21a05a;
-  --color-paper: #f4f4ef;
-  --color-line: #e4e3da;
-  --color-tone: #ebeae3;
-  --color-cloud: #ffffff;
+html.dark {
+  --ink: #f1f2ee;
+  --pine: #2ea866;
+  --pine-bright: #39c97a;
+  --paper: #0e0f12;
+  --line: #2a2e37;
+  --tone: #23262e;
+  --cloud: #181a20;
+  --rail: #1c7c47;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: var(--font-archivo);
+  --font-display: var(--font-archivo);
+
+  /* Color tokens reference the raw vars above, so .dark flips them all. */
+  --color-ink: var(--ink);
+  --color-pine: var(--pine);
+  --color-pine-bright: var(--pine-bright);
+  --color-paper: var(--paper);
+  --color-line: var(--line);
+  --color-tone: var(--tone);
+  --color-cloud: var(--cloud);
+  --color-rail: var(--rail);
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-:root {
-  color-scheme: light;
 }
 
 * {
@@ -74,6 +95,20 @@ body::before {
   background-clip: content-box;
 }
 
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(241, 242, 238, 0.16);
+  background-clip: content-box;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(241, 242, 238, 0.3);
+  background-clip: content-box;
+}
+
+html.dark body::before {
+  opacity: 0.04;
+}
+
 @layer base {
   body {
     @apply font-sans antialiased;
@@ -85,14 +120,8 @@ body::before {
   h3,
   h4 {
     @apply font-display;
-    letter-spacing: -0.035em;
-    line-height: 0.98;
-  }
-
-  .font-accent {
-    font-family: var(--font-accent), Georgia, serif;
-    font-style: italic;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.04em;
+    line-height: 0.96;
   }
 
   button,
@@ -242,6 +271,20 @@ body::before {
   animation: qs-backdrop-fade 280ms ease-out;
 }
 
+/* Mobile tab bar slides out of the way while a bottom sheet is open, so it
+   never covers the sheet's own Maps / Close controls. */
+.mobile-tab-bar {
+  transition:
+    transform 360ms var(--ease-out-expo),
+    opacity 360ms var(--ease-out-expo);
+}
+
+body.sheet-open .mobile-tab-bar {
+  transform: translateY(calc(100% + 1.5rem));
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Shimmering accent underline used on links/labels */
 @keyframes pulse-dot {
   0%,
@@ -258,6 +301,93 @@ body::before {
 
 .pulse-dot {
   animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+/* Tactile check-mark pop when a product chip is selected */
+@keyframes check-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.check-pop {
+  animation: check-pop 220ms var(--ease-spring) both;
+}
+
+/* Product chip popping onto the discovery panel when selected */
+@keyframes chip-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.chip-pop {
+  animation: chip-pop 340ms var(--ease-spring) both;
+}
+
+/* Slow drift + dashed route for the desktop discovery panel */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(var(--drift-x, 10px), var(--drift-y, -12px));
+  }
+}
+
+.drift {
+  animation: drift var(--drift-dur, 12s) ease-in-out infinite;
+}
+
+@keyframes route-dash {
+  to {
+    stroke-dashoffset: -200;
+  }
+}
+
+.route-dash {
+  animation: route-dash 6s linear infinite;
+}
+
+/* ---------- Custom cursor ---------- */
+.has-custom-cursor .cursor-zone,
+.has-custom-cursor .cursor-zone * {
+  cursor: none;
+}
+
+.has-custom-cursor .cursor-zone input,
+.has-custom-cursor .cursor-zone textarea,
+.has-custom-cursor .cursor-zone select {
+  cursor: auto;
+}
+
+/* ---------- View transitions ---------- */
+::view-transition-group(qs-farm) {
+  animation-duration: 460ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .check-pop,
+  .chip-pop,
+  .drift,
+  .route-dash {
+    animation: none !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
