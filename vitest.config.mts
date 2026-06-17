@@ -1,9 +1,11 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [tsconfigPaths(), react()],
+  plugins: [react()],
+  // Vite 8 resolves tsconfig `paths` (the `@/*` alias) natively, so the
+  // vite-tsconfig-paths plugin is no longer needed.
+  resolve: { tsconfigPaths: true },
   test: {
     environment: "jsdom",
     globals: true,
