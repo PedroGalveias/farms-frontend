@@ -72,8 +72,22 @@ export default function Logo({ className = "", idPrefix = "logo" }: LogoProps) {
       />
 
       <rect fill="#E23D36" height="14" rx="4.5" width="14" x="11" y="11" />
-      <rect fill="#FFFFFF" height="8.5" rx="0.7" width="2.5" x="16.75" y="13.75" />
-      <rect fill="#FFFFFF" height="2.5" rx="0.7" width="8.5" x="13.75" y="16.75" />
+      <rect
+        fill="#FFFFFF"
+        height="8.5"
+        rx="0.7"
+        width="2.5"
+        x="16.75"
+        y="13.75"
+      />
+      <rect
+        fill="#FFFFFF"
+        height="2.5"
+        rx="0.7"
+        width="8.5"
+        x="13.75"
+        y="16.75"
+      />
 
       <path
         d="M8 45C15 39 21 36 28 37C34 38 40 41 46 41C50 41 53.5 39.8 56 38V56H8V45Z"
@@ -91,7 +105,14 @@ export default function Logo({ className = "", idPrefix = "logo" }: LogoProps) {
         d="M17 31.5H32V44.2C32 46.3 30.3 48 28.2 48H20.8C18.7 48 17 46.3 17 44.2V31.5Z"
         fill={`url(#${barn})`}
       />
-      <rect fill="#FFF6E8" height="12.8" rx="1.8" width="5.6" x="21.7" y="35.2" />
+      <rect
+        fill="#FFF6E8"
+        height="12.8"
+        rx="1.8"
+        width="5.6"
+        x="21.7"
+        y="35.2"
+      />
       <path
         d="M21.9 39L27.1 44.1M27.1 39L21.9 44.1"
         stroke="#CB312C"
@@ -114,7 +135,14 @@ export default function Logo({ className = "", idPrefix = "logo" }: LogoProps) {
         strokeLinecap="round"
         strokeWidth="1.4"
       />
-      <rect fill="#F6B7AB" height="5.1" rx="2.2" width="7.4" x="42.1" y="39.4" />
+      <rect
+        fill="#F6B7AB"
+        height="5.1"
+        rx="2.2"
+        width="7.4"
+        x="42.1"
+        y="39.4"
+      />
       <circle cx="44.4" cy="41.8" fill="#915A52" r="0.45" />
       <circle cx="47.2" cy="41.8" fill="#915A52" r="0.45" />
       <path

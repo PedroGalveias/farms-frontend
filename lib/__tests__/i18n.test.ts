@@ -3,9 +3,7 @@ import { LOCALES, MESSAGES, translate, type Locale } from "@/lib/i18n";
 
 describe("translate", () => {
   it("returns the message for the requested locale", () => {
-    expect(translate("de", "nav_directory")).toBe(
-      MESSAGES.de.nav_directory,
-    );
+    expect(translate("de", "nav_directory")).toBe(MESSAGES.de.nav_directory);
   });
 
   it("interpolates {var} placeholders", () => {

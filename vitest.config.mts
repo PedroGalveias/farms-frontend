@@ -9,7 +9,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: ["**/*.{test,spec}.{ts,tsx}"],
-    exclude: ["node_modules", ".next", "dist"],
+    // e2e/ is Playwright's territory — keep Vitest out of it.
+    exclude: ["node_modules", ".next", "dist", "e2e/**"],
     coverage: {
       provider: "v8",
       // text/text-summary for the CI log; json + json-summary feed the PR

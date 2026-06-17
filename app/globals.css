@@ -56,8 +56,16 @@ body {
   position: relative;
   min-height: 100vh;
   background:
-    radial-gradient(120% 70% at 50% -20%, rgba(33, 160, 90, 0.08), transparent 60%),
-    radial-gradient(80% 50% at 100% 0%, rgba(33, 160, 90, 0.05), transparent 55%),
+    radial-gradient(
+      120% 70% at 50% -20%,
+      rgba(33, 160, 90, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(
+      80% 50% at 100% 0%,
+      rgba(33, 160, 90, 0.05),
+      transparent 55%
+    ),
     var(--color-paper);
   color: var(--color-ink);
 }

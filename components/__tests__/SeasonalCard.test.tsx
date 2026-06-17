@@ -42,8 +42,6 @@ describe("SeasonalCard", () => {
     vi.setSystemTime(new Date("2026-06-15T12:00:00Z"));
     renderCard();
 
-    expect(
-      screen.getByText(/eat with the season/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/eat with the season/i)).toBeInTheDocument();
   });
 });

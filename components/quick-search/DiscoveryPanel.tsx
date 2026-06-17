@@ -139,7 +139,12 @@ const PRODUCT_EMOJI: Record<string, string> = {
 function emojiFor(label: string) {
   const norm = label.toLowerCase().trim();
   const first = norm.split(/[\s/&,]+/)[0] ?? norm;
-  const candidates = [norm, norm.replace(/s$/, ""), first, first.replace(/s$/, "")];
+  const candidates = [
+    norm,
+    norm.replace(/s$/, ""),
+    first,
+    first.replace(/s$/, ""),
+  ];
   for (const key of candidates) {
     if (PRODUCT_EMOJI[key]) {
       return PRODUCT_EMOJI[key];
@@ -154,7 +159,13 @@ const FARM_PINS = [
   { x: 79, y: 20 },
 ];
 
-function Dots({ dots, active }: { dots: { x: number; y: number }[]; active: boolean }) {
+function Dots({
+  dots,
+  active,
+}: {
+  dots: { x: number; y: number }[];
+  active: boolean;
+}) {
   return (
     <>
       {dots.map((dot, index) => (

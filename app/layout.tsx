@@ -17,7 +17,8 @@ const archivo = Archivo({
 });
 
 export const metadata: Metadata = {
-  description: "Fresh products, direct from Swiss farms — find what you need at the farm nearest to you.",
+  description:
+    "Fresh products, direct from Swiss farms — find what you need at the farm nearest to you.",
   icons: {
     apple: "/apple-icon.png",
     icon: [

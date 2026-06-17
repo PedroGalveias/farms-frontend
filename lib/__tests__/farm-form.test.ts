@@ -79,7 +79,11 @@ describe("validateFarmForm", () => {
 describe("toCreateFarmInput", () => {
   it("normalizes values into the API payload shape", () => {
     const input = toCreateFarmInput(
-      validValues({ canton: "be", name: "  Hof  ", categories: "Dairy\nDairy" }),
+      validValues({
+        canton: "be",
+        name: "  Hof  ",
+        categories: "Dairy\nDairy",
+      }),
     );
     expect(input).toEqual({
       name: "Hof",

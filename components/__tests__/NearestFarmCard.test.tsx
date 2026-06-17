@@ -29,12 +29,11 @@ const FARMS: Farm[] = [
 ];
 
 function mockGeolocation(coords: { latitude: number; longitude: number }) {
-  const getCurrentPosition = vi.fn(
-    (success: PositionCallback) =>
-      success({
-        coords: { ...coords, accuracy: 10 },
-        timestamp: Date.now(),
-      } as GeolocationPosition),
+  const getCurrentPosition = vi.fn((success: PositionCallback) =>
+    success({
+      coords: { ...coords, accuracy: 10 },
+      timestamp: Date.now(),
+    } as GeolocationPosition),
   );
   Object.defineProperty(navigator, "geolocation", {
     value: { getCurrentPosition },
@@ -78,9 +77,7 @@ describe("NearestFarmCard", () => {
     const user = userEvent.setup();
     renderCard();
 
-    await user.click(
-      screen.getByRole("button", { name: /use my location/i }),
-    );
+    await user.click(screen.getByRole("button", { name: /use my location/i }));
 
     expect(screen.getByText("Hof Sonnenmatt")).toBeInTheDocument();
     expect(screen.getByText(/Dorfstrasse 12/)).toBeInTheDocument();
@@ -92,9 +89,7 @@ describe("NearestFarmCard", () => {
     const user = userEvent.setup();
     const onOpenFarm = renderCard();
 
-    await user.click(
-      screen.getByRole("button", { name: /use my location/i }),
-    );
+    await user.click(screen.getByRole("button", { name: /use my location/i }));
     await user.click(screen.getByText("Hof Sonnenmatt"));
 
     expect(onOpenFarm).toHaveBeenCalledWith(
@@ -107,9 +102,7 @@ describe("NearestFarmCard", () => {
     const user = userEvent.setup();
     renderCard();
 
-    await user.click(
-      screen.getByRole("button", { name: /use my location/i }),
-    );
+    await user.click(screen.getByRole("button", { name: /use my location/i }));
     expect(screen.getByText(/Location unavailable/i)).toBeInTheDocument();
   });
 });

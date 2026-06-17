@@ -21,7 +21,9 @@ describe("MobileTabBar", () => {
   it("renders both navigation tabs", () => {
     pathname.value = "/";
     renderBar();
-    expect(screen.getByRole("link", { name: /directory/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /directory/i }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /quick search/i }),
     ).toBeInTheDocument();
@@ -42,8 +44,9 @@ describe("MobileTabBar", () => {
   it("marks Quick search active on the quick-search route", () => {
     pathname.value = "/quick-search";
     renderBar();
-    expect(
-      screen.getByRole("link", { name: /quick search/i }),
-    ).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: /quick search/i })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 });

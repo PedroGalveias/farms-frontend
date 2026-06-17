@@ -37,6 +37,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check formatting
+        run: npm run format:check
+
       - name: Lint
         run: npm run lint
 
@@ -63,11 +66,42 @@ jobs:
       - name: Build
         run: npm run build
 
-  # Trigger a Render deploy only after `verify` passes, and only for pushes
+  # End-to-end smoke tests against a production build in a real browser.
+  e2e:
+    name: E2E smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+  # Trigger a Render deploy only after checks pass, and only for pushes
   # (or manual runs) on the default branch. Pull requests never deploy.
   deploy:
     name: Deploy to Render
-    needs: verify
+    needs: [verify, e2e]
     if: >-
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
       && github.ref == 'refs/heads/main'

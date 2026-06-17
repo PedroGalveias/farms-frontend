@@ -31,7 +31,10 @@ export default function SiteHeader() {
 
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
-          <LanguageMenu placement="header" triggerClassName={utilityClassName} />
+          <LanguageMenu
+            placement="header"
+            triggerClassName={utilityClassName}
+          />
         </div>
       </div>
     </header>

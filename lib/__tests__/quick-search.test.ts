@@ -130,7 +130,10 @@ describe("getQuickSearchResults", () => {
   it("sorts by distance, nearest first, when coordinates are given", () => {
     const results = getQuickSearchResults({
       farms: [zurich, bern],
-      location: { coordinates: { latitude: 46.95, longitude: 7.45 }, label: "" },
+      location: {
+        coordinates: { latitude: 46.95, longitude: 7.45 },
+        label: "",
+      },
       matchMode: "any",
       selectedProducts: ["Vegetables"],
     });
