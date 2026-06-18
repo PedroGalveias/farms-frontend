@@ -1,6 +1,8 @@
 "use client";
 
 import { Check, X } from "lucide-react";
+import { categoryEmoji, categoryLabel } from "@/lib/categories";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type {
   QuickSearchMatchMode,
   QuickSearchProduct,
@@ -25,6 +27,7 @@ export default function ProductsStep({
   products,
   selectedProducts,
 }: ProductsStepProps) {
+  const { locale } = useLanguage();
   const selectedCount = selectedProducts.length;
   const hasAnyAvailability = products.some((product) => product.farmCount > 0);
 
@@ -71,7 +74,7 @@ export default function ProductsStep({
 
       <div className="flex flex-wrap gap-2">
         {products.map((product) => {
-          const isSelected = selectedProducts.includes(product.label);
+          const isSelected = selectedProducts.includes(product.category);
           const isUnavailable = hasAnyAvailability && product.farmCount === 0;
 
           return (
@@ -84,12 +87,18 @@ export default function ProductsStep({
                       isUnavailable ? "opacity-45" : ""
                     }`
               }`}
-              key={product.label}
-              onClick={() => onToggleProduct(product.label)}
+              key={product.category}
+              onClick={() => onToggleProduct(product.category)}
               type="button"
             >
-              {isSelected ? <Check className="check-pop h-3.5 w-3.5" /> : null}
-              {product.label}
+              {isSelected ? (
+                <Check className="check-pop h-3.5 w-3.5" />
+              ) : (
+                <span aria-hidden="true">
+                  {categoryEmoji(product.category)}
+                </span>
+              )}
+              {categoryLabel(product.category, locale)}
               {product.farmCount > 0 ? (
                 <span
                   className={`rounded-full px-1.5 py-0.5 text-[0.65rem] font-bold leading-none ${

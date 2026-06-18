@@ -1,24 +1,6 @@
 import { getCantonName } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
-// The 13 product groups the farm dataset categorises into (German groups
-// mapped to English). Backends should send these as `Farm.categories`.
-const CURATED_PRODUCTS = [
-  "Fruits",
-  "Vegetables",
-  "Dairy",
-  "Meat & poultry",
-  "Honey & sweeteners",
-  "Bakery",
-  "Drinks",
-  "Preserves",
-  "Nuts & oils",
-  "Grains",
-  "Flowers & plants",
-  "Fish & seafood",
-  "Other",
-] as const;
-
 export type QuickSearchMatchMode = "all" | "any";
 
 export interface QuickSearchCoordinates {
@@ -32,8 +14,9 @@ export interface QuickSearchLocation {
 }
 
 export interface QuickSearchProduct {
+  /** Canonical category key (the German group string the backend stores). */
+  category: string;
   farmCount: number;
-  label: string;
 }
 
 export interface QuickSearchResult {
@@ -115,39 +98,38 @@ export function parseQuickSearchCoordinates(
   return { latitude, longitude };
 }
 
+/**
+ * The selectable categories, derived entirely from the farm data the backend
+ * returned — there is no hardcoded list. If the database is empty (no farms,
+ * or farms without categories) this returns `[]`, so no categories are shown.
+ * Each entry's `category` is the canonical key (German); translate it for
+ * display with `categoryLabel` from `lib/categories`.
+ */
 export function getQuickSearchProducts(farms: Farm[]): QuickSearchProduct[] {
-  const productsByNormalizedLabel = new Map<string, QuickSearchProduct>();
-
-  for (const label of CURATED_PRODUCTS) {
-    productsByNormalizedLabel.set(normalizeSearchValue(label), {
-      farmCount: 0,
-      label,
-    });
-  }
+  const farmCountByCategory = new Map<string, number>();
 
   for (const farm of farms) {
-    for (const category of farm.categories) {
-      const normalized = normalizeSearchValue(category);
-
-      if (normalized.length > 0 && !productsByNormalizedLabel.has(normalized)) {
-        productsByNormalizedLabel.set(normalized, {
-          farmCount: 0,
-          label: category,
-        });
+    const seen = new Set<string>();
+    for (const rawCategory of farm.categories) {
+      const category = rawCategory.trim();
+      if (category.length === 0 || seen.has(category)) {
+        continue;
       }
+      seen.add(category);
+      farmCountByCategory.set(
+        category,
+        (farmCountByCategory.get(category) ?? 0) + 1,
+      );
     }
   }
 
-  for (const product of productsByNormalizedLabel.values()) {
-    product.farmCount = farms.filter((farm) =>
-      farmMatchesProduct(farm, product.label),
-    ).length;
-  }
-
-  return [...productsByNormalizedLabel.values()].sort(
-    (left, right) =>
-      right.farmCount - left.farmCount || left.label.localeCompare(right.label),
-  );
+  return [...farmCountByCategory.entries()]
+    .map(([category, farmCount]) => ({ category, farmCount }))
+    .sort(
+      (left, right) =>
+        right.farmCount - left.farmCount ||
+        left.category.localeCompare(right.category),
+    );
 }
 
 function getLocationScore(

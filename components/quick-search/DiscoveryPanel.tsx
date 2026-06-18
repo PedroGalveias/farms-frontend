@@ -1,4 +1,8 @@
+"use client";
+
 import { MapPin, ShoppingBasket, Sprout, type LucideIcon } from "lucide-react";
+import { categoryEmoji, categoryLabel } from "@/lib/categories";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 type Step = "location" | "products" | "results";
 
@@ -44,113 +48,6 @@ function chipSlot(i: number) {
     x: 13 + col * 19 + stagger,
     y: 12 + row * 12 + jitterY,
   };
-}
-
-// Emoji for every product the backend can surface (the curated quick-search
-// set plus the common free-form farm categories), keyed by singular lowercase.
-const PRODUCT_EMOJI: Record<string, string> = {
-  milk: "🥛",
-  dairy: "🥛",
-  yoghurt: "🥛",
-  yogurt: "🥛",
-  cream: "🥛",
-  butter: "🧈",
-  cheese: "🧀",
-  ham: "🥓",
-  bacon: "🥓",
-  sausage: "🌭",
-  meat: "🥩",
-  beef: "🥩",
-  pork: "🥩",
-  lamb: "🍖",
-  veal: "🍖",
-  poultry: "🐔",
-  chicken: "🐔",
-  charcuterie: "🥓",
-  fish: "🐟",
-  honey: "🍯",
-  beeswax: "🕯️",
-  fruit: "🍎",
-  apple: "🍎",
-  pear: "🍐",
-  berry: "🫐",
-  blueberry: "🫐",
-  raspberry: "🍓",
-  strawberry: "🍓",
-  cherry: "🍒",
-  grape: "🍇",
-  plum: "🫐",
-  peach: "🍑",
-  apricot: "🍑",
-  juice: "🧃",
-  "fruit juice": "🧃",
-  cider: "🍾",
-  wine: "🍷",
-  beer: "🍺",
-  spirit: "🥃",
-  egg: "🥚",
-  vegetable: "🥕",
-  carrot: "🥕",
-  potato: "🥔",
-  tomato: "🍅",
-  onion: "🧅",
-  garlic: "🧄",
-  pumpkin: "🎃",
-  squash: "🎃",
-  corn: "🌽",
-  pepper: "🫑",
-  cucumber: "🥒",
-  salad: "🥬",
-  lettuce: "🥬",
-  mushroom: "🍄",
-  asparagus: "🥬",
-  herb: "🌿",
-  spice: "🌶️",
-  bread: "🍞",
-  pastry: "🥐",
-  flour: "🌾",
-  grain: "🌾",
-  cereal: "🌾",
-  nut: "🌰",
-  jam: "🍓",
-  preserve: "🫙",
-  pickle: "🫙",
-  oil: "🫒",
-  vinegar: "🫙",
-  tea: "🍵",
-  coffee: "☕",
-  chocolate: "🍫",
-  organic: "🌱",
-  bio: "🌱",
-  flower: "🌷",
-  plant: "🪴",
-  seedling: "🌱",
-  wool: "🧶",
-  // Group-level labels (the curated quick-search taxonomy)
-  bakery: "🥐",
-  drink: "🥤",
-  drinks: "🥤",
-  beverage: "🥤",
-  seafood: "🦐",
-  sweetener: "🍯",
-  other: "🧺",
-};
-
-function emojiFor(label: string) {
-  const norm = label.toLowerCase().trim();
-  const first = norm.split(/[\s/&,]+/)[0] ?? norm;
-  const candidates = [
-    norm,
-    norm.replace(/s$/, ""),
-    first,
-    first.replace(/s$/, ""),
-  ];
-  for (const key of candidates) {
-    if (PRODUCT_EMOJI[key]) {
-      return PRODUCT_EMOJI[key];
-    }
-  }
-  return "🧺";
 }
 
 const FARM_PINS = [
@@ -201,6 +98,7 @@ export default function DiscoveryPanel({
   step: Step;
   selectedProducts: string[];
 }) {
+  const { locale } = useLanguage();
   const index = STEP_INDEX[step];
   const legAActive = index >= 1;
   const legBActive = index >= 2;
@@ -248,8 +146,8 @@ export default function DiscoveryPanel({
             style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
           >
             <span className="chip-pop flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
-              <span aria-hidden="true">{emojiFor(product)}</span>
-              {product}
+              <span aria-hidden="true">{categoryEmoji(product)}</span>
+              {categoryLabel(product, locale)}
             </span>
           </div>
         );

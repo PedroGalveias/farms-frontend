@@ -174,24 +174,31 @@ describe("getQuickSearchResults", () => {
 });
 
 describe("getQuickSearchProducts", () => {
-  it("includes curated products and counts farms", () => {
+  it("derives categories from the farm data and counts farms", () => {
     const products = getQuickSearchProducts([
-      makeFarm({ categories: ["Vegetables"] }),
-      makeFarm({ categories: ["Vegetables", "Dairy"] }),
+      makeFarm({ categories: ["Gemüse"] }),
+      makeFarm({ categories: ["Gemüse", "Milchprodukte"] }),
     ]);
-    const vegetables = products.find((p) => p.label === "Vegetables");
-    const dairy = products.find((p) => p.label === "Dairy");
+    const vegetables = products.find((p) => p.category === "Gemüse");
+    const dairy = products.find((p) => p.category === "Milchprodukte");
     expect(vegetables?.farmCount).toBe(2);
     expect(dairy?.farmCount).toBe(1);
+    // Only categories present in the data appear — nothing is hardcoded.
+    expect(products).toHaveLength(2);
+  });
+
+  it("returns an empty list when the data has no categories", () => {
+    expect(getQuickSearchProducts([])).toEqual([]);
+    expect(getQuickSearchProducts([makeFarm({ categories: [] })])).toEqual([]);
   });
 
   it("sorts by farm count descending", () => {
     const products = getQuickSearchProducts([
-      makeFarm({ categories: ["Dairy"] }),
-      makeFarm({ categories: ["Dairy"] }),
-      makeFarm({ categories: ["Vegetables"] }),
+      makeFarm({ categories: ["Milchprodukte"] }),
+      makeFarm({ categories: ["Milchprodukte"] }),
+      makeFarm({ categories: ["Gemüse"] }),
     ]);
-    expect(products[0].label).toBe("Dairy");
+    expect(products[0].category).toBe("Milchprodukte");
   });
 });
 

@@ -9,6 +9,8 @@ import {
   type ReactNode,
 } from "react";
 import { ExternalLink, X } from "lucide-react";
+import { categoryLabel } from "@/lib/categories";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { productMatchesCategory } from "@/lib/quick-search";
 import { supportsViewTransitions } from "@/lib/view-transition";
@@ -28,6 +30,7 @@ export default function FarmDetailSheet({
   onClose,
   selectedProducts,
 }: FarmDetailSheetProps) {
+  const { locale } = useLanguage();
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartYRef = useRef<number | null>(null);
@@ -197,7 +200,7 @@ export default function FarmDetailSheet({
                     }`}
                     key={category}
                   >
-                    {category}
+                    {categoryLabel(category, locale)}
                   </span>
                 ))}
               </div>
