@@ -2,6 +2,8 @@
 
 import { ChevronRight, Leaf, MapPin, Navigation } from "lucide-react";
 import CountUp from "@/components/motion/CountUp";
+import { categoryLabel } from "@/lib/categories";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { getCantonName } from "@/lib/farms";
 import {
   productMatchesCategory,
@@ -131,6 +133,7 @@ function ResultRow({
   result: QuickSearchResult;
   selectedProducts: string[];
 }) {
+  const { locale } = useLanguage();
   const { farm } = result;
   const hasDistance = result.distanceKm !== null;
 
@@ -190,7 +193,7 @@ function ResultRow({
                 }`}
                 key={category}
               >
-                {category}
+                {categoryLabel(category, locale)}
               </span>
             ))}
           {hiddenCategoryCount > 0 ? (

@@ -10,8 +10,9 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { categoryLabel } from "@/lib/categories";
 import { getCantonName } from "@/lib/farms";
-import { useT } from "@/components/i18n/LanguageProvider";
+import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import type { DirectoryViewMode, FarmSortOption } from "@/types/farm";
 
 interface DirectoryToolbarProps {
@@ -81,6 +82,7 @@ export default function DirectoryToolbar({
   viewMode,
 }: DirectoryToolbarProps) {
   const t = useT();
+  const { locale } = useLanguage();
 
   return (
     <section className="sticky top-[84px] z-20 rounded-[30px] border border-line bg-cloud/85 p-4 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_28px_60px_-32px_rgba(20,22,27,0.28)] backdrop-blur-2xl sm:p-5">
@@ -141,7 +143,7 @@ export default function DirectoryToolbar({
             <option value="all">{t("toolbar_allCategories")}</option>
             {categoryOptions.map((category) => (
               <option key={category} value={category}>
-                {category}
+                {categoryLabel(category, locale)}
               </option>
             ))}
           </select>
@@ -202,7 +204,7 @@ export default function DirectoryToolbar({
                 onClick={() => onSelectQuickCategory(category)}
                 type="button"
               >
-                {category}
+                {categoryLabel(category, locale)}
               </button>
             );
           })}
@@ -271,7 +273,7 @@ export default function DirectoryToolbar({
               onClick={onClearCategory}
               type="button"
             >
-              {t("chip_category")} {selectedCategory}
+              {t("chip_category")} {categoryLabel(selectedCategory, locale)}
               <X className="h-3.5 w-3.5" />
             </button>
           ) : null}

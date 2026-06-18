@@ -1,8 +1,9 @@
 "use client";
 
 import { ArrowUpRight, MapPin } from "lucide-react";
+import { categoryLabel } from "@/lib/categories";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
-import { useT } from "@/components/i18n/LanguageProvider";
+import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import type { DirectoryViewMode, Farm } from "@/types/farm";
 
 interface FarmCardProps {
@@ -26,6 +27,7 @@ function CategoryChips({
   categories: string[];
   hiddenCount?: number;
 }) {
+  const { locale } = useLanguage();
   return (
     <div className="flex flex-wrap gap-1.5">
       {categories.map((category) => (
@@ -33,7 +35,7 @@ function CategoryChips({
           className="rounded-full bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/60"
           key={category}
         >
-          {category}
+          {categoryLabel(category, locale)}
         </span>
       ))}
       {hiddenCount > 0 ? (

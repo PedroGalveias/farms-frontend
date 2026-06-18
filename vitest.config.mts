@@ -23,6 +23,7 @@ export default defineConfig({
       // Presentational/animation components are excluded until they get tests.
       include: [
         "lib/quick-search.ts",
+        "lib/categories.ts",
         "lib/farms.ts",
         "lib/farm-form.ts",
         "lib/i18n.ts",
