@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   EMPTY_FARM_FORM_VALUES,
-  parseCategoriesInput,
+  normalizeCategories,
   toCreateFarmInput,
   validateFarmForm,
 } from "@/lib/farm-form";
@@ -14,21 +14,22 @@ function validValues(overrides: Partial<FarmFormValues> = {}): FarmFormValues {
     canton: "BE",
     latitude: "46.948",
     longitude: "7.4474",
-    categories: "Vegetables, Dairy",
+    categories: ["Gemüse", "Milchprodukte"],
     ...overrides,
   };
 }
 
-describe("parseCategoriesInput", () => {
-  it("splits on commas and newlines, trims, and de-duplicates", () => {
-    expect(parseCategoriesInput("Dairy, Vegetables\nDairy")).toEqual([
-      "Dairy",
-      "Vegetables",
-    ]);
+describe("normalizeCategories", () => {
+  it("trims, drops blanks, and de-duplicates", () => {
+    expect(
+      normalizeCategories(["Milchprodukte", " Gemüse ", "Milchprodukte", ""]),
+    ).toEqual(["Milchprodukte", "Gemüse"]);
   });
 
-  it("returns an empty array for blank input", () => {
-    expect(parseCategoriesInput("  ,\n ")).toEqual([]);
+  it("preserves keys that contain commas", () => {
+    expect(normalizeCategories(["Nüsse, Samen und Öle"])).toEqual([
+      "Nüsse, Samen und Öle",
+    ]);
   });
 });
 
@@ -71,7 +72,7 @@ describe("validateFarmForm", () => {
 
   it("requires at least one category", () => {
     expect(
-      validateFarmForm(validValues({ categories: "" })).categories,
+      validateFarmForm(validValues({ categories: [] })).categories,
     ).toBeDefined();
   });
 });
@@ -82,7 +83,7 @@ describe("toCreateFarmInput", () => {
       validValues({
         canton: "be",
         name: "  Hof  ",
-        categories: "Dairy\nDairy",
+        categories: ["Milchprodukte", "Milchprodukte"],
       }),
     );
     expect(input).toEqual({
@@ -90,7 +91,7 @@ describe("toCreateFarmInput", () => {
       address: "Dorfstrasse 12, 3011 Bern",
       canton: "BE",
       coordinates: "46.948,7.4474",
-      categories: ["Dairy"],
+      categories: ["Milchprodukte"],
     });
   });
 });
