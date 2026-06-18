@@ -4,11 +4,16 @@ import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
 import { LoaderCircle, Plus, X } from "lucide-react";
 import {
   EMPTY_FARM_FORM_VALUES,
-  parseCategoriesInput,
   toCreateFarmInput,
   validateFarmForm,
 } from "@/lib/farm-form";
+import {
+  KNOWN_CATEGORY_KEYS,
+  categoryEmoji,
+  categoryLabel,
+} from "@/lib/categories";
 import { SWISS_CANTONS } from "@/lib/farms";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type { FarmFormErrors, FarmFormValues } from "@/types/farm";
 
 interface CreateFarmDialogProps {
@@ -28,6 +33,7 @@ export default function CreateFarmDialog({
   onClose,
   onSuccess,
 }: CreateFarmDialogProps) {
+  const { locale, t } = useLanguage();
   const [values, setValues] = useState<FarmFormValues>(EMPTY_FARM_FORM_VALUES);
   const [errors, setErrors] = useState<FarmFormErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
@@ -68,21 +74,34 @@ export default function CreateFarmDialog({
     return null;
   }
 
-  const categoryPreview = parseCategoriesInput(values.categories);
-
-  const setFieldValue = (field: keyof FarmFormValues, value: string) => {
-    setValues((currentValues) => ({
-      ...currentValues,
-      [field]: value,
-    }));
-
+  const clearFieldError = (field: keyof FarmFormValues) => {
     setErrors((currentErrors) => {
       const nextErrors = { ...currentErrors };
       delete nextErrors[field];
       return nextErrors;
     });
-
     setServerError(null);
+  };
+
+  const setFieldValue = (
+    field: Exclude<keyof FarmFormValues, "categories">,
+    value: string,
+  ) => {
+    setValues((currentValues) => ({
+      ...currentValues,
+      [field]: value,
+    }));
+    clearFieldError(field);
+  };
+
+  const toggleCategory = (key: string) => {
+    setValues((currentValues) => ({
+      ...currentValues,
+      categories: currentValues.categories.includes(key)
+        ? currentValues.categories.filter((value) => value !== key)
+        : [...currentValues.categories, key],
+    }));
+    clearFieldError("categories");
   };
 
   const resetForm = () => {
@@ -278,37 +297,38 @@ export default function CreateFarmDialog({
             </div>
           </div>
 
-          <label className="mt-5 block">
-            <span className={labelClassName}>Categories</span>
-            <textarea
-              className={`${fieldClassName} min-h-28 resize-y`}
-              name="categories"
-              onChange={(event) =>
-                setFieldValue("categories", event.target.value)
-              }
-              placeholder="Organic, Fruit, Vegetables, Eggs"
-              value={values.categories}
-            />
+          <fieldset className="mt-5 block">
+            <legend className={labelClassName}>
+              {t("create_categories_label")}
+            </legend>
             <p className="mt-2 text-sm text-ink/40">
-              Separate categories with commas or line breaks.
+              {t("create_categories_hint")}
             </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {KNOWN_CATEGORY_KEYS.map((key) => {
+                const isSelected = values.categories.includes(key);
+                return (
+                  <button
+                    aria-pressed={isSelected}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                      isSelected
+                        ? "border-ink bg-ink text-cloud"
+                        : "border-line bg-cloud text-ink/70 hover:border-ink/30 hover:text-ink"
+                    }`}
+                    key={key}
+                    onClick={() => toggleCategory(key)}
+                    type="button"
+                  >
+                    <span aria-hidden="true">{categoryEmoji(key)}</span>
+                    {categoryLabel(key, locale)}
+                  </button>
+                );
+              })}
+            </div>
             {errors.categories ? (
               <p className="mt-2 text-sm text-rose-600">{errors.categories}</p>
             ) : null}
-          </label>
-
-          {categoryPreview.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {categoryPreview.map((category) => (
-                <span
-                  className="rounded-full bg-tone px-3 py-1 text-sm font-medium text-ink/70"
-                  key={category}
-                >
-                  {category}
-                </span>
-              ))}
-            </div>
-          ) : null}
+          </fieldset>
 
           {serverError ? (
             <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">

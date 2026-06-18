@@ -27,7 +27,7 @@ export default function ProductsStep({
   products,
   selectedProducts,
 }: ProductsStepProps) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const selectedCount = selectedProducts.length;
   const hasAnyAvailability = products.some((product) => product.farmCount > 0);
 
@@ -35,11 +35,10 @@ export default function ProductsStep({
     <div className="space-y-5">
       <div>
         <h2 className="text-[28px] font-bold tracking-[-0.035em] text-ink">
-          What do you need?
+          {t("qs_prod_title")}
         </h2>
         <p className="mt-2 text-sm leading-6 text-ink/55">
-          Pick one or more products — the numbers show how many farms carry
-          each.
+          {t("qs_prod_subcopy")}
         </p>
       </div>
 
@@ -61,14 +60,14 @@ export default function ProductsStep({
               onClick={() => onMatchModeChange(mode)}
               type="button"
             >
-              {mode === "all" ? "Match all" : "Match any"}
+              {mode === "all" ? t("qs_match_all") : t("qs_match_any")}
             </button>
           ))}
         </div>
         <p className="text-xs leading-5 text-ink/45">
           {matchMode === "all"
-            ? "Farms must offer everything you pick."
-            : "Farms can offer any of your picks."}
+            ? t("qs_match_all_hint")
+            : t("qs_match_any_hint")}
         </p>
       </div>
 
@@ -119,8 +118,8 @@ export default function ProductsStep({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3">
           <p className="text-sm leading-6 text-amber-900">
             {matchMode === "all" && selectedCount > 1
-              ? "No farm has all of these together."
-              : "No farms carry these products right now."}
+              ? t("qs_none_all")
+              : t("qs_none_any")}
           </p>
           {matchMode === "all" && selectedCount > 1 ? (
             <button
@@ -128,7 +127,7 @@ export default function ProductsStep({
               onClick={() => onMatchModeChange("any")}
               type="button"
             >
-              Match any instead
+              {t("qs_match_any_instead")}
             </button>
           ) : null}
         </div>
@@ -141,14 +140,16 @@ export default function ProductsStep({
           type="button"
         >
           <X className="h-3 w-3" />
-          Clear selection ({selectedCount})
+          {t("qs_clear_selection", { n: selectedCount })}
         </button>
       ) : null}
 
       <p aria-live="polite" className="sr-only">
         {selectedCount === 0
-          ? "No products selected."
-          : `${matchCount} ${matchCount === 1 ? "farm matches" : "farms match"} your selection.`}
+          ? t("qs_sr_none")
+          : t(matchCount === 1 ? "qs_sr_matches_one" : "qs_sr_matches_many", {
+              n: matchCount,
+            })}
       </p>
     </div>
   );

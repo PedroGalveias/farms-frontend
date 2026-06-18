@@ -27,7 +27,7 @@ export interface FarmFormValues {
   canton: string;
   latitude: string;
   longitude: string;
-  categories: string;
+  categories: string[];
 }
 
 export type FarmFormErrors = Partial<Record<keyof FarmFormValues, string>>;
