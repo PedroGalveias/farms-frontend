@@ -26,7 +26,8 @@ import FarmDetailSheet from "@/components/quick-search/FarmDetailSheet";
 import CountUp from "@/components/motion/CountUp";
 import Magnetic from "@/components/motion/Magnetic";
 import Reveal from "@/components/motion/Reveal";
-import { useT } from "@/components/i18n/LanguageProvider";
+import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { categoryLabel } from "@/lib/categories";
 import {
   getTopFarmCategories,
   getUniqueFarmCantons,
@@ -110,6 +111,7 @@ export default function FarmsPageShell({
 }: FarmsPageShellProps) {
   const router = useRouter();
   const t = useT();
+  const { locale } = useLanguage();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -334,7 +336,10 @@ export default function FarmsPageShell({
                 {t("bento_mostWanted")}
               </p>
               <p className="text-sm font-bold leading-snug text-pine">
-                {quickCategories.slice(0, 3).join(" · ") || "—"}
+                {quickCategories
+                  .slice(0, 3)
+                  .map((category) => categoryLabel(category, locale))
+                  .join(" · ") || "—"}
               </p>
             </div>
           </Reveal>
