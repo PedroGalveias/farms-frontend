@@ -79,7 +79,7 @@ describe("NearestFarmCard", () => {
 
     await user.click(screen.getByRole("button", { name: /use my location/i }));
 
-    expect(screen.getByText("Hof Sonnenmatt")).toBeInTheDocument();
+    expect(await screen.findByText("Hof Sonnenmatt")).toBeInTheDocument();
     expect(screen.getByText(/Dorfstrasse 12/)).toBeInTheDocument();
     expect(screen.getByText("< 1 km")).toBeInTheDocument();
   });
@@ -90,7 +90,7 @@ describe("NearestFarmCard", () => {
     const onOpenFarm = renderCard();
 
     await user.click(screen.getByRole("button", { name: /use my location/i }));
-    await user.click(screen.getByText("Hof Sonnenmatt"));
+    await user.click(await screen.findByText("Hof Sonnenmatt"));
 
     expect(onOpenFarm).toHaveBeenCalledWith(
       expect.objectContaining({ id: "bern" }),
@@ -103,6 +103,24 @@ describe("NearestFarmCard", () => {
     renderCard();
 
     await user.click(screen.getByRole("button", { name: /use my location/i }));
-    expect(screen.getByText(/Location unavailable/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/isn't available in this browser/i),
+    ).toBeInTheDocument();
+  });
+
+  it("surfaces a denied-permission message", async () => {
+    const getCurrentPosition = vi.fn(
+      (_success: PositionCallback, error?: PositionErrorCallback) =>
+        error?.({ code: 1, PERMISSION_DENIED: 1 } as GeolocationPositionError),
+    );
+    Object.defineProperty(navigator, "geolocation", {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+    const user = userEvent.setup();
+    renderCard();
+
+    await user.click(screen.getByRole("button", { name: /use my location/i }));
+    expect(await screen.findByText(/blocked/i)).toBeInTheDocument();
   });
 });

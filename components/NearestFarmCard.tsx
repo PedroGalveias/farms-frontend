@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { ArrowRight, LoaderCircle, MapPin, Navigation } from "lucide-react";
 import { getNearestFarm } from "@/lib/quick-search";
+import {
+  geolocationErrorKey,
+  requestCurrentPosition,
+  type GeolocationErrorReason,
+} from "@/lib/geolocation";
 import { useT } from "@/components/i18n/LanguageProvider";
 import type { Farm } from "@/types/farm";
 
@@ -34,33 +39,31 @@ export default function NearestFarmCard({
 }: NearestFarmCardProps) {
   const t = useT();
   const [status, setStatus] = useState<GeoStatus>("idle");
+  const [errorReason, setErrorReason] =
+    useState<GeolocationErrorReason>("unavailable");
   const [nearest, setNearest] = useState<{
     farm: Farm;
     distanceKm: number;
   } | null>(null);
 
   const locate = () => {
-    if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
-      setStatus("error");
-      return;
-    }
     setStatus("locating");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const result = getNearestFarm(farms, {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
+    // Call directly (no await first) so iOS Safari shows the prompt.
+    requestCurrentPosition().then((outcome) => {
+      if (outcome.coords) {
+        const result = getNearestFarm(farms, outcome.coords);
         if (result) {
           setNearest(result);
           setStatus("ready");
-        } else {
-          setStatus("error");
+          return;
         }
-      },
-      () => setStatus("error"),
-      { enableHighAccuracy: true, maximumAge: 300_000, timeout: 10_000 },
-    );
+        setErrorReason("unavailable");
+        setStatus("error");
+        return;
+      }
+      setErrorReason(outcome.error);
+      setStatus("error");
+    });
   };
 
   const cardClassName =
@@ -111,7 +114,9 @@ export default function NearestFarmCard({
       </div>
       <div>
         <p className="text-xl font-bold leading-tight tracking-[-0.02em]">
-          {status === "error" ? t("nearest_error") : t("nearest_prompt")}
+          {status === "error"
+            ? t(geolocationErrorKey(errorReason))
+            : t("nearest_prompt")}
         </p>
         <button
           className="mt-3.5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#14161b] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-pine disabled:opacity-70"

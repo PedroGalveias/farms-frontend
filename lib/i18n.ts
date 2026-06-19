@@ -46,6 +46,12 @@ const en: Dict = {
   nearest_locating: "Locating…",
   nearest_view: "View details",
   nearest_error: "Location unavailable",
+  geo_err_denied:
+    "Location access is blocked. Allow it in your browser or device settings, then try again.",
+  geo_err_unavailable: "We couldn't determine your location. Please try again.",
+  geo_err_timeout: "Locating took too long. Please try again.",
+  geo_err_insecure: "Location needs a secure (https) connection.",
+  geo_err_unsupported: "Location isn't available in this browser.",
   season_label: "In season now",
   season_promo: "Local, fresher, lower-impact — eat with the season.",
   ticker_1: "Fresh from the source",
@@ -195,6 +201,14 @@ const de: Dict = {
   nearest_locating: "Wird lokalisiert…",
   nearest_view: "Details ansehen",
   nearest_error: "Standort nicht verfügbar",
+  geo_err_denied:
+    "Der Standortzugriff ist blockiert. Erlaube ihn in den Browser- oder Geräteeinstellungen und versuche es erneut.",
+  geo_err_unavailable:
+    "Wir konnten deinen Standort nicht ermitteln. Bitte versuche es erneut.",
+  geo_err_timeout:
+    "Die Standortsuche hat zu lange gedauert. Bitte versuche es erneut.",
+  geo_err_insecure: "Standort benötigt eine sichere (https) Verbindung.",
+  geo_err_unsupported: "Standort ist in diesem Browser nicht verfügbar.",
   season_label: "Jetzt Saison",
   season_promo: "Regional, frischer, ökologischer — iss saisonal.",
   ticker_1: "Frisch ab Hof",
@@ -346,6 +360,13 @@ const fr: Dict = {
   nearest_locating: "Localisation…",
   nearest_view: "Voir les détails",
   nearest_error: "Position indisponible",
+  geo_err_denied:
+    "L'accès à la position est bloqué. Autorisez-le dans les réglages du navigateur ou de l'appareil, puis réessayez.",
+  geo_err_unavailable:
+    "Nous n'avons pas pu déterminer votre position. Veuillez réessayer.",
+  geo_err_timeout: "La localisation a pris trop de temps. Veuillez réessayer.",
+  geo_err_insecure: "La position nécessite une connexion sécurisée (https).",
+  geo_err_unsupported: "La position n'est pas disponible dans ce navigateur.",
   season_label: "De saison",
   season_promo: "Local, plus frais, plus écolo — mangez de saison.",
   ticker_1: "Frais de la ferme",
@@ -498,6 +519,13 @@ const it: Dict = {
   nearest_locating: "Localizzazione…",
   nearest_view: "Vedi i dettagli",
   nearest_error: "Posizione non disponibile",
+  geo_err_denied:
+    "L'accesso alla posizione è bloccato. Consentilo nelle impostazioni del browser o del dispositivo e riprova.",
+  geo_err_unavailable:
+    "Non siamo riusciti a determinare la tua posizione. Riprova.",
+  geo_err_timeout: "La localizzazione ha richiesto troppo tempo. Riprova.",
+  geo_err_insecure: "La posizione richiede una connessione sicura (https).",
+  geo_err_unsupported: "La posizione non è disponibile in questo browser.",
   season_label: "Di stagione",
   season_promo: "Locale, più fresco, più ecologico — mangia di stagione.",
   ticker_1: "Fresco dalla fattoria",
@@ -650,6 +678,14 @@ const rm: Dict = {
   nearest_locating: "Localisaziun…",
   nearest_view: "Vesair ils detagls",
   nearest_error: "Posiziun betg disponibla",
+  geo_err_denied:
+    "L'access a la posiziun è bloccà. Permetta el en ils parameters dal navigatur u da l'apparat e emprova anc ina giada.",
+  geo_err_unavailable:
+    "Nus n'avain betg pudì determinar tia posiziun. Emprova per plaschair anc ina giada.",
+  geo_err_timeout:
+    "La localisaziun ha durà memia ditg. Emprova per plaschair anc ina giada.",
+  geo_err_insecure: "La posiziun dovra ina connexiun segira (https).",
+  geo_err_unsupported: "La posiziun n'è betg disponibla en quest navigatur.",
   season_label: "En stagiun",
   season_promo: "Regiunal, pli fresc, pli ecologic — mangia tenor la stagiun.",
   ticker_1: "Fresc da la fattoria",

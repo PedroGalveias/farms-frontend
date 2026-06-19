@@ -29,6 +29,7 @@ import ProductsStep from "@/components/quick-search/ProductsStep";
 import ResultsStep from "@/components/quick-search/ResultsStep";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { categoryLabel } from "@/lib/categories";
+import { geolocationErrorKey, requestCurrentPosition } from "@/lib/geolocation";
 import { getCantonName, getUniqueFarmCantons } from "@/lib/farms";
 import { runViewTransition } from "@/lib/view-transition";
 import {
@@ -187,30 +188,20 @@ export default function QuickSearchExperience({
   };
 
   const requestGeolocation = () => {
-    if (!("geolocation" in navigator)) {
-      setGeoState("error");
-      setGeoMessage(t("qs_geo_unavailable"));
-      return;
-    }
-
     setGeoState("locating");
     setGeoMessage(null);
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setSharedCoordinates({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
+    // Call directly (no await first) so iOS Safari shows the prompt.
+    requestCurrentPosition().then((outcome) => {
+      if (outcome.coords) {
+        setSharedCoordinates(outcome.coords);
         setLocationInput("");
         setGeoState("ready");
-      },
-      () => {
-        setGeoState("error");
-        setGeoMessage(t("qs_geo_failed"));
-      },
-      { enableHighAccuracy: true, maximumAge: 300_000, timeout: 10_000 },
-    );
+        return;
+      }
+      setGeoState("error");
+      setGeoMessage(t(geolocationErrorKey(outcome.error)));
+    });
   };
 
   const clearGeolocation = () => {
