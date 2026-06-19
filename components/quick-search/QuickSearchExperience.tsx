@@ -27,6 +27,8 @@ import LocationStep, {
 } from "@/components/quick-search/LocationStep";
 import ProductsStep from "@/components/quick-search/ProductsStep";
 import ResultsStep from "@/components/quick-search/ResultsStep";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { categoryLabel } from "@/lib/categories";
 import { getCantonName, getUniqueFarmCantons } from "@/lib/farms";
 import { runViewTransition } from "@/lib/view-transition";
 import {
@@ -48,33 +50,33 @@ const PEEK_PX = 56;
 interface StepMeta {
   icon: LucideIcon;
   id: QuickSearchStep;
-  label: string;
+  labelKey: string;
 }
 
 const STEPS: StepMeta[] = [
-  { icon: MapPin, id: "location", label: "Location" },
-  { icon: ShoppingBasket, id: "products", label: "Products" },
-  { icon: Sprout, id: "results", label: "Results" },
+  { icon: MapPin, id: "location", labelKey: "qs_step_location" },
+  { icon: ShoppingBasket, id: "products", labelKey: "qs_step_products" },
+  { icon: Sprout, id: "results", labelKey: "qs_step_results" },
 ];
 
 const SERVICE_STATUS_PILLS: Record<
   ServiceStatus,
-  { className: string; dotClassName: string; label: string }
+  { className: string; dotClassName: string; labelKey: string }
 > = {
   degraded: {
     className: "bg-amber-500/10 text-amber-700 ring-amber-500/25",
     dotClassName: "bg-amber-500",
-    label: "Service degraded",
+    labelKey: "status_degraded",
   },
   offline: {
     className: "bg-rose-500/10 text-rose-700 ring-rose-500/25",
     dotClassName: "bg-rose-500",
-    label: "Service offline",
+    labelKey: "status_offline",
   },
   online: {
     className: "bg-pine/10 text-pine ring-pine/20",
     dotClassName: "bg-pine-bright",
-    label: "Live farm data",
+    labelKey: "qs_status_live",
   },
 };
 
@@ -95,6 +97,7 @@ export default function QuickSearchExperience({
   loadError,
   serviceStatus,
 }: QuickSearchExperienceProps) {
+  const { locale, t } = useLanguage();
   const [step, setStep] = useState<QuickSearchStep>("location");
   const [locationInput, setLocationInput] = useState("");
   const [sharedCoordinates, setSharedCoordinates] =
@@ -186,9 +189,7 @@ export default function QuickSearchExperience({
   const requestGeolocation = () => {
     if (!("geolocation" in navigator)) {
       setGeoState("error");
-      setGeoMessage(
-        "Geolocation is not available in this browser. You can type a town, ZIP code, or coordinates instead.",
-      );
+      setGeoMessage(t("qs_geo_unavailable"));
       return;
     }
 
@@ -206,9 +207,7 @@ export default function QuickSearchExperience({
       },
       () => {
         setGeoState("error");
-        setGeoMessage(
-          "We could not read your location. You can still type a place or coordinates.",
-        );
+        setGeoMessage(t("qs_geo_failed"));
       },
       { enableHighAccuracy: true, maximumAge: 300_000, timeout: 10_000 },
     );
@@ -246,21 +245,24 @@ export default function QuickSearchExperience({
 
   const stepSummaries: Record<QuickSearchStep, string> = {
     location: sharedCoordinates
-      ? "Current location"
+      ? t("qs_current_location")
       : typedCoordinates
         ? locationInput.trim()
-        : locationInput.trim() || "Anywhere in Switzerland",
+        : locationInput.trim() || t("qs_anywhere"),
     products:
       selectedProducts.length === 0
-        ? "Nothing picked yet"
-        : selectedProducts.slice(0, 3).join(", ") +
+        ? t("qs_nothing_picked")
+        : selectedProducts
+            .slice(0, 3)
+            .map((category) => categoryLabel(category, locale))
+            .join(", ") +
           (selectedProducts.length > 3
             ? ` +${selectedProducts.length - 3}`
             : ""),
     results:
       selectedProducts.length === 0
-        ? "Pick products first"
-        : `${results.length} ${results.length === 1 ? "farm" : "farms"}`,
+        ? t("qs_pick_products_first")
+        : t("results_farms", { n: results.length }),
   };
 
   const getCardStyle = (index: number): CSSProperties => {
@@ -338,7 +340,7 @@ export default function QuickSearchExperience({
           onClick={() => goToStep("products")}
           type="button"
         >
-          Choose products
+          {t("qs_choose_products")}
           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
         </button>
       );
@@ -354,12 +356,12 @@ export default function QuickSearchExperience({
         >
           <Search className="h-4 w-4" />
           {selectedProducts.length === 0
-            ? "Pick a product first"
+            ? t("qs_pick_product_first")
             : results.length === 1
-              ? "Show 1 farm"
+              ? t("qs_show_one")
               : results.length > 1
-                ? `Show ${results.length} farms`
-                : "View results"}
+                ? t("qs_show_many", { n: results.length })
+                : t("qs_view_results")}
         </button>
       );
     }
@@ -367,7 +369,7 @@ export default function QuickSearchExperience({
     return (
       <button className={GHOST_BUTTON_CLASS} onClick={startOver} type="button">
         <RotateCcw className="h-4 w-4" />
-        Start over
+        {t("qs_start_over")}
       </button>
     );
   };
@@ -379,7 +381,7 @@ export default function QuickSearchExperience({
       <span
         className={`h-1.5 w-1.5 rounded-full pulse-dot ${statusPill.dotClassName}`}
       />
-      {statusPill.label}
+      {t(statusPill.labelKey)}
     </span>
   );
 
@@ -391,16 +393,16 @@ export default function QuickSearchExperience({
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-xs font-semibold text-ink/60">
                 <Sparkles className="h-3.5 w-3.5 text-pine" />
-                Quick search
+                {t("qs_hero_eyebrow")}
               </span>
               {serviceStatus !== "online" ? statusBadge : null}
             </div>
             <h1 className="mt-5 text-[clamp(2.75rem,11vw,4rem)] font-extrabold leading-[0.92] tracking-[-0.045em] text-ink">
-              What do you need <span className="text-pine">today?</span>
+              {t("qs_hero_lead")}{" "}
+              <span className="text-pine">{t("qs_hero_accent")}</span>
             </h1>
             <p className="mt-4 max-w-md text-[15px] leading-7 text-ink/55">
-              Set where you are, pick what you’re after — get the farms that
-              have it, nearest first.
+              {t("qs_hero_subcopy")}
             </p>
           </div>
 
@@ -409,13 +411,12 @@ export default function QuickSearchExperience({
               className="mt-6 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
               role="status"
             >
-              The farm data is not fully available right now. You can still
-              explore the flow, but live results may be limited.
+              {t("qs_load_error")}
             </div>
           ) : null}
 
           <div
-            aria-label="Quick search steps"
+            aria-label={t("qs_steps_aria")}
             className="relative mt-8 h-[clamp(460px,calc(100dvh-400px),640px)] lg:h-[clamp(520px,calc(100dvh-360px),660px)]"
             role="group"
           >
@@ -445,7 +446,7 @@ export default function QuickSearchExperience({
                         <Icon className="h-4 w-4" />
                       </span>
                       <span className="shrink-0 text-sm font-bold text-ink">
-                        {meta.label}
+                        {t(meta.labelKey)}
                       </span>
                       <span className="min-w-0 flex-1 truncate text-sm text-ink/45">
                         {stepSummaries[meta.id]}
@@ -458,10 +459,10 @@ export default function QuickSearchExperience({
                         <Icon className="h-4 w-4" />
                       </span>
                       <span className="text-sm font-bold text-ink">
-                        {meta.label}
+                        {t(meta.labelKey)}
                       </span>
                       <span className="ml-auto text-xs font-semibold text-ink/35">
-                        Step {index + 1} of 3
+                        {t("qs_step_of", { n: index + 1 })}
                       </span>
                     </div>
                   )}
@@ -515,10 +516,10 @@ export default function QuickSearchExperience({
                     <span
                       className={`text-sm font-semibold ${enabled ? "text-ink/55" : "text-ink/30"}`}
                     >
-                      {meta.label}
+                      {t(meta.labelKey)}
                     </span>
                     <span className="ml-auto text-xs text-ink/30">
-                      {enabled ? "Up next" : "Pick products first"}
+                      {enabled ? t("qs_up_next") : t("qs_pick_products_first")}
                     </span>
                   </button>
                 </div>

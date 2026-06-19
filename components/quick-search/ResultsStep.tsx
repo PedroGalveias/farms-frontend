@@ -3,7 +3,7 @@
 import { ChevronRight, Leaf, MapPin, Navigation } from "lucide-react";
 import CountUp from "@/components/motion/CountUp";
 import { categoryLabel } from "@/lib/categories";
-import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { getCantonName } from "@/lib/farms";
 import {
   productMatchesCategory,
@@ -14,17 +14,17 @@ import {
 import type { Farm } from "@/types/farm";
 
 function AnimatedDistance({ km }: { km: number }) {
+  const t = useT();
   if (km < 1) {
-    return <>Less than 1 km away</>;
+    return <>{t("qs_dist_lt1")}</>;
   }
 
+  const suffix = ` ${t("qs_dist_suffix")}`;
   if (km < 10) {
-    return (
-      <CountUp decimals={1} durationMs={900} suffix=" km away" value={km} />
-    );
+    return <CountUp decimals={1} durationMs={900} suffix={suffix} value={km} />;
   }
 
-  return <CountUp durationMs={900} suffix=" km away" value={Math.round(km)} />;
+  return <CountUp durationMs={900} suffix={suffix} value={Math.round(km)} />;
 }
 
 const MAX_VISIBLE_CATEGORIES = 4;
@@ -50,25 +50,26 @@ export default function ResultsStep({
   revealKey,
   selectedProducts,
 }: ResultsStepProps) {
+  const { t } = useLanguage();
   const count = results.length;
   const hasCoordinates = location.coordinates !== null;
   const hasTypedLocation = !hasCoordinates && location.label.length > 0;
 
   const sortNote = hasCoordinates
-    ? "Nearest first. Tap a farm for details."
+    ? t("qs_res_nearest")
     : hasTypedLocation
-      ? `Best matches for “${location.label}” first. Tap a farm for details.`
-      : "From all of Switzerland. Tap a farm for details.";
+      ? t("qs_res_best_for", { place: location.label })
+      : t("qs_res_all_ch");
 
   return (
     <div className="space-y-4">
       <div>
         <h2 className="text-[28px] font-bold tracking-[-0.035em] text-ink">
           {count === 0
-            ? "No farms found"
+            ? t("qs_res_none_title")
             : count === 1
-              ? "1 farm found"
-              : `${count} farms found`}
+              ? t("qs_res_one_found")
+              : t("qs_res_many_found", { n: count })}
         </h2>
         <p className="mt-2 text-sm leading-6 text-ink/55">{sortNote}</p>
       </div>
@@ -91,12 +92,12 @@ export default function ResultsStep({
             <Leaf className="h-5 w-5" />
           </span>
           <h3 className="mt-4 text-xl font-bold tracking-[-0.03em] text-ink">
-            Try loosening your search
+            {t("qs_res_loosen_title")}
           </h3>
           <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-ink/55">
             {matchMode === "all" && selectedProducts.length > 1
-              ? "No single farm offers all of those products together."
-              : "No farms carry these products right now."}
+              ? t("qs_none_all_results")
+              : t("qs_none_any")}
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             {matchMode === "all" && selectedProducts.length > 1 ? (
@@ -105,7 +106,7 @@ export default function ResultsStep({
                 onClick={() => onMatchModeChange("any")}
                 type="button"
               >
-                Match any product instead
+                {t("qs_match_any_instead")}
               </button>
             ) : null}
             <button
@@ -113,7 +114,7 @@ export default function ResultsStep({
               onClick={onEditProducts}
               type="button"
             >
-              Change products
+              {t("qs_res_change_products")}
             </button>
           </div>
         </div>
@@ -133,7 +134,7 @@ function ResultRow({
   result: QuickSearchResult;
   selectedProducts: string[];
 }) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const { farm } = result;
   const hasDistance = result.distanceKm !== null;
 
@@ -198,7 +199,7 @@ function ResultRow({
             ))}
           {hiddenCategoryCount > 0 ? (
             <span className="rounded-full bg-tone px-2.5 py-1 text-xs font-semibold text-ink/40">
-              +{hiddenCategoryCount} more
+              {t("qs_res_more", { n: hiddenCategoryCount })}
             </span>
           ) : null}
         </div>

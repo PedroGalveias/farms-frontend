@@ -2,109 +2,8 @@
 
 import { Sprout } from "lucide-react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { SEASONAL_BY_MONTH, produceEmoji, produceLabel } from "@/lib/seasonal";
 import type { Locale } from "@/lib/i18n";
-
-// Swiss seasonal calendar (by month index 0–11) — the produce typically in
-// season here. Emoji are language-neutral; names stay in English to match the
-// app's product/category data. Approximate, in the spirit of a Saisonkalender.
-const SWISS_SEASONAL: string[][] = [
-  [
-    "🍎 Apples",
-    "🍐 Pears",
-    "🥬 Cabbage",
-    "🥕 Carrots",
-    "🧅 Onions",
-    "🥔 Potatoes",
-  ],
-  [
-    "🍎 Apples",
-    "🥬 Cabbage",
-    "🥕 Carrots",
-    "🧅 Onions",
-    "🥔 Potatoes",
-    "🥬 Lamb's lettuce",
-  ],
-  [
-    "🥕 Carrots",
-    "🥬 Spinach",
-    "🥗 Lettuce",
-    "🍎 Apples",
-    "🌿 Chives",
-    "🥬 Lamb's lettuce",
-  ],
-  [
-    "🥬 Asparagus",
-    "🥗 Lettuce",
-    "🌱 Spinach",
-    "🌶️ Radishes",
-    "🌿 Rhubarb",
-    "🥕 Carrots",
-  ],
-  [
-    "🍓 Strawberries",
-    "🥬 Asparagus",
-    "🥗 Lettuce",
-    "🌿 Rhubarb",
-    "🫛 Peas",
-    "🌶️ Radishes",
-  ],
-  [
-    "🍓 Strawberries",
-    "🍒 Cherries",
-    "🥒 Cucumbers",
-    "🥗 Lettuce",
-    "🫛 Peas",
-    "🍑 Apricots",
-  ],
-  [
-    "🍒 Cherries",
-    "🍑 Apricots",
-    "🫐 Berries",
-    "🍅 Tomatoes",
-    "🥒 Cucumbers",
-    "🫑 Peppers",
-  ],
-  [
-    "🍑 Peaches",
-    "🫐 Plums",
-    "🍅 Tomatoes",
-    "🌽 Corn",
-    "🫑 Peppers",
-    "🫛 Beans",
-  ],
-  [
-    "🍇 Grapes",
-    "🍎 Apples",
-    "🍐 Pears",
-    "🎃 Pumpkins",
-    "🍅 Tomatoes",
-    "🌽 Corn",
-  ],
-  [
-    "🍎 Apples",
-    "🍐 Pears",
-    "🍇 Grapes",
-    "🎃 Pumpkins",
-    "🥬 Cabbage",
-    "🍄 Mushrooms",
-  ],
-  [
-    "🍎 Apples",
-    "🍐 Pears",
-    "🎃 Pumpkins",
-    "🥬 Cabbage",
-    "🥕 Carrots",
-    "🥔 Potatoes",
-  ],
-  [
-    "🍎 Apples",
-    "🍐 Pears",
-    "🥬 Cabbage",
-    "🥕 Carrots",
-    "🥔 Potatoes",
-    "🥬 Lamb's lettuce",
-  ],
-];
 
 const INTL_LOCALE: Record<Locale, string> = {
   en: "en-CH",
@@ -122,7 +21,7 @@ const INTL_LOCALE: Record<Locale, string> = {
 export default function SeasonalCard() {
   const { locale, t } = useLanguage();
   const now = new Date();
-  const items = SWISS_SEASONAL[now.getMonth()] ?? [];
+  const items = SEASONAL_BY_MONTH[now.getMonth()] ?? [];
   const monthName = now.toLocaleDateString([INTL_LOCALE[locale], "en"], {
     month: "long",
   });
@@ -143,12 +42,12 @@ export default function SeasonalCard() {
           {monthName}
         </p>
         <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {items.map((item) => (
+          {items.map((key) => (
             <span
               className="rounded-full bg-tone px-3 py-1.5 text-sm font-semibold text-ink/70"
-              key={item}
+              key={key}
             >
-              {item}
+              {produceEmoji(key)} {produceLabel(key, locale)}
             </span>
           ))}
         </div>
