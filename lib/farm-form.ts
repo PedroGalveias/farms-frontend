@@ -23,20 +23,16 @@ const SWISS_COORDINATE_BOUNDS = {
 export const EMPTY_FARM_FORM_VALUES: FarmFormValues = {
   address: "",
   canton: "",
-  categories: "",
+  categories: [],
   latitude: "",
   longitude: "",
   name: "",
 };
 
-export function parseCategoriesInput(value: string) {
+// Trim, drop blanks, and de-duplicate a list of selected category keys.
+export function normalizeCategories(categories: string[]) {
   return Array.from(
-    new Set(
-      value
-        .split(/[\n,]/)
-        .map((entry) => entry.trim())
-        .filter(Boolean),
-    ),
+    new Set(categories.map((entry) => entry.trim()).filter(Boolean)),
   );
 }
 
@@ -86,7 +82,7 @@ export function validateFarmForm(values: FarmFormValues): FarmFormErrors {
     errors.longitude = message;
   }
 
-  if (parseCategoriesInput(values.categories).length === 0) {
+  if (normalizeCategories(values.categories).length === 0) {
     errors.categories = "Add at least one category.";
   }
 
@@ -100,7 +96,7 @@ export function toCreateFarmInput(values: FarmFormValues): CreateFarmInput {
   return {
     address: values.address.trim(),
     canton: values.canton.trim().toUpperCase(),
-    categories: parseCategoriesInput(values.categories),
+    categories: normalizeCategories(values.categories),
     coordinates: `${latitude},${longitude}`,
     name: values.name.trim(),
   };

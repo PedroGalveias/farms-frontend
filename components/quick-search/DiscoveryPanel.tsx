@@ -50,12 +50,6 @@ function chipSlot(i: number) {
   };
 }
 
-const FARM_PINS = [
-  { x: 81, y: 24 },
-  { x: 85, y: 34 },
-  { x: 79, y: 20 },
-];
-
 function Dots({
   dots,
   active,
@@ -102,7 +96,6 @@ export default function DiscoveryPanel({
   const index = STEP_INDEX[step];
   const legAActive = index >= 1;
   const legBActive = index >= 2;
-  const farmsVisible = index >= 2;
 
   return (
     <div
@@ -152,21 +145,6 @@ export default function DiscoveryPanel({
           </div>
         );
       })}
-
-      {/* Farm markers — land on the results step */}
-      {FARM_PINS.map((pin, pinIndex) => (
-        <span
-          className={`absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.25)] transition-all duration-500 ${
-            farmsVisible ? "scale-100 opacity-100" : "scale-0 opacity-0"
-          }`}
-          key={`${pin.x}-${pin.y}`}
-          style={{
-            left: `${pin.x}%`,
-            top: `${pin.y}%`,
-            transitionDelay: farmsVisible ? `${500 + pinIndex * 110}ms` : "0ms",
-          }}
-        />
-      ))}
 
       {/* Step nodes */}
       {NODES.map((node, nodeIndex) => {
