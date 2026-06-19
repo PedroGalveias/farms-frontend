@@ -9,6 +9,7 @@ import {
   Navigation,
   X,
 } from "lucide-react";
+import { useT } from "@/components/i18n/LanguageProvider";
 import type { QuickSearchCoordinates } from "@/lib/quick-search";
 
 export type GeoState = "idle" | "locating" | "ready" | "error";
@@ -44,6 +45,7 @@ export default function LocationStep({
   typedCoordinates,
 }: LocationStepProps) {
   const inputId = useId();
+  const t = useT();
 
   const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -56,11 +58,10 @@ export default function LocationStep({
     <div className="space-y-5">
       <div>
         <h2 className="text-[28px] font-bold tracking-[-0.035em] text-ink">
-          Where are you?
+          {t("qs_loc_title")}
         </h2>
         <p className="mt-2 text-sm leading-6 text-ink/55">
-          Sort farms by distance from you — or skip this and search all of
-          Switzerland.
+          {t("qs_loc_subcopy")}
         </p>
       </div>
 
@@ -68,10 +69,10 @@ export default function LocationStep({
         <div className="flex items-center justify-between gap-3 rounded-2xl border border-pine/20 bg-pine/[0.07] px-4 py-3.5">
           <span className="flex items-center gap-2.5 text-sm font-bold text-pine">
             <Navigation className="h-4 w-4" />
-            Using your current location
+            {t("qs_loc_using")}
           </span>
           <button
-            aria-label="Stop using current location"
+            aria-label={t("qs_loc_stop")}
             className="rounded-full p-1.5 text-ink/40 transition hover:bg-ink/5 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={onClearGeolocation}
             type="button"
@@ -91,7 +92,9 @@ export default function LocationStep({
           ) : (
             <Locate className="h-4 w-4" />
           )}
-          {geoState === "locating" ? "Locating…" : "Use my current location"}
+          {geoState === "locating"
+            ? t("qs_loc_locating")
+            : t("qs_loc_use_current")}
         </button>
       )}
 
@@ -106,13 +109,13 @@ export default function LocationStep({
 
       <div className="flex items-center gap-3 text-xs font-semibold text-ink/35">
         <span aria-hidden="true" className="h-px flex-1 bg-line" />
-        or type a place
+        {t("qs_loc_or_type")}
         <span aria-hidden="true" className="h-px flex-1 bg-line" />
       </div>
 
       <div>
         <label className="sr-only" htmlFor={inputId}>
-          Town, ZIP code, canton, or coordinates
+          {t("qs_loc_input_label")}
         </label>
         <div className="relative">
           <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/30" />
@@ -122,7 +125,7 @@ export default function LocationStep({
             id={inputId}
             onChange={(event) => onLocationInputChange(event.target.value)}
             onKeyDown={handleInputKeyDown}
-            placeholder="Aarau, 5000, Bern or 47.3925, 8.0457"
+            placeholder={t("qs_loc_placeholder")}
             type="text"
             value={locationInput}
           />
@@ -131,7 +134,7 @@ export default function LocationStep({
         {typedCoordinates && !sharedCoordinates ? (
           <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-pine/10 px-3 py-1.5 text-xs font-semibold text-pine">
             <Crosshair className="h-3.5 w-3.5" />
-            Coordinates detected — results will be sorted by distance
+            {t("qs_loc_coords_detected")}
           </p>
         ) : null}
       </div>
@@ -139,7 +142,7 @@ export default function LocationStep({
       {cantonOptions.length > 0 ? (
         <div>
           <p className="text-xs font-semibold text-ink/40">
-            Cantons with farms
+            {t("qs_loc_cantons")}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {cantonOptions.map(({ code, name }) => {
