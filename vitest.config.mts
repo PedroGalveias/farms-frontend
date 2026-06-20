@@ -25,6 +25,7 @@ export default defineConfig({
         "lib/quick-search.ts",
         "lib/categories.ts",
         "lib/seasonal.ts",
+        "lib/geolocation.ts",
         "lib/farms.ts",
         "lib/farm-form.ts",
         "lib/i18n.ts",

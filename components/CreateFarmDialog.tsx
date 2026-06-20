@@ -146,18 +146,14 @@ export default function CreateFarmDialog({
       } | null;
 
       if (!response.ok) {
-        throw new Error(
-          payload?.error ?? "Unable to create new farm right now.",
-        );
+        throw new Error(payload?.error ?? t("create_error"));
       }
 
       resetForm();
       onSuccess();
     } catch (error) {
       setServerError(
-        error instanceof Error
-          ? error.message
-          : "Unable to create new farm right now.",
+        error instanceof Error ? error.message : t("create_error"),
       );
     } finally {
       setIsSubmitting(false);
@@ -179,21 +175,21 @@ export default function CreateFarmDialog({
         <div className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-pine">
-              New entry
+              {t("create_eyebrow")}
             </p>
             <h2
               className="mt-2.5 text-4xl font-extrabold leading-[0.95] tracking-[-0.04em] text-ink"
               id="create-farm-heading"
             >
-              Add a farm
+              {t("cta_addFarm")}
             </h2>
             <p className="mt-3 max-w-md text-sm leading-6 text-ink/50">
-              A Swiss canton, Swiss coordinates, and at least one category.
+              {t("create_subtitle")}
             </p>
           </div>
 
           <button
-            aria-label="Close create farm dialog"
+            aria-label={t("create_close_aria")}
             className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/60 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isSubmitting}
             onClick={onClose}
@@ -209,7 +205,7 @@ export default function CreateFarmDialog({
         >
           <div className="grid gap-5 md:grid-cols-2">
             <label className="block">
-              <span className={labelClassName}>Farm name</span>
+              <span className={labelClassName}>{t("create_name_label")}</span>
               <input
                 className={fieldClassName}
                 name="name"
@@ -218,12 +214,14 @@ export default function CreateFarmDialog({
                 value={values.name}
               />
               {errors.name ? (
-                <p className="mt-2 text-sm text-rose-600">{errors.name}</p>
+                <p className="mt-2 text-sm text-rose-600">{t(errors.name)}</p>
               ) : null}
             </label>
 
             <label className="block">
-              <span className={labelClassName}>Address</span>
+              <span className={labelClassName}>
+                {t("create_address_label")}
+              </span>
               <input
                 className={fieldClassName}
                 name="address"
@@ -234,12 +232,14 @@ export default function CreateFarmDialog({
                 value={values.address}
               />
               {errors.address ? (
-                <p className="mt-2 text-sm text-rose-600">{errors.address}</p>
+                <p className="mt-2 text-sm text-rose-600">
+                  {t(errors.address)}
+                </p>
               ) : null}
             </label>
 
             <label className="block">
-              <span className={labelClassName}>Canton</span>
+              <span className={labelClassName}>{t("create_canton_label")}</span>
               <select
                 className={fieldClassName}
                 name="canton"
@@ -248,7 +248,7 @@ export default function CreateFarmDialog({
                 }
                 value={values.canton}
               >
-                <option value="">Select a Swiss canton</option>
+                <option value="">{t("create_canton_placeholder")}</option>
                 {SWISS_CANTONS.map((canton) => (
                   <option key={canton.code} value={canton.code}>
                     {canton.code} · {canton.name}
@@ -256,13 +256,15 @@ export default function CreateFarmDialog({
                 ))}
               </select>
               {errors.canton ? (
-                <p className="mt-2 text-sm text-rose-600">{errors.canton}</p>
+                <p className="mt-2 text-sm text-rose-600">{t(errors.canton)}</p>
               ) : null}
             </label>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="block">
-                <span className={labelClassName}>Latitude</span>
+                <span className={labelClassName}>
+                  {t("create_latitude_label")}
+                </span>
                 <input
                   className={fieldClassName}
                   inputMode="decimal"
@@ -275,13 +277,15 @@ export default function CreateFarmDialog({
                 />
                 {errors.latitude ? (
                   <p className="mt-2 text-sm text-rose-600">
-                    {errors.latitude}
+                    {t(errors.latitude)}
                   </p>
                 ) : null}
               </label>
 
               <label className="block">
-                <span className={labelClassName}>Longitude</span>
+                <span className={labelClassName}>
+                  {t("create_longitude_label")}
+                </span>
                 <input
                   className={fieldClassName}
                   inputMode="decimal"
@@ -294,7 +298,7 @@ export default function CreateFarmDialog({
                 />
                 {errors.longitude ? (
                   <p className="mt-2 text-sm text-rose-600">
-                    {errors.longitude}
+                    {t(errors.longitude)}
                   </p>
                 ) : null}
               </label>
@@ -330,7 +334,9 @@ export default function CreateFarmDialog({
               })}
             </div>
             {errors.categories ? (
-              <p className="mt-2 text-sm text-rose-600">{errors.categories}</p>
+              <p className="mt-2 text-sm text-rose-600">
+                {t(errors.categories)}
+              </p>
             ) : null}
           </fieldset>
 
@@ -347,7 +353,7 @@ export default function CreateFarmDialog({
               onClick={onClose}
               type="button"
             >
-              Close
+              {t("create_close")}
             </button>
             <button
               className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -357,12 +363,12 @@ export default function CreateFarmDialog({
               {isSubmitting ? (
                 <>
                   <LoaderCircle className="h-4 w-4 animate-spin" />
-                  Saving farm
+                  {t("create_saving")}
                 </>
               ) : (
                 <>
                   <Plus className="h-4 w-4" />
-                  Create farm
+                  {t("create_submit")}
                 </>
               )}
             </button>

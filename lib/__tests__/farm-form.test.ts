@@ -49,8 +49,8 @@ describe("validateFarmForm", () => {
   });
 
   it("rejects an unknown canton code", () => {
-    expect(validateFarmForm(validValues({ canton: "XX" })).canton).toMatch(
-      /valid two-letter/i,
+    expect(validateFarmForm(validValues({ canton: "XX" })).canton).toBe(
+      "form_err_canton_invalid",
     );
   });
 
@@ -66,8 +66,8 @@ describe("validateFarmForm", () => {
     const errors = validateFarmForm(
       validValues({ latitude: "10", longitude: "10" }),
     );
-    expect(errors.latitude).toMatch(/inside Switzerland/i);
-    expect(errors.longitude).toMatch(/inside Switzerland/i);
+    expect(errors.latitude).toBe("form_err_coords_ch");
+    expect(errors.longitude).toBe("form_err_coords_ch");
   });
 
   it("requires at least one category", () => {
