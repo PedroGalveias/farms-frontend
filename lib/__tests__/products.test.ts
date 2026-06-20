@@ -24,11 +24,16 @@ describe("productGroupOf", () => {
 });
 
 describe("productLabel / tagLabel", () => {
-  it("translates a product, falling back to English for unmapped locales", () => {
+  it("translates a product into every locale", () => {
     expect(productLabel("Erdbeeren", "en")).toBe("Strawberries");
     expect(productLabel("Erdbeeren", "de")).toBe("Erdbeeren");
-    // fr/it/rm fall back to English until authored.
-    expect(productLabel("Erdbeeren", "fr")).toBe("Strawberries");
+    expect(productLabel("Erdbeeren", "fr")).toBe("Fraises");
+    expect(productLabel("Erdbeeren", "it")).toBe("Fragole");
+    expect(productLabel("Erdbeeren", "rm")).toBe("Fraulas");
+  });
+
+  it("falls back to the key for an unknown product", () => {
+    expect(productLabel("Nonexistent", "fr")).toBe("Nonexistent");
   });
 
   it("tagLabel handles both products and category groups", () => {
@@ -51,6 +56,16 @@ describe("taxonomy integrity", () => {
         expect(PRODUCTS[product]?.group).toBe(group);
       }
     }
+  });
+
+  it("defines a label in every locale for every product", () => {
+    const locales = ["de", "en", "fr", "it", "rm"] as const;
+    const gaps = Object.entries(PRODUCTS).flatMap(([key, meta]) =>
+      locales
+        .filter((locale) => !meta.labels[locale]?.trim())
+        .map((locale) => `${key}:${locale}`),
+    );
+    expect(gaps).toEqual([]);
   });
 
   it("groups all 13 categories and a healthy number of products", () => {
