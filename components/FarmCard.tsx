@@ -9,6 +9,7 @@ import type { DirectoryViewMode, Farm } from "@/types/farm";
 interface FarmCardProps {
   farm: Farm;
   variant?: DirectoryViewMode;
+  onOpen?: () => void;
 }
 
 function CantonTag({ farm }: { farm: Farm }) {
@@ -47,12 +48,29 @@ function CategoryChips({
   );
 }
 
-export default function FarmCard({ farm, variant = "grid" }: FarmCardProps) {
+export default function FarmCard({
+  farm,
+  variant = "grid",
+  onOpen,
+}: FarmCardProps) {
   const t = useT();
   const { latitude, longitude } = splitCoordinates(farm.coordinates);
   const mapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(
     farm.coordinates,
   )}`;
+
+  // A transparent button stretched over the whole card opens the detail sheet,
+  // while the Google Maps link sits above it (z-10) so it stays clickable.
+  const openOverlay =
+    onOpen != null ? (
+      <button
+        aria-label={`${t("nearest_view")}: ${farm.name}`}
+        className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+        data-cursor="Open"
+        onClick={onOpen}
+        type="button"
+      />
+    ) : null;
 
   if (variant === "list") {
     const visibleCategories = farm.categories.slice(0, 4);
@@ -60,6 +78,7 @@ export default function FarmCard({ farm, variant = "grid" }: FarmCardProps) {
 
     return (
       <article className="group relative overflow-hidden rounded-[26px] border border-line bg-cloud p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-[0_24px_50px_-28px_rgba(20,22,27,0.35)] sm:p-6">
+        {openOverlay}
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_auto] lg:items-center">
           <div className="min-w-0">
             <CantonTag farm={farm} />
@@ -77,7 +96,7 @@ export default function FarmCard({ farm, variant = "grid" }: FarmCardProps) {
               {t("card_added")} {formatFarmDate(farm.created_at)}
             </p>
             <a
-              className="inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
+              className="relative z-10 inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
               href={mapsUrl}
               rel="noreferrer"
               target="_blank"
@@ -100,6 +119,7 @@ export default function FarmCard({ farm, variant = "grid" }: FarmCardProps) {
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-line bg-cloud p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:border-ink/15 hover:shadow-[0_30px_60px_-30px_rgba(20,22,27,0.4)]">
+      {openOverlay}
       <div className="flex items-start justify-between gap-3">
         <CantonTag farm={farm} />
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/40 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
@@ -121,7 +141,7 @@ export default function FarmCard({ farm, variant = "grid" }: FarmCardProps) {
           {t("card_added")} {formatFarmDate(farm.created_at)}
         </span>
         <a
-          className="inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
+          className="relative z-10 inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
           href={mapsUrl}
           rel="noreferrer"
           target="_blank"
