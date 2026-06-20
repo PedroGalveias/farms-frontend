@@ -167,6 +167,20 @@ const en: Dict = {
   qs_dist_suffix: "km away",
   create_categories_label: "Categories",
   create_categories_hint: "Pick the products this farm offers.",
+  create_eyebrow: "New entry",
+  create_subtitle:
+    "A Swiss canton, Swiss coordinates, and at least one category.",
+  create_close_aria: "Close create farm dialog",
+  create_name_label: "Farm name",
+  create_address_label: "Address",
+  create_canton_label: "Canton",
+  create_canton_placeholder: "Select a Swiss canton",
+  create_latitude_label: "Latitude",
+  create_longitude_label: "Longitude",
+  create_close: "Close",
+  create_submit: "Create farm",
+  create_saving: "Saving farm",
+  create_error: "Unable to create new farm right now.",
 };
 
 const de: Dict = {
@@ -326,6 +340,20 @@ const de: Dict = {
   qs_dist_suffix: "km entfernt",
   create_categories_label: "Kategorien",
   create_categories_hint: "Wähle die Produkte, die dieser Hof anbietet.",
+  create_eyebrow: "Neuer Eintrag",
+  create_subtitle:
+    "Ein Schweizer Kanton, Schweizer Koordinaten und mindestens eine Kategorie.",
+  create_close_aria: "Dialog zum Hinzufügen eines Hofs schliessen",
+  create_name_label: "Hofname",
+  create_address_label: "Adresse",
+  create_canton_label: "Kanton",
+  create_canton_placeholder: "Schweizer Kanton wählen",
+  create_latitude_label: "Breitengrad",
+  create_longitude_label: "Längengrad",
+  create_close: "Schliessen",
+  create_submit: "Hof erstellen",
+  create_saving: "Hof wird gespeichert",
+  create_error: "Der Hof kann derzeit nicht erstellt werden.",
 };
 
 const fr: Dict = {
@@ -485,6 +513,20 @@ const fr: Dict = {
   qs_dist_suffix: "km",
   create_categories_label: "Catégories",
   create_categories_hint: "Choisissez les produits proposés par cette ferme.",
+  create_eyebrow: "Nouvelle entrée",
+  create_subtitle:
+    "Un canton suisse, des coordonnées suisses et au moins une catégorie.",
+  create_close_aria: "Fermer la boîte de dialogue d'ajout de ferme",
+  create_name_label: "Nom de la ferme",
+  create_address_label: "Adresse",
+  create_canton_label: "Canton",
+  create_canton_placeholder: "Choisir un canton suisse",
+  create_latitude_label: "Latitude",
+  create_longitude_label: "Longitude",
+  create_close: "Fermer",
+  create_submit: "Créer la ferme",
+  create_saving: "Enregistrement de la ferme",
+  create_error: "Impossible de créer la ferme pour le moment.",
 };
 
 const it: Dict = {
@@ -643,6 +685,20 @@ const it: Dict = {
   qs_dist_suffix: "km",
   create_categories_label: "Categorie",
   create_categories_hint: "Scegli i prodotti offerti da questa fattoria.",
+  create_eyebrow: "Nuova voce",
+  create_subtitle:
+    "Un cantone svizzero, coordinate svizzere e almeno una categoria.",
+  create_close_aria: "Chiudi la finestra di aggiunta fattoria",
+  create_name_label: "Nome della fattoria",
+  create_address_label: "Indirizzo",
+  create_canton_label: "Cantone",
+  create_canton_placeholder: "Scegli un cantone svizzero",
+  create_latitude_label: "Latitudine",
+  create_longitude_label: "Longitudine",
+  create_close: "Chiudi",
+  create_submit: "Crea fattoria",
+  create_saving: "Salvataggio fattoria",
+  create_error: "Impossibile creare la fattoria al momento.",
 };
 
 // Rumantsch Grischun — best-effort; a native speaker should review.
@@ -805,6 +861,20 @@ const rm: Dict = {
   qs_dist_suffix: "km davent",
   create_categories_label: "Categorias",
   create_categories_hint: "Tscherna ils products che quest manaschi offra.",
+  create_eyebrow: "Nova endataziun",
+  create_subtitle:
+    "In chantun svizzer, coordinatas svizras ed almain ina categoria.",
+  create_close_aria: "Serrar il dialog per agiuntar in manaschi",
+  create_name_label: "Num dal manaschi",
+  create_address_label: "Adressa",
+  create_canton_label: "Chantun",
+  create_canton_placeholder: "Tscherner in chantun svizzer",
+  create_latitude_label: "Latitudine",
+  create_longitude_label: "Longitudine",
+  create_close: "Serrar",
+  create_submit: "Crear manaschi",
+  create_saving: "Memorisar il manaschi",
+  create_error: "Impussibel da crear il manaschi al mument.",
 };
 
 export const MESSAGES: Record<Locale, Dict> = { en, de, fr, it, rm };
