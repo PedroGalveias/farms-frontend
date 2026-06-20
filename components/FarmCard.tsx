@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUpRight, MapPin } from "lucide-react";
-import { categoryLabel } from "@/lib/categories";
+import { tagLabel } from "@/lib/products";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import type { DirectoryViewMode, Farm } from "@/types/farm";
@@ -35,7 +35,7 @@ function CategoryChips({
           className="rounded-full bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/60"
           key={category}
         >
-          {categoryLabel(category, locale)}
+          {tagLabel(category, locale)}
         </span>
       ))}
       {hiddenCount > 0 ? (

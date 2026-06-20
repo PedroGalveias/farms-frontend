@@ -1,4 +1,5 @@
 import { getCantonName } from "@/lib/farms";
+import { productGroupOf } from "@/lib/products";
 import type { Farm } from "@/types/farm";
 
 export type QuickSearchMatchMode = "all" | "any";
@@ -52,9 +53,13 @@ export function productMatchesCategory(product: string, category: string) {
   return left.includes(right) || right.includes(left);
 }
 
+// Quick search selects category groups; a farm matches if any of its tags
+// (a granular product, or an existing group-level value) rolls up to it.
 function farmMatchesProduct(farm: Farm, product: string) {
-  return farm.categories.some((category) =>
-    productMatchesCategory(product, category),
+  return farm.categories.some(
+    (category) =>
+      productGroupOf(category) === product ||
+      productMatchesCategory(product, category),
   );
 }
 
@@ -111,8 +116,14 @@ export function getQuickSearchProducts(farms: Farm[]): QuickSearchProduct[] {
   for (const farm of farms) {
     const seen = new Set<string>();
     for (const rawCategory of farm.categories) {
-      const category = rawCategory.trim();
-      if (category.length === 0 || seen.has(category)) {
+      const trimmed = rawCategory.trim();
+      if (trimmed.length === 0) {
+        continue;
+      }
+      // Roll granular products up to their parent group so the picker stays at
+      // the 13-group level (existing group values map to themselves).
+      const category = productGroupOf(trimmed);
+      if (seen.has(category)) {
         continue;
       }
       seen.add(category);
