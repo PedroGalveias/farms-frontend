@@ -442,7 +442,11 @@ export default function FarmsPageShell({
                   key={farm.id}
                   style={{ height: viewMode === "grid" ? "100%" : undefined }}
                 >
-                  <FarmCard farm={farm} variant={viewMode} />
+                  <FarmCard
+                    farm={farm}
+                    onOpen={() => setActiveFarm(farm)}
+                    variant={viewMode}
+                  />
                 </Reveal>
               ))}
             </div>
