@@ -36,37 +36,39 @@ export function normalizeCategories(categories: string[]) {
   );
 }
 
+// validateFarmForm returns i18n keys (not text), so the dialog can render them
+// in the active locale via `t(...)`.
 export function validateFarmForm(values: FarmFormValues): FarmFormErrors {
   const errors: FarmFormErrors = {};
 
   if (!values.name.trim()) {
-    errors.name = "Add a farm name.";
+    errors.name = "form_err_name";
   }
 
   if (!values.address.trim()) {
-    errors.address = "Add an address.";
+    errors.address = "form_err_address";
   }
 
   const canton = values.canton.trim().toUpperCase();
   if (!canton) {
-    errors.canton = "Choose a canton.";
+    errors.canton = "form_err_canton_required";
   } else if (!SWISS_CANTON_CODES.has(canton)) {
-    errors.canton = "Use a valid two-letter Swiss canton code.";
+    errors.canton = "form_err_canton_invalid";
   }
 
   const latitude = Number.parseFloat(values.latitude.trim());
   const longitude = Number.parseFloat(values.longitude.trim());
 
   if (Number.isNaN(latitude)) {
-    errors.latitude = "Enter a valid latitude.";
+    errors.latitude = "form_err_lat_invalid";
   } else if (latitude < -90 || latitude > 90) {
-    errors.latitude = "Latitude must be between -90 and 90.";
+    errors.latitude = "form_err_lat_range";
   }
 
   if (Number.isNaN(longitude)) {
-    errors.longitude = "Enter a valid longitude.";
+    errors.longitude = "form_err_lng_invalid";
   } else if (longitude < -180 || longitude > 180) {
-    errors.longitude = "Longitude must be between -180 and 180.";
+    errors.longitude = "form_err_lng_range";
   }
 
   if (
@@ -77,13 +79,12 @@ export function validateFarmForm(values: FarmFormValues): FarmFormErrors {
       longitude < SWISS_COORDINATE_BOUNDS.longitude.min ||
       longitude > SWISS_COORDINATE_BOUNDS.longitude.max)
   ) {
-    const message = "Coordinates need to be inside Switzerland.";
-    errors.latitude = message;
-    errors.longitude = message;
+    errors.latitude = "form_err_coords_ch";
+    errors.longitude = "form_err_coords_ch";
   }
 
   if (normalizeCategories(values.categories).length === 0) {
-    errors.categories = "Add at least one category.";
+    errors.categories = "form_err_categories";
   }
 
   return errors;
