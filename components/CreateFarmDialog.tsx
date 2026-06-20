@@ -214,7 +214,7 @@ export default function CreateFarmDialog({
                 value={values.name}
               />
               {errors.name ? (
-                <p className="mt-2 text-sm text-rose-600">{errors.name}</p>
+                <p className="mt-2 text-sm text-rose-600">{t(errors.name)}</p>
               ) : null}
             </label>
 
@@ -232,7 +232,9 @@ export default function CreateFarmDialog({
                 value={values.address}
               />
               {errors.address ? (
-                <p className="mt-2 text-sm text-rose-600">{errors.address}</p>
+                <p className="mt-2 text-sm text-rose-600">
+                  {t(errors.address)}
+                </p>
               ) : null}
             </label>
 
@@ -254,7 +256,7 @@ export default function CreateFarmDialog({
                 ))}
               </select>
               {errors.canton ? (
-                <p className="mt-2 text-sm text-rose-600">{errors.canton}</p>
+                <p className="mt-2 text-sm text-rose-600">{t(errors.canton)}</p>
               ) : null}
             </label>
 
@@ -275,7 +277,7 @@ export default function CreateFarmDialog({
                 />
                 {errors.latitude ? (
                   <p className="mt-2 text-sm text-rose-600">
-                    {errors.latitude}
+                    {t(errors.latitude)}
                   </p>
                 ) : null}
               </label>
@@ -296,7 +298,7 @@ export default function CreateFarmDialog({
                 />
                 {errors.longitude ? (
                   <p className="mt-2 text-sm text-rose-600">
-                    {errors.longitude}
+                    {t(errors.longitude)}
                   </p>
                 ) : null}
               </label>
@@ -332,7 +334,9 @@ export default function CreateFarmDialog({
               })}
             </div>
             {errors.categories ? (
-              <p className="mt-2 text-sm text-rose-600">{errors.categories}</p>
+              <p className="mt-2 text-sm text-rose-600">
+                {t(errors.categories)}
+              </p>
             ) : null}
           </fieldset>
 

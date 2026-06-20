@@ -181,6 +181,16 @@ const en: Dict = {
   create_submit: "Create farm",
   create_saving: "Saving farm",
   create_error: "Unable to create new farm right now.",
+  form_err_name: "Add a farm name.",
+  form_err_address: "Add an address.",
+  form_err_canton_required: "Choose a canton.",
+  form_err_canton_invalid: "Use a valid two-letter Swiss canton code.",
+  form_err_lat_invalid: "Enter a valid latitude.",
+  form_err_lat_range: "Latitude must be between -90 and 90.",
+  form_err_lng_invalid: "Enter a valid longitude.",
+  form_err_lng_range: "Longitude must be between -180 and 180.",
+  form_err_coords_ch: "Coordinates need to be inside Switzerland.",
+  form_err_categories: "Add at least one category.",
 };
 
 const de: Dict = {
@@ -354,6 +364,17 @@ const de: Dict = {
   create_submit: "Hof erstellen",
   create_saving: "Hof wird gespeichert",
   create_error: "Der Hof kann derzeit nicht erstellt werden.",
+  form_err_name: "Gib einen Hofnamen ein.",
+  form_err_address: "Gib eine Adresse ein.",
+  form_err_canton_required: "Wähle einen Kanton.",
+  form_err_canton_invalid:
+    "Verwende einen gültigen zweistelligen Schweizer Kantonscode.",
+  form_err_lat_invalid: "Gib einen gültigen Breitengrad ein.",
+  form_err_lat_range: "Der Breitengrad muss zwischen -90 und 90 liegen.",
+  form_err_lng_invalid: "Gib einen gültigen Längengrad ein.",
+  form_err_lng_range: "Der Längengrad muss zwischen -180 und 180 liegen.",
+  form_err_coords_ch: "Die Koordinaten müssen in der Schweiz liegen.",
+  form_err_categories: "Wähle mindestens eine Kategorie.",
 };
 
 const fr: Dict = {
@@ -527,6 +548,17 @@ const fr: Dict = {
   create_submit: "Créer la ferme",
   create_saving: "Enregistrement de la ferme",
   create_error: "Impossible de créer la ferme pour le moment.",
+  form_err_name: "Saisissez un nom de ferme.",
+  form_err_address: "Saisissez une adresse.",
+  form_err_canton_required: "Choisissez un canton.",
+  form_err_canton_invalid:
+    "Utilisez un code de canton suisse valide à deux lettres.",
+  form_err_lat_invalid: "Saisissez une latitude valide.",
+  form_err_lat_range: "La latitude doit être comprise entre -90 et 90.",
+  form_err_lng_invalid: "Saisissez une longitude valide.",
+  form_err_lng_range: "La longitude doit être comprise entre -180 et 180.",
+  form_err_coords_ch: "Les coordonnées doivent se situer en Suisse.",
+  form_err_categories: "Choisissez au moins une catégorie.",
 };
 
 const it: Dict = {
@@ -699,6 +731,17 @@ const it: Dict = {
   create_submit: "Crea fattoria",
   create_saving: "Salvataggio fattoria",
   create_error: "Impossibile creare la fattoria al momento.",
+  form_err_name: "Inserisci un nome per la fattoria.",
+  form_err_address: "Inserisci un indirizzo.",
+  form_err_canton_required: "Scegli un cantone.",
+  form_err_canton_invalid:
+    "Usa un codice cantonale svizzero valido di due lettere.",
+  form_err_lat_invalid: "Inserisci una latitudine valida.",
+  form_err_lat_range: "La latitudine deve essere compresa tra -90 e 90.",
+  form_err_lng_invalid: "Inserisci una longitudine valida.",
+  form_err_lng_range: "La longitudine deve essere compresa tra -180 e 180.",
+  form_err_coords_ch: "Le coordinate devono trovarsi in Svizzera.",
+  form_err_categories: "Scegli almeno una categoria.",
 };
 
 // Rumantsch Grischun — best-effort; a native speaker should review.
@@ -875,6 +918,17 @@ const rm: Dict = {
   create_submit: "Crear manaschi",
   create_saving: "Memorisar il manaschi",
   create_error: "Impussibel da crear il manaschi al mument.",
+  form_err_name: "Endatescha in num da manaschi.",
+  form_err_address: "Endatescha in'adressa.",
+  form_err_canton_required: "Tscherna in chantun.",
+  form_err_canton_invalid:
+    "Dovra in code chantunal svizzer valid da dus bustabs.",
+  form_err_lat_invalid: "Endatescha ina latitudine valida.",
+  form_err_lat_range: "La latitudine sto esser tranter -90 e 90.",
+  form_err_lng_invalid: "Endatescha ina longitudine valida.",
+  form_err_lng_range: "La longitudine sto esser tranter -180 e 180.",
+  form_err_coords_ch: "Las coordinatas ston esser en Svizra.",
+  form_err_categories: "Tscherna almain ina categoria.",
 };
 
 export const MESSAGES: Record<Locale, Dict> = { en, de, fr, it, rm };
