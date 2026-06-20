@@ -28,6 +28,7 @@ import Magnetic from "@/components/motion/Magnetic";
 import Reveal from "@/components/motion/Reveal";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { categoryLabel } from "@/lib/categories";
+import { productGroupOf } from "@/lib/products";
 import {
   getTopFarmCategories,
   getUniqueFarmCantons,
@@ -167,7 +168,10 @@ export default function FarmsPageShell({
     const matchesCanton =
       selectedCanton === "all" || farm.canton === selectedCanton;
     const matchesCategory =
-      selectedCategory === "all" || farm.categories.includes(selectedCategory);
+      selectedCategory === "all" ||
+      farm.categories.some(
+        (category) => productGroupOf(category) === selectedCategory,
+      );
 
     return matchesSearch && matchesCanton && matchesCategory;
   });
