@@ -24,6 +24,7 @@ export default defineConfig({
       include: [
         "lib/quick-search.ts",
         "lib/categories.ts",
+        "lib/products.ts",
         "lib/seasonal.ts",
         "lib/geolocation.ts",
         "lib/farms.ts",

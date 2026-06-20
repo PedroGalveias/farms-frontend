@@ -9,10 +9,9 @@ import {
   type ReactNode,
 } from "react";
 import { ExternalLink, X } from "lucide-react";
-import { categoryLabel } from "@/lib/categories";
+import { productGroupOf, tagLabel } from "@/lib/products";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
-import { productMatchesCategory } from "@/lib/quick-search";
 import { supportsViewTransitions } from "@/lib/view-transition";
 import type { Farm } from "@/types/farm";
 
@@ -110,9 +109,7 @@ export default function FarmDetailSheet({
   };
 
   const isCategoryMatched = (category: string) =>
-    selectedProducts.some((product) =>
-      productMatchesCategory(product, category),
-    );
+    selectedProducts.includes(productGroupOf(category));
 
   const mapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(farm.coordinates)}`;
 
@@ -200,7 +197,7 @@ export default function FarmDetailSheet({
                     }`}
                     key={category}
                   >
-                    {categoryLabel(category, locale)}
+                    {tagLabel(category, locale)}
                   </span>
                 ))}
               </div>

@@ -2,11 +2,10 @@
 
 import { ChevronRight, Leaf, MapPin, Navigation } from "lucide-react";
 import CountUp from "@/components/motion/CountUp";
-import { categoryLabel } from "@/lib/categories";
+import { productGroupOf, tagLabel } from "@/lib/products";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { getCantonName } from "@/lib/farms";
 import {
-  productMatchesCategory,
   type QuickSearchLocation,
   type QuickSearchMatchMode,
   type QuickSearchResult,
@@ -139,9 +138,7 @@ function ResultRow({
   const hasDistance = result.distanceKm !== null;
 
   const isCategoryMatched = (category: string) =>
-    selectedProducts.some((product) =>
-      productMatchesCategory(product, category),
-    );
+    selectedProducts.includes(productGroupOf(category));
 
   const orderedCategories = [...farm.categories].sort(
     (left, right) =>
@@ -194,7 +191,7 @@ function ResultRow({
                 }`}
                 key={category}
               >
-                {categoryLabel(category, locale)}
+                {tagLabel(category, locale)}
               </span>
             ))}
           {hiddenCategoryCount > 0 ? (

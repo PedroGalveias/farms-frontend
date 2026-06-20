@@ -1,3 +1,4 @@
+import { productGroupOf } from "@/lib/products";
 import type { Farm } from "@/types/farm";
 
 export const SWISS_CANTONS = [
@@ -39,9 +40,16 @@ export function getUniqueFarmCantons(farms: Farm[]) {
   );
 }
 
+// A farm's distinct category groups: granular products are rolled up to their
+// parent group (and existing group-level values map to themselves), so the
+// directory always works at the 13-group level.
+export function getFarmGroups(farm: Farm) {
+  return Array.from(new Set(farm.categories.map(productGroupOf)));
+}
+
 export function getUniqueFarmCategories(farms: Farm[]) {
-  return Array.from(new Set(farms.flatMap((farm) => farm.categories))).sort(
-    (a, b) => a.localeCompare(b),
+  return Array.from(new Set(farms.flatMap(getFarmGroups))).sort((a, b) =>
+    a.localeCompare(b),
   );
 }
 
@@ -49,7 +57,7 @@ export function getTopFarmCategories(farms: Farm[], limit = 6) {
   const counts = new Map<string, number>();
 
   for (const farm of farms) {
-    for (const category of farm.categories) {
+    for (const category of getFarmGroups(farm)) {
       counts.set(category, (counts.get(category) ?? 0) + 1);
     }
   }

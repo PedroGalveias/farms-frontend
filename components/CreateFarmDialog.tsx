@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
-import { LoaderCircle, Plus, X } from "lucide-react";
+import { ChevronDown, LoaderCircle, Plus, X } from "lucide-react";
 import {
   EMPTY_FARM_FORM_VALUES,
   toCreateFarmInput,
@@ -12,6 +12,7 @@ import {
   categoryEmoji,
   categoryLabel,
 } from "@/lib/categories";
+import { PRODUCTS_BY_GROUP, productLabel } from "@/lib/products";
 import { SWISS_CANTONS } from "@/lib/farms";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type { FarmFormErrors, FarmFormValues } from "@/types/farm";
@@ -38,6 +39,7 @@ export default function CreateFarmDialog({
   const [errors, setErrors] = useState<FarmFormErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -312,24 +314,66 @@ export default function CreateFarmDialog({
             <p className="mt-2 text-sm text-ink/40">
               {t("create_categories_hint")}
             </p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {KNOWN_CATEGORY_KEYS.map((key) => {
-                const isSelected = values.categories.includes(key);
+            <div className="mt-3 space-y-2">
+              {KNOWN_CATEGORY_KEYS.map((group) => {
+                const products = PRODUCTS_BY_GROUP[group] ?? [];
+                const selectedCount = products.filter((product) =>
+                  values.categories.includes(product),
+                ).length;
+                const isExpanded = expandedGroup === group;
+
                 return (
-                  <button
-                    aria-pressed={isSelected}
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ink/20 ${
-                      isSelected
-                        ? "border-ink bg-ink text-cloud"
-                        : "border-line bg-cloud text-ink/70 hover:border-ink/30 hover:text-ink"
-                    }`}
-                    key={key}
-                    onClick={() => toggleCategory(key)}
-                    type="button"
+                  <div
+                    className="overflow-hidden rounded-2xl border border-line"
+                    key={group}
                   >
-                    <span aria-hidden="true">{categoryEmoji(key)}</span>
-                    {categoryLabel(key, locale)}
-                  </button>
+                    <button
+                      aria-expanded={isExpanded}
+                      className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition hover:bg-tone/50"
+                      onClick={() =>
+                        setExpandedGroup(isExpanded ? null : group)
+                      }
+                      type="button"
+                    >
+                      <span aria-hidden="true">{categoryEmoji(group)}</span>
+                      <span className="text-sm font-semibold text-ink">
+                        {categoryLabel(group, locale)}
+                      </span>
+                      {selectedCount > 0 ? (
+                        <span className="rounded-full bg-pine/10 px-2 py-0.5 text-xs font-bold text-pine">
+                          {selectedCount}
+                        </span>
+                      ) : null}
+                      <ChevronDown
+                        className={`ml-auto h-4 w-4 text-ink/40 transition-transform duration-200 ${
+                          isExpanded ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    {isExpanded ? (
+                      <div className="flex flex-wrap gap-1.5 border-t border-line px-4 py-3">
+                        {products.map((product) => {
+                          const isSelected =
+                            values.categories.includes(product);
+                          return (
+                            <button
+                              aria-pressed={isSelected}
+                              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                                isSelected
+                                  ? "border-ink bg-ink text-cloud"
+                                  : "border-line bg-cloud text-ink/70 hover:border-ink/30 hover:text-ink"
+                              }`}
+                              key={product}
+                              onClick={() => toggleCategory(product)}
+                              type="button"
+                            >
+                              {productLabel(product, locale)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
                 );
               })}
             </div>
