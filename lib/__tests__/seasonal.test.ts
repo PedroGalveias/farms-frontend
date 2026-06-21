@@ -4,8 +4,26 @@ import {
   SEASONAL_PRODUCE,
   produceEmoji,
   produceLabel,
+  seasonalGroupsForMonth,
 } from "@/lib/seasonal";
+import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
 import { LOCALES, type Locale } from "@/lib/i18n";
+
+describe("seasonalGroupsForMonth", () => {
+  it("returns the distinct category groups in season for a month", () => {
+    // June (index 5): strawberries/cherries/apricots (Früchte) +
+    // cucumbers/lettuce/peas (Gemüse).
+    expect(seasonalGroupsForMonth(5).sort()).toEqual(["Früchte", "Gemüse"]);
+  });
+
+  it("only returns known category groups for every month", () => {
+    for (let month = 0; month < 12; month++) {
+      for (const group of seasonalGroupsForMonth(month)) {
+        expect(KNOWN_CATEGORY_KEYS).toContain(group);
+      }
+    }
+  });
+});
 
 describe("produceLabel", () => {
   it("translates a known item into the requested locale", () => {

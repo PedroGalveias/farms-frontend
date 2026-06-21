@@ -1,8 +1,14 @@
 "use client";
 
-import { Sprout } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Sprout } from "lucide-react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
-import { SEASONAL_BY_MONTH, produceEmoji, produceLabel } from "@/lib/seasonal";
+import {
+  SEASONAL_BY_MONTH,
+  produceEmoji,
+  produceLabel,
+  seasonalGroupsForMonth,
+} from "@/lib/seasonal";
 import type { Locale } from "@/lib/i18n";
 
 const INTL_LOCALE: Record<Locale, string> = {
@@ -20,11 +26,22 @@ const INTL_LOCALE: Record<Locale, string> = {
  */
 export default function SeasonalCard() {
   const { locale, t } = useLanguage();
+  const router = useRouter();
   const now = new Date();
-  const items = SEASONAL_BY_MONTH[now.getMonth()] ?? [];
+  const month = now.getMonth();
+  const items = SEASONAL_BY_MONTH[month] ?? [];
   const monthName = now.toLocaleDateString([INTL_LOCALE[locale], "en"], {
     month: "long",
   });
+
+  // Send the in-season category groups into quick search, which sorts farms by
+  // distance ("near you") once the visitor shares their location.
+  const findNearby = () => {
+    const groups = seasonalGroupsForMonth(month);
+    router.push(
+      `/quick-search?products=${encodeURIComponent(groups.join(","))}`,
+    );
+  };
 
   return (
     <div className="col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] border border-line bg-cloud p-5 sm:row-span-2 sm:min-h-0">
@@ -54,6 +71,14 @@ export default function SeasonalCard() {
         <p className="mt-3 text-xs leading-5 text-ink/50">
           {t("season_promo")}
         </p>
+        <button
+          className="group mt-3.5 inline-flex items-center gap-1.5 rounded-full bg-pine px-4 py-2 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-pine/40 focus-visible:ring-offset-2"
+          onClick={findNearby}
+          type="button"
+        >
+          {t("season_cta")}
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+        </button>
       </div>
     </div>
   );

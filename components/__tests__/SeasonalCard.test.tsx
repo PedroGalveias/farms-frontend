@@ -1,7 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import SeasonalCard from "@/components/SeasonalCard";
+
+const push = vi.hoisted(() => vi.fn());
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
 
 function renderCard() {
   return render(
@@ -43,5 +49,21 @@ describe("SeasonalCard", () => {
     renderCard();
 
     expect(screen.getByText(/eat with the season/i)).toBeInTheDocument();
+  });
+
+  it("links to quick search with the in-season groups when tapped", async () => {
+    vi.setSystemTime(new Date("2026-06-15T12:00:00Z"));
+    // userEvent needs real timers.
+    vi.useRealTimers();
+    const user = userEvent.setup();
+    renderCard();
+
+    await user.click(
+      screen.getByRole("button", { name: /find these near you/i }),
+    );
+    // June produce spans Fruits + Vegetables (Früchte, Gemüse).
+    expect(push).toHaveBeenCalledWith(
+      "/quick-search?products=Fr%C3%BCchte%2CGem%C3%BCse",
+    );
   });
 });
