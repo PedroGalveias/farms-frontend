@@ -28,7 +28,7 @@ import LocationStep, {
 import ProductsStep from "@/components/quick-search/ProductsStep";
 import ResultsStep from "@/components/quick-search/ResultsStep";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
-import { categoryLabel } from "@/lib/categories";
+import { KNOWN_CATEGORY_KEYS, categoryLabel } from "@/lib/categories";
 import { geolocationErrorKey, requestCurrentPosition } from "@/lib/geolocation";
 import { getCantonName, getUniqueFarmCantons } from "@/lib/farms";
 import { runViewTransition } from "@/lib/view-transition";
@@ -145,6 +145,24 @@ export default function QuickSearchExperience({
 
   const currentIndex = STEPS.findIndex((meta) => meta.id === step);
   const statusPill = SERVICE_STATUS_PILLS[serviceStatus];
+
+  // Deep link (e.g. the home "in season" card): ?products=Group1,Group2
+  // pre-selects those category groups, so the visitor lands ready to share
+  // their location and see those farms nearest-first.
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get("products");
+    if (!raw) {
+      return;
+    }
+    const groups = raw
+      .split(",")
+      .map((value) => value.trim())
+      .filter((value) => KNOWN_CATEGORY_KEYS.includes(value));
+    if (groups.length > 0) {
+      // Defer out of the effect body (repo lint: no sync setState in effects).
+      queueMicrotask(() => setSelectedProducts(groups));
+    }
+  }, []);
 
   // Move focus to the card that just came to the foreground so keyboard
   // users are not stranded on a button that became inert.
@@ -286,7 +304,9 @@ export default function QuickSearchExperience({
           geoState={geoState}
           locationInput={locationInput}
           onClearGeolocation={clearGeolocation}
-          onContinue={() => goToStep("products")}
+          onContinue={() =>
+            goToStep(selectedProducts.length > 0 ? "results" : "products")
+          }
           onLocationInputChange={handleLocationInputChange}
           onRequestGeolocation={requestGeolocation}
           sharedCoordinates={sharedCoordinates}
@@ -325,13 +345,22 @@ export default function QuickSearchExperience({
 
   const renderStepFooter = (stepId: QuickSearchStep) => {
     if (stepId === "location") {
+      // If products are already chosen (e.g. via the seasonal deep link), go
+      // straight to results instead of the products step.
+      const hasProducts = selectedProducts.length > 0;
       return (
         <button
           className={PRIMARY_BUTTON_CLASS}
-          onClick={() => goToStep("products")}
+          onClick={() => goToStep(hasProducts ? "results" : "products")}
           type="button"
         >
-          {t("qs_choose_products")}
+          {hasProducts
+            ? results.length === 1
+              ? t("qs_show_one")
+              : results.length > 1
+                ? t("qs_show_many", { n: results.length })
+                : t("qs_view_results")
+            : t("qs_choose_products")}
           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
         </button>
       );
