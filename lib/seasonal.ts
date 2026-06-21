@@ -130,6 +130,48 @@ export const SEASONAL_BY_MONTH: string[][] = [
   ["apples", "pears", "cabbage", "carrots", "potatoes", "lambsLettuce"],
 ];
 
+// Each seasonal item's parent category group (all are fruits or vegetables),
+// using the canonical German group keys from lib/categories so the value can
+// drive the quick-search filter.
+const PRODUCE_GROUP: Record<string, string> = {
+  apples: "Früchte",
+  pears: "Früchte",
+  strawberries: "Früchte",
+  cherries: "Früchte",
+  apricots: "Früchte",
+  berries: "Früchte",
+  plums: "Früchte",
+  peaches: "Früchte",
+  grapes: "Früchte",
+  cabbage: "Gemüse",
+  carrots: "Gemüse",
+  onions: "Gemüse",
+  potatoes: "Gemüse",
+  lambsLettuce: "Gemüse",
+  spinach: "Gemüse",
+  lettuce: "Gemüse",
+  chives: "Gemüse",
+  asparagus: "Gemüse",
+  radishes: "Gemüse",
+  rhubarb: "Gemüse",
+  peas: "Gemüse",
+  cucumbers: "Gemüse",
+  tomatoes: "Gemüse",
+  peppers: "Gemüse",
+  corn: "Gemüse",
+  beans: "Gemüse",
+  pumpkins: "Gemüse",
+  mushrooms: "Gemüse",
+};
+
+/** The distinct category groups in season for a month (index 0 = January). */
+export function seasonalGroupsForMonth(monthIndex: number): string[] {
+  const items = SEASONAL_BY_MONTH[monthIndex] ?? [];
+  return Array.from(
+    new Set(items.map((key) => PRODUCE_GROUP[key]).filter(Boolean)),
+  );
+}
+
 export function produceEmoji(key: string): string {
   return SEASONAL_PRODUCE[key]?.emoji ?? "🧺";
 }
