@@ -419,3 +419,46 @@ body.sheet-open .mobile-tab-bar {
     filter: none !important;
   }
 }
+
+/* ---------- Map (Leaflet) ---------- */
+.leaflet-container {
+  background: var(--color-tone);
+  font: inherit;
+}
+
+/* On-brand farm pin (custom divIcon — no external image). */
+.farm-pin__dot {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--color-pine);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(20, 22, 27, 0.45);
+}
+
+.farm-cluster {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--color-pine);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 14px -4px rgba(28, 124, 71, 0.7);
+}
+
+/* Dark mode: tint the raster tiles so they match the dark canvas. */
+.map-dark .leaflet-tile {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+.map-dark .leaflet-control-attribution {
+  background: rgba(14, 15, 18, 0.8);
+  color: rgba(241, 242, 238, 0.6);
+}
+.map-dark .leaflet-control-attribution a {
+  color: rgba(241, 242, 238, 0.8);
+}

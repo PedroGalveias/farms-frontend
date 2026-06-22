@@ -31,7 +31,7 @@ export interface FarmFormValues {
 }
 
 export type FarmFormErrors = Partial<Record<keyof FarmFormValues, string>>;
-export type DirectoryViewMode = "grid" | "list";
+export type DirectoryViewMode = "grid" | "list" | "map";
 export type FarmSortOption = "newest" | "name" | "canton";
 
 export type ServiceStatus = "online" | "degraded" | "offline";
