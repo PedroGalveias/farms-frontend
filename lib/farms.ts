@@ -30,9 +30,45 @@ export const SWISS_CANTONS = [
   { code: "ZH", name: "Zurich" },
 ] as const;
 
+// Switzerland's seven statistical "great regions" (Grossregionen), used to
+// group the canton filter for faster scanning. `key` is an i18n message key.
+export const SWISS_REGIONS: { key: string; cantons: string[] }[] = [
+  { key: "region_leman", cantons: ["GE", "VD", "VS"] },
+  { key: "region_mittelland", cantons: ["BE", "FR", "JU", "NE", "SO"] },
+  { key: "region_nordwest", cantons: ["AG", "BL", "BS"] },
+  { key: "region_zurich", cantons: ["ZH"] },
+  { key: "region_ost", cantons: ["AI", "AR", "GL", "GR", "SG", "SH", "TG"] },
+  { key: "region_zentral", cantons: ["LU", "NW", "OW", "SZ", "UR", "ZG"] },
+  { key: "region_ticino", cantons: ["TI"] },
+];
+
 const cantonNameByCode = new Map<string, string>(
   SWISS_CANTONS.map((canton) => [canton.code, canton.name]),
 );
+
+/**
+ * Buckets the given canton codes into Switzerland's great regions, preserving
+ * region order and dropping regions (and codes) that have no farms. Any code
+ * not mapped to a region (shouldn't happen for valid Swiss data) is collected
+ * under a trailing "region_other" group so nothing is silently hidden.
+ */
+export function groupCantonsByRegion(cantonCodes: string[]) {
+  const available = new Set(cantonCodes);
+  const assigned = new Set<string>();
+
+  const groups = SWISS_REGIONS.map((region) => {
+    const cantons = region.cantons.filter((code) => available.has(code));
+    cantons.forEach((code) => assigned.add(code));
+    return { key: region.key, cantons };
+  }).filter((region) => region.cantons.length > 0);
+
+  const leftovers = cantonCodes.filter((code) => !assigned.has(code));
+  if (leftovers.length > 0) {
+    groups.push({ key: "region_other", cantons: leftovers });
+  }
+
+  return groups;
+}
 
 export function getUniqueFarmCantons(farms: Farm[]) {
   return Array.from(new Set(farms.map((farm) => farm.canton))).sort((a, b) =>

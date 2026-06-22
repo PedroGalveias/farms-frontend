@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { geolocationErrorKey, requestCurrentPosition } from "@/lib/geolocation";
+import {
+  clearStoredLocation,
+  geolocationErrorKey,
+  readStoredLocation,
+  requestCurrentPosition,
+  writeStoredLocation,
+  LOCATION_STORAGE_KEY,
+} from "@/lib/geolocation";
 
 function setGeolocation(
   impl: (s: PositionCallback, e?: PositionErrorCallback) => void,
@@ -66,5 +73,34 @@ describe("geolocationErrorKey", () => {
   it("maps a reason to its i18n key", () => {
     expect(geolocationErrorKey("denied")).toBe("geo_err_denied");
     expect(geolocationErrorKey("timeout")).toBe("geo_err_timeout");
+  });
+});
+
+describe("remembered location", () => {
+  afterEach(() => window.localStorage.clear());
+
+  it("round-trips a written location", () => {
+    writeStoredLocation({ latitude: 46.95, longitude: 7.45 });
+    expect(readStoredLocation()).toEqual({ latitude: 46.95, longitude: 7.45 });
+  });
+
+  it("returns null when nothing is stored", () => {
+    expect(readStoredLocation()).toBeNull();
+  });
+
+  it("returns null for corrupt or out-of-range data", () => {
+    window.localStorage.setItem(LOCATION_STORAGE_KEY, "{not json");
+    expect(readStoredLocation()).toBeNull();
+    window.localStorage.setItem(
+      LOCATION_STORAGE_KEY,
+      JSON.stringify({ latitude: 999, longitude: 7 }),
+    );
+    expect(readStoredLocation()).toBeNull();
+  });
+
+  it("clears a remembered location", () => {
+    writeStoredLocation({ latitude: 46.95, longitude: 7.45 });
+    clearStoredLocation();
+    expect(readStoredLocation()).toBeNull();
   });
 });

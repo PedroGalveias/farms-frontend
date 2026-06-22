@@ -63,7 +63,7 @@ function farmMatchesProduct(farm: Farm, product: string) {
   );
 }
 
-function haversineDistanceKm(
+export function haversineDistanceKm(
   from: QuickSearchCoordinates,
   to: QuickSearchCoordinates,
 ) {

@@ -1,7 +1,8 @@
 "use client";
 
-import { ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin, Navigation, Sparkles } from "lucide-react";
 import { tagLabel } from "@/lib/products";
+import { formatDistanceShort, isNewThisMonth } from "@/lib/directory";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import type { DirectoryViewMode, Farm } from "@/types/farm";
@@ -10,6 +11,8 @@ interface FarmCardProps {
   farm: Farm;
   variant?: DirectoryViewMode;
   onOpen?: () => void;
+  /** Distance from the visitor's location, when known — shows a badge. */
+  distanceKm?: number | null;
 }
 
 function CantonTag({ farm }: { farm: Farm }) {
@@ -18,6 +21,34 @@ function CantonTag({ farm }: { farm: Farm }) {
       <span className="text-pine">{farm.canton}</span>
       {getCantonName(farm.canton)}
     </span>
+  );
+}
+
+/** Canton tag plus optional "New" and distance badges. */
+function CardBadges({
+  farm,
+  distanceKm,
+}: {
+  farm: Farm;
+  distanceKm?: number | null;
+}) {
+  const t = useT();
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <CantonTag farm={farm} />
+      {isNewThisMonth(farm.created_at) ? (
+        <span className="inline-flex items-center gap-1 rounded-full bg-pine px-2.5 py-1 text-[11px] font-bold text-white">
+          <Sparkles className="h-3 w-3" />
+          {t("card_new")}
+        </span>
+      ) : null}
+      {distanceKm != null ? (
+        <span className="inline-flex items-center gap-1 rounded-full bg-pine/10 px-2.5 py-1 text-[11px] font-bold text-pine">
+          <Navigation className="h-3 w-3" />
+          {formatDistanceShort(distanceKm)}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -52,6 +83,7 @@ export default function FarmCard({
   farm,
   variant = "grid",
   onOpen,
+  distanceKm,
 }: FarmCardProps) {
   const t = useT();
   const { latitude, longitude } = splitCoordinates(farm.coordinates);
@@ -81,7 +113,7 @@ export default function FarmCard({
         {openOverlay}
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_auto] lg:items-center">
           <div className="min-w-0">
-            <CantonTag farm={farm} />
+            <CardBadges distanceKm={distanceKm} farm={farm} />
             <h3 className="mt-3 text-2xl font-bold leading-[1.05] tracking-[-0.03em] text-ink">
               {farm.name}
             </h3>
@@ -121,7 +153,7 @@ export default function FarmCard({
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-line bg-cloud p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:border-ink/15 hover:shadow-[0_30px_60px_-30px_rgba(20,22,27,0.4)]">
       {openOverlay}
       <div className="flex items-start justify-between gap-3">
-        <CantonTag farm={farm} />
+        <CardBadges distanceKm={distanceKm} farm={farm} />
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/40 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
           <ArrowUpRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </span>
