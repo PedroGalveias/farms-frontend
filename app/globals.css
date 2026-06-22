@@ -437,9 +437,13 @@ body.sheet-open .mobile-tab-bar {
   box-shadow: 0 1px 4px rgba(20, 22, 27, 0.45);
 }
 
-.farm-cluster {
-  display: grid;
-  place-items: center;
+/* Scoped with `.leaflet-marker-icon` so it out-specifies Leaflet's own
+   `.leaflet-marker-icon { display: block }` (which would otherwise drop the
+   centering and push the count to the top-left). */
+.leaflet-marker-icon.farm-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
   border-radius: 999px;
@@ -447,6 +451,8 @@ body.sheet-open .mobile-tab-bar {
   color: #fff;
   font-weight: 800;
   font-size: 13px;
+  line-height: 1;
+  text-align: center;
   border: 3px solid rgba(255, 255, 255, 0.85);
   box-shadow: 0 4px 14px -4px rgba(28, 124, 71, 0.7);
 }

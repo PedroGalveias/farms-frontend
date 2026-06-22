@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Search } from "lucide-react";
+import { Heart, LayoutGrid, Search } from "lucide-react";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 import Logo from "@/components/Logo";
 import LanguageMenu from "@/components/LanguageMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useT } from "@/components/i18n/LanguageProvider";
+import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
 const FRONTEND_REPO = "https://github.com/PedroGalveias/farms-frontend";
 
@@ -33,6 +34,7 @@ const utilityClassName =
 export default function SideRail() {
   const pathname = usePathname();
   const t = useT();
+  const { favoritesCount } = usePersonalization();
   const active =
     pathname === "/quick-search"
       ? "quick-search"
@@ -66,6 +68,18 @@ export default function SideRail() {
           title={t("nav_quickSearch")}
         >
           <Search className="h-5 w-5" />
+        </Link>
+        <Link
+          className={`relative ${railLinkClassName(false)}`}
+          href="/?saved=1"
+          title={t("toolbar_savedOnly")}
+        >
+          <Heart className="h-5 w-5" />
+          {favoritesCount > 0 ? (
+            <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-pine px-1 text-[10px] font-bold text-white">
+              {favoritesCount}
+            </span>
+          ) : null}
         </Link>
       </nav>
 
