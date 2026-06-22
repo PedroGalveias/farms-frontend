@@ -3,6 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+    # Version tags (e.g. v1.2.3) are what trigger a Render deploy — see the
+    # deploy job below. Pushes to main run CI but no longer deploy.
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
@@ -118,14 +121,15 @@ jobs:
           path: playwright-report/
           if-no-files-found: ignore
 
-  # Trigger a Render deploy only after checks pass, and only for pushes
-  # (or manual runs) on the default branch. Pull requests never deploy.
+  # Trigger a Render deploy only after checks pass, and only for a pushed
+  # version tag (or an explicit manual run). Pushes to main and pull requests
+  # never deploy — cut a `v*` tag to ship.
   deploy:
     name: Deploy to Render
     needs: [verify, e2e]
     if: >-
-      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-      && github.ref == 'refs/heads/main'
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: render
     permissions:
