@@ -4,6 +4,7 @@ import {
   ArrowDownWideNarrow,
   LayoutGrid,
   List,
+  MapPin,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -183,6 +184,15 @@ export default function DirectoryToolbar({
             type="button"
           >
             <LayoutGrid className="h-4 w-4" />
+          </button>
+          <button
+            aria-label="Show map layout"
+            aria-pressed={viewMode === "map"}
+            className={viewToggleClassName(viewMode === "map")}
+            onClick={() => onViewModeChange("map")}
+            type="button"
+          >
+            <MapPin className="h-4 w-4" />
           </button>
         </div>
       </div>
