@@ -50,6 +50,10 @@ html.dark {
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Kill the rubber-band overscroll so the page (and the fixed side rail /
+     tab bar with it) doesn't bounce past the top/bottom — a more anchored,
+     polished feel. */
+  overscroll-behavior: none;
 }
 
 body {

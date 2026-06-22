@@ -54,8 +54,10 @@ export async function generateMetadata({
 
 export default async function FarmPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string; products?: string }>;
 }) {
   const { id } = await params;
   const farm = await findFarm(id);
@@ -64,5 +66,19 @@ export default async function FarmPage({
     notFound();
   }
 
-  return <FarmDetail farm={farm} />;
+  // When the visitor came from quick search, send them back there with their
+  // product selection restored; otherwise back to the directory.
+  const { from, products } = await searchParams;
+  const fromQuickSearch = from === "quick-search";
+  const backHref = fromQuickSearch
+    ? `/quick-search${products ? `?products=${encodeURIComponent(products)}` : ""}`
+    : "/";
+
+  return (
+    <FarmDetail
+      backHref={backHref}
+      farm={farm}
+      fromQuickSearch={fromQuickSearch}
+    />
+  );
 }
