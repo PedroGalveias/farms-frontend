@@ -2,6 +2,7 @@
 
 import {
   ArrowDownWideNarrow,
+  Heart,
   LayoutGrid,
   List,
   LoaderCircle,
@@ -42,13 +43,16 @@ interface DirectoryToolbarProps {
   onSelectedCantonChange: (value: string) => void;
   onToggleCategory: (value: string) => void;
   onSortOptionChange: (value: FarmSortOption) => void;
+  onToggleSavedOnly: () => void;
   onUseLocation: () => void;
   onViewModeChange: (value: DirectoryViewMode) => void;
   radiusKm: number | null;
   resultsCount: number;
+  savedCount: number;
   searchTerm: string;
   selectedCanton: string;
   selectedCategories: string[];
+  showSavedOnly: boolean;
   sortOption: FarmSortOption;
   totalCount: number;
   viewMode: DirectoryViewMode;
@@ -95,13 +99,16 @@ export default function DirectoryToolbar({
   onSelectedCantonChange,
   onToggleCategory,
   onSortOptionChange,
+  onToggleSavedOnly,
   onUseLocation,
   onViewModeChange,
   radiusKm,
   resultsCount,
+  savedCount,
   searchTerm,
   selectedCanton,
   selectedCategories,
+  showSavedOnly,
   sortOption,
   totalCount,
   viewMode,
@@ -264,6 +271,27 @@ export default function DirectoryToolbar({
           <span className="text-[13px] font-medium text-rose-600">
             {locationError}
           </span>
+        ) : null}
+
+        {savedCount > 0 || showSavedOnly ? (
+          <button
+            aria-pressed={showSavedOnly}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 sm:ml-auto ${
+              showSavedOnly
+                ? "border-pine/30 bg-pine/10 text-pine"
+                : "border-line bg-cloud text-ink/70 hover:border-ink/25 hover:text-ink"
+            }`}
+            onClick={onToggleSavedOnly}
+            type="button"
+          >
+            <Heart
+              className={`h-4 w-4 ${showSavedOnly ? "fill-current" : ""}`}
+            />
+            {t("toolbar_savedOnly")}
+            <span className={showSavedOnly ? "text-pine/60" : "text-ink/35"}>
+              {savedCount}
+            </span>
+          </button>
         ) : null}
       </div>
 

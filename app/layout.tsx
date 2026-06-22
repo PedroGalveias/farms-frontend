@@ -4,6 +4,7 @@ import SideRail from "@/components/SideRail";
 import SiteHeader from "@/components/SiteHeader";
 import MobileTabBar from "@/components/MobileTabBar";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
+import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import CustomCursor from "@/components/motion/CustomCursor";
 import "./globals.css";
@@ -49,13 +50,15 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ThemeProvider>
           <LanguageProvider>
-            <SideRail />
-            <div className="cursor-zone relative z-[1] pb-24 lg:pb-0 lg:pl-[76px]">
-              <SiteHeader />
-              {children}
-            </div>
-            <MobileTabBar />
-            <CustomCursor />
+            <PersonalizationProvider>
+              <SideRail />
+              <div className="cursor-zone relative z-[1] pb-24 lg:pb-0 lg:pl-[76px]">
+                <SiteHeader />
+                {children}
+              </div>
+              <MobileTabBar />
+              <CustomCursor />
+            </PersonalizationProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

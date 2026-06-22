@@ -36,6 +36,8 @@ import CountUp from "@/components/motion/CountUp";
 import Magnetic from "@/components/motion/Magnetic";
 import Reveal from "@/components/motion/Reveal";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
+import RecentlyViewedStrip from "@/components/personalization/RecentlyViewedStrip";
 import { categoryLabel } from "@/lib/categories";
 import {
   getTopFarmCategories,
@@ -155,11 +157,13 @@ export default function FarmsPageShell({
   const router = useRouter();
   const t = useT();
   const { locale } = useLanguage();
+  const { favorites, recordView } = usePersonalization();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCanton, setSelectedCanton] = useState("all");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [categoryMatchMode, setCategoryMatchMode] =
     useState<CategoryMatchMode>("any");
   const [sortOption, setSortOption] = useState<FarmSortOption>("newest");
@@ -175,6 +179,12 @@ export default function FarmsPageShell({
   const deferredSearchTerm = useDeferredValue(searchTerm);
   // Gates URL writes until after we've hydrated state from the URL on mount.
   const hydratedRef = useRef(false);
+
+  // Opening a farm (sheet) also records it in the recently-viewed history.
+  const openFarm = (farm: Farm) => {
+    recordView(farm.id);
+    setActiveFarm(farm);
+  };
 
   // The SideRail "Add a farm" CTA links here as /#add — open the dialog when
   // that hash is present (also works when navigating in from another page).
@@ -375,10 +385,13 @@ export default function FarmsPageShell({
     ],
   );
 
+  const favoriteSet = useMemo(() => new Set(favorites), [favorites]);
+
   // The result list: every active filter applied, distances attached, sorted.
   const ranked = useMemo(() => {
     const matched = initialFarms.filter(
       (farm) =>
+        (!showSavedOnly || favoriteSet.has(farm.id)) &&
         matchesSearch(farm, normalizedSearchTerm) &&
         matchesCanton(farm, selectedCanton) &&
         matchesCategories(farm, selectedCategories, categoryMatchMode) &&
@@ -419,6 +432,8 @@ export default function FarmsPageShell({
     });
   }, [
     initialFarms,
+    showSavedOnly,
+    favoriteSet,
     normalizedSearchTerm,
     selectedCanton,
     selectedCategories,
@@ -440,7 +455,7 @@ export default function FarmsPageShell({
     ",",
   )}|${categoryMatchMode}|${effectiveSort}|${radiusKm ?? "any"}|${
     originCoords ? "geo" : "none"
-  }`;
+  }|${showSavedOnly ? "saved" : "all"}|${favorites.length}`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
   if (filterKey !== prevFilterKey) {
     setPrevFilterKey(filterKey);
@@ -452,6 +467,7 @@ export default function FarmsPageShell({
     selectedCanton !== "all",
     selectedCategories.length > 0,
     radiusKm !== null,
+    showSavedOnly,
   ].filter(Boolean).length;
 
   const serviceStatusMeta = serviceStatusCopy[serviceStatus];
@@ -472,6 +488,7 @@ export default function FarmsPageShell({
     setSelectedCanton("all");
     setSelectedCategories([]);
     setRadiusKm(null);
+    setShowSavedOnly(false);
   };
 
   const toggleCategory = (category: string) => {
@@ -608,7 +625,7 @@ export default function FarmsPageShell({
               </p>
             </div>
 
-            <NearestFarmCard farms={initialFarms} onOpenFarm={setActiveFarm} />
+            <NearestFarmCard farms={initialFarms} onOpenFarm={openFarm} />
 
             <ImageSlot
               className="min-h-[150px] rounded-[22px] sm:min-h-0"
@@ -649,6 +666,9 @@ export default function FarmsPageShell({
           </div>
         </Reveal>
 
+        {/* ---------- Recently viewed ---------- */}
+        <RecentlyViewedStrip farms={initialFarms} />
+
         {/* ---------- Directory ---------- */}
         <div className="mt-16 scroll-mt-28" id="directory">
           <DirectoryToolbar
@@ -674,13 +694,16 @@ export default function FarmsPageShell({
             onSelectedCantonChange={setSelectedCanton}
             onSortOptionChange={setSortOption}
             onToggleCategory={toggleCategory}
+            onToggleSavedOnly={() => setShowSavedOnly((value) => !value)}
             onUseLocation={locateMe}
             onViewModeChange={setViewMode}
             radiusKm={radiusKm}
             resultsCount={visibleFarms.length}
+            savedCount={favorites.length}
             searchTerm={searchTerm}
             selectedCanton={selectedCanton}
             selectedCategories={selectedCategories}
+            showSavedOnly={showSavedOnly}
             sortOption={effectiveSort}
             totalCount={initialFarms.length}
             viewMode={viewMode}
@@ -724,7 +747,7 @@ export default function FarmsPageShell({
 
             {viewMode === "map" ? (
               <div className="mt-6">
-                <FarmsMap farms={visibleFarms} onOpenFarm={setActiveFarm} />
+                <FarmsMap farms={visibleFarms} onOpenFarm={openFarm} />
               </div>
             ) : (
               <>
@@ -746,7 +769,7 @@ export default function FarmsPageShell({
                       <FarmCard
                         distanceKm={distanceByFarmId.get(farm.id) ?? null}
                         farm={farm}
-                        onOpen={() => setActiveFarm(farm)}
+                        onOpen={() => openFarm(farm)}
                         variant={viewMode}
                       />
                     </Reveal>
