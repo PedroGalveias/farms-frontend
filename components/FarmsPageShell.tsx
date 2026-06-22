@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useDeferredValue, useEffect, useState, useTransition } from "react";
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
@@ -29,12 +36,28 @@ import Magnetic from "@/components/motion/Magnetic";
 import Reveal from "@/components/motion/Reveal";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { categoryLabel } from "@/lib/categories";
-import { productGroupOf } from "@/lib/products";
 import {
   getTopFarmCategories,
   getUniqueFarmCantons,
   getUniqueFarmCategories,
+  groupCantonsByRegion,
 } from "@/lib/farms";
+import {
+  RADIUS_OPTIONS,
+  farmDistanceKm,
+  getCantonCounts,
+  getCategoryCounts,
+  matchesCategories,
+  type CategoryMatchMode,
+} from "@/lib/directory";
+import {
+  clearStoredLocation,
+  geolocationErrorKey,
+  readStoredLocation,
+  requestCurrentPosition,
+  writeStoredLocation,
+  type GeolocationCoords,
+} from "@/lib/geolocation";
 import type {
   DirectoryViewMode,
   Farm,
@@ -132,12 +155,22 @@ export default function FarmsPageShell({
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCanton, setSelectedCanton] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [categoryMatchMode, setCategoryMatchMode] =
+    useState<CategoryMatchMode>("any");
   const [sortOption, setSortOption] = useState<FarmSortOption>("newest");
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
+  const [originCoords, setOriginCoords] = useState<GeolocationCoords | null>(
+    null,
+  );
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<DirectoryViewMode>("grid");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isRefreshing, startRefreshTransition] = useTransition();
   const deferredSearchTerm = useDeferredValue(searchTerm);
+  // Gates URL writes until after we've hydrated state from the URL on mount.
+  const hydratedRef = useRef(false);
 
   // The SideRail "Add a farm" CTA links here as /#add — open the dialog when
   // that hash is present (also works when navigating in from another page).
@@ -157,64 +190,223 @@ export default function FarmsPageShell({
     return () => window.removeEventListener("hashchange", openOnHash);
   }, []);
 
-  const cantonOptions = getUniqueFarmCantons(initialFarms);
-  const categoryOptions = getUniqueFarmCategories(initialFarms);
-  const quickCategories = getTopFarmCategories(initialFarms, 7);
+  // Hydrate filters from the URL on mount (so a shared/bookmarked link restores
+  // the view) and keep them in sync with Back/Forward via popstate. The last
+  // shared location is restored from localStorage — never from the URL, which
+  // must not carry personal data.
+  useEffect(() => {
+    const applyFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const sortParam = params.get("sort");
+      const sort: FarmSortOption =
+        sortParam === "name" ||
+        sortParam === "canton" ||
+        sortParam === "nearest"
+          ? sortParam
+          : "newest";
+      const radiusParam = Number(params.get("radius"));
+      const radius = (RADIUS_OPTIONS as readonly number[]).includes(radiusParam)
+        ? radiusParam
+        : null;
+
+      setSearchTerm(params.get("q") ?? "");
+      setSelectedCanton(params.get("canton") ?? "all");
+      setSelectedCategories(
+        (params.get("cat") ?? "")
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean),
+      );
+      setCategoryMatchMode(params.get("match") === "all" ? "all" : "any");
+      setSortOption(sort);
+      setRadiusKm(radius);
+    };
+
+    // Defer setState out of the effect body (repo lint: no sync setState here).
+    queueMicrotask(() => {
+      applyFromUrl();
+      const stored = readStoredLocation();
+      if (stored) {
+        setOriginCoords(stored);
+      }
+      hydratedRef.current = true;
+    });
+
+    window.addEventListener("popstate", applyFromUrl);
+    return () => window.removeEventListener("popstate", applyFromUrl);
+  }, []);
+
+  // Mirror the active filters into the URL (shareable, Back-button friendly).
+  // replaceState keeps it client-side — no navigation or server refetch.
+  useEffect(() => {
+    if (!hydratedRef.current) {
+      return;
+    }
+    const params = new URLSearchParams();
+    if (searchTerm.trim()) {
+      params.set("q", searchTerm.trim());
+    }
+    if (selectedCanton !== "all") {
+      params.set("canton", selectedCanton);
+    }
+    if (selectedCategories.length > 0) {
+      params.set("cat", selectedCategories.join(","));
+    }
+    if (selectedCategories.length > 1 && categoryMatchMode === "all") {
+      params.set("match", "all");
+    }
+    const sortForUrl =
+      sortOption === "nearest" && !originCoords ? "newest" : sortOption;
+    if (sortForUrl !== "newest") {
+      params.set("sort", sortForUrl);
+    }
+    if (radiusKm !== null) {
+      params.set("radius", String(radiusKm));
+    }
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+    );
+  }, [
+    searchTerm,
+    selectedCanton,
+    selectedCategories,
+    categoryMatchMode,
+    sortOption,
+    originCoords,
+    radiusKm,
+  ]);
+
+  const cantonOptions = useMemo(
+    () => getUniqueFarmCantons(initialFarms),
+    [initialFarms],
+  );
+  const categoryOptions = useMemo(
+    () => getUniqueFarmCategories(initialFarms),
+    [initialFarms],
+  );
+  const quickCategories = useMemo(
+    () => getTopFarmCategories(initialFarms, 3),
+    [initialFarms],
+  );
+  const categoryCounts = useMemo(
+    () => getCategoryCounts(initialFarms),
+    [initialFarms],
+  );
+  const cantonCounts = useMemo(
+    () => getCantonCounts(initialFarms),
+    [initialFarms],
+  );
+  const cantonRegions = useMemo(
+    () => groupCantonsByRegion(cantonOptions),
+    [cantonOptions],
+  );
   const normalizedSearchTerm = deferredSearchTerm.trim().toLowerCase();
+
+  // "Nearest" only makes sense with a location; fall back gracefully so the
+  // sort control always reflects a real, selectable option.
+  const effectiveSort: FarmSortOption =
+    sortOption === "nearest" && !originCoords ? "newest" : sortOption;
+
+  // Filter, attach distances (when located), apply the radius, then sort.
+  const ranked = useMemo(() => {
+    const matched = initialFarms.filter((farm) => {
+      const matchesSearch =
+        normalizedSearchTerm.length === 0 ||
+        farm.name.toLowerCase().includes(normalizedSearchTerm) ||
+        farm.address.toLowerCase().includes(normalizedSearchTerm) ||
+        farm.categories.some((category) =>
+          category.toLowerCase().includes(normalizedSearchTerm),
+        );
+      const matchesCanton =
+        selectedCanton === "all" || farm.canton === selectedCanton;
+      return (
+        matchesSearch &&
+        matchesCanton &&
+        matchesCategories(farm, selectedCategories, categoryMatchMode)
+      );
+    });
+
+    const withDistance = matched.map((farm) => ({
+      farm,
+      distanceKm: originCoords ? farmDistanceKm(farm, originCoords) : null,
+    }));
+
+    const limited =
+      originCoords && radiusKm !== null
+        ? withDistance.filter(
+            (entry) =>
+              entry.distanceKm !== null && entry.distanceKm <= radiusKm,
+          )
+        : withDistance;
+
+    return limited.sort((left, right) => {
+      if (effectiveSort === "nearest") {
+        const leftDistance = left.distanceKm ?? Number.POSITIVE_INFINITY;
+        const rightDistance = right.distanceKm ?? Number.POSITIVE_INFINITY;
+        if (leftDistance !== rightDistance) {
+          return leftDistance - rightDistance;
+        }
+        return left.farm.name.localeCompare(right.farm.name);
+      }
+
+      if (effectiveSort === "name") {
+        return left.farm.name.localeCompare(right.farm.name);
+      }
+
+      if (effectiveSort === "canton") {
+        const byCanton = left.farm.canton.localeCompare(right.farm.canton);
+        if (byCanton !== 0) {
+          return byCanton;
+        }
+        return left.farm.name.localeCompare(right.farm.name);
+      }
+
+      return (
+        new Date(right.farm.created_at).getTime() -
+        new Date(left.farm.created_at).getTime()
+      );
+    });
+  }, [
+    initialFarms,
+    normalizedSearchTerm,
+    selectedCanton,
+    selectedCategories,
+    categoryMatchMode,
+    originCoords,
+    radiusKm,
+    effectiveSort,
+  ]);
+
+  const visibleFarms = useMemo(
+    () => ranked.map((entry) => entry.farm),
+    [ranked],
+  );
+  const distanceByFarmId = useMemo(
+    () => new Map(ranked.map((entry) => [entry.farm.id, entry.distanceKm])),
+    [ranked],
+  );
 
   // Reset paging to the first page whenever the filters change — adjusting
   // state during render (React's documented pattern) avoids an effect.
-  const filterKey = `${normalizedSearchTerm}|${selectedCanton}|${selectedCategory}|${sortOption}`;
+  const filterKey = `${normalizedSearchTerm}|${selectedCanton}|${selectedCategories.join(
+    ",",
+  )}|${categoryMatchMode}|${effectiveSort}|${radiusKm ?? "any"}|${
+    originCoords ? "geo" : "none"
+  }`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
   if (filterKey !== prevFilterKey) {
     setPrevFilterKey(filterKey);
     setVisibleCount(PAGE_SIZE);
   }
 
-  const filteredFarms = initialFarms.filter((farm) => {
-    const matchesSearch =
-      normalizedSearchTerm.length === 0 ||
-      farm.name.toLowerCase().includes(normalizedSearchTerm) ||
-      farm.address.toLowerCase().includes(normalizedSearchTerm) ||
-      farm.categories.some((category) =>
-        category.toLowerCase().includes(normalizedSearchTerm),
-      );
-
-    const matchesCanton =
-      selectedCanton === "all" || farm.canton === selectedCanton;
-    const matchesCategory =
-      selectedCategory === "all" ||
-      farm.categories.some(
-        (category) => productGroupOf(category) === selectedCategory,
-      );
-
-    return matchesSearch && matchesCanton && matchesCategory;
-  });
-
-  const visibleFarms = [...filteredFarms].sort((leftFarm, rightFarm) => {
-    if (sortOption === "name") {
-      return leftFarm.name.localeCompare(rightFarm.name);
-    }
-
-    if (sortOption === "canton") {
-      const byCanton = leftFarm.canton.localeCompare(rightFarm.canton);
-      if (byCanton !== 0) {
-        return byCanton;
-      }
-
-      return leftFarm.name.localeCompare(rightFarm.name);
-    }
-
-    return (
-      new Date(rightFarm.created_at).getTime() -
-      new Date(leftFarm.created_at).getTime()
-    );
-  });
-
   const activeFiltersCount = [
     searchTerm.trim().length > 0,
     selectedCanton !== "all",
-    selectedCategory !== "all",
+    selectedCategories.length > 0,
+    radiusKm !== null,
   ].filter(Boolean).length;
 
   const serviceStatusMeta = serviceStatusCopy[serviceStatus];
@@ -233,13 +425,42 @@ export default function FarmsPageShell({
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedCanton("all");
-    setSelectedCategory("all");
+    setSelectedCategories([]);
+    setRadiusKm(null);
   };
 
-  const handleQuickCategorySelection = (category: string) => {
-    setSelectedCategory((currentValue) =>
-      currentValue === category ? "all" : category,
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((current) =>
+      current.includes(category)
+        ? current.filter((value) => value !== category)
+        : [...current, category],
     );
+  };
+
+  // Distance sorting: request the browser location only on tap (privacy), then
+  // remember it so a return visit gets distance-sorted results without asking
+  // again. Called directly (no await first) so iOS Safari shows the prompt.
+  const locateMe = () => {
+    setIsLocating(true);
+    setLocationError(null);
+    requestCurrentPosition().then((outcome) => {
+      if (outcome.coords) {
+        setOriginCoords(outcome.coords);
+        writeStoredLocation(outcome.coords);
+        setSortOption("nearest");
+      } else {
+        setLocationError(t(geolocationErrorKey(outcome.error)));
+      }
+      setIsLocating(false);
+    });
+  };
+
+  const clearLocation = () => {
+    setOriginCoords(null);
+    setRadiusKm(null);
+    setLocationError(null);
+    clearStoredLocation();
+    setSortOption((current) => (current === "nearest" ? "newest" : current));
   };
 
   const statusBadge = (
@@ -387,27 +608,35 @@ export default function FarmsPageShell({
         <div className="mt-16 scroll-mt-28" id="directory">
           <DirectoryToolbar
             activeFiltersCount={activeFiltersCount}
+            cantonCounts={cantonCounts}
+            cantonRegions={cantonRegions}
+            categoryCounts={categoryCounts}
+            categoryMatchMode={categoryMatchMode}
             categoryOptions={categoryOptions}
-            cantonOptions={cantonOptions}
+            isLocating={isLocating}
             isRefreshing={isRefreshing}
+            locationActive={originCoords !== null}
+            locationError={locationError}
+            onCategoryMatchModeChange={setCategoryMatchMode}
             onClearCanton={() => setSelectedCanton("all")}
-            onClearCategory={() => setSelectedCategory("all")}
+            onClearLocation={clearLocation}
             onClearSearchTerm={() => setSearchTerm("")}
             onCreateFarm={() => setIsCreateDialogOpen(true)}
+            onRadiusChange={setRadiusKm}
             onRefresh={refreshDirectory}
             onReset={resetFilters}
-            onSelectQuickCategory={handleQuickCategorySelection}
             onSearchTermChange={setSearchTerm}
             onSelectedCantonChange={setSelectedCanton}
-            onSelectedCategoryChange={setSelectedCategory}
             onSortOptionChange={setSortOption}
+            onToggleCategory={toggleCategory}
+            onUseLocation={locateMe}
             onViewModeChange={setViewMode}
-            quickCategories={quickCategories}
+            radiusKm={radiusKm}
             resultsCount={visibleFarms.length}
             searchTerm={searchTerm}
             selectedCanton={selectedCanton}
-            selectedCategory={selectedCategory}
-            sortOption={sortOption}
+            selectedCategories={selectedCategories}
+            sortOption={effectiveSort}
             totalCount={initialFarms.length}
             viewMode={viewMode}
           />
@@ -470,6 +699,7 @@ export default function FarmsPageShell({
                       }}
                     >
                       <FarmCard
+                        distanceKm={distanceByFarmId.get(farm.id) ?? null}
                         farm={farm}
                         onOpen={() => setActiveFarm(farm)}
                         variant={viewMode}

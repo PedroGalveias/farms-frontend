@@ -29,6 +29,7 @@ export default defineConfig({
         "lib/geolocation.ts",
         "lib/farms.ts",
         "lib/map.ts",
+        "lib/directory.ts",
         "lib/farm-form.ts",
         "lib/i18n.ts",
         "app/api/health/route.ts",

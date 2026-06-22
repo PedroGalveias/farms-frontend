@@ -5,6 +5,7 @@ import {
   getTopFarmCategories,
   getUniqueFarmCantons,
   getUniqueFarmCategories,
+  groupCantonsByRegion,
   splitCoordinates,
 } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
@@ -93,5 +94,24 @@ describe("getTopFarmCategories", () => {
       2,
     );
     expect(top).toHaveLength(2);
+  });
+});
+
+describe("groupCantonsByRegion", () => {
+  it("buckets cantons into great regions, dropping empty regions", () => {
+    const groups = groupCantonsByRegion(["ZH", "VD", "GE"]);
+    expect(groups).toEqual([
+      { key: "region_leman", cantons: ["GE", "VD"] },
+      { key: "region_zurich", cantons: ["ZH"] },
+    ]);
+  });
+
+  it("collects unmapped codes under region_other", () => {
+    const groups = groupCantonsByRegion(["ZH", "XX"]);
+    expect(groups).toContainEqual({ key: "region_other", cantons: ["XX"] });
+  });
+
+  it("returns nothing for an empty input", () => {
+    expect(groupCantonsByRegion([])).toEqual([]);
   });
 });

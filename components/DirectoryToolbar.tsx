@@ -4,7 +4,9 @@ import {
   ArrowDownWideNarrow,
   LayoutGrid,
   List,
+  LoaderCircle,
   MapPin,
+  Navigation,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -12,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { categoryLabel } from "@/lib/categories";
+import { RADIUS_OPTIONS, type CategoryMatchMode } from "@/lib/directory";
 import { getCantonName } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import type { DirectoryViewMode, FarmSortOption } from "@/types/farm";
@@ -19,25 +22,33 @@ import type { DirectoryViewMode, FarmSortOption } from "@/types/farm";
 interface DirectoryToolbarProps {
   activeFiltersCount: number;
   categoryOptions: string[];
-  cantonOptions: string[];
+  categoryCounts: Record<string, number>;
+  cantonCounts: Record<string, number>;
+  cantonRegions: { key: string; cantons: string[] }[];
+  categoryMatchMode: CategoryMatchMode;
   isRefreshing: boolean;
+  isLocating: boolean;
+  locationActive: boolean;
+  locationError: string | null;
+  onCategoryMatchModeChange: (mode: CategoryMatchMode) => void;
   onClearCanton: () => void;
-  onClearCategory: () => void;
+  onClearLocation: () => void;
   onClearSearchTerm: () => void;
   onCreateFarm: () => void;
+  onRadiusChange: (km: number | null) => void;
   onRefresh: () => void;
   onReset: () => void;
-  onSelectQuickCategory: (value: string) => void;
   onSearchTermChange: (value: string) => void;
   onSelectedCantonChange: (value: string) => void;
-  onSelectedCategoryChange: (value: string) => void;
+  onToggleCategory: (value: string) => void;
   onSortOptionChange: (value: FarmSortOption) => void;
+  onUseLocation: () => void;
   onViewModeChange: (value: DirectoryViewMode) => void;
-  quickCategories: string[];
+  radiusKm: number | null;
   resultsCount: number;
   searchTerm: string;
   selectedCanton: string;
-  selectedCategory: string;
+  selectedCategories: string[];
   sortOption: FarmSortOption;
   totalCount: number;
   viewMode: DirectoryViewMode;
@@ -56,34 +67,55 @@ const viewToggleClassName = (isActive: boolean) =>
       : "text-ink/40 hover:text-ink/70"
   }`;
 
+const segmentClassName = (isActive: boolean) =>
+  `rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
+    isActive ? "bg-ink text-cloud" : "text-ink/50 hover:text-ink/80"
+  }`;
+
 export default function DirectoryToolbar({
   activeFiltersCount,
   categoryOptions,
-  cantonOptions,
+  categoryCounts,
+  cantonCounts,
+  cantonRegions,
+  categoryMatchMode,
   isRefreshing,
+  isLocating,
+  locationActive,
+  locationError,
+  onCategoryMatchModeChange,
   onClearCanton,
-  onClearCategory,
+  onClearLocation,
   onClearSearchTerm,
   onCreateFarm,
+  onRadiusChange,
   onRefresh,
   onReset,
-  onSelectQuickCategory,
   onSearchTermChange,
   onSelectedCantonChange,
-  onSelectedCategoryChange,
+  onToggleCategory,
   onSortOptionChange,
+  onUseLocation,
   onViewModeChange,
-  quickCategories,
+  radiusKm,
   resultsCount,
   searchTerm,
   selectedCanton,
-  selectedCategory,
+  selectedCategories,
   sortOption,
   totalCount,
   viewMode,
 }: DirectoryToolbarProps) {
   const t = useT();
   const { locale } = useLanguage();
+
+  // Categories shown as toggle chips, most-stocked first (facet counts make the
+  // empty ones obvious).
+  const sortedCategories = [...categoryOptions].sort(
+    (left, right) =>
+      (categoryCounts[right] ?? 0) - (categoryCounts[left] ?? 0) ||
+      categoryLabel(left, locale).localeCompare(categoryLabel(right, locale)),
+  );
 
   return (
     <section className="sticky top-[84px] z-20 rounded-[30px] border border-line bg-cloud/85 p-4 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_28px_60px_-32px_rgba(20,22,27,0.28)] backdrop-blur-2xl sm:p-5">
@@ -106,7 +138,7 @@ export default function DirectoryToolbar({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
+      <div className="mt-4 grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_auto]">
         <label className="relative block">
           <span className="sr-only">Search farms</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
@@ -126,26 +158,15 @@ export default function DirectoryToolbar({
             value={selectedCanton}
           >
             <option value="all">{t("toolbar_allCantons")}</option>
-            {cantonOptions.map((canton) => (
-              <option key={canton} value={canton}>
-                {canton} · {getCantonName(canton)}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block">
-          <span className="sr-only">Category</span>
-          <select
-            className={fieldClassName}
-            onChange={(event) => onSelectedCategoryChange(event.target.value)}
-            value={selectedCategory}
-          >
-            <option value="all">{t("toolbar_allCategories")}</option>
-            {categoryOptions.map((category) => (
-              <option key={category} value={category}>
-                {categoryLabel(category, locale)}
-              </option>
+            {cantonRegions.map((region) => (
+              <optgroup key={region.key} label={t(region.key)}>
+                {region.cantons.map((canton) => (
+                  <option key={canton} value={canton}>
+                    {canton} · {getCantonName(canton)} (
+                    {cantonCounts[canton] ?? 0})
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>
@@ -161,6 +182,9 @@ export default function DirectoryToolbar({
             value={sortOption}
           >
             <option value="newest">{t("sort_newest")}</option>
+            {locationActive ? (
+              <option value="nearest">{t("sort_nearest")}</option>
+            ) : null}
             <option value="name">{t("sort_name")}</option>
             <option value="canton">{t("sort_canton")}</option>
           </select>
@@ -197,27 +221,105 @@ export default function DirectoryToolbar({
         </div>
       </div>
 
-      <div className="mt-3.5 flex flex-col gap-3 px-1 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-2">
-          {quickCategories.map((category) => {
-            const isActive = selectedCategory === category;
+      {/* Location + radius — distance sorting and "within … of me". */}
+      <div className="mt-3 flex flex-col gap-2.5 px-1 sm:flex-row sm:flex-wrap sm:items-center">
+        {locationActive ? (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-pine px-3 py-1.5 text-[13px] font-bold text-white">
+              <Navigation className="h-3.5 w-3.5" />
+              {t("chip_near")}
+              <button
+                aria-label={t("toolbar_clearLocation")}
+                className="-mr-1 ml-0.5 rounded-full p-0.5 transition hover:bg-white/20"
+                onClick={onClearLocation}
+                type="button"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+            <div className="flex flex-wrap items-center gap-1 rounded-full bg-tone p-1">
+              {[null, ...RADIUS_OPTIONS].map((option) => (
+                <button
+                  aria-pressed={radiusKm === option}
+                  className={segmentClassName(radiusKm === option)}
+                  key={String(option)}
+                  onClick={() => onRadiusChange(option)}
+                  type="button"
+                >
+                  {option === null
+                    ? t("toolbar_radiusAny")
+                    : t("toolbar_radiusKm", { n: option })}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <button
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-4 py-2 text-[13px] font-semibold text-ink/70 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20 disabled:opacity-60"
+            disabled={isLocating}
+            onClick={onUseLocation}
+            type="button"
+          >
+            {isLocating ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <Navigation className="h-4 w-4 text-pine" />
+            )}
+            {isLocating ? t("nearest_locating") : t("toolbar_useLocation")}
+          </button>
+        )}
+        {locationError ? (
+          <span className="text-[13px] font-medium text-rose-600">
+            {locationError}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="mt-3.5 flex flex-col gap-3 px-1 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          {sortedCategories.map((category) => {
+            const isActive = selectedCategories.includes(category);
 
             return (
               <button
                 aria-pressed={isActive}
-                className={`rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                   isActive
                     ? "border-ink bg-ink text-cloud shadow-[0_8px_20px_-8px_rgba(20,22,27,0.5)]"
                     : "border-line bg-cloud text-ink/60 hover:border-ink/25 hover:text-ink"
                 }`}
                 key={category}
-                onClick={() => onSelectQuickCategory(category)}
+                onClick={() => onToggleCategory(category)}
                 type="button"
               >
                 {categoryLabel(category, locale)}
+                <span className={isActive ? "text-cloud/55" : "text-ink/35"}>
+                  {categoryCounts[category] ?? 0}
+                </span>
               </button>
             );
           })}
+
+          {selectedCategories.length >= 2 ? (
+            <div className="inline-flex items-center gap-1 rounded-full bg-tone p-1">
+              <button
+                aria-pressed={categoryMatchMode === "all"}
+                className={segmentClassName(categoryMatchMode === "all")}
+                onClick={() => onCategoryMatchModeChange("all")}
+                type="button"
+              >
+                {t("qs_match_all")}
+              </button>
+              <button
+                aria-pressed={categoryMatchMode === "any"}
+                className={segmentClassName(categoryMatchMode === "any")}
+                onClick={() => onCategoryMatchModeChange("any")}
+                type="button"
+              >
+                {t("qs_match_any")}
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -277,13 +379,25 @@ export default function DirectoryToolbar({
             </button>
           ) : null}
 
-          {selectedCategory !== "all" ? (
+          {selectedCategories.map((category) => (
             <button
               className={filterChipClassName}
-              onClick={onClearCategory}
+              key={category}
+              onClick={() => onToggleCategory(category)}
               type="button"
             >
-              {t("chip_category")} {categoryLabel(selectedCategory, locale)}
+              {t("chip_category")} {categoryLabel(category, locale)}
+              <X className="h-3.5 w-3.5" />
+            </button>
+          ))}
+
+          {radiusKm !== null ? (
+            <button
+              className={filterChipClassName}
+              onClick={() => onRadiusChange(null)}
+              type="button"
+            >
+              {t("chip_radius", { n: radiusKm })}
               <X className="h-3.5 w-3.5" />
             </button>
           ) : null}
