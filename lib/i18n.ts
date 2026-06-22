@@ -136,6 +136,12 @@ const en: Dict = {
   offline_body:
     "We couldn't reach the network. Pages you've already visited are still available.",
   offline_retry: "Try again",
+  map_loading: "Loading map…",
+  view_list: "Show list layout",
+  view_grid: "Show grid layout",
+  view_map: "Show map layout",
+  a11y_search: "Search farms",
+  a11y_sortBy: "Sort by",
   footer_source: "Source",
   footer_farmsService: "Farms service",
   footer_farmsFrontend: "Farms frontend",
@@ -359,6 +365,12 @@ const de: Dict = {
   offline_body:
     "Wir konnten das Netzwerk nicht erreichen. Bereits besuchte Seiten sind weiterhin verfügbar.",
   offline_retry: "Erneut versuchen",
+  map_loading: "Karte wird geladen…",
+  view_list: "Listenansicht anzeigen",
+  view_grid: "Rasteransicht anzeigen",
+  view_map: "Kartenansicht anzeigen",
+  a11y_search: "Höfe suchen",
+  a11y_sortBy: "Sortieren nach",
   footer_source: "Quellcode",
   footer_farmsService: "Farms-Service",
   footer_farmsFrontend: "Farms-Frontend",
@@ -586,6 +598,12 @@ const fr: Dict = {
   offline_body:
     "Réseau injoignable. Les pages déjà visitées restent disponibles.",
   offline_retry: "Réessayer",
+  map_loading: "Chargement de la carte…",
+  view_list: "Afficher la vue liste",
+  view_grid: "Afficher la vue grille",
+  view_map: "Afficher la vue carte",
+  a11y_search: "Rechercher des fermes",
+  a11y_sortBy: "Trier par",
   footer_source: "Code source",
   footer_farmsService: "Service Farms",
   footer_farmsFrontend: "Frontend Farms",
@@ -811,6 +829,12 @@ const it: Dict = {
   offline_body:
     "Rete non raggiungibile. Le pagine già visitate restano disponibili.",
   offline_retry: "Riprova",
+  map_loading: "Caricamento mappa…",
+  view_list: "Mostra vista elenco",
+  view_grid: "Mostra vista griglia",
+  view_map: "Mostra vista mappa",
+  a11y_search: "Cerca fattorie",
+  a11y_sortBy: "Ordina per",
   footer_source: "Codice sorgente",
   footer_farmsService: "Servizio Farms",
   footer_farmsFrontend: "Frontend Farms",
@@ -1040,6 +1064,12 @@ const rm: Dict = {
   offline_body:
     "Nus n'avain betg pudì cuntanscher la rait. Paginas gia visitadas restan disponiblas.",
   offline_retry: "Empruvar danovamain",
+  map_loading: "Chargiar la charta…",
+  view_list: "Mussar la vista da glista",
+  view_grid: "Mussar la vista da grilliada",
+  view_map: "Mussar la vista da charta",
+  a11y_search: "Tschertgar manaschis",
+  a11y_sortBy: "Zavrar tenor",
   footer_source: "Code da funtauna",
   footer_farmsService: "Servetsch Farms",
   footer_farmsFrontend: "Frontend Farms",
@@ -1157,4 +1187,37 @@ export function translate(
   return raw.replace(/\{(\w+)\}/g, (_, name: string) =>
     vars[name] === undefined ? `{${name}}` : String(vars[name]),
   );
+}
+
+/**
+ * Best-effort locale negotiation from an HTTP `Accept-Language` header, used to
+ * localize server-rendered metadata (the client locale lives in localStorage
+ * and isn't available during render). Falls back to the default locale.
+ */
+export function localeFromAcceptLanguage(
+  header: string | null | undefined,
+): Locale {
+  if (!header) {
+    return DEFAULT_LOCALE;
+  }
+  const supported = new Set<Locale>(LOCALES.map((entry) => entry.code));
+  const ranked = header
+    .split(",")
+    .map((part) => {
+      const [tag, ...params] = part.trim().split(";");
+      const qParam = params.find((param) => param.trim().startsWith("q="));
+      const quality = qParam ? Number.parseFloat(qParam.split("=")[1]) : 1;
+      return {
+        base: tag.trim().toLowerCase().split("-")[0],
+        quality: Number.isFinite(quality) ? quality : 0,
+      };
+    })
+    .sort((left, right) => right.quality - left.quality);
+
+  for (const { base } of ranked) {
+    if (supported.has(base as Locale)) {
+      return base as Locale;
+    }
+  }
+  return DEFAULT_LOCALE;
 }

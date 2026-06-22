@@ -28,6 +28,7 @@ import {
 import CreateFarmDialog from "@/components/CreateFarmDialog";
 import DirectoryToolbar from "@/components/DirectoryToolbar";
 import FarmCard from "@/components/FarmCard";
+import MapPlaceholder from "@/components/MapPlaceholder";
 import NearestFarmCard from "@/components/NearestFarmCard";
 import SeasonalCard from "@/components/SeasonalCard";
 import SiteFooter from "@/components/SiteFooter";
@@ -114,14 +115,7 @@ const PAGE_SIZE = 24;
 // keep it out of the initial bundle until the map view is opened.
 const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
   ssr: false,
-  loading: () => (
-    <div
-      className="mt-6 grid place-items-center rounded-[24px] border border-line bg-tone/40 text-sm text-ink/40"
-      style={{ height: "min(70vh, 640px)" }}
-    >
-      Loading map…
-    </div>
-  ),
+  loading: () => <MapPlaceholder />,
 });
 
 function ImageSlot({

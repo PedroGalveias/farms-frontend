@@ -38,7 +38,10 @@ function FavoriteButton({
       }}
       type="button"
     >
-      <Heart className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+      <Heart
+        className={`h-4 w-4 ${saved ? "fill-current heart-pop" : ""}`}
+        key={saved ? "saved" : "unsaved"}
+      />
     </button>
   );
 }

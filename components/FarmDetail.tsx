@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { ArrowLeft, ExternalLink, Heart, MapPin } from "lucide-react";
 import CopyButton from "@/components/CopyButton";
+import MapPlaceholder from "@/components/MapPlaceholder";
 import ShareButton from "@/components/ShareButton";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
@@ -16,14 +17,7 @@ import type { Farm } from "@/types/farm";
 // Client-only Leaflet, same pattern as the directory's map view.
 const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
   ssr: false,
-  loading: () => (
-    <div
-      className="grid place-items-center rounded-[24px] border border-line bg-tone/40 text-sm text-ink/40"
-      style={{ height: "360px" }}
-    >
-      Loading map…
-    </div>
-  ),
+  loading: () => <MapPlaceholder heightStyle="360px" />,
 });
 
 function InfoCard({ children, label }: { children: string; label: string }) {
@@ -98,7 +92,10 @@ export default function FarmDetail({ farm }: { farm: Farm }) {
           onClick={() => toggleFavorite(farm.id)}
           type="button"
         >
-          <Heart className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+          <Heart
+            className={`h-4 w-4 ${saved ? "fill-current heart-pop" : ""}`}
+            key={saved ? "saved" : "unsaved"}
+          />
           {saved ? t("card_saved") : t("card_save")}
         </button>
       </div>

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import FarmDetail from "@/components/FarmDetail";
 import { getFarms } from "@/lib/farms-service";
-import { DEFAULT_LOCALE } from "@/lib/i18n";
+import { localeFromAcceptLanguage } from "@/lib/i18n";
 import { farmMetaDescription } from "@/lib/share";
 import type { Farm } from "@/types/farm";
 
@@ -31,7 +32,12 @@ export async function generateMetadata({
     return { title: "Farm not found" };
   }
 
-  const description = farmMetaDescription(farm, DEFAULT_LOCALE);
+  // Localize the description from the request's Accept-Language (the client
+  // locale isn't available during server render).
+  const locale = localeFromAcceptLanguage(
+    (await headers()).get("accept-language"),
+  );
+  const description = farmMetaDescription(farm, locale);
   return {
     title: farm.name,
     description,

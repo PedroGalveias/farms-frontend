@@ -165,7 +165,7 @@ export default function DirectoryToolbar({
 
       <div className="mt-4 grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_auto]">
         <label className="relative block">
-          <span className="sr-only">Search farms</span>
+          <span className="sr-only">{t("a11y_search")}</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
           <input
             className={`${fieldClassName} pl-11 pr-10`}
@@ -183,7 +183,7 @@ export default function DirectoryToolbar({
         </label>
 
         <label className="block">
-          <span className="sr-only">Canton</span>
+          <span className="sr-only">{t("sort_canton")}</span>
           <select
             className={fieldClassName}
             onChange={(event) => onSelectedCantonChange(event.target.value)}
@@ -204,7 +204,7 @@ export default function DirectoryToolbar({
         </label>
 
         <label className="relative block">
-          <span className="sr-only">Sort by</span>
+          <span className="sr-only">{t("a11y_sortBy")}</span>
           <ArrowDownWideNarrow className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
           <select
             className={`${fieldClassName} pl-11`}
@@ -224,7 +224,7 @@ export default function DirectoryToolbar({
 
         <div className="flex items-center gap-1 rounded-2xl bg-tone p-1">
           <button
-            aria-label="Show list layout"
+            aria-label={t("view_list")}
             aria-pressed={viewMode === "list"}
             className={viewToggleClassName(viewMode === "list")}
             onClick={() => onViewModeChange("list")}
@@ -233,7 +233,7 @@ export default function DirectoryToolbar({
             <List className="h-4 w-4" />
           </button>
           <button
-            aria-label="Show grid layout"
+            aria-label={t("view_grid")}
             aria-pressed={viewMode === "grid"}
             className={viewToggleClassName(viewMode === "grid")}
             onClick={() => onViewModeChange("grid")}
@@ -242,7 +242,7 @@ export default function DirectoryToolbar({
             <LayoutGrid className="h-4 w-4" />
           </button>
           <button
-            aria-label="Show map layout"
+            aria-label={t("view_map")}
             aria-pressed={viewMode === "map"}
             className={viewToggleClassName(viewMode === "map")}
             onClick={() => onViewModeChange("map")}
