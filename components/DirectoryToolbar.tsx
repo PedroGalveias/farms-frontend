@@ -109,14 +109,6 @@ export default function DirectoryToolbar({
   const t = useT();
   const { locale } = useLanguage();
 
-  // Categories shown as toggle chips, most-stocked first (facet counts make the
-  // empty ones obvious).
-  const sortedCategories = [...categoryOptions].sort(
-    (left, right) =>
-      (categoryCounts[right] ?? 0) - (categoryCounts[left] ?? 0) ||
-      categoryLabel(left, locale).localeCompare(categoryLabel(right, locale)),
-  );
-
   return (
     <section className="sticky top-[84px] z-20 rounded-[30px] border border-line bg-cloud/85 p-4 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_28px_60px_-32px_rgba(20,22,27,0.28)] backdrop-blur-2xl sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
@@ -277,8 +269,13 @@ export default function DirectoryToolbar({
 
       <div className="mt-3.5 flex flex-col gap-3 px-1 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          {sortedCategories.map((category) => {
+          {categoryOptions.map((category) => {
             const isActive = selectedCategories.includes(category);
+            const count = categoryCounts[category] ?? 0;
+
+            // Contextually empty (given the other filters) and not chosen — dim
+            // it so it's clear toggling it would yield nothing right now.
+            const isEmpty = count === 0 && !isActive;
 
             return (
               <button
@@ -286,7 +283,9 @@ export default function DirectoryToolbar({
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                   isActive
                     ? "border-ink bg-ink text-cloud shadow-[0_8px_20px_-8px_rgba(20,22,27,0.5)]"
-                    : "border-line bg-cloud text-ink/60 hover:border-ink/25 hover:text-ink"
+                    : isEmpty
+                      ? "border-line bg-cloud text-ink/30 hover:text-ink/50"
+                      : "border-line bg-cloud text-ink/60 hover:border-ink/25 hover:text-ink"
                 }`}
                 key={category}
                 onClick={() => onToggleCategory(category)}
@@ -294,7 +293,7 @@ export default function DirectoryToolbar({
               >
                 {categoryLabel(category, locale)}
                 <span className={isActive ? "text-cloud/55" : "text-ink/35"}>
-                  {categoryCounts[category] ?? 0}
+                  {count}
                 </span>
               </button>
             );

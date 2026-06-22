@@ -6,7 +6,10 @@ import {
   getCantonCounts,
   getCategoryCounts,
   isNewThisMonth,
+  matchesCanton,
   matchesCategories,
+  matchesSearch,
+  withinRadius,
 } from "@/lib/directory";
 import type { Farm } from "@/types/farm";
 
@@ -40,6 +43,48 @@ describe("matchesCategories", () => {
     const farm = makeFarm({ categories: ["Gemüse"] });
     expect(matchesCategories(farm, ["Eier", "Gemüse"], "any")).toBe(true);
     expect(matchesCategories(farm, ["Eier", "Früchte"], "any")).toBe(false);
+  });
+});
+
+describe("matchesSearch", () => {
+  it("matches everything for an empty query", () => {
+    expect(matchesSearch(makeFarm(), "")).toBe(true);
+  });
+
+  it("matches on name, address, or a category string", () => {
+    expect(matchesSearch(makeFarm({ name: "Hofgut" }), "hofg")).toBe(true);
+    expect(
+      matchesSearch(makeFarm({ address: "Bahnhofstrasse" }), "bahnhof"),
+    ).toBe(true);
+    expect(matchesSearch(makeFarm({ categories: ["Gemüse"] }), "gemü")).toBe(
+      true,
+    );
+    expect(matchesSearch(makeFarm({ name: "Hof" }), "zürich")).toBe(false);
+  });
+});
+
+describe("matchesCanton", () => {
+  it("matches all cantons for 'all'", () => {
+    expect(matchesCanton(makeFarm({ canton: "BE" }), "all")).toBe(true);
+  });
+
+  it("matches only the selected canton", () => {
+    expect(matchesCanton(makeFarm({ canton: "BE" }), "BE")).toBe(true);
+    expect(matchesCanton(makeFarm({ canton: "BE" }), "ZH")).toBe(false);
+  });
+});
+
+describe("withinRadius", () => {
+  it("always passes when no radius is set", () => {
+    expect(withinRadius(null, null)).toBe(true);
+    expect(withinRadius(42, null)).toBe(true);
+  });
+
+  it("requires a known distance within the radius", () => {
+    expect(withinRadius(9.9, 10)).toBe(true);
+    expect(withinRadius(10, 10)).toBe(true);
+    expect(withinRadius(10.1, 10)).toBe(false);
+    expect(withinRadius(null, 10)).toBe(false);
   });
 });
 

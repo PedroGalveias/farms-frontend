@@ -12,6 +12,44 @@ export type CategoryMatchMode = "all" | "any";
 export const RADIUS_OPTIONS = [10, 25, 50] as const;
 
 /**
+ * Whether a farm matches the free-text directory search (name, address, or a raw
+ * category string). `normalizedSearch` is expected pre-trimmed and lower-cased;
+ * an empty string matches every farm.
+ */
+export function matchesSearch(farm: Farm, normalizedSearch: string): boolean {
+  if (normalizedSearch.length === 0) {
+    return true;
+  }
+  return (
+    farm.name.toLowerCase().includes(normalizedSearch) ||
+    farm.address.toLowerCase().includes(normalizedSearch) ||
+    farm.categories.some((category) =>
+      category.toLowerCase().includes(normalizedSearch),
+    )
+  );
+}
+
+/** Whether a farm is in the selected canton ("all" matches every canton). */
+export function matchesCanton(farm: Farm, selectedCanton: string): boolean {
+  return selectedCanton === "all" || farm.canton === selectedCanton;
+}
+
+/**
+ * Whether a (possibly unknown) distance falls within the chosen radius. A null
+ * radius means "any distance" (always true); a null distance can never satisfy
+ * a real radius.
+ */
+export function withinRadius(
+  distanceKm: number | null,
+  radiusKm: number | null,
+): boolean {
+  if (radiusKm === null) {
+    return true;
+  }
+  return distanceKm !== null && distanceKm <= radiusKm;
+}
+
+/**
  * Whether a farm matches a multi-select category filter. With no categories
  * selected every farm matches. In "all" mode the farm must carry every selected
  * group; in "any" mode at least one. Matching is at the 13-group level, the same

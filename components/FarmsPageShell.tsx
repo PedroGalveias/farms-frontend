@@ -3,6 +3,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
+  useCallback,
   useDeferredValue,
   useEffect,
   useMemo,
@@ -47,7 +48,10 @@ import {
   farmDistanceKm,
   getCantonCounts,
   getCategoryCounts,
+  matchesCanton,
   matchesCategories,
+  matchesSearch,
+  withinRadius,
   type CategoryMatchMode,
 } from "@/lib/directory";
 import {
@@ -291,18 +295,23 @@ export default function FarmsPageShell({
     () => getTopFarmCategories(initialFarms, 3),
     [initialFarms],
   );
-  const categoryCounts = useMemo(
-    () => getCategoryCounts(initialFarms),
-    [initialFarms],
-  );
-  const cantonCounts = useMemo(
-    () => getCantonCounts(initialFarms),
-    [initialFarms],
-  );
   const cantonRegions = useMemo(
     () => groupCantonsByRegion(cantonOptions),
     [cantonOptions],
   );
+
+  // Stable display order for the category chips: by overall popularity, computed
+  // once from the full dataset so chips keep their place as the (contextual)
+  // counts below change.
+  const orderedCategoryOptions = useMemo(() => {
+    const overall = getCategoryCounts(initialFarms);
+    return [...categoryOptions].sort(
+      (left, right) =>
+        (overall[right] ?? 0) - (overall[left] ?? 0) ||
+        left.localeCompare(right),
+    );
+  }, [initialFarms, categoryOptions]);
+
   const normalizedSearchTerm = deferredSearchTerm.trim().toLowerCase();
 
   // "Nearest" only makes sense with a location; fall back gracefully so the
@@ -310,39 +319,78 @@ export default function FarmsPageShell({
   const effectiveSort: FarmSortOption =
     sortOption === "nearest" && !originCoords ? "newest" : sortOption;
 
-  // Filter, attach distances (when located), apply the radius, then sort.
+  // Distance from the visitor to every farm, computed once per location change
+  // and shared by the result list, the radius filter, and the facet counts.
+  const distanceByFarmId = useMemo(() => {
+    const distances = new Map<string, number | null>();
+    if (originCoords) {
+      for (const farm of initialFarms) {
+        distances.set(farm.id, farmDistanceKm(farm, originCoords));
+      }
+    }
+    return distances;
+  }, [initialFarms, originCoords]);
+
+  const passesRadius = useCallback(
+    (farm: Farm) =>
+      withinRadius(
+        originCoords ? (distanceByFarmId.get(farm.id) ?? null) : null,
+        radiusKm,
+      ),
+    [distanceByFarmId, originCoords, radiusKm],
+  );
+
+  // Facet counts are *contextual*: each facet reflects the other active filters
+  // but not itself (disjunctive faceting), so a count tells you what you'd get
+  // by toggling that value given everything else you've already chosen.
+  const categoryCounts = useMemo(
+    () =>
+      getCategoryCounts(
+        initialFarms.filter(
+          (farm) =>
+            matchesSearch(farm, normalizedSearchTerm) &&
+            matchesCanton(farm, selectedCanton) &&
+            passesRadius(farm),
+        ),
+      ),
+    [initialFarms, normalizedSearchTerm, selectedCanton, passesRadius],
+  );
+
+  const cantonCounts = useMemo(
+    () =>
+      getCantonCounts(
+        initialFarms.filter(
+          (farm) =>
+            matchesSearch(farm, normalizedSearchTerm) &&
+            matchesCategories(farm, selectedCategories, categoryMatchMode) &&
+            passesRadius(farm),
+        ),
+      ),
+    [
+      initialFarms,
+      normalizedSearchTerm,
+      selectedCategories,
+      categoryMatchMode,
+      passesRadius,
+    ],
+  );
+
+  // The result list: every active filter applied, distances attached, sorted.
   const ranked = useMemo(() => {
-    const matched = initialFarms.filter((farm) => {
-      const matchesSearch =
-        normalizedSearchTerm.length === 0 ||
-        farm.name.toLowerCase().includes(normalizedSearchTerm) ||
-        farm.address.toLowerCase().includes(normalizedSearchTerm) ||
-        farm.categories.some((category) =>
-          category.toLowerCase().includes(normalizedSearchTerm),
-        );
-      const matchesCanton =
-        selectedCanton === "all" || farm.canton === selectedCanton;
-      return (
-        matchesSearch &&
-        matchesCanton &&
-        matchesCategories(farm, selectedCategories, categoryMatchMode)
-      );
-    });
+    const matched = initialFarms.filter(
+      (farm) =>
+        matchesSearch(farm, normalizedSearchTerm) &&
+        matchesCanton(farm, selectedCanton) &&
+        matchesCategories(farm, selectedCategories, categoryMatchMode) &&
+        passesRadius(farm),
+    );
 
     const withDistance = matched.map((farm) => ({
       farm,
-      distanceKm: originCoords ? farmDistanceKm(farm, originCoords) : null,
+      distanceKm: originCoords ? (distanceByFarmId.get(farm.id) ?? null) : null,
     }));
 
-    const limited =
-      originCoords && radiusKm !== null
-        ? withDistance.filter(
-            (entry) =>
-              entry.distanceKm !== null && entry.distanceKm <= radiusKm,
-          )
-        : withDistance;
-
-    return limited.sort((left, right) => {
+    return withDistance.sort((left, right) => {
       if (effectiveSort === "nearest") {
         const leftDistance = left.distanceKm ?? Number.POSITIVE_INFINITY;
         const rightDistance = right.distanceKm ?? Number.POSITIVE_INFINITY;
@@ -376,16 +424,13 @@ export default function FarmsPageShell({
     selectedCategories,
     categoryMatchMode,
     originCoords,
-    radiusKm,
+    distanceByFarmId,
+    passesRadius,
     effectiveSort,
   ]);
 
   const visibleFarms = useMemo(
     () => ranked.map((entry) => entry.farm),
-    [ranked],
-  );
-  const distanceByFarmId = useMemo(
-    () => new Map(ranked.map((entry) => [entry.farm.id, entry.distanceKm])),
     [ranked],
   );
 
@@ -612,7 +657,7 @@ export default function FarmsPageShell({
             cantonRegions={cantonRegions}
             categoryCounts={categoryCounts}
             categoryMatchMode={categoryMatchMode}
-            categoryOptions={categoryOptions}
+            categoryOptions={orderedCategoryOptions}
             isLocating={isLocating}
             isRefreshing={isRefreshing}
             locationActive={originCoords !== null}
