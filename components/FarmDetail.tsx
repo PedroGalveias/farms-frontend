@@ -4,6 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { ArrowLeft, ExternalLink, Heart, MapPin } from "lucide-react";
+import CopyButton from "@/components/CopyButton";
 import ShareButton from "@/components/ShareButton";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
@@ -103,7 +104,19 @@ export default function FarmDetail({ farm }: { farm: Farm }) {
       </div>
 
       <div className="mt-7 space-y-3">
-        <InfoCard label={t("detail_address")}>{farm.address}</InfoCard>
+        <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold text-ink/40">
+                {t("detail_address")}
+              </p>
+              <p className="mt-1.5 text-sm leading-6 text-ink/80">
+                {farm.address}
+              </p>
+            </div>
+            <CopyButton value={farm.address} />
+          </div>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <InfoCard label={t("detail_coordinates")}>
             {farm.coordinates}
