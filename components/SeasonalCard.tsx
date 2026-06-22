@@ -31,6 +31,11 @@ export default function SeasonalCard() {
   const now = new Date();
   const month = now.getMonth();
   const items = SEASONAL_BY_MONTH[month] ?? [];
+  // The bento card stays compact — show a handful and let the full calendar
+  // carry the rest.
+  const CARD_LIMIT = 8;
+  const shownItems = items.slice(0, CARD_LIMIT);
+  const extraCount = items.length - shownItems.length;
   const monthName = now.toLocaleDateString([INTL_LOCALE[locale], "en"], {
     month: "long",
   });
@@ -60,7 +65,7 @@ export default function SeasonalCard() {
           {monthName}
         </p>
         <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {items.map((key) => (
+          {shownItems.map((key) => (
             <span
               className="rounded-full bg-tone px-3 py-1.5 text-sm font-semibold text-ink/70"
               key={key}
@@ -68,6 +73,11 @@ export default function SeasonalCard() {
               {produceEmoji(key)} {produceLabel(key, locale)}
             </span>
           ))}
+          {extraCount > 0 ? (
+            <span className="rounded-full bg-tone px-3 py-1.5 text-sm font-semibold text-ink/40">
+              +{extraCount}
+            </span>
+          ) : null}
         </div>
         <p className="mt-3 text-xs leading-5 text-ink/50">
           {t("season_promo")}
