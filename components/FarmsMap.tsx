@@ -12,6 +12,8 @@ import type { Farm } from "@/types/farm";
 interface FarmsMapProps {
   farms: Farm[];
   onOpenFarm: (farm: Farm) => void;
+  /** CSS height for the map container (default: the directory's tall view). */
+  heightStyle?: string;
 }
 
 // On-brand pin (no external image — avoids Leaflet's broken default-icon paths).
@@ -37,7 +39,11 @@ function clusterIcon(cluster: L.MarkerCluster) {
  * Client-only; loaded via a dynamic import so Leaflet stays out of the initial
  * bundle.
  */
-export default function FarmsMap({ farms, onOpenFarm }: FarmsMapProps) {
+export default function FarmsMap({
+  farms,
+  onOpenFarm,
+  heightStyle = "min(70vh, 640px)",
+}: FarmsMapProps) {
   const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -113,7 +119,7 @@ export default function FarmsMap({ farms, onOpenFarm }: FarmsMapProps) {
         theme === "dark" ? "map-dark" : ""
       }`}
       ref={containerRef}
-      style={{ height: "min(70vh, 640px)" }}
+      style={{ height: heightStyle }}
     />
   );
 }

@@ -17,6 +17,11 @@ const archivo = Archivo({
 });
 
 export const metadata: Metadata = {
+  // Resolves relative canonical/Open-Graph URLs (e.g. on /farm/[id]) to absolute
+  // ones. Set NEXT_PUBLIC_SITE_URL in production; localhost is the dev fallback.
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  ),
   description:
     "Fresh products, direct from Swiss farms — find what you need at the farm nearest to you.",
   icons: {
