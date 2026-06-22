@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Search } from "lucide-react";
+import { Heart, LayoutGrid, Search } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
+import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
 function tabClassName(isActive: boolean) {
   return `flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
@@ -21,6 +22,7 @@ function tabClassName(isActive: boolean) {
 export default function MobileTabBar() {
   const pathname = usePathname();
   const t = useT();
+  const { favoritesCount } = usePersonalization();
   const active =
     pathname === "/quick-search"
       ? "quick-search"
@@ -48,6 +50,18 @@ export default function MobileTabBar() {
       >
         <Search className="h-4 w-4" />
         {t("nav_quickSearch")}
+      </Link>
+      <Link
+        aria-label={t("toolbar_savedOnly")}
+        className="relative flex shrink-0 items-center justify-center rounded-full px-4 py-3 text-ink/55 transition-colors duration-300 hover:text-ink"
+        href="/?saved=1"
+      >
+        <Heart className="h-4 w-4" />
+        {favoritesCount > 0 ? (
+          <span className="absolute -right-0 -top-0 grid h-4 min-w-4 place-items-center rounded-full bg-pine px-1 text-[10px] font-bold text-white">
+            {favoritesCount}
+          </span>
+        ) : null}
       </Link>
     </nav>
   );

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import FarmsPageShell from "@/components/FarmsPageShell";
 import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
 import type { ServiceStatus } from "@/types/farm";
@@ -40,10 +41,12 @@ export default async function HomePage() {
   }
 
   return (
-    <FarmsPageShell
-      initialFarms={farms}
-      loadError={loadError}
-      serviceStatus={serviceStatus}
-    />
+    <Suspense>
+      <FarmsPageShell
+        initialFarms={farms}
+        loadError={loadError}
+        serviceStatus={serviceStatus}
+      />
+    </Suspense>
   );
 }
