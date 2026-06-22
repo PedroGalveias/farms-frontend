@@ -1,11 +1,47 @@
 "use client";
 
-import { ArrowUpRight, MapPin, Navigation, Sparkles } from "lucide-react";
+import {
+  ArrowUpRight,
+  Heart,
+  MapPin,
+  Navigation,
+  Sparkles,
+} from "lucide-react";
 import { tagLabel } from "@/lib/products";
 import { formatDistanceShort, isNewThisMonth } from "@/lib/directory";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import type { DirectoryViewMode, Farm } from "@/types/farm";
+
+function FavoriteButton({
+  farm,
+  className = "",
+}: {
+  farm: Farm;
+  className?: string;
+}) {
+  const t = useT();
+  const { isFavorite, toggleFavorite } = usePersonalization();
+  const saved = isFavorite(farm.id);
+
+  return (
+    <button
+      aria-label={saved ? t("card_saved") : t("card_save")}
+      aria-pressed={saved}
+      className={`relative z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
+        saved ? "bg-pine/10 text-pine" : "bg-tone text-ink/40 hover:text-ink"
+      } ${className}`}
+      onClick={(event) => {
+        event.stopPropagation();
+        toggleFavorite(farm.id);
+      }}
+      type="button"
+    >
+      <Heart className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+    </button>
+  );
+}
 
 interface FarmCardProps {
   farm: Farm;
@@ -111,6 +147,10 @@ export default function FarmCard({
     return (
       <article className="group relative overflow-hidden rounded-[26px] border border-line bg-cloud p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-[0_24px_50px_-28px_rgba(20,22,27,0.35)] sm:p-6">
         {openOverlay}
+        <FavoriteButton
+          className="absolute right-5 top-5 sm:right-6 sm:top-6"
+          farm={farm}
+        />
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_auto] lg:items-center">
           <div className="min-w-0">
             <CardBadges distanceKm={distanceKm} farm={farm} />
@@ -154,9 +194,12 @@ export default function FarmCard({
       {openOverlay}
       <div className="flex items-start justify-between gap-3">
         <CardBadges distanceKm={distanceKm} farm={farm} />
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/40 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
-          <ArrowUpRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <FavoriteButton farm={farm} />
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/40 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
+            <ArrowUpRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </span>
+        </div>
       </div>
 
       <h3 className="mt-4 text-[26px] font-bold leading-[1.04] tracking-[-0.035em] text-ink">
