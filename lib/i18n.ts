@@ -132,6 +132,10 @@ const en: Dict = {
   detail_close: "Close",
   detail_closeAria: "Close farm details",
   detail_highlighted: "Highlighted items match your search.",
+  offline_title: "You're offline",
+  offline_body:
+    "We couldn't reach the network. Pages you've already visited are still available.",
+  offline_retry: "Try again",
   footer_source: "Source",
   footer_farmsService: "Farms service",
   footer_farmsFrontend: "Farms frontend",
@@ -351,6 +355,10 @@ const de: Dict = {
   detail_close: "Schliessen",
   detail_closeAria: "Hofdetails schliessen",
   detail_highlighted: "Hervorgehobene Einträge passen zu deiner Suche.",
+  offline_title: "Du bist offline",
+  offline_body:
+    "Wir konnten das Netzwerk nicht erreichen. Bereits besuchte Seiten sind weiterhin verfügbar.",
+  offline_retry: "Erneut versuchen",
   footer_source: "Quellcode",
   footer_farmsService: "Farms-Service",
   footer_farmsFrontend: "Farms-Frontend",
@@ -574,6 +582,10 @@ const fr: Dict = {
   detail_closeAria: "Fermer les détails de la ferme",
   detail_highlighted:
     "Les éléments en surbrillance correspondent à votre recherche.",
+  offline_title: "Vous êtes hors ligne",
+  offline_body:
+    "Réseau injoignable. Les pages déjà visitées restent disponibles.",
+  offline_retry: "Réessayer",
   footer_source: "Code source",
   footer_farmsService: "Service Farms",
   footer_farmsFrontend: "Frontend Farms",
@@ -795,6 +807,10 @@ const it: Dict = {
   detail_closeAria: "Chiudi i dettagli della fattoria",
   detail_highlighted:
     "Gli elementi evidenziati corrispondono alla tua ricerca.",
+  offline_title: "Sei offline",
+  offline_body:
+    "Rete non raggiungibile. Le pagine già visitate restano disponibili.",
+  offline_retry: "Riprova",
   footer_source: "Codice sorgente",
   footer_farmsService: "Servizio Farms",
   footer_farmsFrontend: "Frontend Farms",
@@ -1020,6 +1036,10 @@ const rm: Dict = {
   detail_close: "Serrar",
   detail_closeAria: "Serrar ils detagls da la fattoria",
   detail_highlighted: "Ils elements relevads correspundan a tia tschertga.",
+  offline_title: "Ti es offline",
+  offline_body:
+    "Nus n'avain betg pudì cuntanscher la rait. Paginas gia visitadas restan disponiblas.",
+  offline_retry: "Empruvar danovamain",
   footer_source: "Code da funtauna",
   footer_farmsService: "Servetsch Farms",
   footer_farmsFrontend: "Frontend Farms",

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import SideRail from "@/components/SideRail";
 import SiteHeader from "@/components/SiteHeader";
@@ -7,6 +7,7 @@ import LanguageProvider from "@/components/i18n/LanguageProvider";
 import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import CustomCursor from "@/components/motion/CustomCursor";
+import PwaRegister from "@/components/PwaRegister";
 import "./globals.css";
 
 // Set the theme class before paint to avoid a flash of the wrong theme.
@@ -37,6 +38,15 @@ export const metadata: Metadata = {
     default: "Swiss farms",
     template: "%s | farms",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "farms",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1c7c47",
 };
 
 export default function RootLayout({
@@ -58,6 +68,7 @@ export default function RootLayout({
               </div>
               <MobileTabBar />
               <CustomCursor />
+              <PwaRegister />
             </PersonalizationProvider>
           </LanguageProvider>
         </ThemeProvider>
