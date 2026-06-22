@@ -91,3 +91,60 @@ export function requestCurrentPosition(): Promise<GeolocationOutcome> {
 export function geolocationErrorKey(reason: GeolocationErrorReason): string {
   return `geo_err_${reason}`;
 }
+
+// The visitor's last shared location, kept in localStorage so a returning
+// visitor gets distance-sorted results without re-sharing. We only ever store a
+// location the visitor already chose to share — never in the URL (it's personal
+// data) and never requested automatically.
+export const LOCATION_STORAGE_KEY = "farms.location";
+
+/** Read the remembered location, or null if none/invalid/unavailable. */
+export function readStoredLocation(): GeolocationCoords | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const raw = window.localStorage.getItem(LOCATION_STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw) as Partial<GeolocationCoords>;
+    if (
+      typeof parsed?.latitude === "number" &&
+      typeof parsed?.longitude === "number" &&
+      Number.isFinite(parsed.latitude) &&
+      Number.isFinite(parsed.longitude) &&
+      Math.abs(parsed.latitude) <= 90 &&
+      Math.abs(parsed.longitude) <= 180
+    ) {
+      return { latitude: parsed.latitude, longitude: parsed.longitude };
+    }
+  } catch {
+    // Corrupt JSON or storage disabled — treat as no remembered location.
+  }
+  return null;
+}
+
+/** Remember a location the visitor just shared. Best-effort. */
+export function writeStoredLocation(coords: GeolocationCoords): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(coords));
+  } catch {
+    // Storage full or disabled — distance sorting still works this session.
+  }
+}
+
+/** Forget the remembered location. */
+export function clearStoredLocation(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.removeItem(LOCATION_STORAGE_KEY);
+  } catch {
+    // Ignore — nothing actionable.
+  }
+}
