@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
+import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
 import FarmCard from "@/components/FarmCard";
 import type { Farm } from "@/types/farm";
 
@@ -19,7 +20,9 @@ const FARM: Farm = {
 function renderCard(props: Partial<Parameters<typeof FarmCard>[0]> = {}) {
   return render(
     <LanguageProvider>
-      <FarmCard farm={FARM} {...props} />
+      <PersonalizationProvider>
+        <FarmCard farm={FARM} {...props} />
+      </PersonalizationProvider>
     </LanguageProvider>,
   );
 }
@@ -46,7 +49,11 @@ describe("FarmCard", () => {
 
   it("does not render the open overlay when onOpen is omitted", () => {
     renderCard();
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    // The favorite button is always present; only the full-card open overlay
+    // is conditional on onOpen.
+    expect(
+      screen.queryByRole("button", { name: /view details/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the Maps link separate from the open action", async () => {

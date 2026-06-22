@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { ExternalLink, Maximize2, X } from "lucide-react";
 import { productGroupOf, tagLabel } from "@/lib/products";
+import CopyButton from "@/components/CopyButton";
 import ShareButton from "@/components/ShareButton";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
@@ -120,7 +121,7 @@ export default function FarmDetailSheet({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
       <button
-        aria-label="Close farm details"
+        aria-label={t("detail_closeAria")}
         className="qs-backdrop absolute inset-0 bg-black/50 backdrop-blur-md"
         onClick={onClose}
         type="button"
@@ -167,7 +168,7 @@ export default function FarmDetailSheet({
             </div>
 
             <button
-              aria-label="Close"
+              aria-label={t("detail_close")}
               className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/60 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
               onClick={onClose}
               ref={closeButtonRef}
@@ -178,18 +179,32 @@ export default function FarmDetailSheet({
           </div>
 
           <div className="mt-6 space-y-3">
-            <InfoCard label="Address">{farm.address}</InfoCard>
+            <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-ink/40">
+                    {t("detail_address")}
+                  </p>
+                  <p className="mt-1.5 text-sm leading-6 text-ink/80">
+                    {farm.address}
+                  </p>
+                </div>
+                <CopyButton value={farm.address} />
+              </div>
+            </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <InfoCard label="Coordinates">{farm.coordinates}</InfoCard>
-              <InfoCard label="Added">
+              <InfoCard label={t("detail_coordinates")}>
+                {farm.coordinates}
+              </InfoCard>
+              <InfoCard label={t("detail_added")}>
                 {formatFarmDate(farm.created_at)}
               </InfoCard>
             </div>
 
             <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
               <p className="text-xs font-semibold text-ink/40">
-                Products &amp; categories
+                {t("detail_products")}
               </p>
               <div className="mt-2.5 flex flex-wrap gap-1.5">
                 {farm.categories.map((category) => (
@@ -207,7 +222,7 @@ export default function FarmDetailSheet({
               </div>
               {selectedProducts.length > 0 ? (
                 <p className="mt-2.5 text-xs text-ink/40">
-                  Highlighted items match your search.
+                  {t("detail_highlighted")}
                 </p>
               ) : null}
             </div>
@@ -221,7 +236,7 @@ export default function FarmDetailSheet({
               target="_blank"
             >
               <ExternalLink className="h-4 w-4" />
-              Open in Google Maps
+              {t("detail_openMaps")}
             </a>
             <Link
               className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
@@ -240,7 +255,7 @@ export default function FarmDetailSheet({
               onClick={onClose}
               type="button"
             >
-              Close
+              {t("detail_close")}
             </button>
           </div>
         </div>

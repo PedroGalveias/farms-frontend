@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import {
   ArrowDownWideNarrow,
+  Heart,
   LayoutGrid,
   List,
   LoaderCircle,
@@ -42,13 +44,16 @@ interface DirectoryToolbarProps {
   onSelectedCantonChange: (value: string) => void;
   onToggleCategory: (value: string) => void;
   onSortOptionChange: (value: FarmSortOption) => void;
+  onToggleSavedOnly: () => void;
   onUseLocation: () => void;
   onViewModeChange: (value: DirectoryViewMode) => void;
   radiusKm: number | null;
   resultsCount: number;
+  savedCount: number;
   searchTerm: string;
   selectedCanton: string;
   selectedCategories: string[];
+  showSavedOnly: boolean;
   sortOption: FarmSortOption;
   totalCount: number;
   viewMode: DirectoryViewMode;
@@ -95,19 +100,47 @@ export default function DirectoryToolbar({
   onSelectedCantonChange,
   onToggleCategory,
   onSortOptionChange,
+  onToggleSavedOnly,
   onUseLocation,
   onViewModeChange,
   radiusKm,
   resultsCount,
+  savedCount,
   searchTerm,
   selectedCanton,
   selectedCategories,
+  showSavedOnly,
   sortOption,
   totalCount,
   viewMode,
 }: DirectoryToolbarProps) {
   const t = useT();
   const { locale } = useLanguage();
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // "/" focuses the search field — unless the visitor is already typing in a
+  // field or editing content elsewhere.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+      event.preventDefault();
+      searchRef.current?.focus();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   return (
     <section className="sticky top-[84px] z-20 rounded-[30px] border border-line bg-cloud/85 p-4 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_28px_60px_-32px_rgba(20,22,27,0.28)] backdrop-blur-2xl sm:p-5">
@@ -132,18 +165,25 @@ export default function DirectoryToolbar({
 
       <div className="mt-4 grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_auto]">
         <label className="relative block">
-          <span className="sr-only">Search farms</span>
+          <span className="sr-only">{t("a11y_search")}</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
           <input
-            className={`${fieldClassName} pl-11`}
+            className={`${fieldClassName} pl-11 pr-10`}
             onChange={(event) => onSearchTermChange(event.target.value)}
             placeholder={t("toolbar_searchPlaceholder")}
+            ref={searchRef}
             value={searchTerm}
           />
+          <kbd
+            aria-hidden
+            className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-line bg-tone px-1.5 py-0.5 text-[11px] font-semibold text-ink/40 sm:block"
+          >
+            /
+          </kbd>
         </label>
 
         <label className="block">
-          <span className="sr-only">Canton</span>
+          <span className="sr-only">{t("sort_canton")}</span>
           <select
             className={fieldClassName}
             onChange={(event) => onSelectedCantonChange(event.target.value)}
@@ -164,7 +204,7 @@ export default function DirectoryToolbar({
         </label>
 
         <label className="relative block">
-          <span className="sr-only">Sort by</span>
+          <span className="sr-only">{t("a11y_sortBy")}</span>
           <ArrowDownWideNarrow className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
           <select
             className={`${fieldClassName} pl-11`}
@@ -184,7 +224,7 @@ export default function DirectoryToolbar({
 
         <div className="flex items-center gap-1 rounded-2xl bg-tone p-1">
           <button
-            aria-label="Show list layout"
+            aria-label={t("view_list")}
             aria-pressed={viewMode === "list"}
             className={viewToggleClassName(viewMode === "list")}
             onClick={() => onViewModeChange("list")}
@@ -193,7 +233,7 @@ export default function DirectoryToolbar({
             <List className="h-4 w-4" />
           </button>
           <button
-            aria-label="Show grid layout"
+            aria-label={t("view_grid")}
             aria-pressed={viewMode === "grid"}
             className={viewToggleClassName(viewMode === "grid")}
             onClick={() => onViewModeChange("grid")}
@@ -202,7 +242,7 @@ export default function DirectoryToolbar({
             <LayoutGrid className="h-4 w-4" />
           </button>
           <button
-            aria-label="Show map layout"
+            aria-label={t("view_map")}
             aria-pressed={viewMode === "map"}
             className={viewToggleClassName(viewMode === "map")}
             onClick={() => onViewModeChange("map")}
@@ -264,6 +304,27 @@ export default function DirectoryToolbar({
           <span className="text-[13px] font-medium text-rose-600">
             {locationError}
           </span>
+        ) : null}
+
+        {savedCount > 0 || showSavedOnly ? (
+          <button
+            aria-pressed={showSavedOnly}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 sm:ml-auto ${
+              showSavedOnly
+                ? "border-pine/30 bg-pine/10 text-pine"
+                : "border-line bg-cloud text-ink/70 hover:border-ink/25 hover:text-ink"
+            }`}
+            onClick={onToggleSavedOnly}
+            type="button"
+          >
+            <Heart
+              className={`h-4 w-4 ${showSavedOnly ? "fill-current" : ""}`}
+            />
+            {t("toolbar_savedOnly")}
+            <span className={showSavedOnly ? "text-pine/60" : "text-ink/35"}>
+              {savedCount}
+            </span>
+          </button>
         ) : null}
       </div>
 

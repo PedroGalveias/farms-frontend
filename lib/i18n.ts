@@ -121,6 +121,27 @@ const en: Dict = {
   detail_coordinates: "Coordinates",
   detail_added: "Added",
   detail_products: "Products & categories",
+  card_save: "Save",
+  card_saved: "Saved",
+  toolbar_savedOnly: "Saved",
+  recent_title: "Recently viewed",
+  seasonal_title: "Seasonal calendar",
+  seasonal_subtitle: "What's growing in Switzerland, month by month.",
+  season_full_calendar: "Full calendar",
+  copy_address: "Copy address",
+  detail_close: "Close",
+  detail_closeAria: "Close farm details",
+  detail_highlighted: "Highlighted items match your search.",
+  offline_title: "You're offline",
+  offline_body:
+    "We couldn't reach the network. Pages you've already visited are still available.",
+  offline_retry: "Try again",
+  map_loading: "Loading map…",
+  view_list: "Show list layout",
+  view_grid: "Show grid layout",
+  view_map: "Show map layout",
+  a11y_search: "Search farms",
+  a11y_sortBy: "Sort by",
   footer_source: "Source",
   footer_farmsService: "Farms service",
   footer_farmsFrontend: "Farms frontend",
@@ -329,6 +350,27 @@ const de: Dict = {
   detail_coordinates: "Koordinaten",
   detail_added: "Hinzugefügt",
   detail_products: "Produkte & Kategorien",
+  card_save: "Speichern",
+  card_saved: "Gespeichert",
+  toolbar_savedOnly: "Gespeichert",
+  recent_title: "Zuletzt angesehen",
+  seasonal_title: "Saisonkalender",
+  seasonal_subtitle: "Was in der Schweiz wächst — Monat für Monat.",
+  season_full_calendar: "Ganzer Kalender",
+  copy_address: "Adresse kopieren",
+  detail_close: "Schliessen",
+  detail_closeAria: "Hofdetails schliessen",
+  detail_highlighted: "Hervorgehobene Einträge passen zu deiner Suche.",
+  offline_title: "Du bist offline",
+  offline_body:
+    "Wir konnten das Netzwerk nicht erreichen. Bereits besuchte Seiten sind weiterhin verfügbar.",
+  offline_retry: "Erneut versuchen",
+  map_loading: "Karte wird geladen…",
+  view_list: "Listenansicht anzeigen",
+  view_grid: "Rasteransicht anzeigen",
+  view_map: "Kartenansicht anzeigen",
+  a11y_search: "Höfe suchen",
+  a11y_sortBy: "Sortieren nach",
   footer_source: "Quellcode",
   footer_farmsService: "Farms-Service",
   footer_farmsFrontend: "Farms-Frontend",
@@ -540,6 +582,28 @@ const fr: Dict = {
   detail_coordinates: "Coordonnées",
   detail_added: "Ajoutée le",
   detail_products: "Produits & catégories",
+  card_save: "Enregistrer",
+  card_saved: "Enregistré",
+  toolbar_savedOnly: "Enregistrés",
+  recent_title: "Vus récemment",
+  seasonal_title: "Calendrier de saison",
+  seasonal_subtitle: "Ce qui pousse en Suisse, mois après mois.",
+  season_full_calendar: "Calendrier complet",
+  copy_address: "Copier l'adresse",
+  detail_close: "Fermer",
+  detail_closeAria: "Fermer les détails de la ferme",
+  detail_highlighted:
+    "Les éléments en surbrillance correspondent à votre recherche.",
+  offline_title: "Vous êtes hors ligne",
+  offline_body:
+    "Réseau injoignable. Les pages déjà visitées restent disponibles.",
+  offline_retry: "Réessayer",
+  map_loading: "Chargement de la carte…",
+  view_list: "Afficher la vue liste",
+  view_grid: "Afficher la vue grille",
+  view_map: "Afficher la vue carte",
+  a11y_search: "Rechercher des fermes",
+  a11y_sortBy: "Trier par",
   footer_source: "Code source",
   footer_farmsService: "Service Farms",
   footer_farmsFrontend: "Frontend Farms",
@@ -749,6 +813,28 @@ const it: Dict = {
   detail_coordinates: "Coordinate",
   detail_added: "Aggiunta il",
   detail_products: "Prodotti e categorie",
+  card_save: "Salva",
+  card_saved: "Salvato",
+  toolbar_savedOnly: "Salvati",
+  recent_title: "Visti di recente",
+  seasonal_title: "Calendario di stagione",
+  seasonal_subtitle: "Cosa cresce in Svizzera, mese per mese.",
+  season_full_calendar: "Calendario completo",
+  copy_address: "Copia indirizzo",
+  detail_close: "Chiudi",
+  detail_closeAria: "Chiudi i dettagli della fattoria",
+  detail_highlighted:
+    "Gli elementi evidenziati corrispondono alla tua ricerca.",
+  offline_title: "Sei offline",
+  offline_body:
+    "Rete non raggiungibile. Le pagine già visitate restano disponibili.",
+  offline_retry: "Riprova",
+  map_loading: "Caricamento mappa…",
+  view_list: "Mostra vista elenco",
+  view_grid: "Mostra vista griglia",
+  view_map: "Mostra vista mappa",
+  a11y_search: "Cerca fattorie",
+  a11y_sortBy: "Ordina per",
   footer_source: "Codice sorgente",
   footer_farmsService: "Servizio Farms",
   footer_farmsFrontend: "Frontend Farms",
@@ -963,6 +1049,27 @@ const rm: Dict = {
   detail_coordinates: "Coordinatas",
   detail_added: "Agiuntà ils",
   detail_products: "Products & categorias",
+  card_save: "Memorisar",
+  card_saved: "Memorisà",
+  toolbar_savedOnly: "Memorisads",
+  recent_title: "Vis dacurt",
+  seasonal_title: "Chalender da stagiun",
+  seasonal_subtitle: "Tge che crescha en Svizra, mais per mais.",
+  season_full_calendar: "Chalender cumplet",
+  copy_address: "Copiar l'adressa",
+  detail_close: "Serrar",
+  detail_closeAria: "Serrar ils detagls da la fattoria",
+  detail_highlighted: "Ils elements relevads correspundan a tia tschertga.",
+  offline_title: "Ti es offline",
+  offline_body:
+    "Nus n'avain betg pudì cuntanscher la rait. Paginas gia visitadas restan disponiblas.",
+  offline_retry: "Empruvar danovamain",
+  map_loading: "Chargiar la charta…",
+  view_list: "Mussar la vista da glista",
+  view_grid: "Mussar la vista da grilliada",
+  view_map: "Mussar la vista da charta",
+  a11y_search: "Tschertgar manaschis",
+  a11y_sortBy: "Zavrar tenor",
   footer_source: "Code da funtauna",
   footer_farmsService: "Servetsch Farms",
   footer_farmsFrontend: "Frontend Farms",
@@ -1080,4 +1187,37 @@ export function translate(
   return raw.replace(/\{(\w+)\}/g, (_, name: string) =>
     vars[name] === undefined ? `{${name}}` : String(vars[name]),
   );
+}
+
+/**
+ * Best-effort locale negotiation from an HTTP `Accept-Language` header, used to
+ * localize server-rendered metadata (the client locale lives in localStorage
+ * and isn't available during render). Falls back to the default locale.
+ */
+export function localeFromAcceptLanguage(
+  header: string | null | undefined,
+): Locale {
+  if (!header) {
+    return DEFAULT_LOCALE;
+  }
+  const supported = new Set<Locale>(LOCALES.map((entry) => entry.code));
+  const ranked = header
+    .split(",")
+    .map((part) => {
+      const [tag, ...params] = part.trim().split(";");
+      const qParam = params.find((param) => param.trim().startsWith("q="));
+      const quality = qParam ? Number.parseFloat(qParam.split("=")[1]) : 1;
+      return {
+        base: tag.trim().toLowerCase().split("-")[0],
+        quality: Number.isFinite(quality) ? quality : 0,
+      };
+    })
+    .sort((left, right) => right.quality - left.quality);
+
+  for (const { base } of ranked) {
+    if (supported.has(base as Locale)) {
+      return base as Locale;
+    }
+  }
+  return DEFAULT_LOCALE;
 }
