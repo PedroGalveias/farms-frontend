@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
+import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
 import MobileTabBar from "@/components/MobileTabBar";
 
 const pathname = vi.hoisted(() => ({ value: "/" }));
@@ -12,7 +13,9 @@ vi.mock("next/navigation", () => ({
 function renderBar() {
   return render(
     <LanguageProvider>
-      <MobileTabBar />
+      <PersonalizationProvider>
+        <MobileTabBar />
+      </PersonalizationProvider>
     </LanguageProvider>,
   );
 }

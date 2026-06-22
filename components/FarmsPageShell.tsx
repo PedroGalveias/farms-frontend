@@ -11,7 +11,7 @@ import {
   useState,
   useTransition,
 } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   ArrowRight,
@@ -228,6 +228,7 @@ export default function FarmsPageShell({
       setCategoryMatchMode(params.get("match") === "all" ? "all" : "any");
       setSortOption(sort);
       setRadiusKm(radius);
+      setShowSavedOnly(params.get("saved") === "1");
     };
 
     // Defer setState out of the effect body (repo lint: no sync setState here).
@@ -271,6 +272,9 @@ export default function FarmsPageShell({
     if (radiusKm !== null) {
       params.set("radius", String(radiusKm));
     }
+    if (showSavedOnly) {
+      params.set("saved", "1");
+    }
     const query = params.toString();
     window.history.replaceState(
       null,
@@ -285,7 +289,17 @@ export default function FarmsPageShell({
     sortOption,
     originCoords,
     radiusKm,
+    showSavedOnly,
   ]);
+
+  // The "Saved" nav link points at /?saved=1; react to that soft navigation
+  // (which doesn't fire popstate) so the filter turns on without a remount.
+  const savedParam = useSearchParams().get("saved");
+  useEffect(() => {
+    if (savedParam === "1") {
+      queueMicrotask(() => setShowSavedOnly(true));
+    }
+  }, [savedParam]);
 
   const cantonOptions = useMemo(
     () => getUniqueFarmCantons(initialFarms),
