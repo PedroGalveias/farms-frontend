@@ -41,7 +41,8 @@ describe("SeasonalCard", () => {
     renderCard();
 
     expect(screen.getByText("December")).toBeInTheDocument();
-    expect(screen.getByText(/Apples/)).toBeInTheDocument();
+    // December is winter brassicas/roots — apples are stored, not harvested.
+    expect(screen.getByText(/Kale/)).toBeInTheDocument();
   });
 
   it("renders the seasonal promo copy", () => {
