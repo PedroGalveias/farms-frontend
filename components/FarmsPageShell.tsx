@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useDeferredValue, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -79,6 +80,20 @@ const TICKER_KEYS = [
 // How many farm cards to render per page — keeps the DOM light when the
 // directory holds thousands of farms.
 const PAGE_SIZE = 24;
+
+// Leaflet touches `window`/`document` at import time, so load it client-only and
+// keep it out of the initial bundle until the map view is opened.
+const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
+  ssr: false,
+  loading: () => (
+    <div
+      className="mt-6 grid place-items-center rounded-[24px] border border-line bg-tone/40 text-sm text-ink/40"
+      style={{ height: "min(70vh, 640px)" }}
+    >
+      Loading map…
+    </div>
+  ),
+});
 
 function ImageSlot({
   className = "",
@@ -424,7 +439,7 @@ export default function FarmsPageShell({
                 {t("results_farms", { n: visibleFarms.length })}
               </h2>
               <p className="text-sm text-ink/40">
-                {visibleCount < visibleFarms.length
+                {viewMode !== "map" && visibleCount < visibleFarms.length
                   ? t("results_showing", {
                       shown: visibleCount,
                       total: visibleFarms.length,
@@ -433,44 +448,56 @@ export default function FarmsPageShell({
               </p>
             </div>
 
-            <div
-              className={
-                viewMode === "grid"
-                  ? "mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-                  : "mt-6 flex flex-col gap-3"
-              }
-            >
-              {visibleFarms.slice(0, visibleCount).map((farm, index) => (
-                <Reveal
-                  delay={Math.min(index % PAGE_SIZE, 6) * 60}
-                  key={farm.id}
-                  style={{ height: viewMode === "grid" ? "100%" : undefined }}
-                >
-                  <FarmCard
-                    farm={farm}
-                    onOpen={() => setActiveFarm(farm)}
-                    variant={viewMode}
-                  />
-                </Reveal>
-              ))}
-            </div>
-
-            {visibleCount < visibleFarms.length ? (
-              <div className="mt-10 flex justify-center">
-                <button
-                  className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-7 py-3.5 text-sm font-semibold text-ink/75 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/25 hover:text-ink active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/20"
-                  onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-                  type="button"
-                >
-                  {t("results_loadMore")}
-                  <span className="text-ink/40">
-                    {t("results_left", {
-                      n: visibleFarms.length - visibleCount,
-                    })}
-                  </span>
-                </button>
+            {viewMode === "map" ? (
+              <div className="mt-6">
+                <FarmsMap farms={visibleFarms} onOpenFarm={setActiveFarm} />
               </div>
-            ) : null}
+            ) : (
+              <>
+                <div
+                  className={
+                    viewMode === "grid"
+                      ? "mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+                      : "mt-6 flex flex-col gap-3"
+                  }
+                >
+                  {visibleFarms.slice(0, visibleCount).map((farm, index) => (
+                    <Reveal
+                      delay={Math.min(index % PAGE_SIZE, 6) * 60}
+                      key={farm.id}
+                      style={{
+                        height: viewMode === "grid" ? "100%" : undefined,
+                      }}
+                    >
+                      <FarmCard
+                        farm={farm}
+                        onOpen={() => setActiveFarm(farm)}
+                        variant={viewMode}
+                      />
+                    </Reveal>
+                  ))}
+                </div>
+
+                {visibleCount < visibleFarms.length ? (
+                  <div className="mt-10 flex justify-center">
+                    <button
+                      className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-7 py-3.5 text-sm font-semibold text-ink/75 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/25 hover:text-ink active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/20"
+                      onClick={() =>
+                        setVisibleCount((count) => count + PAGE_SIZE)
+                      }
+                      type="button"
+                    >
+                      {t("results_loadMore")}
+                      <span className="text-ink/40">
+                        {t("results_left", {
+                          n: visibleFarms.length - visibleCount,
+                        })}
+                      </span>
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            )}
           </section>
         ) : (
           <section className="mt-8 rounded-[32px] border border-dashed border-line bg-tone/40 px-6 py-16 text-center">
