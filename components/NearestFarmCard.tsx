@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, LoaderCircle, MapPin, Navigation } from "lucide-react";
 import { getNearestFarm } from "@/lib/quick-search";
 import {
   geolocationErrorKey,
+  readStoredLocation,
   requestCurrentPosition,
+  writeStoredLocation,
   type GeolocationErrorReason,
 } from "@/lib/geolocation";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -46,11 +48,29 @@ export default function NearestFarmCard({
     distanceKm: number;
   } | null>(null);
 
+  // Reuse a location the visitor already shared (e.g. on a previous visit or
+  // from the directory) so coming back doesn't re-prompt. Restored from
+  // localStorage only — never requested automatically.
+  useEffect(() => {
+    queueMicrotask(() => {
+      const stored = readStoredLocation();
+      if (!stored) {
+        return;
+      }
+      const result = getNearestFarm(farms, stored);
+      if (result) {
+        setNearest(result);
+        setStatus("ready");
+      }
+    });
+  }, [farms]);
+
   const locate = () => {
     setStatus("locating");
     // Call directly (no await first) so iOS Safari shows the prompt.
     requestCurrentPosition().then((outcome) => {
       if (outcome.coords) {
+        writeStoredLocation(outcome.coords);
         const result = getNearestFarm(farms, outcome.coords);
         if (result) {
           setNearest(result);
