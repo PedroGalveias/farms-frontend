@@ -110,7 +110,6 @@ format:check → lint → typecheck → test (+coverage) → build      (verify 
 
 Deploys are triggered by a Render **deploy hook** after CI passes on `main`.
 
-- Secret required: `RENDER_DEPLOY_HOOK_URL` (GitHub Actions secret, `render` environment).
 - Health check path: `/api/health`.
 
 ## 🌍 Internationalization
