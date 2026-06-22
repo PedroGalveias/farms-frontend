@@ -29,7 +29,15 @@ function InfoCard({ children, label }: { children: string; label: string }) {
   );
 }
 
-export default function FarmDetail({ farm }: { farm: Farm }) {
+export default function FarmDetail({
+  farm,
+  backHref = "/",
+  fromQuickSearch = false,
+}: {
+  farm: Farm;
+  backHref?: string;
+  fromQuickSearch?: boolean;
+}) {
   const t = useT();
   const { locale } = useLanguage();
   const { recordView, isFavorite, toggleFavorite } = usePersonalization();
@@ -48,10 +56,10 @@ export default function FarmDetail({ farm }: { farm: Farm }) {
     <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
       <Link
         className="inline-flex items-center gap-2 text-sm font-semibold text-ink/55 transition hover:text-ink"
-        href="/"
+        href={backHref}
       >
         <ArrowLeft className="h-4 w-4" />
-        {t("farm_back")}
+        {fromQuickSearch ? t("farm_backToQuickSearch") : t("farm_back")}
       </Link>
 
       <header className="mt-6">

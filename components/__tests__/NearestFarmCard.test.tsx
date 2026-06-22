@@ -54,6 +54,8 @@ function renderCard(onOpenFarm = vi.fn()) {
 afterEach(() => {
   vi.restoreAllMocks();
   delete (navigator as { geolocation?: unknown }).geolocation;
+  // The card now remembers a located position; isolate tests from each other.
+  window.localStorage.clear();
 });
 
 describe("NearestFarmCard", () => {
@@ -106,6 +108,22 @@ describe("NearestFarmCard", () => {
     expect(
       await screen.findByText(/isn't available in this browser/i),
     ).toBeInTheDocument();
+  });
+
+  it("restores a remembered location on mount without prompting", async () => {
+    const getCurrentPosition = mockGeolocation({
+      latitude: 46.95,
+      longitude: 7.45,
+    });
+    window.localStorage.setItem(
+      "farms.location",
+      JSON.stringify({ latitude: 46.95, longitude: 7.45 }),
+    );
+    renderCard();
+
+    // Shows the nearest farm straight away, never calling geolocation.
+    expect(await screen.findByText("Hof Sonnenmatt")).toBeInTheDocument();
+    expect(getCurrentPosition).not.toHaveBeenCalled();
   });
 
   it("surfaces a denied-permission message", async () => {

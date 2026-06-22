@@ -560,6 +560,11 @@ export default function QuickSearchExperience({
           farm={activeFarm}
           onClose={closeFarmSheet}
           selectedProducts={selectedProducts}
+          viewPageQuery={`?from=quick-search${
+            selectedProducts.length > 0
+              ? `&products=${encodeURIComponent(selectedProducts.join(","))}`
+              : ""
+          }`}
         />
       ) : null}
     </div>

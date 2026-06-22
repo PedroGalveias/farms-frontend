@@ -26,12 +26,16 @@ interface FarmDetailSheetProps {
   farm: Farm;
   onClose: () => void;
   selectedProducts: string[];
+  /** Extra query (e.g. "?from=quick-search&products=…") for the full-page link
+   *  so that page's Back returns to where the visitor came from. */
+  viewPageQuery?: string;
 }
 
 export default function FarmDetailSheet({
   farm,
   onClose,
   selectedProducts,
+  viewPageQuery = "",
 }: FarmDetailSheetProps) {
   const { locale } = useLanguage();
   const t = useT();
@@ -240,7 +244,7 @@ export default function FarmDetailSheet({
             </a>
             <Link
               className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
-              href={farmPath(farm.id)}
+              href={`${farmPath(farm.id)}${viewPageQuery}`}
             >
               <Maximize2 className="h-4 w-4" />
               {t("farm_viewPage")}
