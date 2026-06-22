@@ -8,10 +8,13 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { ExternalLink, X } from "lucide-react";
+import Link from "next/link";
+import { ExternalLink, Maximize2, X } from "lucide-react";
 import { productGroupOf, tagLabel } from "@/lib/products";
-import { useLanguage } from "@/components/i18n/LanguageProvider";
+import ShareButton from "@/components/ShareButton";
+import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
+import { farmPath } from "@/lib/share";
 import { supportsViewTransitions } from "@/lib/view-transition";
 import type { Farm } from "@/types/farm";
 
@@ -30,6 +33,7 @@ export default function FarmDetailSheet({
   selectedProducts,
 }: FarmDetailSheetProps) {
   const { locale } = useLanguage();
+  const t = useT();
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartYRef = useRef<number | null>(null);
@@ -219,6 +223,18 @@ export default function FarmDetailSheet({
               <ExternalLink className="h-4 w-4" />
               Open in Google Maps
             </a>
+            <Link
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+              href={farmPath(farm.id)}
+            >
+              <Maximize2 className="h-4 w-4" />
+              {t("farm_viewPage")}
+            </Link>
+            <ShareButton
+              text={farm.address}
+              title={farm.name}
+              url={farmPath(farm.id)}
+            />
             <button
               className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
               onClick={onClose}
