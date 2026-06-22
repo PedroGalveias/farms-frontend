@@ -166,7 +166,7 @@ export default function DirectoryToolbar({
       <div className="mt-4 grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_auto]">
         <label className="relative block">
           <span className="sr-only">{t("a11y_search")}</span>
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
+          <Search className="pointer-events-none absolute bottom-0 left-4 top-0 my-auto h-4 w-4 text-ink/35" />
           <input
             className={`${fieldClassName} pl-11 pr-10`}
             onChange={(event) => onSearchTermChange(event.target.value)}
@@ -205,7 +205,7 @@ export default function DirectoryToolbar({
 
         <label className="relative block">
           <span className="sr-only">{t("a11y_sortBy")}</span>
-          <ArrowDownWideNarrow className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
+          <ArrowDownWideNarrow className="pointer-events-none absolute bottom-0 left-4 top-0 my-auto h-4 w-4 text-ink/35" />
           <select
             className={`${fieldClassName} pl-11`}
             onChange={(event) =>
