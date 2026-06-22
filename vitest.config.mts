@@ -31,6 +31,7 @@ export default defineConfig({
         "lib/map.ts",
         "lib/directory.ts",
         "lib/share.ts",
+        "lib/personalization.ts",
         "lib/farm-form.ts",
         "lib/i18n.ts",
         "app/api/health/route.ts",

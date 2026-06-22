@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ArrowLeft, ExternalLink, MapPin } from "lucide-react";
+import { useEffect } from "react";
+import { ArrowLeft, ExternalLink, Heart, MapPin } from "lucide-react";
+import CopyButton from "@/components/CopyButton";
+import MapPlaceholder from "@/components/MapPlaceholder";
 import ShareButton from "@/components/ShareButton";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { tagLabel } from "@/lib/products";
 import { farmPath } from "@/lib/share";
@@ -13,14 +17,7 @@ import type { Farm } from "@/types/farm";
 // Client-only Leaflet, same pattern as the directory's map view.
 const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
   ssr: false,
-  loading: () => (
-    <div
-      className="grid place-items-center rounded-[24px] border border-line bg-tone/40 text-sm text-ink/40"
-      style={{ height: "360px" }}
-    >
-      Loading map…
-    </div>
-  ),
+  loading: () => <MapPlaceholder heightStyle="360px" />,
 });
 
 function InfoCard({ children, label }: { children: string; label: string }) {
@@ -35,6 +32,13 @@ function InfoCard({ children, label }: { children: string; label: string }) {
 export default function FarmDetail({ farm }: { farm: Farm }) {
   const t = useT();
   const { locale } = useLanguage();
+  const { recordView, isFavorite, toggleFavorite } = usePersonalization();
+  const saved = isFavorite(farm.id);
+
+  // Landing on a farm's page counts as viewing it.
+  useEffect(() => {
+    recordView(farm.id);
+  }, [farm.id, recordView]);
   const mapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(farm.coordinates)}`;
   const hasCoordinates = /-?\d+(?:\.\d+)?\s*[,;]\s*-?\d+(?:\.\d+)?/.test(
     farm.coordinates,
@@ -78,10 +82,38 @@ export default function FarmDetail({ farm }: { farm: Farm }) {
           title={farm.name}
           url={farmPath(farm.id)}
         />
+        <button
+          aria-pressed={saved}
+          className={`inline-flex items-center gap-2 rounded-full border px-6 py-3.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
+            saved
+              ? "border-pine/30 bg-pine/10 text-pine"
+              : "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink"
+          }`}
+          onClick={() => toggleFavorite(farm.id)}
+          type="button"
+        >
+          <Heart
+            className={`h-4 w-4 ${saved ? "fill-current heart-pop" : ""}`}
+            key={saved ? "saved" : "unsaved"}
+          />
+          {saved ? t("card_saved") : t("card_save")}
+        </button>
       </div>
 
       <div className="mt-7 space-y-3">
-        <InfoCard label={t("detail_address")}>{farm.address}</InfoCard>
+        <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold text-ink/40">
+                {t("detail_address")}
+              </p>
+              <p className="mt-1.5 text-sm leading-6 text-ink/80">
+                {farm.address}
+              </p>
+            </div>
+            <CopyButton value={farm.address} />
+          </div>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <InfoCard label={t("detail_coordinates")}>
             {farm.coordinates}

@@ -1,5 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { LOCALES, MESSAGES, translate, type Locale } from "@/lib/i18n";
+import {
+  LOCALES,
+  MESSAGES,
+  localeFromAcceptLanguage,
+  translate,
+  type Locale,
+} from "@/lib/i18n";
+
+describe("localeFromAcceptLanguage", () => {
+  it("falls back to English when the header is empty or unsupported", () => {
+    expect(localeFromAcceptLanguage(null)).toBe("en");
+    expect(localeFromAcceptLanguage("es-ES,es;q=0.9")).toBe("en");
+  });
+
+  it("matches a supported language, ignoring the region subtag", () => {
+    expect(localeFromAcceptLanguage("de-CH,de;q=0.9")).toBe("de");
+    expect(localeFromAcceptLanguage("fr-FR")).toBe("fr");
+  });
+
+  it("respects q-value ordering over list order", () => {
+    expect(localeFromAcceptLanguage("en;q=0.6,it;q=0.9")).toBe("it");
+  });
+});
 
 describe("translate", () => {
   it("returns the message for the requested locale", () => {
