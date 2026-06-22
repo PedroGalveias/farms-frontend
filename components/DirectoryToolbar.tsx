@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import {
   ArrowDownWideNarrow,
   Heart,
@@ -115,6 +116,31 @@ export default function DirectoryToolbar({
 }: DirectoryToolbarProps) {
   const t = useT();
   const { locale } = useLanguage();
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // "/" focuses the search field — unless the visitor is already typing in a
+  // field or editing content elsewhere.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+      event.preventDefault();
+      searchRef.current?.focus();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   return (
     <section className="sticky top-[84px] z-20 rounded-[30px] border border-line bg-cloud/85 p-4 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_28px_60px_-32px_rgba(20,22,27,0.28)] backdrop-blur-2xl sm:p-5">
@@ -142,11 +168,18 @@ export default function DirectoryToolbar({
           <span className="sr-only">Search farms</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
           <input
-            className={`${fieldClassName} pl-11`}
+            className={`${fieldClassName} pl-11 pr-10`}
             onChange={(event) => onSearchTermChange(event.target.value)}
             placeholder={t("toolbar_searchPlaceholder")}
+            ref={searchRef}
             value={searchTerm}
           />
+          <kbd
+            aria-hidden
+            className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-line bg-tone px-1.5 py-0.5 text-[11px] font-semibold text-ink/40 sm:block"
+          >
+            /
+          </kbd>
         </label>
 
         <label className="block">

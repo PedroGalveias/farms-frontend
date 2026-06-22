@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Sprout } from "lucide-react";
+import { ArrowRight, CalendarDays, Sprout } from "lucide-react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import {
   SEASONAL_BY_MONTH,
@@ -71,14 +72,23 @@ export default function SeasonalCard() {
         <p className="mt-3 text-xs leading-5 text-ink/50">
           {t("season_promo")}
         </p>
-        <button
-          className="group mt-3.5 inline-flex items-center gap-1.5 rounded-full bg-pine px-4 py-2 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-pine/40 focus-visible:ring-offset-2"
-          onClick={findNearby}
-          type="button"
-        >
-          {t("season_cta")}
-          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-        </button>
+        <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <button
+            className="group inline-flex items-center gap-1.5 rounded-full bg-pine px-4 py-2 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-pine/40 focus-visible:ring-offset-2"
+            onClick={findNearby}
+            type="button"
+          >
+            {t("season_cta")}
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+          </button>
+          <Link
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink/55 transition hover:text-ink"
+            href="/seasonal"
+          >
+            <CalendarDays className="h-3.5 w-3.5" />
+            {t("season_full_calendar")}
+          </Link>
+        </div>
       </div>
     </div>
   );
