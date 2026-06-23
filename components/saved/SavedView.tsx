@@ -87,7 +87,11 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           type="button"
         >
           {t("saved_all")}
-          <span className="text-ink/35">{favorites.length}</span>
+          <span
+            className={effectiveTab === "all" ? "text-cloud/55" : "text-ink/35"}
+          >
+            {favorites.length}
+          </span>
         </button>
 
         {collections.map((collection) => (
