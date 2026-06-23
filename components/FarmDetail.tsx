@@ -47,7 +47,9 @@ export default function FarmDetail({
   useEffect(() => {
     recordView(farm.id);
   }, [farm.id, recordView]);
-  const mapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(farm.coordinates)}`;
+  // Directions to the farm (opens the Maps app on mobile) — more useful in the
+  // field than a static pin.
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(farm.coordinates)}`;
   const hasCoordinates = /-?\d+(?:\.\d+)?\s*[,;]\s*-?\d+(?:\.\d+)?/.test(
     farm.coordinates,
   );

@@ -120,7 +120,9 @@ export default function FarmDetailSheet({
   const isCategoryMatched = (category: string) =>
     selectedProducts.includes(productGroupOf(category));
 
-  const mapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(farm.coordinates)}`;
+  // Directions to the farm (opens the Maps app on mobile) — more useful in the
+  // field than a static pin.
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(farm.coordinates)}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
