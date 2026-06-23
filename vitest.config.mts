@@ -33,6 +33,7 @@ export default defineConfig({
         "lib/share.ts",
         "lib/personalization.ts",
         "lib/search-stats.ts",
+        "lib/collections.ts",
         "lib/farm-form.ts",
         "lib/i18n.ts",
         "app/api/health/route.ts",

@@ -38,9 +38,11 @@ export default function SideRail() {
   const active =
     pathname === "/quick-search"
       ? "quick-search"
-      : pathname === "/"
-        ? "directory"
-        : undefined;
+      : pathname === "/saved"
+        ? "saved"
+        : pathname === "/"
+          ? "directory"
+          : undefined;
 
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-dvh w-[76px] flex-col items-center justify-between border-r border-white/10 bg-rail py-6 transition-colors duration-300 lg:flex">
@@ -70,9 +72,10 @@ export default function SideRail() {
           <Search className="h-5 w-5" />
         </Link>
         <Link
-          className={`relative ${railLinkClassName(false)}`}
-          href="/?saved=1"
-          title={t("toolbar_savedOnly")}
+          aria-current={active === "saved" ? "page" : undefined}
+          className={`relative ${railLinkClassName(active === "saved")}`}
+          href="/saved"
+          title={t("saved_title")}
         >
           <Heart className="h-5 w-5" />
           {favoritesCount > 0 ? (

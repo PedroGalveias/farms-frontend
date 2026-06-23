@@ -26,9 +26,11 @@ export default function MobileTabBar() {
   const active =
     pathname === "/quick-search"
       ? "quick-search"
-      : pathname === "/"
-        ? "directory"
-        : "";
+      : pathname === "/saved"
+        ? "saved"
+        : pathname === "/"
+          ? "directory"
+          : "";
 
   return (
     <nav
@@ -52,9 +54,14 @@ export default function MobileTabBar() {
         {t("nav_quickSearch")}
       </Link>
       <Link
-        aria-label={t("toolbar_savedOnly")}
-        className="relative flex shrink-0 items-center justify-center rounded-full px-4 py-3 text-ink/55 transition-colors duration-300 hover:text-ink"
-        href="/?saved=1"
+        aria-current={active === "saved" ? "page" : undefined}
+        aria-label={t("saved_title")}
+        className={`relative flex shrink-0 items-center justify-center rounded-full px-4 py-3 transition-colors duration-300 ${
+          active === "saved"
+            ? "bg-ink text-cloud shadow-[0_6px_16px_-6px_rgba(20,22,27,0.5)]"
+            : "text-ink/55 hover:text-ink"
+        }`}
+        href="/saved"
       >
         <Heart className="h-4 w-4" />
         {favoritesCount > 0 ? (
