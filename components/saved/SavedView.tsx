@@ -2,12 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Heart, Pencil, Plus, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Download,
+  Heart,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import FarmCard from "@/components/FarmCard";
 import FarmDetailSheet from "@/components/quick-search/FarmDetailSheet";
 import AddToCollectionMenu from "@/components/saved/AddToCollectionMenu";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
+import { farmsToCsv } from "@/lib/export";
 import type { Farm } from "@/types/farm";
 
 const chipClassName = (active: boolean) =>
@@ -55,6 +65,22 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
     setActiveFarm(farm);
   };
 
+  const exportCsv = () => {
+    const blob = new Blob([farmsToCsv(shownFarms)], {
+      type: "text/csv;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const filename =
+      `farms-${activeCollection ? activeCollection.name : "saved"}.csv`
+        .toLowerCase()
+        .replace(/[^a-z0-9.-]+/g, "-");
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
       <Link
@@ -69,7 +95,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-pine/10 text-pine">
           <Heart className="h-6 w-6 fill-current" />
         </span>
-        <div>
+        <div className="min-w-0">
           <h1 className="text-[clamp(2rem,5vw,3rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
             {t("saved_title")}
           </h1>
@@ -77,6 +103,16 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
             {t("saved_subtitle")}
           </p>
         </div>
+        {shownFarms.length > 0 ? (
+          <button
+            className="ml-auto inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-line bg-cloud px-4 py-2 text-sm font-semibold text-ink/70 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            onClick={exportCsv}
+            type="button"
+          >
+            <Download className="h-4 w-4" />
+            {t("saved_export")}
+          </button>
+        ) : null}
       </header>
 
       {/* Collection tabs */}
