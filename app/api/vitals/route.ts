@@ -11,6 +11,10 @@ interface VitalPayload {
 
 const ALLOWED_METRICS = new Set(["LCP", "CLS", "INP", "FCP", "TTFB"]);
 
+function sanitizeForLog(value: string): string {
+  return value.replace(/[\r\n]/g, "");
+}
+
 /**
  * Receives Web Vitals beacons from the client and logs them server-side so they
  * surface in the platform logs (Render) — lightweight observability with no
@@ -26,8 +30,9 @@ export async function POST(request: Request) {
 
   const name = typeof body.name === "string" ? body.name : "";
   if (ALLOWED_METRICS.has(name) && typeof body.value === "number") {
-    const rating = typeof body.rating === "string" ? body.rating : "";
-    const path = typeof body.path === "string" ? body.path : "";
+    const rating =
+      typeof body.rating === "string" ? sanitizeForLog(body.rating) : "";
+    const path = typeof body.path === "string" ? sanitizeForLog(body.path) : "";
     console.info(
       `[web-vitals] ${name}=${Math.round(body.value)} ${rating} ${path}`.trim(),
     );
