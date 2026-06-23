@@ -474,10 +474,17 @@ body.sheet-open .mobile-tab-bar {
 }
 
 /* ---------- Skeleton shimmer (loading states) ---------- */
+/* Skeletons are Suspense fallbacks — only mounted while a segment is loading.
+   They stay invisible for the first beat and only fade in (and shimmer) if the
+   load actually drags, so a fast navigation shows nothing rather than a flash
+   of animated placeholder. Effectively: feedback for slow connections only. */
 .skeleton {
   position: relative;
   overflow: hidden;
   background: var(--color-tone);
+  opacity: 0;
+  animation: skeleton-appear 240ms ease-out var(--skeleton-delay, 480ms)
+    forwards;
 }
 
 .skeleton::after {
@@ -491,7 +498,15 @@ body.sheet-open .mobile-tab-bar {
     rgba(255, 255, 255, 0.45),
     transparent
   );
-  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  /* Match the appear delay so the sweep only runs once the skeleton shows. */
+  animation: skeleton-shimmer 1.6s ease-in-out var(--skeleton-delay, 480ms)
+    infinite;
+}
+
+@keyframes skeleton-appear {
+  to {
+    opacity: 1;
+  }
 }
 
 html.dark .skeleton::after {
@@ -527,6 +542,11 @@ html.dark .skeleton::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* No fade/shimmer, but the skeleton must still be visible as feedback. */
+  .skeleton {
+    opacity: 1;
+    animation: none !important;
+  }
   .skeleton::after,
   .heart-pop {
     animation: none !important;
