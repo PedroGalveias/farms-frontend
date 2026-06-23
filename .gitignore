@@ -47,3 +47,7 @@ next-env.d.ts
 # local AI tooling & working docs (keep out of the repo)
 .claude/
 docs/
+
+# Local scratch / private (never commit)
+tmp/
+.config.ts
