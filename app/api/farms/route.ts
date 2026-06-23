@@ -1,5 +1,11 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
-import { FarmsApiError, createFarm, getFarms } from "@/lib/farms-service";
+import {
+  FARMS_CACHE_TAG,
+  FarmsApiError,
+  createFarm,
+  getFarms,
+} from "@/lib/farms-service";
 import type { CreateFarmInput } from "@/types/farm";
 
 export const dynamic = "force-dynamic";
@@ -74,6 +80,11 @@ export async function POST(request: Request) {
       ...body,
       idempotency_key: crypto.randomUUID(),
     });
+
+    // The directory just changed — drop the cached farm list so the new farm
+    // shows up immediately everywhere. ("max" = expire now; Next 16 requires a
+    // cache-life profile here.)
+    revalidateTag(FARMS_CACHE_TAG, "max");
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {
