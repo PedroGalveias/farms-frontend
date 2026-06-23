@@ -35,12 +35,16 @@ describe("prototype-pollution safety", () => {
   });
 
   it("ignores dangerous keys when reading and merging", () => {
+    // Raw JSON string (not an object literal) so the test itself doesn't set a
+    // prototype; readSearchCounts must drop the dangerous key.
     window.localStorage.setItem(
       SEARCH_STATS_STORAGE_KEY,
-      JSON.stringify({ __proto__: 5, ok: 2 }),
+      '{"__proto__":5,"ok":2}',
     );
     expect(readSearchCounts()).toEqual({ ok: 2 });
-    expect(mergeCounts({ ok: 1 }, { prototype: 9 })).toEqual({ ok: 1 });
+    expect(mergeCounts({ ok: 1 }, JSON.parse('{"prototype":9}'))).toEqual({
+      ok: 1,
+    });
   });
 });
 

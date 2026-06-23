@@ -30,7 +30,7 @@ export function readSearchCounts(): SearchCounts {
     }
     const parsed = JSON.parse(raw) as unknown;
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      const counts: SearchCounts = {};
+      const counts = new Map<string, number>();
       for (const [key, value] of Object.entries(parsed)) {
         if (
           isSafeKey(key) &&
@@ -38,10 +38,10 @@ export function readSearchCounts(): SearchCounts {
           Number.isFinite(value) &&
           value > 0
         ) {
-          counts[key] = value;
+          counts.set(key, value);
         }
       }
-      return counts;
+      return Object.fromEntries(counts);
     }
   } catch {
     // Corrupt JSON or storage disabled — treat as no stats.
@@ -68,13 +68,15 @@ export function incrementCounts(
   counts: SearchCounts,
   keys: string[],
 ): SearchCounts {
-  const next = { ...counts };
+  // Build via a Map + Object.fromEntries so user-controllable keys are never
+  // written as dynamic property names (avoids a prototype-pollution sink).
+  const next = new Map<string, number>(Object.entries(counts));
   for (const key of keys) {
     if (isSafeKey(key)) {
-      next[key] = (next[key] ?? 0) + 1;
+      next.set(key, (next.get(key) ?? 0) + 1);
     }
   }
-  return next;
+  return Object.fromEntries(next);
 }
 
 /** Record one search worth of keys (products/categories) for this device. */
@@ -87,15 +89,15 @@ export function trackSearch(keys: string[]): void {
 
 /** Pure: sum any number of counts maps into one. */
 export function mergeCounts(...sources: SearchCounts[]): SearchCounts {
-  const merged: SearchCounts = {};
+  const merged = new Map<string, number>();
   for (const source of sources) {
     for (const [key, value] of Object.entries(source)) {
       if (isSafeKey(key)) {
-        merged[key] = (merged[key] ?? 0) + value;
+        merged.set(key, (merged.get(key) ?? 0) + value);
       }
     }
   }
-  return merged;
+  return Object.fromEntries(merged);
 }
 
 /** Pure: the `limit` most-counted keys, ties broken alphabetically. */
