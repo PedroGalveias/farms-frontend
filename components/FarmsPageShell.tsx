@@ -12,6 +12,7 @@ import EditorialTicker from "@/components/home/EditorialTicker";
 import GreenSlabCta from "@/components/home/GreenSlabCta";
 import HomeHero from "@/components/home/HomeHero";
 import { useFarmDirectory } from "@/components/home/useFarmDirectory";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import RecentlyViewedStrip from "@/components/personalization/RecentlyViewedStrip";
@@ -30,10 +31,21 @@ export default function FarmsPageShell({
 }: FarmsPageShellProps) {
   const t = useT();
   const { recordView } = usePersonalization();
+  const { user, openAuth } = useAuth();
   const directory = useFarmDirectory(initialFarms);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);
+
+  // Adding a farm requires an account: open the create dialog when signed in,
+  // otherwise prompt login with a contextual notice.
+  const requestAddFarm = () => {
+    if (user) {
+      setIsCreateDialogOpen(true);
+    } else {
+      openAuth("login", "auth_login_required");
+    }
+  };
 
   // Opening a farm (sheet) also records it in the recently-viewed history.
   const openFarm = (farm: Farm) => {
@@ -51,28 +63,27 @@ export default function FarmsPageShell({
   useEffect(() => {
     const openOnHash = () => {
       if (window.location.hash === "#add") {
-        setIsCreateDialogOpen(true);
         history.replaceState(
           null,
           "",
           window.location.pathname + window.location.search,
         );
+        requestAddFarm();
       }
     };
     openOnHash();
     window.addEventListener("hashchange", openOnHash);
     return () => window.removeEventListener("hashchange", openOnHash);
-  }, []);
+    // requestAddFarm reads the latest user via closure on each invocation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   return (
     <div className="relative overflow-clip">
       <main className="mx-auto max-w-6xl px-5 pt-6 sm:px-8 lg:pt-0">
         {/* ---------- Editorial hero ---------- */}
         <section className="relative pt-10 sm:pt-14">
-          <HomeHero
-            onAddFarm={() => setIsCreateDialogOpen(true)}
-            serviceStatus={serviceStatus}
-          />
+          <HomeHero onAddFarm={requestAddFarm} serviceStatus={serviceStatus} />
 
           {/* ---------- Bento overview (informational — no duplicate CTAs) ---------- */}
           <BentoOverview
@@ -106,7 +117,7 @@ export default function FarmsPageShell({
             onClearCanton={() => directory.setSelectedCanton("all")}
             onClearLocation={directory.clearLocation}
             onClearSearchTerm={() => directory.setSearchTerm("")}
-            onCreateFarm={() => setIsCreateDialogOpen(true)}
+            onCreateFarm={requestAddFarm}
             onRadiusChange={directory.setRadiusKm}
             onRefresh={directory.refreshDirectory}
             onReset={directory.resetFilters}
@@ -148,7 +159,7 @@ export default function FarmsPageShell({
 
         <DirectoryResults
           distanceByFarmId={directory.distanceByFarmId}
-          onAddFarm={() => setIsCreateDialogOpen(true)}
+          onAddFarm={requestAddFarm}
           onLoadMore={directory.loadMore}
           onOpenFarm={openFarm}
           onResetFilters={directory.resetFilters}

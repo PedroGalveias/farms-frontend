@@ -7,6 +7,7 @@ import GitHubIcon from "@/components/icons/GitHubIcon";
 import Logo from "@/components/Logo";
 import LanguageMenu from "@/components/LanguageMenu";
 import ThemeToggle from "@/components/ThemeToggle";
+import AccountMenu from "@/components/auth/AccountMenu";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
@@ -87,6 +88,7 @@ export default function SideRail() {
       </nav>
 
       <div className="flex flex-col items-center gap-3">
+        <AccountMenu placement="rail" triggerClassName={utilityClassName} />
         <ThemeToggle />
         <LanguageMenu placement="rail" triggerClassName={utilityClassName} />
         <a

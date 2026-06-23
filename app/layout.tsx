@@ -10,6 +10,7 @@ import CustomCursor from "@/components/motion/CustomCursor";
 import PwaRegister from "@/components/PwaRegister";
 import SkipLink from "@/components/SkipLink";
 import WebVitals from "@/components/WebVitals";
+import AuthProvider from "@/components/auth/AuthProvider";
 import "./globals.css";
 
 // Set the theme class before paint to avoid a flash of the wrong theme.
@@ -63,18 +64,20 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ThemeProvider>
           <LanguageProvider>
-            <PersonalizationProvider>
-              <SkipLink />
-              <SideRail />
-              <div className="cursor-zone relative z-[1] pb-24 lg:pb-0 lg:pl-[76px]">
-                <SiteHeader />
-                <div id="main-content">{children}</div>
-              </div>
-              <MobileTabBar />
-              <CustomCursor />
-              <PwaRegister />
-              <WebVitals />
-            </PersonalizationProvider>
+            <AuthProvider>
+              <PersonalizationProvider>
+                <SkipLink />
+                <SideRail />
+                <div className="cursor-zone relative z-[1] pb-24 lg:pb-0 lg:pl-[76px]">
+                  <SiteHeader />
+                  <div id="main-content">{children}</div>
+                </div>
+                <MobileTabBar />
+                <CustomCursor />
+                <PwaRegister />
+                <WebVitals />
+              </PersonalizationProvider>
+            </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

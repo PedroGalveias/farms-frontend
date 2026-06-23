@@ -4,6 +4,11 @@ test.describe("create farm dialog", () => {
   test("opens, validates an empty submit, and closes — without posting", async ({
     page,
   }) => {
+    // Adding a farm now requires login, so present an authenticated session.
+    await page.route("**/api/auth/me", (route) =>
+      route.fulfill({ json: { user: { user_id: "u1", role: "user" } } }),
+    );
+
     // Guard: fail loudly if an empty/invalid submit ever hits the real backend.
     let posted = false;
     page.on("request", (request) => {

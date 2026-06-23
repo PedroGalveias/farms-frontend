@@ -76,10 +76,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    await createFarm({
-      ...body,
-      idempotency_key: crypto.randomUUID(),
-    });
+    await createFarm(
+      {
+        ...body,
+        idempotency_key: crypto.randomUUID(),
+      },
+      request.headers.get("cookie") ?? undefined,
+    );
 
     // The directory just changed — drop the cached farm list so the new farm
     // shows up immediately everywhere. ("max" = expire now; Next 16 requires a
