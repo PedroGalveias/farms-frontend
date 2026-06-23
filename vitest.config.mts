@@ -35,6 +35,7 @@ export default defineConfig({
         "lib/search-stats.ts",
         "lib/collections.ts",
         "lib/farm-form.ts",
+        "lib/export.ts",
         "lib/i18n.ts",
         "app/api/health/route.ts",
         "components/SeasonalCard.tsx",
