@@ -15,15 +15,20 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
 
 ## ✨ Features
 
-- **Farm directory** — searchable, filterable (by canton and category), sortable, and paginated for large datasets.
-- **Quick search** — a guided, three-step flow (location → products → farms) that returns farms holding the products you want, **sorted by distance, nearest first**.
+- **Farm directory** — searchable, filterable (by canton and category), sortable, and paginated for large datasets, with grid, list, and **map** views.
+- **Quick search** — a guided, three-step flow (location → products → farms) that returns farms holding the products you want, **sorted by distance, nearest first**. Supports a subcategory picker and seasonal deep links.
+- **Per-farm pages** — each farm has its own shareable page (`/farm/[id]`) with a Web Share / copy-link button, copy-address, SEO metadata, and schema.org JSON-LD.
 - **Nearest farm** — on request (never on load, for privacy), uses your browser location to surface the single closest farm.
-- **Seasonal produce** — a date-driven card highlighting what's in season in Switzerland right now, to nudge local, lower-impact eating.
+- **Saved & collections** — favorite farms and organize them into named collections, plus a "recently viewed" strip; all stored per-device in the browser.
+- **Most wanted** — a per-device search-stats card (backend-ready) that surfaces the products you search for most.
+- **Seasonal produce** — a date-driven calendar (rebuilt from the official Swiss Farmers calendar) highlighting what's in season in Switzerland right now, to nudge local, lower-impact eating.
 - **Add a farm** — a validated create flow (Swiss canton + coordinate checks) that posts back to the API.
 - **Internationalization** — English, German, French, Italian, and Swiss Romansh, switchable at runtime.
 - **Light & dark mode** — class-based theming with no flash of the wrong theme on load.
-- **Native-feeling mobile UI** — a slim header and a floating bottom tab bar.
+- **Installable PWA** — works offline with a cached directory fallback.
+- **Native-feeling mobile UI** — a slim header and a floating bottom tab bar, plus a `/` keyboard shortcut to jump to search on desktop.
 - **Motion system** — scroll reveals, count-ups, a custom desktop cursor, and view-transition detail sheets (all respect `prefers-reduced-motion`).
+- **Resilient** — branded error boundaries and a graceful 404, so a backend hiccup never leaves a blank screen.
 
 ## 🧱 Tech stack
 
@@ -60,6 +65,9 @@ cp .env.example .env
 # 3. Point the app at a backend (defaults to the hosted instance if unset)
 #    .env:
 #    FARMS_API_BASE_URL=http://localhost:8000
+#    # In production also set the public origin (used for canonical URLs,
+#    # the sitemap, robots.txt, and JSON-LD). Defaults to localhost in dev:
+#    NEXT_PUBLIC_SITE_URL=https://your-domain.example
 
 # 4. Start the dev server
 npm run dev
@@ -103,12 +111,16 @@ format:check → lint → typecheck → test (+coverage) → build      (verify 
 ```
 
 - Pull requests get an automatic **coverage comment**; the HTML report is uploaded as an artifact.
-- **Deploy is gated**: a Render deploy is triggered only after `verify` **and** `e2e` pass, and only on `main` (pull requests never deploy).
+- **Deploy is gated**: a Render deploy is triggered only after `verify` **and** `e2e` pass, and only for a pushed **`v*` version tag** (or a manual `workflow_dispatch`). Pushes to `main` and pull requests run CI but **never deploy**.
 - [`codeql.yml`](.github/workflows/codeql.yml) runs CodeQL security analysis; [`audit.yml`](.github/workflows/audit.yml) runs `npm audit` daily and on dependency changes (failing on high/critical advisories in production deps).
 
 ### Deployment (Render)
 
-Deploys are triggered by a Render **deploy hook** after CI passes on `main`.
+Shipping is **tag-driven**: merge to `main` whenever — that only runs CI. To release, cut a version tag, which triggers the Render **deploy hook** after CI passes:
+
+```bash
+git tag v1.2.3 && git push origin v1.2.3
+```
 
 - Health check path: `/api/health`.
 
@@ -124,15 +136,20 @@ To **add or change a string**: add the key to every locale in `MESSAGES`. A test
 app/
   page.tsx              Server-rendered home — loads farms + service health
   quick-search/         The guided, distance-sorted search experience
+  farm/[id]/            Per-farm page (metadata + JSON-LD)
+  saved/ · seasonal/    Saved/collections and the seasonal calendar
+  sitemap.ts · robots.ts  SEO surface (uses NEXT_PUBLIC_SITE_URL)
+  error.tsx · not-found.tsx  Branded error/404 boundaries
   api/health/route.ts   Liveness endpoint for Render and uptime checks
   api/farms/route.ts    Local route handler used by the create flow
 components/             UI: directory shell, toolbar, cards, dialogs, motion
-  i18n/ · theme/        Language and theme providers
+  i18n/ · theme/ · personalization/  Cross-cutting providers
 lib/
   farms-service.ts      Backend access layer
   quick-search.ts       Distance (Haversine), matching, ranking
   farm-form.ts          Create-form normalization & validation
   farms.ts              Canton metadata & formatters
+  share.ts · site.ts    Share URLs, meta description, JSON-LD, site origin
   i18n.ts               Translation dictionary
 types/farm.ts           Shared TypeScript contracts
 e2e/                    Playwright end-to-end tests
