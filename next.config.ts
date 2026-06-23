@@ -1,3 +1,4 @@
+import bundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 
 // Conservative, framework-agnostic hardening headers. We intentionally skip a
@@ -29,4 +30,9 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Run `npm run analyze` to open the bundle treemap; a no-op for normal builds.
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default withBundleAnalyzer(nextConfig);

@@ -9,6 +9,7 @@ import ThemeProvider from "@/components/theme/ThemeProvider";
 import CustomCursor from "@/components/motion/CustomCursor";
 import PwaRegister from "@/components/PwaRegister";
 import SkipLink from "@/components/SkipLink";
+import WebVitals from "@/components/WebVitals";
 import "./globals.css";
 
 // Set the theme class before paint to avoid a flash of the wrong theme.
@@ -72,6 +73,7 @@ export default function RootLayout({
               <MobileTabBar />
               <CustomCursor />
               <PwaRegister />
+              <WebVitals />
             </PersonalizationProvider>
           </LanguageProvider>
         </ThemeProvider>
