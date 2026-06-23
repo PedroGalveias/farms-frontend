@@ -30,6 +30,7 @@ import ResultsStep from "@/components/quick-search/ResultsStep";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
 import { PRODUCTS, tagLabel } from "@/lib/products";
+import { trackSearch } from "@/lib/search-stats";
 import { geolocationErrorKey, requestCurrentPosition } from "@/lib/geolocation";
 import { getCantonName, getUniqueFarmCantons } from "@/lib/farms";
 import { runViewTransition } from "@/lib/view-transition";
@@ -192,6 +193,9 @@ export default function QuickSearchExperience({
 
     if (nextStep === "results") {
       setResultsVisit((visit) => visit + 1);
+      // Viewing results is the strongest "search" signal — feed the home
+      // Most-wanted card (per-device stats).
+      trackSearch(selectedProducts);
     }
 
     setStep(nextStep);
