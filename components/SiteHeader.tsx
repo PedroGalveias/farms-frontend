@@ -4,6 +4,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import LanguageMenu from "@/components/LanguageMenu";
 import ThemeToggle from "@/components/ThemeToggle";
+import AccountMenu from "@/components/auth/AccountMenu";
 
 const utilityClassName =
   "grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink/55 transition-colors hover:bg-tone hover:text-ink";
@@ -30,6 +31,7 @@ export default function SiteHeader() {
         </Link>
 
         <div className="flex items-center gap-1.5">
+          <AccountMenu placement="header" triggerClassName={utilityClassName} />
           <ThemeToggle />
           <LanguageMenu
             placement="header"

@@ -473,6 +473,29 @@ body.sheet-open .mobile-tab-bar {
   color: rgba(241, 242, 238, 0.8);
 }
 
+/* ---------- Letter illustration (auth) ---------- */
+@keyframes letter-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(-3deg);
+  }
+}
+
+.letter-float {
+  animation: letter-float 3.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letter-float {
+    animation: none;
+  }
+}
+
 /* ---------- Skip-to-content link ---------- */
 /* Stays in the DOM (focusable, screen-reader reachable) but parked off the top
    edge until focused — a robust pattern that doesn't depend on utility order. */

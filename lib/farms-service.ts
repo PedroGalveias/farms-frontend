@@ -1,33 +1,12 @@
+import {
+  FarmsApiError,
+  getFarmsApiBaseUrl,
+  readErrorMessage,
+} from "@/lib/backend";
 import type { CreateFarmPayload, Farm } from "@/types/farm";
 
-const DEFAULT_FARMS_API_BASE_URL = "https://farms-0ivm.onrender.com";
-
-function getFarmsApiBaseUrl() {
-  return (process.env.FARMS_API_BASE_URL ?? DEFAULT_FARMS_API_BASE_URL).replace(
-    /\/$/,
-    "",
-  );
-}
-
-export class FarmsApiError extends Error {
-  status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = "FarmsApiError";
-    this.status = status;
-  }
-}
-
-async function readErrorMessage(response: Response) {
-  const text = (await response.text()).trim();
-
-  if (text.length > 0) {
-    return text;
-  }
-
-  return `The farms service returned ${response.status}.`;
-}
+// Re-exported so existing importers of these from farms-service keep working.
+export { FarmsApiError, getFarmsApiBaseUrl } from "@/lib/backend";
 
 // A cold Render backend can take tens of seconds to wake. Cap how long we wait
 // so a hung backend fails fast (into the cached copy / error UI / a degraded
@@ -81,12 +60,15 @@ export async function getFarms(): Promise<Farm[]> {
   return (await response.json()) as Farm[];
 }
 
-export async function createFarm(payload: CreateFarmPayload) {
+export async function createFarm(payload: CreateFarmPayload, cookie?: string) {
   const response = await fetch(`${getFarmsApiBaseUrl()}/farms`, {
     body: JSON.stringify(payload),
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
+      // Forward the caller's session so the backend can authorize the create
+      // if it requires it; harmless when it doesn't.
+      ...(cookie ? { cookie } : {}),
     },
     method: "POST",
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
