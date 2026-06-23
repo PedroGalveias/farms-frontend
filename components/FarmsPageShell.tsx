@@ -11,7 +11,7 @@ import {
   useState,
   useTransition,
 } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   ArrowRight,
@@ -156,13 +156,12 @@ export default function FarmsPageShell({
   const router = useRouter();
   const t = useT();
   const { locale } = useLanguage();
-  const { favorites, recordView } = usePersonalization();
+  const { recordView } = usePersonalization();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCanton, setSelectedCanton] = useState("all");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [categoryMatchMode, setCategoryMatchMode] =
     useState<CategoryMatchMode>("any");
   const [sortOption, setSortOption] = useState<FarmSortOption>("newest");
@@ -233,7 +232,6 @@ export default function FarmsPageShell({
       setCategoryMatchMode(params.get("match") === "all" ? "all" : "any");
       setSortOption(sort);
       setRadiusKm(radius);
-      setShowSavedOnly(params.get("saved") === "1");
     };
 
     // Defer setState out of the effect body (repo lint: no sync setState here).
@@ -277,9 +275,6 @@ export default function FarmsPageShell({
     if (radiusKm !== null) {
       params.set("radius", String(radiusKm));
     }
-    if (showSavedOnly) {
-      params.set("saved", "1");
-    }
     const query = params.toString();
     window.history.replaceState(
       null,
@@ -294,17 +289,7 @@ export default function FarmsPageShell({
     sortOption,
     originCoords,
     radiusKm,
-    showSavedOnly,
   ]);
-
-  // The "Saved" nav link points at /?saved=1; react to that soft navigation
-  // (which doesn't fire popstate) so the filter turns on without a remount.
-  const savedParam = useSearchParams().get("saved");
-  useEffect(() => {
-    if (savedParam === "1") {
-      queueMicrotask(() => setShowSavedOnly(true));
-    }
-  }, [savedParam]);
 
   const cantonOptions = useMemo(
     () => getUniqueFarmCantons(initialFarms),
@@ -416,13 +401,10 @@ export default function FarmsPageShell({
     ],
   );
 
-  const favoriteSet = useMemo(() => new Set(favorites), [favorites]);
-
   // The result list: every active filter applied, distances attached, sorted.
   const ranked = useMemo(() => {
     const matched = initialFarms.filter(
       (farm) =>
-        (!showSavedOnly || favoriteSet.has(farm.id)) &&
         matchesSearch(farm, normalizedSearchTerm) &&
         matchesCanton(farm, selectedCanton) &&
         matchesCategories(farm, selectedCategories, categoryMatchMode) &&
@@ -463,8 +445,6 @@ export default function FarmsPageShell({
     });
   }, [
     initialFarms,
-    showSavedOnly,
-    favoriteSet,
     normalizedSearchTerm,
     selectedCanton,
     selectedCategories,
@@ -486,7 +466,7 @@ export default function FarmsPageShell({
     ",",
   )}|${categoryMatchMode}|${effectiveSort}|${radiusKm ?? "any"}|${
     originCoords ? "geo" : "none"
-  }|${showSavedOnly ? "saved" : "all"}|${favorites.length}`;
+  }`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
   if (filterKey !== prevFilterKey) {
     setPrevFilterKey(filterKey);
@@ -498,7 +478,6 @@ export default function FarmsPageShell({
     selectedCanton !== "all",
     selectedCategories.length > 0,
     radiusKm !== null,
-    showSavedOnly,
   ].filter(Boolean).length;
 
   const serviceStatusMeta = serviceStatusCopy[serviceStatus];
@@ -519,7 +498,6 @@ export default function FarmsPageShell({
     setSelectedCanton("all");
     setSelectedCategories([]);
     setRadiusKm(null);
-    setShowSavedOnly(false);
   };
 
   const toggleCategory = (category: string) => {
@@ -729,16 +707,13 @@ export default function FarmsPageShell({
             onSelectedCantonChange={setSelectedCanton}
             onSortOptionChange={setSortOption}
             onToggleCategory={toggleCategory}
-            onToggleSavedOnly={() => setShowSavedOnly((value) => !value)}
             onUseLocation={locateMe}
             onViewModeChange={setViewMode}
             radiusKm={radiusKm}
             resultsCount={visibleFarms.length}
-            savedCount={favorites.length}
             searchTerm={searchTerm}
             selectedCanton={selectedCanton}
             selectedCategories={selectedCategories}
-            showSavedOnly={showSavedOnly}
             sortOption={effectiveSort}
             totalCount={initialFarms.length}
             viewMode={viewMode}
