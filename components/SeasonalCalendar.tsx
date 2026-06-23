@@ -7,7 +7,7 @@ import {
   SEASONAL_BY_MONTH,
   produceEmoji,
   produceLabel,
-  seasonalGroupsForMonth,
+  seasonalProductsForMonth,
 } from "@/lib/seasonal";
 import type { Locale } from "@/lib/i18n";
 
@@ -52,7 +52,7 @@ export default function SeasonalCalendar() {
       <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {SEASONAL_BY_MONTH.map((items, month) => {
           const isCurrent = month === currentMonth;
-          const groups = seasonalGroupsForMonth(month);
+          const seasonalKeys = seasonalProductsForMonth(month);
 
           return (
             <section
@@ -88,7 +88,7 @@ export default function SeasonalCalendar() {
 
               <Link
                 className="group mt-4 inline-flex items-center gap-1.5 text-[13px] font-bold text-pine transition hover:text-ink"
-                href={`/quick-search?products=${encodeURIComponent(groups.join(","))}`}
+                href={`/quick-search?products=${encodeURIComponent(seasonalKeys.join(","))}&match=any`}
               >
                 {t("season_cta")}
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />

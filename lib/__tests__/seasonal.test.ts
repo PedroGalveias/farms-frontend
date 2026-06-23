@@ -5,9 +5,27 @@ import {
   produceEmoji,
   produceLabel,
   seasonalGroupsForMonth,
+  seasonalProductsForMonth,
 } from "@/lib/seasonal";
 import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
+import { PRODUCTS } from "@/lib/products";
 import { LOCALES, type Locale } from "@/lib/i18n";
+
+describe("seasonalProductsForMonth", () => {
+  it("returns specific product keys for in-season items (e.g. June cherries)", () => {
+    const june = seasonalProductsForMonth(5);
+    expect(june).toContain("Kirschen");
+  });
+
+  it("only returns keys quick search understands (a product or a group)", () => {
+    for (let month = 0; month < 12; month++) {
+      for (const key of seasonalProductsForMonth(month)) {
+        const known = key in PRODUCTS || KNOWN_CATEGORY_KEYS.includes(key);
+        expect(known).toBe(true);
+      }
+    }
+  });
+});
 
 describe("seasonalGroupsForMonth", () => {
   it("returns the distinct category groups in season for a month", () => {

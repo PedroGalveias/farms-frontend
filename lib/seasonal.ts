@@ -1,3 +1,4 @@
+import { PRODUCTS } from "@/lib/products";
 import type { Locale } from "@/lib/i18n";
 
 /**
@@ -573,6 +574,21 @@ export function seasonalGroupsForMonth(monthIndex: number): string[] {
   return Array.from(
     new Set(items.map((key) => PRODUCE_GROUP[key]).filter(Boolean)),
   );
+}
+
+/**
+ * The specific quick-search keys in season for a month: each item's canonical
+ * product key (its German name, when it exists in the product taxonomy) so
+ * "find these near you" pre-selects the actual products, falling back to the
+ * parent group for anything without a product entry. (index 0 = January)
+ */
+export function seasonalProductsForMonth(monthIndex: number): string[] {
+  const items = SEASONAL_BY_MONTH[monthIndex] ?? [];
+  const keys = items.map((key) => {
+    const germanName = SEASONAL_PRODUCE[key].labels.de;
+    return germanName in PRODUCTS ? germanName : PRODUCE_GROUP[key];
+  });
+  return Array.from(new Set(keys));
 }
 
 export function produceEmoji(key: string): string {
