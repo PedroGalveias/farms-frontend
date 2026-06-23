@@ -27,6 +27,23 @@ describe("mergeCounts", () => {
   });
 });
 
+describe("prototype-pollution safety", () => {
+  it("ignores dangerous keys when incrementing", () => {
+    const out = incrementCounts({}, ["__proto__", "constructor", "ok"]);
+    expect(out).toEqual({ ok: 1 });
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+
+  it("ignores dangerous keys when reading and merging", () => {
+    window.localStorage.setItem(
+      SEARCH_STATS_STORAGE_KEY,
+      JSON.stringify({ __proto__: 5, ok: 2 }),
+    );
+    expect(readSearchCounts()).toEqual({ ok: 2 });
+    expect(mergeCounts({ ok: 1 }, { prototype: 9 })).toEqual({ ok: 1 });
+  });
+});
+
 describe("topKeys", () => {
   it("orders by count desc, then alphabetically, capped at limit", () => {
     expect(topKeys({ a: 1, b: 3, c: 3 }, 2)).toEqual(["b", "c"]);

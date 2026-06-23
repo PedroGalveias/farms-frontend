@@ -10,6 +10,15 @@ export const SEARCH_STATS_STORAGE_KEY = "farms.searchStats";
 
 export type SearchCounts = Record<string, number>;
 
+// Keys come from user-controllable input (the ?products= deep link, stored
+// JSON). Refuse the prototype-polluting ones before ever writing them as a
+// property name — guards against remote property injection.
+const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+function isSafeKey(key: string): boolean {
+  return key.length > 0 && !UNSAFE_KEYS.has(key);
+}
+
 export function readSearchCounts(): SearchCounts {
   if (typeof window === "undefined") {
     return {};
@@ -23,7 +32,12 @@ export function readSearchCounts(): SearchCounts {
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       const counts: SearchCounts = {};
       for (const [key, value] of Object.entries(parsed)) {
-        if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+        if (
+          isSafeKey(key) &&
+          typeof value === "number" &&
+          Number.isFinite(value) &&
+          value > 0
+        ) {
           counts[key] = value;
         }
       }
@@ -56,7 +70,7 @@ export function incrementCounts(
 ): SearchCounts {
   const next = { ...counts };
   for (const key of keys) {
-    if (key) {
+    if (isSafeKey(key)) {
       next[key] = (next[key] ?? 0) + 1;
     }
   }
@@ -76,7 +90,9 @@ export function mergeCounts(...sources: SearchCounts[]): SearchCounts {
   const merged: SearchCounts = {};
   for (const source of sources) {
     for (const [key, value] of Object.entries(source)) {
-      merged[key] = (merged[key] ?? 0) + value;
+      if (isSafeKey(key)) {
+        merged[key] = (merged[key] ?? 0) + value;
+      }
     }
   }
   return merged;
