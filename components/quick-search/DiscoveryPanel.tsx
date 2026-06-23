@@ -1,7 +1,8 @@
 "use client";
 
 import { MapPin, ShoppingBasket, Sprout, type LucideIcon } from "lucide-react";
-import { categoryEmoji, categoryLabel } from "@/lib/categories";
+import { categoryEmoji } from "@/lib/categories";
+import { tagLabel } from "@/lib/products";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 type Step = "location" | "products" | "results";
@@ -140,7 +141,7 @@ export default function DiscoveryPanel({
           >
             <span className="chip-pop flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
               <span aria-hidden="true">{categoryEmoji(product)}</span>
-              {categoryLabel(product, locale)}
+              {tagLabel(product, locale)}
             </span>
           </div>
         );

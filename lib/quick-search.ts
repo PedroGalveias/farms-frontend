@@ -53,12 +53,14 @@ export function productMatchesCategory(product: string, category: string) {
   return left.includes(right) || right.includes(left);
 }
 
-// Quick search selects category groups; a farm matches if any of its tags
-// (a granular product, or an existing group-level value) rolls up to it.
+// A selection can be a category group OR a specific product (subcategory). Farm
+// data is stored at the group level, so we roll the selection up to its group
+// and match on that; the fuzzy text match stays as a fallback for free-text.
 function farmMatchesProduct(farm: Farm, product: string) {
+  const selectedGroup = productGroupOf(product);
   return farm.categories.some(
     (category) =>
-      productGroupOf(category) === product ||
+      productGroupOf(category) === selectedGroup ||
       productMatchesCategory(product, category),
   );
 }

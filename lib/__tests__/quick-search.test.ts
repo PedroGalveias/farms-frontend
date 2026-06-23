@@ -161,6 +161,19 @@ describe("getQuickSearchResults", () => {
     expect(results.map((r) => r.farm.id).sort()).toEqual(["bern", "zurich"]);
   });
 
+  it("matches a specific product (subcategory) via its parent group", () => {
+    // Farms store group-level categories; selecting the product "Tomaten"
+    // (group Gemüse) should still match a farm tagged with the group.
+    const gemueseFarm = makeFarm({ id: "g", categories: ["Gemüse"] });
+    const results = getQuickSearchResults({
+      farms: [gemueseFarm],
+      location: { coordinates: null, label: "" },
+      matchMode: "any",
+      selectedProducts: ["Tomaten"],
+    });
+    expect(results.map((r) => r.farm.id)).toEqual(["g"]);
+  });
+
   it("ranks text-location matches by relevance score", () => {
     const results = getQuickSearchResults({
       farms: [bern, zurich],

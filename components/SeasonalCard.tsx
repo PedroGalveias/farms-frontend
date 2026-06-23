@@ -8,7 +8,7 @@ import {
   SEASONAL_BY_MONTH,
   produceEmoji,
   produceLabel,
-  seasonalGroupsForMonth,
+  seasonalProductsForMonth,
 } from "@/lib/seasonal";
 import type { Locale } from "@/lib/i18n";
 
@@ -40,12 +40,12 @@ export default function SeasonalCard() {
     month: "long",
   });
 
-  // Send the in-season category groups into quick search, which sorts farms by
-  // distance ("near you") once the visitor shares their location.
+  // Send the specific in-season products into quick search (match any), which
+  // sorts farms by distance ("near you") once the visitor shares their location.
   const findNearby = () => {
-    const groups = seasonalGroupsForMonth(month);
+    const items = seasonalProductsForMonth(month);
     router.push(
-      `/quick-search?products=${encodeURIComponent(groups.join(","))}`,
+      `/quick-search?products=${encodeURIComponent(items.join(","))}&match=any`,
     );
   };
 
