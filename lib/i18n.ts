@@ -16,6 +16,7 @@ type Dict = Record<string, string>;
 
 const en: Dict = {
   nav_directory: "Directory",
+  skip_to_content: "Skip to content",
   nav_quickSearch: "Quick search",
   lang_title: "Language",
   rail_source: "Source on GitHub",
@@ -264,6 +265,7 @@ const en: Dict = {
 
 const de: Dict = {
   nav_directory: "Verzeichnis",
+  skip_to_content: "Zum Inhalt springen",
   nav_quickSearch: "Schnellsuche",
   lang_title: "Sprache",
   rail_source: "Quellcode auf GitHub",
@@ -518,6 +520,7 @@ const de: Dict = {
 
 const fr: Dict = {
   nav_directory: "Répertoire",
+  skip_to_content: "Aller au contenu",
   nav_quickSearch: "Recherche rapide",
   lang_title: "Langue",
   rail_source: "Code source sur GitHub",
@@ -772,6 +775,7 @@ const fr: Dict = {
 
 const it: Dict = {
   nav_directory: "Elenco",
+  skip_to_content: "Vai al contenuto",
   nav_quickSearch: "Ricerca rapida",
   lang_title: "Lingua",
   rail_source: "Codice sorgente su GitHub",
@@ -1026,6 +1030,7 @@ const it: Dict = {
 // Rumantsch Grischun — best-effort; a native speaker should review.
 const rm: Dict = {
   nav_directory: "Register",
+  skip_to_content: "Siglir al cuntegn",
   nav_quickSearch: "Tschertga svelta",
   lang_title: "Lingua",
   rail_source: "Code da funtauna sin GitHub",

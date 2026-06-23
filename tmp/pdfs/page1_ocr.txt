@@ -1,0 +1,28 @@
+CALCULO DE MEDIAS DE CURSO - Demonstrag&o do calculo
+Escola: 0860 Escola Secundaria de Raul Proenga
+Numero BI: 14789555 — Civil
+Nome: PEDRO REMEDIOS GALVEIAS
+Inscrigdo: Sexo: M Data Nasc.: 30/10/1996 Candidato: Sim = Turma: Termos: 45/88
+Curso: C60 Ciéncias e Tecnologias N° Proc.: 50264
+Comp. Classif. Anuais Exames Utilizagao na Média
+Cédigo e designagao da disciplina Form. Ano | 10° 11° 12° CIF | 1°F 29°F | CFDsCFDa Extra} Sec. Sup. 1°C
+N186 Portugués G 1415 12 12 12 12 086 aq. 4 11 11
+G 1516 0 0 0 088 9 9
+N304 LE WII/II Inglés G 13/14 15 17 16 16 16 16 16
+NO96 Filosofia G 13/14 12 11 12 12512 12 12
+N048 Educagao Fisica G 1415 15 14 11 13 13 13
+N162 Matematica A E 1415 8 7 0 0 029045 5 5
+E 15/16; 0 O 0 045 095 10 10 10 10
+N100 Fis. e Quim. A E 13/14 10 9 10 076095 10 10 10 10
+E 14/15 0 0 056 6 6
+N014 Biol. e Geol. E 13/14; 11 12 12 096 A) ad ul 11
+N222 Quimica E 14/15 16. 16 16 16 16 16
+NOO09 Aplic. Inf. B DL-272 E 14/15 19 19 19 19 19 19
+Somas de classificagdes 105 105 0
+Numero de disciplinas 8 8 0
+Médias 13 131
+Ano Classificagao final
+Cursos: Codigo e designagao do curso Tipo Calculo p/Sec. p/Sup. p/12C. Calculo
+C60 Ciéncias e Tecnologias 12° 15/16 13 131 0 Auto
+RO3 Resultado: Médias foram calculadas com sucesso.
+ENES2016 - CALCULO DE MEDIAS 2016/08/08 13:57 - Pag. 1
