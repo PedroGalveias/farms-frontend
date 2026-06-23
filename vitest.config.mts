@@ -47,6 +47,7 @@ export default defineConfig({
         "components/ShareButton.tsx",
         "components/personalization/RecentlyViewedStrip.tsx",
         "components/saved/SavedView.tsx",
+        "components/home/useFarmDirectory.ts",
         "components/theme/ThemeProvider.tsx",
         "components/i18n/LanguageProvider.tsx",
       ],
