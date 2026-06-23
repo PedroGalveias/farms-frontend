@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import FarmDetail from "@/components/FarmDetail";
 import { getFarms } from "@/lib/farms-service";
 import { localeFromAcceptLanguage } from "@/lib/i18n";
-import { farmMetaDescription } from "@/lib/share";
+import { farmJsonLd, farmMetaDescription } from "@/lib/share";
+import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
 
 // There's no single-farm endpoint, so we fetch the list and find the farm.
@@ -72,11 +73,19 @@ export default async function FarmPage({
     ? `/quick-search${products ? `?products=${encodeURIComponent(products)}` : ""}`
     : "/";
 
+  const jsonLd = farmJsonLd(farm, getSiteUrl());
+
   return (
-    <FarmDetail
-      backHref={backHref}
-      farm={farm}
-      fromQuickSearch={fromQuickSearch}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <FarmDetail
+        backHref={backHref}
+        farm={farm}
+        fromQuickSearch={fromQuickSearch}
+      />
+    </>
   );
 }

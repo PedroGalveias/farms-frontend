@@ -1,5 +1,6 @@
 import { getCantonName } from "@/lib/farms";
 import { tagLabel } from "@/lib/products";
+import { parseQuickSearchCoordinates } from "@/lib/quick-search";
 import type { Locale } from "@/lib/i18n";
 import type { Farm } from "@/types/farm";
 
@@ -29,4 +30,38 @@ export function farmMetaDescription(farm: Farm, locale: Locale): string {
     .join(", ");
   const base = `${farm.name} in ${place}`;
   return categories ? `${base} — ${categories}` : base;
+}
+
+/**
+ * schema.org JSON-LD for a farm's page, so search engines can surface it as a
+ * rich result with its location on the map. `origin` is the absolute site
+ * origin used to build the canonical URL. The `geo` block is omitted when the
+ * stored coordinates can't be parsed.
+ */
+export function farmJsonLd(
+  farm: Farm,
+  origin: string,
+): Record<string, unknown> {
+  const coordinates = parseQuickSearchCoordinates(farm.coordinates);
+  return {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: farm.name,
+    url: farmShareUrl(origin, farm.id),
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: farm.address,
+      addressRegion: getCantonName(farm.canton),
+      addressCountry: "CH",
+    },
+    ...(coordinates
+      ? {
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+          },
+        }
+      : {}),
+  };
 }

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { farmMetaDescription, farmPath, farmShareUrl } from "@/lib/share";
+import {
+  farmJsonLd,
+  farmMetaDescription,
+  farmPath,
+  farmShareUrl,
+} from "@/lib/share";
 import type { Farm } from "@/types/farm";
 
 function makeFarm(overrides: Partial<Farm> = {}): Farm {
@@ -45,5 +50,29 @@ describe("farmMetaDescription", () => {
   it("omits the dash when a farm has no categories", () => {
     const description = farmMetaDescription(makeFarm({ categories: [] }), "en");
     expect(description).toBe("Bauernhof Meier in Bern (BE)");
+  });
+});
+
+describe("farmJsonLd", () => {
+  it("describes the farm as a LocalBusiness with a canonical URL and geo", () => {
+    const data = farmJsonLd(makeFarm(), "https://farms.example");
+    expect(data["@type"]).toBe("LocalBusiness");
+    expect(data.name).toBe("Bauernhof Meier");
+    expect(data.url).toBe("https://farms.example/farm/abc%20123");
+    expect(data.address).toMatchObject({
+      streetAddress: "Dorfstrasse 1",
+      addressRegion: "Bern",
+      addressCountry: "CH",
+    });
+    expect(data.geo).toMatchObject({
+      "@type": "GeoCoordinates",
+      latitude: 46.948,
+      longitude: 7.4474,
+    });
+  });
+
+  it("omits geo when the coordinates can't be parsed", () => {
+    const data = farmJsonLd(makeFarm({ coordinates: "n/a" }), "https://x.test");
+    expect(data.geo).toBeUndefined();
   });
 });
