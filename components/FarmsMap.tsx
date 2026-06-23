@@ -77,6 +77,9 @@ export default function FarmsMap({
       iconCreateFunction: clusterIcon,
       showCoverageOnHover: false,
       maxClusterRadius: 50,
+      // Add markers in chunks across frames so a few thousand farms don't freeze
+      // the UI when the map opens or the filter set changes.
+      chunkedLoading: true,
     });
     map.addLayer(cluster);
     mapRef.current = map;
@@ -100,16 +103,28 @@ export default function FarmsMap({
     }
     cluster.clearLayers();
     const points = toFarmPoints(farms);
-    for (const point of points) {
+    // Build the markers up front and add them in one bulk call — far cheaper
+    // than addLayer-per-marker, which re-clusters on every insert.
+    const markers = points.map((point) => {
       const marker = L.marker([point.latitude, point.longitude], {
         icon: pinIcon,
         title: point.farm.name,
       });
       marker.on("click", () => onOpenRef.current(point.farm));
-      cluster.addLayer(marker);
-    }
+      return marker;
+    });
+    cluster.addLayers(markers);
     if (points.length > 0) {
-      map.fitBounds(cluster.getBounds(), { padding: [40, 40], maxZoom: 14 });
+      // Ensure Leaflet knows the real container size before fitting — when this
+      // runs right after the map view mounts the container may not be laid out
+      // yet, which would otherwise clamp the fit to maxZoom. Derive bounds from
+      // the points directly: chunked loading adds markers asynchronously, so
+      // cluster.getBounds() would be incomplete right now.
+      map.invalidateSize();
+      const bounds = L.latLngBounds(
+        points.map((point) => [point.latitude, point.longitude]),
+      );
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
   }, [farms]);
 
