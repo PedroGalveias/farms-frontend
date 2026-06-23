@@ -473,6 +473,38 @@ body.sheet-open .mobile-tab-bar {
   color: rgba(241, 242, 238, 0.8);
 }
 
+/* ---------- Skip-to-content link ---------- */
+/* Stays in the DOM (focusable, screen-reader reachable) but parked off the top
+   edge until focused — a robust pattern that doesn't depend on utility order. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  display: inline-flex;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--color-cloud);
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 10px 30px -10px rgba(20, 22, 27, 0.5);
+  transform: translateY(-200%);
+  transition: transform 200ms var(--ease-out-expo);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}
+
 /* ---------- Skeleton shimmer (loading states) ---------- */
 /* Skeletons are Suspense fallbacks — only mounted while a segment is loading.
    They stay invisible for the first beat and only fade in (and shimmer) if the
