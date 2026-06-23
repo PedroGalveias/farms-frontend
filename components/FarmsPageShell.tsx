@@ -39,7 +39,12 @@ import Reveal from "@/components/motion/Reveal";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import RecentlyViewedStrip from "@/components/personalization/RecentlyViewedStrip";
-import { categoryLabel } from "@/lib/categories";
+import { tagLabel } from "@/lib/products";
+import {
+  rankMostWanted,
+  readSearchCounts,
+  trackSearch,
+} from "@/lib/search-stats";
 import {
   getTopFarmCategories,
   getUniqueFarmCantons,
@@ -313,6 +318,24 @@ export default function FarmsPageShell({
     () => getTopFarmCategories(initialFarms, 3),
     [initialFarms],
   );
+
+  // "Most wanted" = this device's most-searched products/categories, blended
+  // (today: just local) and padded with the most-available categories so it's
+  // never empty. Starts from the availability fallback for SSR, then hydrates
+  // to the search-ranked list on the client.
+  const [mostWanted, setMostWanted] = useState<string[]>(quickCategories);
+  useEffect(() => {
+    queueMicrotask(() => {
+      setMostWanted(
+        rankMostWanted({
+          localCounts: readSearchCounts(),
+          fallback: quickCategories,
+          limit: 3,
+        }),
+      );
+    });
+  }, [quickCategories, selectedCategories]);
+
   const cantonRegions = useMemo(
     () => groupCantonsByRegion(cantonOptions),
     [cantonOptions],
@@ -500,6 +523,10 @@ export default function FarmsPageShell({
   };
 
   const toggleCategory = (category: string) => {
+    // Selecting a category is a "search" signal for the Most-wanted card.
+    if (!selectedCategories.includes(category)) {
+      trackSearch([category]);
+    }
     setSelectedCategories((current) =>
       current.includes(category)
         ? current.filter((value) => value !== category)
@@ -646,9 +673,9 @@ export default function FarmsPageShell({
                 {t("bento_mostWanted")}
               </p>
               <p className="text-sm font-bold leading-snug text-pine">
-                {quickCategories
+                {mostWanted
                   .slice(0, 3)
-                  .map((category) => categoryLabel(category, locale))
+                  .map((key) => tagLabel(key, locale))
                   .join(" · ") || "—"}
               </p>
             </div>
