@@ -3,8 +3,6 @@ import FarmsPageShell from "@/components/FarmsPageShell";
 import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
 import type { ServiceStatus } from "@/types/farm";
 
-export const dynamic = "force-dynamic";
-
 function getErrorMessage(error: unknown, fallback: string) {
   if (error instanceof FarmsApiError) {
     return error.message;

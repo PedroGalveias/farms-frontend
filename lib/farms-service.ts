@@ -41,9 +41,15 @@ export async function getFarmsHealth() {
   }
 }
 
+/** Cache tag for the farm list — bust it with revalidateTag(FARMS_CACHE_TAG). */
+export const FARMS_CACHE_TAG = "farms";
+
 export async function getFarms(): Promise<Farm[]> {
   const response = await fetch(`${getFarmsApiBaseUrl()}/farms`, {
-    cache: "no-store",
+    // Serve the directory from the Next Data Cache (shared across requests and
+    // routes) and refresh at most every 5 minutes, instead of hammering the
+    // backend on every page view. A successful create busts the tag.
+    next: { revalidate: 300, tags: [FARMS_CACHE_TAG] },
   });
 
   if (!response.ok) {
