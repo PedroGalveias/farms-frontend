@@ -137,6 +137,7 @@ const en: Dict = {
   offline_body:
     "We couldn't reach the network. Pages you've already visited are still available.",
   offline_retry: "Try again",
+  not_found_back: "Go back",
   map_loading: "Loading map…",
   view_list: "Show list layout",
   view_grid: "Show grid layout",
@@ -368,6 +369,7 @@ const de: Dict = {
   offline_body:
     "Wir konnten das Netzwerk nicht erreichen. Bereits besuchte Seiten sind weiterhin verfügbar.",
   offline_retry: "Erneut versuchen",
+  not_found_back: "Zurück",
   map_loading: "Karte wird geladen…",
   view_list: "Listenansicht anzeigen",
   view_grid: "Rasteransicht anzeigen",
@@ -603,6 +605,7 @@ const fr: Dict = {
   offline_body:
     "Réseau injoignable. Les pages déjà visitées restent disponibles.",
   offline_retry: "Réessayer",
+  not_found_back: "Retour",
   map_loading: "Chargement de la carte…",
   view_list: "Afficher la vue liste",
   view_grid: "Afficher la vue grille",
@@ -836,6 +839,7 @@ const it: Dict = {
   offline_body:
     "Rete non raggiungibile. Le pagine già visitate restano disponibili.",
   offline_retry: "Riprova",
+  not_found_back: "Indietro",
   map_loading: "Caricamento mappa…",
   view_list: "Mostra vista elenco",
   view_grid: "Mostra vista griglia",
@@ -1073,6 +1077,7 @@ const rm: Dict = {
   offline_body:
     "Nus n'avain betg pudì cuntanscher la rait. Paginas gia visitadas restan disponiblas.",
   offline_retry: "Empruvar danovamain",
+  not_found_back: "Enavos",
   map_loading: "Chargiar la charta…",
   view_list: "Mussar la vista da glista",
   view_grid: "Mussar la vista da grilliada",
