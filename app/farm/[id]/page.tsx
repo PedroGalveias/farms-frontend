@@ -47,7 +47,8 @@ export async function generateMetadata({
       type: "website",
       url: `/farm/${encodeURIComponent(farm.id)}`,
     },
-    twitter: { card: "summary", title: farm.name, description },
+    // The generated opengraph-image.tsx supplies the large preview image.
+    twitter: { card: "summary_large_image", title: farm.name, description },
   };
 }
 
