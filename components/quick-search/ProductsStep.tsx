@@ -1,7 +1,9 @@
 "use client";
 
-import { Check, X } from "lucide-react";
+import { useState } from "react";
+import { Check, ChevronDown, X } from "lucide-react";
 import { categoryEmoji, categoryLabel } from "@/lib/categories";
+import { PRODUCTS_BY_GROUP, productLabel } from "@/lib/products";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type {
   QuickSearchMatchMode,
@@ -30,6 +32,14 @@ export default function ProductsStep({
   const { locale, t } = useLanguage();
   const selectedCount = selectedProducts.length;
   const hasAnyAvailability = products.some((product) => product.farmCount > 0);
+  const [expanded, setExpanded] = useState<string[]>([]);
+
+  const toggleExpanded = (group: string) =>
+    setExpanded((current) =>
+      current.includes(group)
+        ? current.filter((value) => value !== group)
+        : [...current, group],
+    );
 
   return (
     <div className="space-y-5">
@@ -71,45 +81,102 @@ export default function ProductsStep({
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="space-y-2">
         {products.map((product) => {
-          const isSelected = selectedProducts.includes(product.category);
+          const group = product.category;
+          const isSelected = selectedProducts.includes(group);
           const isUnavailable = hasAnyAvailability && product.farmCount === 0;
+          const subProducts = PRODUCTS_BY_GROUP[group] ?? [];
+          const isOpen = expanded.includes(group);
+          const selectedSubCount = subProducts.filter((key) =>
+            selectedProducts.includes(key),
+          ).length;
 
           return (
-            <button
-              aria-pressed={isSelected}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
-                isSelected
-                  ? "-translate-y-0.5 border-ink bg-ink text-cloud shadow-[0_10px_22px_-8px_rgba(20,22,27,0.55)]"
-                  : `border-line bg-cloud text-ink/75 hover:border-ink/30 hover:text-ink ${
-                      isUnavailable ? "opacity-45" : ""
-                    }`
-              }`}
-              key={product.category}
-              onClick={() => onToggleProduct(product.category)}
-              type="button"
+            <div
+              className="overflow-hidden rounded-2xl border border-line bg-cloud"
+              key={group}
             >
-              {isSelected ? (
-                <Check className="check-pop h-3.5 w-3.5" />
-              ) : (
-                <span aria-hidden="true">
-                  {categoryEmoji(product.category)}
-                </span>
-              )}
-              {categoryLabel(product.category, locale)}
-              {product.farmCount > 0 ? (
-                <span
-                  className={`rounded-full px-1.5 py-0.5 text-[0.65rem] font-bold leading-none ${
+              <div className="flex items-stretch gap-1 p-1">
+                <button
+                  aria-pressed={isSelected}
+                  className={`flex flex-1 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                     isSelected
-                      ? "bg-cloud/20 text-cloud"
-                      : "bg-tone text-ink/50"
+                      ? "bg-ink text-cloud"
+                      : `text-ink/75 hover:bg-tone ${
+                          isUnavailable ? "opacity-45" : ""
+                        }`
                   }`}
+                  onClick={() => onToggleProduct(group)}
+                  type="button"
                 >
-                  {product.farmCount}
-                </span>
+                  {isSelected ? (
+                    <Check className="check-pop h-3.5 w-3.5" />
+                  ) : (
+                    <span aria-hidden="true">{categoryEmoji(group)}</span>
+                  )}
+                  {categoryLabel(group, locale)}
+                  {product.farmCount > 0 ? (
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 text-[0.65rem] font-bold leading-none ${
+                        isSelected
+                          ? "bg-cloud/20 text-cloud"
+                          : "bg-tone text-ink/50"
+                      }`}
+                    >
+                      {product.farmCount}
+                    </span>
+                  ) : null}
+                  {!isSelected && selectedSubCount > 0 ? (
+                    <span className="rounded-full bg-pine/10 px-1.5 py-0.5 text-[0.65rem] font-bold leading-none text-pine">
+                      {selectedSubCount}
+                    </span>
+                  ) : null}
+                </button>
+
+                {subProducts.length > 0 ? (
+                  <button
+                    aria-expanded={isOpen}
+                    aria-label={t("qs_show_products")}
+                    className="grid w-10 shrink-0 place-items-center rounded-xl text-ink/45 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+                    onClick={() => toggleExpanded(group)}
+                    type="button"
+                  >
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-300 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                ) : null}
+              </div>
+
+              {isOpen && subProducts.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 border-t border-line px-3 py-3">
+                  {subProducts.map((key) => {
+                    const isProductSelected = selectedProducts.includes(key);
+                    return (
+                      <button
+                        aria-pressed={isProductSelected}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                          isProductSelected
+                            ? "border-pine bg-pine/10 text-pine"
+                            : "border-line bg-cloud text-ink/65 hover:border-ink/25 hover:text-ink"
+                        }`}
+                        key={key}
+                        onClick={() => onToggleProduct(key)}
+                        type="button"
+                      >
+                        {isProductSelected ? (
+                          <Check className="h-3 w-3" />
+                        ) : null}
+                        {productLabel(key, locale)}
+                      </button>
+                    );
+                  })}
+                </div>
               ) : null}
-            </button>
+            </div>
           );
         })}
       </div>

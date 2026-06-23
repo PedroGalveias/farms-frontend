@@ -28,7 +28,8 @@ import LocationStep, {
 import ProductsStep from "@/components/quick-search/ProductsStep";
 import ResultsStep from "@/components/quick-search/ResultsStep";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
-import { KNOWN_CATEGORY_KEYS, categoryLabel } from "@/lib/categories";
+import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
+import { PRODUCTS, tagLabel } from "@/lib/products";
 import { geolocationErrorKey, requestCurrentPosition } from "@/lib/geolocation";
 import { getCantonName, getUniqueFarmCantons } from "@/lib/farms";
 import { runViewTransition } from "@/lib/view-transition";
@@ -146,21 +147,30 @@ export default function QuickSearchExperience({
   const currentIndex = STEPS.findIndex((meta) => meta.id === step);
   const statusPill = SERVICE_STATUS_PILLS[serviceStatus];
 
-  // Deep link (e.g. the home "in season" card): ?products=Group1,Group2
-  // pre-selects those category groups, so the visitor lands ready to share
-  // their location and see those farms nearest-first.
+  // Deep link (e.g. the home "in season" card): ?products=Key1,Key2 pre-selects
+  // those keys — each may be a category group OR a specific product
+  // (subcategory). An optional ?match=any sets the match mode (seasonal links
+  // use "any" so a broad in-season selection still returns farms).
   useEffect(() => {
-    const raw = new URLSearchParams(window.location.search).get("products");
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("products");
     if (!raw) {
       return;
     }
-    const groups = raw
+    const keys = raw
       .split(",")
       .map((value) => value.trim())
-      .filter((value) => KNOWN_CATEGORY_KEYS.includes(value));
-    if (groups.length > 0) {
+      .filter(
+        (value) => KNOWN_CATEGORY_KEYS.includes(value) || value in PRODUCTS,
+      );
+    if (keys.length > 0) {
       // Defer out of the effect body (repo lint: no sync setState in effects).
-      queueMicrotask(() => setSelectedProducts(groups));
+      queueMicrotask(() => {
+        setSelectedProducts(keys);
+        if (params.get("match") === "any") {
+          setMatchMode("any");
+        }
+      });
     }
   }, []);
 
@@ -263,7 +273,7 @@ export default function QuickSearchExperience({
         ? t("qs_nothing_picked")
         : selectedProducts
             .slice(0, 3)
-            .map((category) => categoryLabel(category, locale))
+            .map((category) => tagLabel(category, locale))
             .join(", ") +
           (selectedProducts.length > 3
             ? ` +${selectedProducts.length - 3}`

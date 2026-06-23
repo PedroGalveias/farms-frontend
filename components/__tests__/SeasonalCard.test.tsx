@@ -62,9 +62,11 @@ describe("SeasonalCard", () => {
     await user.click(
       screen.getByRole("button", { name: /find these near you/i }),
     );
-    // June produce spans Fruits + Vegetables (Früchte, Gemüse).
-    expect(push).toHaveBeenCalledWith(
-      "/quick-search?products=Fr%C3%BCchte%2CGem%C3%BCse",
-    );
+    // Now deep-links the specific in-season products (match any), e.g. cherries.
+    expect(push).toHaveBeenCalledTimes(1);
+    const url = push.mock.calls[0][0] as string;
+    expect(url).toMatch(/^\/quick-search\?products=/);
+    expect(url).toContain("Kirschen");
+    expect(url).toContain("match=any");
   });
 });
