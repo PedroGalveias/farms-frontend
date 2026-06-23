@@ -28,6 +28,7 @@ import LocationStep, {
 import ProductsStep from "@/components/quick-search/ProductsStep";
 import ResultsStep from "@/components/quick-search/ResultsStep";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
 import { PRODUCTS, tagLabel } from "@/lib/products";
 import { trackSearch } from "@/lib/search-stats";
@@ -101,6 +102,7 @@ export default function QuickSearchExperience({
   serviceStatus,
 }: QuickSearchExperienceProps) {
   const { locale, t } = useLanguage();
+  const { recordView } = usePersonalization();
   const [step, setStep] = useState<QuickSearchStep>("location");
   const [locationInput, setLocationInput] = useState("");
   const [sharedCoordinates, setSharedCoordinates] =
@@ -258,9 +260,13 @@ export default function QuickSearchExperience({
     goToStep("location");
   };
 
-  const openFarm = useCallback((farm: Farm, sourceEl?: HTMLElement | null) => {
-    runViewTransition(() => setActiveFarm(farm), sourceEl);
-  }, []);
+  const openFarm = useCallback(
+    (farm: Farm, sourceEl?: HTMLElement | null) => {
+      recordView(farm.id);
+      runViewTransition(() => setActiveFarm(farm), sourceEl);
+    },
+    [recordView],
+  );
 
   const closeFarmSheet = useCallback(() => {
     runViewTransition(() => setActiveFarm(null));
