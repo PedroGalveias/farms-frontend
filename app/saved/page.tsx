@@ -5,8 +5,6 @@ import { getFarms } from "@/lib/farms-service";
 import { localeFromAcceptLanguage, translate } from "@/lib/i18n";
 import type { Farm } from "@/types/farm";
 
-export const dynamic = "force-dynamic";
-
 export async function generateMetadata(): Promise<Metadata> {
   const locale = localeFromAcceptLanguage(
     (await headers()).get("accept-language"),
