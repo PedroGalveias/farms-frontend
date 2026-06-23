@@ -8,8 +8,6 @@ import { farmJsonLd, farmMetaDescription } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
 
-export const dynamic = "force-dynamic";
-
 // There's no single-farm endpoint, so we fetch the list and find the farm.
 // Returns null on any failure so the page can render a clean 404.
 async function findFarm(id: string): Promise<Farm | null> {
