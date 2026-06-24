@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  hasSessionCookie,
   isSameOrigin,
   mapAuthError,
   validateEmailFormat,
@@ -39,6 +40,21 @@ describe("mapAuthError", () => {
     expect(mapAuthError(401)).toBe("auth_err_credentials");
     expect(mapAuthError(429)).toBe("auth_err_rate_limited");
     expect(mapAuthError(500)).toBe("auth_err_generic");
+  });
+});
+
+describe("hasSessionCookie", () => {
+  it("detects the session cookie among others", () => {
+    expect(hasSessionCookie("farms-session=abc")).toBe(true);
+    expect(hasSessionCookie("theme=dark; farms-session=abc; lang=en")).toBe(
+      true,
+    );
+  });
+
+  it("returns false when absent (and isn't fooled by similar names)", () => {
+    expect(hasSessionCookie("")).toBe(false);
+    expect(hasSessionCookie("theme=dark")).toBe(false);
+    expect(hasSessionCookie("not-farms-session=abc")).toBe(false);
   });
 });
 

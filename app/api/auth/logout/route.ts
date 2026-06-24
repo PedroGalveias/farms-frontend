@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getFarmsApiBaseUrl } from "@/lib/backend";
-import { isSameOrigin } from "@/lib/auth";
+import { SESSION_COOKIE_NAME, isSameOrigin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +32,6 @@ export async function POST(req: NextRequest) {
   for (const cookie of setCookies) {
     res.headers.append("set-cookie", cookie);
   }
-  res.cookies.set("farms-session", "", { maxAge: 0, path: "/" });
+  res.cookies.set(SESSION_COOKIE_NAME, "", { maxAge: 0, path: "/" });
   return res;
 }

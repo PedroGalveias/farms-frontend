@@ -69,6 +69,16 @@ export default function AuthModal({
     });
   }, [open]);
 
+  // Switching between login and register clears any errors from the other form
+  // (the full reset only runs on close), so a wrong-password message doesn't
+  // linger onto the register view. Email/password are kept so nothing retypes.
+  useEffect(() => {
+    queueMicrotask(() => {
+      setFieldErrors({});
+      setFormError(null);
+    });
+  }, [mode]);
+
   // Body scroll lock + focus the first field on open; Escape to close.
   useEffect(() => {
     if (!open) {

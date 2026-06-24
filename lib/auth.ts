@@ -8,6 +8,17 @@ export interface AuthUser {
   role: Role;
 }
 
+/** Name of the backend's httpOnly session cookie. */
+export const SESSION_COOKIE_NAME = "farms-session";
+
+/**
+ * Whether a Cookie header carries the session cookie. Lets callers skip a
+ * pointless backend /me round-trip for anonymous visitors (the common case).
+ */
+export function hasSessionCookie(cookieHeader: string): boolean {
+  return new RegExp(`(?:^|;\\s*)${SESSION_COOKIE_NAME}=`).test(cookieHeader);
+}
+
 // Backend rule we mirror client-side (UX only — the backend is authoritative):
 // at least 12 characters, at most 1024 bytes, any Unicode, no composition rules.
 export const PASSWORD_MIN_LENGTH = 12;
