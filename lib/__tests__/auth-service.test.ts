@@ -23,9 +23,16 @@ describe("fetchCurrentUser", () => {
     });
   });
 
-  it("returns null on 401 (no session)", async () => {
+  it("returns null on 401 (expired session)", async () => {
     mockFetch(401);
+    await expect(fetchCurrentUser("farms-session=stale")).resolves.toBeNull();
+  });
+
+  it("short-circuits to null without a backend call when no session cookie", async () => {
+    const spy = vi.spyOn(globalThis, "fetch");
     await expect(fetchCurrentUser("")).resolves.toBeNull();
+    await expect(fetchCurrentUser("theme=dark")).resolves.toBeNull();
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it("forwards the cookie header to the backend", async () => {
@@ -39,11 +46,13 @@ describe("fetchCurrentUser", () => {
 
   it("throws FarmsApiError on an unexpected backend error", async () => {
     mockFetch(500, { error: "boom" });
-    await expect(fetchCurrentUser("")).rejects.toBeInstanceOf(FarmsApiError);
+    await expect(fetchCurrentUser("farms-session=abc")).rejects.toBeInstanceOf(
+      FarmsApiError,
+    );
   });
 
   it("treats an unreachable backend as logged-out", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("ECONNREFUSED"));
-    await expect(fetchCurrentUser("")).resolves.toBeNull();
+    await expect(fetchCurrentUser("farms-session=abc")).resolves.toBeNull();
   });
 });

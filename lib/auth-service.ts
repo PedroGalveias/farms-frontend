@@ -3,7 +3,7 @@ import {
   getFarmsApiBaseUrl,
   readErrorMessage,
 } from "@/lib/backend";
-import type { AuthUser } from "@/lib/auth";
+import { hasSessionCookie, type AuthUser } from "@/lib/auth";
 
 const AUTH_TIMEOUT_MS = 8000;
 
@@ -16,6 +16,12 @@ const AUTH_TIMEOUT_MS = 8000;
 export async function fetchCurrentUser(
   cookieHeader: string,
 ): Promise<AuthUser | null> {
+  // No session cookie → definitely anonymous. Skip the backend round-trip that
+  // would otherwise run on every page load for logged-out visitors.
+  if (!hasSessionCookie(cookieHeader)) {
+    return null;
+  }
+
   let response: Response;
   try {
     response = await fetch(`${getFarmsApiBaseUrl()}/me`, {
