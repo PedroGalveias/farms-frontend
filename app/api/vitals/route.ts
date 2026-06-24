@@ -11,8 +11,10 @@ interface VitalPayload {
 
 const ALLOWED_METRICS = new Set(["LCP", "CLS", "INP", "FCP", "TTFB"]);
 
+// Strip CR/LF so attacker-controlled fields can't forge log lines (CWE-117),
+// and cap the length so they can't flood the logs with one huge beacon.
 function sanitizeForLog(value: string): string {
-  return value.replace(/[\r\n]/g, "");
+  return value.replace(/[\r\n]/g, "").slice(0, 200);
 }
 
 /**
