@@ -38,6 +38,23 @@ self.addEventListener("activate", (event) => {
 
 // Let the app's update banner activate a newly installed worker immediately.
 self.addEventListener("message", (event) => {
+  // Only honor messages from same-origin clients.
+  const sourceClient = event.source;
+  if (!sourceClient || !sourceClient.url) {
+    return;
+  }
+
+  let sourceUrl;
+  try {
+    sourceUrl = new URL(sourceClient.url);
+  } catch {
+    return;
+  }
+
+  if (sourceUrl.origin !== self.location.origin) {
+    return;
+  }
+
   if (event.data?.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
