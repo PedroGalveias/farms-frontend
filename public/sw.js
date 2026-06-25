@@ -38,6 +38,11 @@ self.addEventListener("activate", (event) => {
 
 // Let the app's update banner activate a newly installed worker immediately.
 self.addEventListener("message", (event) => {
+  // 1. Explicitly verify that the message comes from the same origin
+  if (event.origin !== self.location.origin) {
+    return;
+  }
+
   // Only honor messages from same-origin clients.
   const sourceClient = event.source;
   if (!sourceClient || !sourceClient.url) {
