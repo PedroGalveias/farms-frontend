@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -18,6 +18,7 @@ import AddToCollectionMenu from "@/components/saved/AddToCollectionMenu";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { farmsToCsv } from "@/lib/export";
+import { readCachedFarms, writeCachedFarms } from "@/lib/offline-farms";
 import type { Farm } from "@/types/farm";
 
 const chipClassName = (active: boolean) =>
@@ -43,8 +44,19 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
   const [newName, setNewName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [renameValue, setRenameValue] = useState<string | null>(null);
+  const [offlineFarms] = useState(readCachedFarms);
 
-  const byId = new Map(farms.map((farm) => [farm.id, farm]));
+  useEffect(() => {
+    writeCachedFarms(farms);
+  }, [farms]);
+
+  const resolvedFarms = farms.length > 0 ? farms : offlineFarms;
+  const usingOfflineCache = farms.length === 0 && offlineFarms.length > 0;
+
+  const byId = useMemo(
+    () => new Map(resolvedFarms.map((farm) => [farm.id, farm])),
+    [resolvedFarms],
+  );
   const resolve = (ids: string[]) =>
     ids.map((id) => byId.get(id)).filter((farm): farm is Farm => farm != null);
 
@@ -100,7 +112,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
             {t("saved_title")}
           </h1>
           <p className="mt-1 text-sm leading-6 text-ink/55">
-            {t("saved_subtitle")}
+            {usingOfflineCache ? t("saved_offline_cache") : t("saved_subtitle")}
           </p>
         </div>
         {shownFarms.length > 0 ? (

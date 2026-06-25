@@ -164,7 +164,8 @@ const en: Dict = {
   farm_back: "Back to directory",
   farm_backToQuickSearch: "Back to quick search",
   farm_viewPage: "View full page",
-  detail_openMaps: "Open in Google Maps",
+  detail_openMaps: "Open in Maps",
+  detail_openAppleMaps: "Open in Apple Maps",
   detail_address: "Address",
   detail_coordinates: "Coordinates",
   detail_added: "Added",
@@ -175,6 +176,7 @@ const en: Dict = {
   recent_title: "Recently viewed",
   saved_title: "Saved",
   saved_subtitle: "Your favourite farms, organised into collections.",
+  saved_offline_cache: "Offline mode: showing your last saved farm data.",
   saved_all: "All saved",
   saved_empty_title: "No saved farms yet",
   saved_empty_body: "Tap the heart on any farm to save it here.",
@@ -199,6 +201,14 @@ const en: Dict = {
   offline_body:
     "We couldn't reach the network. Pages you've already visited are still available.",
   offline_retry: "Try again",
+  pwa_install_title: "Install farms",
+  pwa_install_body: "Add it to your home screen for faster mobile access.",
+  pwa_install_ios: "Use Share, then Add to Home Screen.",
+  pwa_install_cta: "Install",
+  pwa_update_title: "Update ready",
+  pwa_update_body: "Refresh to use the latest offline data and app polish.",
+  pwa_update_cta: "Refresh",
+  pwa_dismiss: "Dismiss",
   not_found_back: "Go back",
   error_title: "Something went wrong",
   error_body:
@@ -462,7 +472,8 @@ const de: Dict = {
   farm_back: "Zurück zum Verzeichnis",
   farm_backToQuickSearch: "Zurück zur Schnellsuche",
   farm_viewPage: "Ganze Seite ansehen",
-  detail_openMaps: "In Google Maps öffnen",
+  detail_openMaps: "In Maps öffnen",
+  detail_openAppleMaps: "In Apple Karten öffnen",
   detail_address: "Adresse",
   detail_coordinates: "Koordinaten",
   detail_added: "Hinzugefügt",
@@ -473,6 +484,8 @@ const de: Dict = {
   recent_title: "Zuletzt angesehen",
   saved_title: "Gespeichert",
   saved_subtitle: "Deine Lieblingshöfe, in Sammlungen organisiert.",
+  saved_offline_cache:
+    "Offline-Modus: Es werden die zuletzt gespeicherten Hofdaten angezeigt.",
   saved_all: "Alle gespeicherten",
   saved_empty_title: "Noch keine gespeicherten Höfe",
   saved_empty_body:
@@ -498,6 +511,16 @@ const de: Dict = {
   offline_body:
     "Wir konnten das Netzwerk nicht erreichen. Bereits besuchte Seiten sind weiterhin verfügbar.",
   offline_retry: "Erneut versuchen",
+  pwa_install_title: "farms installieren",
+  pwa_install_body:
+    "Zum Home-Bildschirm hinzufügen für schnelleren Zugriff auf dem Handy.",
+  pwa_install_ios: "Teilen öffnen, dann Zum Home-Bildschirm wählen.",
+  pwa_install_cta: "Installieren",
+  pwa_update_title: "Update bereit",
+  pwa_update_body:
+    "Aktualisieren, um die neuesten Offline-Daten und Verbesserungen zu nutzen.",
+  pwa_update_cta: "Aktualisieren",
+  pwa_dismiss: "Ausblenden",
   not_found_back: "Zurück",
   error_title: "Etwas ist schiefgelaufen",
   error_body:
@@ -764,7 +787,8 @@ const fr: Dict = {
   farm_back: "Retour au répertoire",
   farm_backToQuickSearch: "Retour à la recherche rapide",
   farm_viewPage: "Voir la page complète",
-  detail_openMaps: "Ouvrir dans Google Maps",
+  detail_openMaps: "Ouvrir dans Plans",
+  detail_openAppleMaps: "Ouvrir dans Plans Apple",
   detail_address: "Adresse",
   detail_coordinates: "Coordonnées",
   detail_added: "Ajoutée le",
@@ -775,6 +799,8 @@ const fr: Dict = {
   recent_title: "Vus récemment",
   saved_title: "Enregistrés",
   saved_subtitle: "Vos fermes favorites, organisées en collections.",
+  saved_offline_cache:
+    "Mode hors ligne : affichage des dernières données de fermes enregistrées.",
   saved_all: "Tous les enregistrés",
   saved_empty_title: "Aucune ferme enregistrée",
   saved_empty_body: "Touchez le cœur d'une ferme pour l'enregistrer ici.",
@@ -800,6 +826,16 @@ const fr: Dict = {
   offline_body:
     "Réseau injoignable. Les pages déjà visitées restent disponibles.",
   offline_retry: "Réessayer",
+  pwa_install_title: "Installer farms",
+  pwa_install_body:
+    "Ajoutez l'app à l'écran d'accueil pour un accès mobile plus rapide.",
+  pwa_install_ios: "Utilisez Partager, puis Sur l'écran d'accueil.",
+  pwa_install_cta: "Installer",
+  pwa_update_title: "Mise à jour prête",
+  pwa_update_body:
+    "Actualisez pour utiliser les dernières données hors ligne et améliorations.",
+  pwa_update_cta: "Actualiser",
+  pwa_dismiss: "Fermer",
   not_found_back: "Retour",
   error_title: "Une erreur s'est produite",
   error_body:
@@ -1064,7 +1100,8 @@ const it: Dict = {
   farm_back: "Torna all'elenco",
   farm_backToQuickSearch: "Torna alla ricerca rapida",
   farm_viewPage: "Vedi la pagina completa",
-  detail_openMaps: "Apri in Google Maps",
+  detail_openMaps: "Apri in Mappe",
+  detail_openAppleMaps: "Apri in Mappe Apple",
   detail_address: "Indirizzo",
   detail_coordinates: "Coordinate",
   detail_added: "Aggiunta il",
@@ -1075,6 +1112,8 @@ const it: Dict = {
   recent_title: "Visti di recente",
   saved_title: "Salvati",
   saved_subtitle: "Le tue fattorie preferite, organizzate in raccolte.",
+  saved_offline_cache:
+    "Modalita offline: mostriamo gli ultimi dati salvati sulle fattorie.",
   saved_all: "Tutti i salvati",
   saved_empty_title: "Nessuna fattoria salvata",
   saved_empty_body: "Tocca il cuore di una fattoria per salvarla qui.",
@@ -1100,6 +1139,16 @@ const it: Dict = {
   offline_body:
     "Rete non raggiungibile. Le pagine già visitate restano disponibili.",
   offline_retry: "Riprova",
+  pwa_install_title: "Installa farms",
+  pwa_install_body:
+    "Aggiungila alla schermata Home per un accesso mobile piu rapido.",
+  pwa_install_ios: "Usa Condividi, poi Aggiungi alla schermata Home.",
+  pwa_install_cta: "Installa",
+  pwa_update_title: "Aggiornamento pronto",
+  pwa_update_body:
+    "Aggiorna per usare gli ultimi dati offline e miglioramenti dell'app.",
+  pwa_update_cta: "Aggiorna",
+  pwa_dismiss: "Chiudi",
   not_found_back: "Indietro",
   error_title: "Qualcosa è andato storto",
   error_body:
@@ -1369,7 +1418,8 @@ const rm: Dict = {
   farm_back: "Enavos al register",
   farm_backToQuickSearch: "Enavos a la tschertga svelta",
   farm_viewPage: "Vesair la pagina entira",
-  detail_openMaps: "Avrir en Google Maps",
+  detail_openMaps: "Avrir en Maps",
+  detail_openAppleMaps: "Avrir en Apple Maps",
   detail_address: "Adressa",
   detail_coordinates: "Coordinatas",
   detail_added: "Agiuntà ils",
@@ -1380,6 +1430,8 @@ const rm: Dict = {
   recent_title: "Vis dacurt",
   saved_title: "Memorisà",
   saved_subtitle: "Tes manaschis preferids, organisads en collecziuns.",
+  saved_offline_cache:
+    "Modus offline: mussain las ultimas datas memorisadas dals manaschis.",
   saved_all: "Tut ils memorisads",
   saved_empty_title: "Anc nagins manaschis memorisads",
   saved_empty_body: "Tatga sin il cor d'in manaschi per al memorisar qua.",
@@ -1404,6 +1456,17 @@ const rm: Dict = {
   offline_body:
     "Nus n'avain betg pudì cuntanscher la rait. Paginas gia visitadas restan disponiblas.",
   offline_retry: "Empruvar danovamain",
+  pwa_install_title: "Installar farms",
+  pwa_install_body:
+    "Agiuntar a la vischnanca da partenza per access pli svelt sin il telefonin.",
+  pwa_install_ios:
+    "Dovra Cundivider, lura Agiuntar a la vischnanca da partenza.",
+  pwa_install_cta: "Installar",
+  pwa_update_title: "Actualisaziun pronta",
+  pwa_update_body:
+    "Actualisescha per duvrar las ultimas datas offline e meglieraziuns.",
+  pwa_update_cta: "Actualisar",
+  pwa_dismiss: "Serrar",
   not_found_back: "Enavos",
   error_title: "Insatg n'è betg ì endretg",
   error_body:
