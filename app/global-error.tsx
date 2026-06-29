@@ -23,7 +23,8 @@ export default function GlobalError({
       <body
         style={{
           margin: 0,
-          minHeight: "100vh",
+          // dvh tracks the visible viewport on mobile Safari/Firefox.
+          minHeight: "100dvh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
