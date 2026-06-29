@@ -276,6 +276,38 @@ export function getNearestFarm(
   return nearest;
 }
 
+export interface FarmDistance {
+  farm: Farm;
+  distanceKm: number;
+}
+
+/**
+ * The `limit` farms closest to `coordinates`, nearest first. Farms without
+ * parseable coordinates are skipped. Used by the "near me" sheet.
+ */
+export function getNearestFarms(
+  farms: Farm[],
+  coordinates: QuickSearchCoordinates,
+  limit = 10,
+): FarmDistance[] {
+  const withDistance: FarmDistance[] = [];
+
+  for (const farm of farms) {
+    const farmCoordinates = parseQuickSearchCoordinates(farm.coordinates);
+    if (!farmCoordinates) {
+      continue;
+    }
+    withDistance.push({
+      farm,
+      distanceKm: haversineDistanceKm(coordinates, farmCoordinates),
+    });
+  }
+
+  return withDistance
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .slice(0, Math.max(0, limit));
+}
+
 export function formatQuickSearchDistance(distanceKm: number | null) {
   if (distanceKm === null) {
     return null;

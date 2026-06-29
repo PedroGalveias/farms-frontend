@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatQuickSearchDistance,
   getNearestFarm,
+  getNearestFarms,
   getQuickSearchProducts,
   getQuickSearchResults,
   parseQuickSearchCoordinates,
@@ -97,6 +98,37 @@ describe("getNearestFarm", () => {
     const broken = makeFarm({ coordinates: "x" });
     expect(getNearestFarm([broken], { latitude: 46, longitude: 7 })).toBeNull();
     expect(getNearestFarm([], { latitude: 46, longitude: 7 })).toBeNull();
+  });
+});
+
+describe("getNearestFarms", () => {
+  const a = makeFarm({ id: "a", coordinates: "46.95,7.45" }); // closest
+  const b = makeFarm({ id: "b", coordinates: "46.96,7.46" });
+  const c = makeFarm({ id: "c", coordinates: "47.3769,8.5417" }); // farthest
+  const broken = makeFarm({ id: "broken", coordinates: "nope" });
+
+  it("returns farms sorted nearest-first, limited", () => {
+    const result = getNearestFarms([c, broken, b, a], {
+      latitude: 46.95,
+      longitude: 7.45,
+    });
+    expect(result.map((r) => r.farm.id)).toEqual(["a", "b", "c"]);
+    expect(result[0].distanceKm).toBeLessThanOrEqual(result[1].distanceKm);
+  });
+
+  it("honors the limit and skips unparseable coordinates", () => {
+    const result = getNearestFarms(
+      [c, broken, b, a],
+      { latitude: 46.95, longitude: 7.45 },
+      2,
+    );
+    expect(result.map((r) => r.farm.id)).toEqual(["a", "b"]);
+  });
+
+  it("returns an empty array when nothing has coordinates", () => {
+    expect(getNearestFarms([broken], { latitude: 46, longitude: 7 })).toEqual(
+      [],
+    );
   });
 });
 
