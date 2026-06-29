@@ -171,7 +171,7 @@ export default function CreateFarmDialog({
       <div
         aria-labelledby="create-farm-heading"
         aria-modal="true"
-        className="qs-sheet max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[32px] border border-line bg-cloud shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)]"
+        className="qs-sheet max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-[32px] border border-line bg-cloud shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)]"
         role="dialog"
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
