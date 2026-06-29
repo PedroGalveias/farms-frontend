@@ -1,8 +1,11 @@
 import type { MetadataRoute } from "next";
 
 // Web App Manifest — makes the site installable. Served at /manifest.webmanifest
-// and auto-linked by Next. The single SVG icon (sizes "any") satisfies install
-// requirements on Chromium browsers without shipping rasterized PNGs.
+// and auto-linked by Next. We ship both the scalable SVG (crisp on Chromium at
+// any size) and rasterized PNGs: iOS/Safari ignores SVG manifest icons for
+// Add-to-Home-Screen and Android drives its install splash + adaptive icon from
+// the 192/512 PNGs, so the PNGs are what give cross-engine install parity.
+// Regenerate the PNGs with: node scripts/generate-icons.mjs
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Swiss farms",
@@ -55,9 +58,21 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "any",
       },
       {
-        src: "/icon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
+        src: "/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon-maskable-512.png",
+        sizes: "512x512",
+        type: "image/png",
         purpose: "maskable",
       },
     ],
