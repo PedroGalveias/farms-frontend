@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, LoaderCircle, MailX } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
+import { useAuth } from "@/components/auth/AuthProvider";
 import LetterToFarm from "@/components/auth/LetterToFarm";
 
 type Status = "idle" | "pending" | "success" | "error" | "missing";
@@ -14,9 +15,19 @@ const REDIRECT_SECONDS = 5;
 export default function VerifyEmailPage() {
   const t = useT();
   const router = useRouter();
+  const { openAuth } = useAuth();
   const [token, setToken] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [countdown, setCountdown] = useState(REDIRECT_SECONDS);
+
+  // Open the login modal (lives in the persistent root-layout provider, so it
+  // survives the navigation) and go home. We can't rely on a ?auth=login URL
+  // param: AuthProvider only reads it once on mount, which doesn't re-run for a
+  // client-side navigation.
+  const goToLogin = useCallback(() => {
+    openAuth("login");
+    router.push("/");
+  }, [openAuth, router]);
 
   // Read the token from the URL once, then strip it so it never lingers in
   // history or leaks via the Referer header on outbound navigations.
@@ -41,12 +52,12 @@ export default function VerifyEmailPage() {
       return undefined;
     }
     if (countdown <= 0) {
-      router.push("/?auth=login");
+      goToLogin();
       return undefined;
     }
     const timer = window.setTimeout(() => setCountdown((n) => n - 1), 1000);
     return () => window.clearTimeout(timer);
-  }, [status, countdown, router]);
+  }, [status, countdown, goToLogin]);
 
   const verify = async () => {
     if (!token) {
@@ -82,7 +93,7 @@ export default function VerifyEmailPage() {
           </p>
           <button
             className="mt-7 inline-flex items-center justify-center rounded-full bg-ink px-7 py-4 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
-            onClick={() => router.push("/?auth=login")}
+            onClick={goToLogin}
             type="button"
           >
             {t("verify_success_cta")}

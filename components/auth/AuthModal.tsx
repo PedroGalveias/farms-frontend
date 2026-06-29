@@ -12,6 +12,7 @@ import {
   mapAuthError,
   validateEmailFormat,
   validatePassword,
+  type AuthUser,
 } from "@/lib/auth";
 import { useT } from "@/components/i18n/LanguageProvider";
 import LetterToFarm from "@/components/auth/LetterToFarm";
@@ -23,7 +24,7 @@ interface AuthModalProps {
   noticeKey: string | null;
   onClose: () => void;
   onSwitch: (mode: AuthMode) => void;
-  onAuthenticated: () => void;
+  onAuthenticated: (user?: AuthUser) => void;
 }
 
 const fieldClassName =
@@ -152,7 +153,10 @@ export default function AuthModal({
 
       if (isLogin) {
         if (res.ok) {
-          onAuthenticated();
+          // Reuse the login response {user_id, role} so the provider doesn't
+          // have to round-trip /me again right after.
+          const user = (await res.json().catch(() => null)) as AuthUser | null;
+          onAuthenticated(user ?? undefined);
           return;
         }
         setFormError(t(mapAuthError(res.status)));
@@ -231,7 +235,11 @@ export default function AuthModal({
             </button>
           </div>
         ) : (
-          <form className="px-6 pb-7 pt-6 sm:px-8" onSubmit={handleSubmit}>
+          <form
+            className="px-6 pb-7 pt-6 sm:px-8"
+            noValidate
+            onSubmit={handleSubmit}
+          >
             {noticeKey ? (
               <p className="mb-5 rounded-2xl bg-pine/10 px-4 py-3 text-sm font-medium text-pine">
                 {t(noticeKey)}
