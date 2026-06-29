@@ -9,13 +9,16 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { ExternalLink, Maximize2, X } from "lucide-react";
+import { ExternalLink, Heart, Maximize2, X } from "lucide-react";
 import { productGroupOf, tagLabel } from "@/lib/products";
 import CopyButton from "@/components/CopyButton";
 import ShareButton from "@/components/ShareButton";
+import AddToCollectionMenu from "@/components/saved/AddToCollectionMenu";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { detectDirectionsPlatform, directionsUrl } from "@/lib/directions";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
+import { haptic } from "@/lib/haptics";
 import { farmPath } from "@/lib/share";
 import { supportsViewTransitions } from "@/lib/view-transition";
 import type { Farm } from "@/types/farm";
@@ -40,6 +43,8 @@ export default function FarmDetailSheet({
 }: FarmDetailSheetProps) {
   const { locale } = useLanguage();
   const t = useT();
+  const { isFavorite, toggleFavorite } = usePersonalization();
+  const saved = isFavorite(farm.id);
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartYRef = useRef<number | null>(null);
@@ -240,9 +245,11 @@ export default function FarmDetailSheet({
             </div>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap">
+          {/* Action-first: a prominent "directions" button, then save / share /
+              collection / full page in a wrapping secondary row. */}
+          <div className="mt-6 space-y-3">
             <a
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 sm:w-auto"
               href={mapsUrl}
               rel="noreferrer"
               target="_blank"
@@ -252,26 +259,46 @@ export default function FarmDetailSheet({
                 ? t("detail_openAppleMaps")
                 : t("detail_openMaps")}
             </a>
-            <Link
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
-              href={`${farmPath(farm.id)}${viewPageQuery}`}
-            >
-              <Maximize2 className="h-4 w-4" />
-              {t("farm_viewPage")}
-            </Link>
-            <ShareButton
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
-              text={farm.address}
-              title={farm.name}
-              url={farmPath(farm.id)}
-            />
-            <button
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
-              onClick={onClose}
-              type="button"
-            >
-              {t("detail_close")}
-            </button>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                aria-label={saved ? t("card_saved") : t("card_save")}
+                aria-pressed={saved}
+                className={`inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                  saved
+                    ? "border-pine/30 bg-pine/10 text-pine"
+                    : "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink"
+                }`}
+                onClick={() => {
+                  haptic();
+                  toggleFavorite(farm.id);
+                }}
+                type="button"
+              >
+                <Heart
+                  className={`h-4 w-4 ${saved ? "fill-current heart-pop" : ""}`}
+                  key={saved ? "saved" : "unsaved"}
+                />
+                {saved ? t("card_saved") : t("card_save")}
+              </button>
+
+              <ShareButton
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-5 py-3 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+                text={farm.address}
+                title={farm.name}
+                url={farmPath(farm.id)}
+              />
+
+              <AddToCollectionMenu farmId={farm.id} />
+
+              <Link
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-5 py-3 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+                href={`${farmPath(farm.id)}${viewPageQuery}`}
+              >
+                <Maximize2 className="h-4 w-4" />
+                {t("farm_viewPage")}
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ import { usePersonalization } from "@/components/personalization/Personalization
 import AddToCollectionMenu from "@/components/saved/AddToCollectionMenu";
 import { detectDirectionsPlatform, directionsUrl } from "@/lib/directions";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
+import { haptic } from "@/lib/haptics";
 import { tagLabel } from "@/lib/products";
 import { farmPath } from "@/lib/share";
 import type { Farm } from "@/types/farm";
@@ -109,7 +110,10 @@ export default function FarmDetail({
               ? "border-pine/30 bg-pine/10 text-pine"
               : "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink"
           }`}
-          onClick={() => toggleFavorite(farm.id)}
+          onClick={() => {
+            haptic();
+            toggleFavorite(farm.id);
+          }}
           type="button"
         >
           <Heart
