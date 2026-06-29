@@ -8,9 +8,11 @@ import {
   readStoredLocation,
   requestCurrentPosition,
   writeStoredLocation,
+  type GeolocationCoords,
   type GeolocationErrorReason,
 } from "@/lib/geolocation";
 import { useT } from "@/components/i18n/LanguageProvider";
+import NearMeSheet from "@/components/NearMeSheet";
 import type { Farm } from "@/types/farm";
 
 type GeoStatus = "idle" | "locating" | "ready" | "error";
@@ -47,6 +49,8 @@ export default function NearestFarmCard({
     farm: Farm;
     distanceKm: number;
   } | null>(null);
+  const [coords, setCoords] = useState<GeolocationCoords | null>(null);
+  const [showNearby, setShowNearby] = useState(false);
 
   // Reuse a location the visitor already shared (e.g. on a previous visit or
   // from the directory) so coming back doesn't re-prompt. Restored from
@@ -59,6 +63,7 @@ export default function NearestFarmCard({
       }
       const result = getNearestFarm(farms, stored);
       if (result) {
+        setCoords(stored);
         setNearest(result);
         setStatus("ready");
       }
@@ -71,6 +76,7 @@ export default function NearestFarmCard({
     requestCurrentPosition().then((outcome) => {
       if (outcome.coords) {
         writeStoredLocation(outcome.coords);
+        setCoords(outcome.coords);
         const result = getNearestFarm(farms, outcome.coords);
         if (result) {
           setNearest(result);
@@ -91,34 +97,59 @@ export default function NearestFarmCard({
 
   if (status === "ready" && nearest) {
     return (
-      <button
-        className="group col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine p-5 text-left text-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-24px_rgba(28,124,71,0.75)] focus-visible:ring-2 focus-visible:ring-pine/40 focus-visible:ring-offset-2 sm:row-span-2 sm:min-h-0"
-        onClick={() => onOpenFarm(nearest.farm)}
-        type="button"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold">
-            <Navigation className="h-3.5 w-3.5" />
-            {compactDistance(nearest.distanceKm)}
-          </span>
-          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/55">
-            {t("nearest_label")}
-          </span>
+      <>
+        <div className="group col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine p-5 text-white sm:row-span-2 sm:min-h-0">
+          <div className="flex items-center justify-between gap-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold">
+              <Navigation className="h-3.5 w-3.5" />
+              {compactDistance(nearest.distanceKm)}
+            </span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/55">
+              {t("nearest_label")}
+            </span>
+          </div>
+          <div>
+            <button
+              className="block w-full text-left transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-pine"
+              onClick={() => onOpenFarm(nearest.farm)}
+              type="button"
+            >
+              <p className="text-2xl font-black leading-[1.05] tracking-[-0.03em]">
+                {nearest.farm.name}
+              </p>
+              <p className="mt-1.5 flex items-start gap-1.5 text-sm leading-6 text-white/70">
+                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                {nearest.farm.address}
+              </p>
+              <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-white/80">
+                {t("nearest_view")}
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+              </span>
+            </button>
+            {coords ? (
+              <button
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-white/25 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-pine"
+                onClick={() => setShowNearby(true)}
+                type="button"
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                {t("near_me_open")}
+              </button>
+            ) : null}
+          </div>
         </div>
-        <div>
-          <p className="text-2xl font-black leading-[1.05] tracking-[-0.03em]">
-            {nearest.farm.name}
-          </p>
-          <p className="mt-1.5 flex items-start gap-1.5 text-sm leading-6 text-white/70">
-            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            {nearest.farm.address}
-          </p>
-          <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-white/80">
-            {t("nearest_view")}
-            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-          </span>
-        </div>
-      </button>
+        {showNearby && coords ? (
+          <NearMeSheet
+            coords={coords}
+            farms={farms}
+            onClose={() => setShowNearby(false)}
+            onOpenFarm={(farm) => {
+              setShowNearby(false);
+              onOpenFarm(farm);
+            }}
+          />
+        ) : null}
+      </>
     );
   }
 
