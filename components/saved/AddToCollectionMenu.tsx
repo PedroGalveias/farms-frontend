@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, FolderPlus, Plus } from "lucide-react";
+import { haptic } from "@/lib/haptics";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
@@ -79,9 +80,10 @@ export default function AddToCollectionMenu({ farmId }: { farmId: string }) {
                     aria-pressed={member}
                     className="flex w-full items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left text-sm font-medium text-ink/75 transition hover:bg-tone focus-visible:ring-2 focus-visible:ring-ink/20"
                     key={collection.id}
-                    onClick={() =>
-                      toggleFarmInCollection(collection.id, farmId)
-                    }
+                    onClick={() => {
+                      haptic();
+                      toggleFarmInCollection(collection.id, farmId);
+                    }}
                     type="button"
                   >
                     <span className="truncate">{collection.name}</span>

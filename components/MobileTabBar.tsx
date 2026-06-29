@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Heart, LayoutGrid, Search } from "lucide-react";
+import { haptic } from "@/lib/haptics";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
@@ -41,6 +42,7 @@ export default function MobileTabBar() {
         aria-current={active === "directory" ? "page" : undefined}
         className={tabClassName(active === "directory")}
         href="/"
+        onClick={() => haptic()}
       >
         <LayoutGrid className="h-4 w-4" />
         {t("nav_directory")}
@@ -49,6 +51,7 @@ export default function MobileTabBar() {
         aria-current={active === "quick-search" ? "page" : undefined}
         className={tabClassName(active === "quick-search")}
         href="/quick-search"
+        onClick={() => haptic()}
       >
         <Search className="h-4 w-4" />
         {t("nav_quickSearch")}
@@ -62,6 +65,7 @@ export default function MobileTabBar() {
             : "text-ink/55 hover:text-ink"
         }`}
         href="/saved"
+        onClick={() => haptic()}
       >
         <Heart className="h-4 w-4" />
         {favoritesCount > 0 ? (
