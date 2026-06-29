@@ -9,13 +9,14 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { ExternalLink, Heart, Maximize2, X } from "lucide-react";
+import { ExternalLink, Heart, Maximize2, Route, X } from "lucide-react";
 import { productGroupOf, tagLabel } from "@/lib/products";
 import CopyButton from "@/components/CopyButton";
 import ShareButton from "@/components/ShareButton";
 import AddToCollectionMenu from "@/components/saved/AddToCollectionMenu";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
+import { useTrip } from "@/components/trip/TripProvider";
 import { detectDirectionsPlatform, directionsUrl } from "@/lib/directions";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { haptic } from "@/lib/haptics";
@@ -45,6 +46,8 @@ export default function FarmDetailSheet({
   const t = useT();
   const { isFavorite, toggleFavorite } = usePersonalization();
   const saved = isFavorite(farm.id);
+  const { isInTrip, toggleStop, isFull } = useTrip();
+  const planned = isInTrip(farm.id);
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartYRef = useRef<number | null>(null);
@@ -290,6 +293,28 @@ export default function FarmDetailSheet({
               />
 
               <AddToCollectionMenu farmId={farm.id} />
+
+              <button
+                aria-pressed={planned}
+                className={`inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50 ${
+                  planned
+                    ? "border-pine/30 bg-pine/10 text-pine"
+                    : "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink"
+                }`}
+                disabled={!planned && isFull}
+                onClick={() =>
+                  toggleStop({
+                    id: farm.id,
+                    name: farm.name,
+                    coordinates: farm.coordinates,
+                    canton: farm.canton,
+                  })
+                }
+                type="button"
+              >
+                <Route className="h-4 w-4" />
+                {planned ? t("trip_added") : t("trip_add")}
+              </button>
 
               <Link
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-5 py-3 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"

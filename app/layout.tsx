@@ -12,6 +12,7 @@ import OfflineChip from "@/components/OfflineChip";
 import SkipLink from "@/components/SkipLink";
 import WebVitals from "@/components/WebVitals";
 import AuthProvider from "@/components/auth/AuthProvider";
+import TripProvider from "@/components/trip/TripProvider";
 import "./globals.css";
 
 // Set the theme class before paint to avoid a flash of the wrong theme.
@@ -67,17 +68,19 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <PersonalizationProvider>
-                <SkipLink />
-                <SideRail />
-                <div className="cursor-zone relative z-[1] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[76px]">
-                  <SiteHeader />
-                  <div id="main-content">{children}</div>
-                </div>
-                <MobileTabBar />
-                <CustomCursor />
-                <PwaRegister />
-                <OfflineChip />
-                <WebVitals />
+                <TripProvider>
+                  <SkipLink />
+                  <SideRail />
+                  <div className="cursor-zone relative z-[1] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[76px]">
+                    <SiteHeader />
+                    <div id="main-content">{children}</div>
+                  </div>
+                  <MobileTabBar />
+                  <CustomCursor />
+                  <PwaRegister />
+                  <OfflineChip />
+                  <WebVitals />
+                </TripProvider>
               </PersonalizationProvider>
             </AuthProvider>
           </LanguageProvider>

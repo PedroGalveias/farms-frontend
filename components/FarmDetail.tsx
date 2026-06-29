@@ -3,12 +3,13 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ExternalLink, Heart, MapPin } from "lucide-react";
+import { ArrowLeft, ExternalLink, Heart, MapPin, Route } from "lucide-react";
 import CopyButton from "@/components/CopyButton";
 import MapPlaceholder from "@/components/MapPlaceholder";
 import ShareButton from "@/components/ShareButton";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
+import { useTrip } from "@/components/trip/TripProvider";
 import AddToCollectionMenu from "@/components/saved/AddToCollectionMenu";
 import { detectDirectionsPlatform, directionsUrl } from "@/lib/directions";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
@@ -45,6 +46,8 @@ export default function FarmDetail({
   const { locale } = useLanguage();
   const { recordView, isFavorite, toggleFavorite } = usePersonalization();
   const saved = isFavorite(farm.id);
+  const { isInTrip, toggleStop, isFull } = useTrip();
+  const planned = isInTrip(farm.id);
   const [directionsPlatform] = useState<"ios" | "android" | "web">(() =>
     typeof navigator === "undefined"
       ? "web"
@@ -125,6 +128,27 @@ export default function FarmDetail({
         <div className="flex justify-center sm:items-center">
           <AddToCollectionMenu farmId={farm.id} />
         </div>
+        <button
+          aria-pressed={planned}
+          className={`inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50 ${
+            planned
+              ? "border-pine/30 bg-pine/10 text-pine"
+              : "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink"
+          }`}
+          disabled={!planned && isFull}
+          onClick={() =>
+            toggleStop({
+              id: farm.id,
+              name: farm.name,
+              coordinates: farm.coordinates,
+              canton: farm.canton,
+            })
+          }
+          type="button"
+        >
+          <Route className="h-4 w-4" />
+          {planned ? t("trip_added") : t("trip_add")}
+        </button>
       </div>
 
       <div className="mt-7 space-y-3">
