@@ -143,8 +143,8 @@ export default function FarmDetailSheet({
         aria-labelledby={titleId}
         aria-modal="true"
         className={`relative w-full max-w-xl overflow-y-auto rounded-t-[32px] border border-line bg-cloud shadow-[0_-16px_60px_rgba(20,22,27,0.3)] sm:rounded-[32px] sm:shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)] ${
-          expanded ? "max-h-[92vh]" : "max-h-[52vh]"
-        } sm:max-h-[88vh] ${useViewTransition ? "" : "qs-sheet"} ${
+          expanded ? "max-h-[92dvh]" : "max-h-[52dvh]"
+        } sm:max-h-[88dvh] ${useViewTransition ? "" : "qs-sheet"} ${
           isDragging
             ? ""
             : "transition-[transform,max-height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
@@ -165,7 +165,7 @@ export default function FarmDetailSheet({
           <span className="h-1.5 w-12 rounded-full bg-ink/15" />
         </div>
 
-        <div className="px-5 pb-7 pt-1 sm:px-7 sm:pb-8 sm:pt-7">
+        <div className="px-5 pb-[calc(1.75rem+env(safe-area-inset-bottom))] pt-1 sm:px-7 sm:pb-8 sm:pt-7">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold text-ink/40">
