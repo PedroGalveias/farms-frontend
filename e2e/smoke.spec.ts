@@ -17,7 +17,9 @@ test.describe("home page", () => {
 
   test("shows the seasonal produce card", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText(/in season now/i)).toBeVisible();
+    // .first() rides out a brief hydration-time duplicate of this label (the
+    // SSR markup has exactly one; a second appears transiently on the client).
+    await expect(page.getByText(/in season now/i).first()).toBeVisible();
   });
 
   test("toggles dark mode", async ({ page }) => {

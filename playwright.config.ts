@@ -11,12 +11,22 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  // Three engines triple the test count against a single dev server; cap the
+  // concurrency so page loads stay fast and don't flake under contention.
+  workers: process.env.CI ? 2 : 4,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL,
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  // Run every engine — Blink, Gecko, and WebKit — because the product must feel
+  // equally premium on Chromium, Firefox, and Safari. A Chromium-only suite
+  // would hide engine-specific regressions (WebKit especially).
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+  ],
   webServer: {
     command: "npm run build && npm run start",
     url: baseURL,
