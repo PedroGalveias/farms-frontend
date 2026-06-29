@@ -8,6 +8,7 @@ import PersonalizationProvider from "@/components/personalization/Personalizatio
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import CustomCursor from "@/components/motion/CustomCursor";
 import PwaRegister from "@/components/PwaRegister";
+import OfflineChip from "@/components/OfflineChip";
 import SkipLink from "@/components/SkipLink";
 import WebVitals from "@/components/WebVitals";
 import AuthProvider from "@/components/auth/AuthProvider";
@@ -75,6 +76,7 @@ export default function RootLayout({
                 <MobileTabBar />
                 <CustomCursor />
                 <PwaRegister />
+                <OfflineChip />
                 <WebVitals />
               </PersonalizationProvider>
             </AuthProvider>

@@ -45,6 +45,7 @@ export default defineConfig({
         "components/ThemeToggle.tsx",
         "components/MobileTabBar.tsx",
         "components/NearestFarmCard.tsx",
+        "components/OfflineChip.tsx",
         "components/GoBackButton.tsx",
         "components/CopyButton.tsx",
         "components/ShareButton.tsx",
