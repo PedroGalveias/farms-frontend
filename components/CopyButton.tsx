@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { haptic } from "@/lib/haptics";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 interface CopyButtonProps {
@@ -27,6 +28,7 @@ export default function CopyButton({
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(value);
+      haptic();
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {

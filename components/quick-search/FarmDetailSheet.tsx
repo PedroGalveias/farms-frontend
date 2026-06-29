@@ -14,6 +14,7 @@ import { productGroupOf, tagLabel } from "@/lib/products";
 import CopyButton from "@/components/CopyButton";
 import ShareButton from "@/components/ShareButton";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { detectDirectionsPlatform, directionsUrl } from "@/lib/directions";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { farmPath } from "@/lib/share";
 import { supportsViewTransitions } from "@/lib/view-transition";
@@ -47,6 +48,11 @@ export default function FarmDetailSheet({
   const [isDragging, setIsDragging] = useState(false);
   // Mobile bottom-sheet snap: peek (~52vh) and full (~92vh).
   const [expanded, setExpanded] = useState(false);
+  const [directionsPlatform] = useState<"ios" | "android" | "web">(() =>
+    typeof navigator === "undefined"
+      ? "web"
+      : detectDirectionsPlatform(navigator.userAgent),
+  );
   // When the browser morphs the row into the sheet via a View Transition, skip
   // the CSS rise so the two animations don't fight.
   const [useViewTransition] = useState(() => supportsViewTransitions());
@@ -122,7 +128,7 @@ export default function FarmDetailSheet({
 
   // Directions to the farm (opens the Maps app on mobile) — more useful in the
   // field than a static pin.
-  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(farm.coordinates)}`;
+  const mapsUrl = directionsUrl(farm.coordinates, directionsPlatform);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
@@ -234,30 +240,33 @@ export default function FarmDetailSheet({
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap">
             <a
-              className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
               href={mapsUrl}
               rel="noreferrer"
               target="_blank"
             >
               <ExternalLink className="h-4 w-4" />
-              {t("detail_openMaps")}
+              {directionsPlatform === "ios"
+                ? t("detail_openAppleMaps")
+                : t("detail_openMaps")}
             </a>
             <Link
-              className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
               href={`${farmPath(farm.id)}${viewPageQuery}`}
             >
               <Maximize2 className="h-4 w-4" />
               {t("farm_viewPage")}
             </Link>
             <ShareButton
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
               text={farm.address}
               title={farm.name}
               url={farmPath(farm.id)}
             />
             <button
-              className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
               onClick={onClose}
               type="button"
             >

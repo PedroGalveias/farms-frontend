@@ -8,15 +8,17 @@
 //     the background.
 //
 // Bump CACHE_VERSION to invalidate everything on a breaking change.
-const CACHE_VERSION = "farms-cache-v1";
+const CACHE_VERSION = "farms-cache-v2";
 const OFFLINE_URL = "/offline";
+const FARMS_API_URL = "/api/farms";
 
 self.addEventListener("install", (event) => {
+  // Don't skipWaiting here: an updated worker should *wait* so the page can
+  // offer a "refresh to update" banner, and only take over when the user opts
+  // in (SKIP_WAITING below). The first-ever worker has nothing to wait behind,
+  // so it still activates immediately.
   event.waitUntil(
-    caches
-      .open(CACHE_VERSION)
-      .then((cache) => cache.add(OFFLINE_URL))
-      .then(() => self.skipWaiting()),
+    caches.open(CACHE_VERSION).then((cache) => cache.add(OFFLINE_URL)),
   );
 });
 
@@ -33,6 +35,35 @@ self.addEventListener("activate", (event) => {
       )
       .then(() => self.clients.claim()),
   );
+});
+
+// Let the app's update banner activate a newly installed worker immediately.
+self.addEventListener("message", (event) => {
+  // 1. Explicitly verify that the message comes from the same origin
+  if (event.origin !== self.location.origin) {
+    return;
+  }
+
+  // Only honor messages from same-origin clients.
+  const sourceClient = event.source;
+  if (!sourceClient || !sourceClient.url) {
+    return;
+  }
+
+  let sourceUrl;
+  try {
+    sourceUrl = new URL(sourceClient.url);
+  } catch {
+    return;
+  }
+
+  if (sourceUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 function isCacheableAsset(url) {
@@ -66,6 +97,32 @@ self.addEventListener("fetch", (event) => {
         .catch(async () => {
           const cached = await caches.match(request);
           return cached || caches.match(OFFLINE_URL);
+        }),
+    );
+    return;
+  }
+
+  if (url.pathname === FARMS_API_URL) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches
+              .open(CACHE_VERSION)
+              .then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(request);
+          return (
+            cached ||
+            new Response(JSON.stringify({ error: "Farm data unavailable." }), {
+              headers: { "Content-Type": "application/json" },
+              status: 503,
+            })
+          );
         }),
     );
     return;

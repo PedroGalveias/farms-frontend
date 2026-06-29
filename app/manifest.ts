@@ -15,6 +15,38 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#f4f4ef",
     theme_color: "#1c7c47",
     lang: "en",
+    shortcuts: [
+      {
+        name: "Quick search",
+        short_name: "Search",
+        description: "Find farms by product and distance.",
+        url: "/quick-search",
+        icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
+      },
+      {
+        name: "Saved farms",
+        short_name: "Saved",
+        description: "Open your saved farms and collections.",
+        url: "/saved",
+        icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
+      },
+      {
+        name: "Seasonal calendar",
+        short_name: "Seasonal",
+        description: "See what's in season now.",
+        url: "/seasonal",
+        icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
+      },
+    ],
+    share_target: {
+      action: "/quick-search",
+      method: "GET",
+      params: {
+        title: "title",
+        text: "text",
+        url: "url",
+      },
+    },
     icons: [
       {
         src: "/icon.svg",

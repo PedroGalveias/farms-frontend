@@ -8,6 +8,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { tagLabel } from "@/lib/products";
+import { haptic } from "@/lib/haptics";
 import { formatDistanceShort, isNewThisMonth } from "@/lib/directory";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
@@ -34,6 +35,7 @@ function FavoriteButton({
       } ${className}`}
       onClick={(event) => {
         event.stopPropagation();
+        haptic();
         toggleFavorite(farm.id);
       }}
       type="button"

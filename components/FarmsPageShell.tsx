@@ -16,6 +16,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import RecentlyViewedStrip from "@/components/personalization/RecentlyViewedStrip";
+import { writeCachedFarms } from "@/lib/offline-farms";
 import type { Farm, ServiceStatus } from "@/types/farm";
 
 interface FarmsPageShellProps {
@@ -36,6 +37,10 @@ export default function FarmsPageShell({
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);
+
+  useEffect(() => {
+    writeCachedFarms(initialFarms);
+  }, [initialFarms]);
 
   // Adding a farm requires an account: open the create dialog when signed in,
   // otherwise prompt login with a contextual notice.
