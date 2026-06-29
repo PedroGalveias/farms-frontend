@@ -13,11 +13,12 @@ const OFFLINE_URL = "/offline";
 const FARMS_API_URL = "/api/farms";
 
 self.addEventListener("install", (event) => {
+  // Don't skipWaiting here: an updated worker should *wait* so the page can
+  // offer a "refresh to update" banner, and only take over when the user opts
+  // in (SKIP_WAITING below). The first-ever worker has nothing to wait behind,
+  // so it still activates immediately.
   event.waitUntil(
-    caches
-      .open(CACHE_VERSION)
-      .then((cache) => cache.add(OFFLINE_URL))
-      .then(() => self.skipWaiting()),
+    caches.open(CACHE_VERSION).then((cache) => cache.add(OFFLINE_URL)),
   );
 });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Download, RefreshCw, X } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
 
@@ -48,6 +48,10 @@ export default function PwaRegister() {
     null,
   );
   const [visible, setVisible] = useState(shouldShowIosInstallHint);
+  // Only reload after the user explicitly applies an update — never on the
+  // first worker's initial clients.claim() (which would yank the page out from
+  // under a first-time visitor, e.g. mid email-verification).
+  const updateRequested = useRef(false);
 
   useEffect(() => {
     const onBeforeInstallPrompt = (event: Event) => {
@@ -74,7 +78,8 @@ export default function PwaRegister() {
     let refreshing = false;
 
     const onControllerChange = () => {
-      if (refreshing) {
+      // Ignore the initial claim; only reload for a user-requested update.
+      if (refreshing || !updateRequested.current) {
         return;
       }
       refreshing = true;
@@ -151,6 +156,7 @@ export default function PwaRegister() {
   };
 
   const update = () => {
+    updateRequested.current = true;
     waitingWorker?.postMessage({ type: "SKIP_WAITING" });
   };
 
