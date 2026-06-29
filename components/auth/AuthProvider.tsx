@@ -46,7 +46,7 @@ export default function AuthProvider({
     } finally {
       setLoading(false);
     }
-    // Re-render Server Components that read getCurrentUser().
+    // Refresh server-rendered content in case any of it depends on the session.
     router.refresh();
   }, [router]);
 
@@ -125,8 +125,16 @@ export default function AuthProvider({
         noticeKey={noticeKey}
         onClose={closeAuth}
         onSwitch={(next) => setMode(next)}
-        onAuthenticated={async () => {
-          await refresh();
+        onAuthenticated={async (loggedInUser) => {
+          if (loggedInUser) {
+            // The login response already told us who we are — set it directly
+            // and skip the extra /me round-trip.
+            setUser(loggedInUser);
+            setLoading(false);
+            router.refresh();
+          } else {
+            await refresh();
+          }
           closeAuth();
         }}
       />
