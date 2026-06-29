@@ -6,19 +6,23 @@ test.describe("language switcher", () => {
   }) => {
     await page.goto("/");
 
-    // The English hero lead is "Fresh from a farm".
-    await expect(page.getByText("Fresh from a farm")).toBeVisible();
+    // Target the hero by role (its accessible name) rather than a loose text
+    // substring, which matched ambiguously under WebKit. English lead:
+    // "Fresh from a farm".
+    const heroEn = page.getByRole("heading", { name: /fresh from a farm/i });
+    const heroDe = page.getByRole("heading", { name: /frisch vom hof/i });
+    await expect(heroEn).toBeVisible();
 
     // Open the language menu (its trigger is labelled "Language" in English).
     await page.getByRole("button", { name: "Language" }).first().click();
     await page.getByRole("menuitemradio", { name: "Deutsch" }).click();
 
     // German hero lead is "Frisch vom Hof".
-    await expect(page.getByText("Frisch vom Hof")).toBeVisible();
-    await expect(page.getByText("Fresh from a farm")).toHaveCount(0);
+    await expect(heroDe).toBeVisible();
+    await expect(heroEn).toHaveCount(0);
 
     // The choice is remembered (persisted client-side) after a reload.
     await page.reload();
-    await expect(page.getByText("Frisch vom Hof")).toBeVisible();
+    await expect(heroDe).toBeVisible();
   });
 });
