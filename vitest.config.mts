@@ -39,6 +39,7 @@ export default defineConfig({
         "lib/directions.ts",
         "lib/offline-farms.ts",
         "lib/trip.ts",
+        "lib/seasonal-reminders.ts",
         "lib/haptics.ts",
         "lib/i18n.ts",
         "app/api/health/route.ts",

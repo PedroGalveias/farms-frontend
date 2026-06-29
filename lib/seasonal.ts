@@ -583,11 +583,21 @@ export function seasonalGroupsForMonth(monthIndex: number): string[] {
  * parent group for anything without a product entry. (index 0 = January)
  */
 export function seasonalProductsForMonth(monthIndex: number): string[] {
-  const items = SEASONAL_BY_MONTH[monthIndex] ?? [];
-  const keys = items.map((key) => {
-    const germanName = SEASONAL_PRODUCE[key].labels.de;
-    return germanName in PRODUCTS ? germanName : PRODUCE_GROUP[key];
-  });
+  return produceToQuickSearchKeys(SEASONAL_BY_MONTH[monthIndex] ?? []);
+}
+
+/**
+ * Map produce keys to the quick-search keys that select them: each item's
+ * canonical product key (its German name, when present in the product taxonomy)
+ * or the parent group as a fallback. De-duplicated.
+ */
+export function produceToQuickSearchKeys(produceKeys: string[]): string[] {
+  const keys = produceKeys
+    .filter((key) => key in SEASONAL_PRODUCE)
+    .map((key) => {
+      const germanName = SEASONAL_PRODUCE[key].labels.de;
+      return germanName in PRODUCTS ? germanName : PRODUCE_GROUP[key];
+    });
   return Array.from(new Set(keys));
 }
 

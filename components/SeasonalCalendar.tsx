@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Sprout } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bell, Sprout } from "lucide-react";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { useSeasonalReminders } from "@/components/seasonal/SeasonalReminderProvider";
 import {
   SEASONAL_BY_MONTH,
   produceEmoji,
@@ -23,6 +24,7 @@ const INTL_LOCALE: Record<Locale, string> = {
 export default function SeasonalCalendar() {
   const { locale } = useLanguage();
   const t = useT();
+  const { isReminded, toggleReminder } = useSeasonalReminders();
   const currentMonth = new Date().getMonth();
 
   const monthName = (index: number) =>
@@ -76,14 +78,39 @@ export default function SeasonalCalendar() {
               </div>
 
               <div className="mt-3 flex flex-1 flex-wrap content-start gap-1.5">
-                {items.map((key) => (
-                  <span
-                    className="rounded-full bg-tone px-3 py-1.5 text-sm font-semibold text-ink/70"
-                    key={key}
-                  >
-                    {produceEmoji(key)} {produceLabel(key, locale)}
-                  </span>
-                ))}
+                {items.map((key) => {
+                  const reminded = isReminded(key);
+                  return (
+                    <button
+                      aria-label={
+                        reminded
+                          ? t("reminder_remove")
+                          : `${t("reminder_add")}: ${produceLabel(key, locale)}`
+                      }
+                      aria-pressed={reminded}
+                      className={`group/chip inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                        reminded
+                          ? "bg-pine/10 text-pine"
+                          : "bg-tone text-ink/70 hover:bg-ink/[0.06]"
+                      }`}
+                      key={key}
+                      onClick={() => toggleReminder(key)}
+                      title={
+                        reminded ? t("reminder_remove") : t("reminder_add")
+                      }
+                      type="button"
+                    >
+                      {produceEmoji(key)} {produceLabel(key, locale)}
+                      <Bell
+                        className={`h-3 w-3 transition ${
+                          reminded
+                            ? "fill-current text-pine"
+                            : "text-ink/25 group-hover/chip:text-ink/45"
+                        }`}
+                      />
+                    </button>
+                  );
+                })}
               </div>
 
               <Link
