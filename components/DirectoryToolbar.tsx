@@ -250,7 +250,7 @@ export default function DirectoryToolbar({
       <div className="mt-3 flex flex-col gap-2.5 px-1 sm:flex-row sm:flex-wrap sm:items-center">
         {locationActive ? (
           <>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-pine px-3 py-1.5 text-[13px] font-bold text-white">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-pine-surface px-3 py-1.5 text-[13px] font-bold text-white">
               <Navigation className="h-3.5 w-3.5" />
               {t("chip_near")}
               <button

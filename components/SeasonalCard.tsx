@@ -84,7 +84,7 @@ export default function SeasonalCard() {
         </p>
         <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2">
           <button
-            className="group inline-flex items-center gap-1.5 rounded-full bg-pine dark:bg-[#1c7c47] px-4 py-2 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-pine/40 focus-visible:ring-offset-2"
+            className="group inline-flex items-center gap-1.5 rounded-full bg-pine-surface px-4 py-2 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-pine/40 focus-visible:ring-offset-2"
             onClick={findNearby}
             type="button"
           >

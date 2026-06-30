@@ -90,7 +90,7 @@ export default function SideRail() {
         >
           <Heart className="h-5 w-5" />
           {favoritesCount > 0 ? (
-            <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-pine px-1 text-[10px] font-bold text-white">
+            <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-pine-surface px-1 text-[10px] font-bold text-white">
               {favoritesCount}
             </span>
           ) : null}

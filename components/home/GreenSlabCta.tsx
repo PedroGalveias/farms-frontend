@@ -13,7 +13,7 @@ export default function GreenSlabCta() {
     <Reveal className="mt-24" once>
       <section
         aria-labelledby="slab-cta-title"
-        className="relative w-full overflow-hidden bg-pine text-white"
+        className="relative w-full overflow-hidden bg-pine-surface text-white"
       >
         <div className="grid lg:grid-cols-2">
           <div className="flex flex-col justify-center px-6 py-16 sm:px-12 lg:py-24">

@@ -5,6 +5,10 @@
   --ink: #14161b;
   --pine: #1c7c47;
   --pine-bright: #21a05a;
+  /* Green *surface* for buttons/badges that carry white text. Stays a dark
+     green in BOTH themes (unlike --pine, which brightens in dark mode for
+     green text on dark) so white always clears WCAG-AA contrast on it. */
+  --pine-surface: #1c7c47;
   --paper: #f4f4ef;
   --line: #e4e3da;
   --tone: #ebeae3;
@@ -33,6 +37,7 @@ html.dark {
   --color-ink: var(--ink);
   --color-pine: var(--pine);
   --color-pine-bright: var(--pine-bright);
+  --color-pine-surface: var(--pine-surface);
   --color-paper: var(--paper);
   --color-line: var(--line);
   --color-tone: var(--tone);
@@ -697,7 +702,7 @@ html.dark .skeleton::after {
     z-index: 0;
   }
   html.theme-vt::view-transition-new(root) {
-    animation: theme-vt-reveal 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+    animation: theme-vt-reveal 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
   }
   @keyframes theme-vt-reveal {
