@@ -9,6 +9,7 @@ import LanguageMenu from "@/components/LanguageMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import AccountMenu from "@/components/auth/AccountMenu";
 import { useT } from "@/components/i18n/LanguageProvider";
+import { useModKey } from "@/components/command/useModKey";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
 const FRONTEND_REPO = "https://github.com/PedroGalveias/farms-frontend";
@@ -35,6 +36,7 @@ const utilityClassName =
 export default function SideRail() {
   const pathname = usePathname();
   const t = useT();
+  const mod = useModKey();
   const { favoritesCount } = usePersonalization();
   const active =
     pathname === "/quick-search"
@@ -61,7 +63,7 @@ export default function SideRail() {
           onClick={() =>
             window.dispatchEvent(new CustomEvent("farms:command-open"))
           }
-          title={`${t("command_open")} (⌘K)`}
+          title={`${t("command_open")} (${mod === "⌘" ? "⌘K" : "Ctrl+K"})`}
           type="button"
         >
           <Command className="h-5 w-5" />
