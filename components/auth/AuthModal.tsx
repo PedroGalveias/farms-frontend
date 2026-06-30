@@ -28,9 +28,9 @@ interface AuthModalProps {
 }
 
 const fieldClassName =
-  "mt-2 w-full rounded-2xl border border-transparent bg-tone px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:font-normal placeholder:text-ink/35 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10";
+  "mt-2 w-full rounded-2xl border border-transparent bg-tone px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:font-normal placeholder:text-ink/70 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10";
 const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.08em] text-ink/55";
+  "text-xs font-bold uppercase tracking-[0.08em] text-ink/60";
 
 type FieldErrors = { email?: string; password?: string; confirm?: string };
 
@@ -211,7 +211,7 @@ export default function AuthModal({
           </div>
           <button
             aria-label={t("auth_close")}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/60 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:opacity-50"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:opacity-50"
             disabled={pending}
             onClick={onClose}
             type="button"
@@ -366,7 +366,7 @@ export default function AuthModal({
             </button>
 
             <button
-              className="mt-4 w-full text-center text-sm font-semibold text-ink/55 transition hover:text-ink"
+              className="mt-4 w-full text-center text-sm font-semibold text-ink/60 transition hover:text-ink"
               onClick={() => onSwitch(isLogin ? "register" : "login")}
               type="button"
             >

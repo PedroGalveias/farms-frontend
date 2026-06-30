@@ -32,7 +32,7 @@ export default function Error({
       <h1 className="mt-5 max-w-2xl text-[clamp(2.5rem,7vw,4.5rem)] font-extrabold leading-[0.92] tracking-[-0.04em] text-ink">
         {t("error_title")}
       </h1>
-      <p className="mt-6 max-w-xl text-lg leading-8 text-ink/55">
+      <p className="mt-6 max-w-xl text-lg leading-8 text-ink/60">
         {t("error_body")}
       </p>
 

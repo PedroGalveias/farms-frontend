@@ -7,7 +7,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AccountMenu from "@/components/auth/AccountMenu";
 
 const utilityClassName =
-  "grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink/55 transition-colors hover:bg-tone hover:text-ink";
+  "grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink/70 transition-colors hover:bg-tone hover:text-ink";
 
 /**
  * Mobile top bar — a slim floating pill with the brand and utilities (theme,

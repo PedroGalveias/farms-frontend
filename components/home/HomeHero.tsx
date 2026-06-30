@@ -80,7 +80,7 @@ export default function HomeHero({
         </h1>
 
         <p
-          className="rise-in mt-7 max-w-md text-lg leading-8 text-ink/55"
+          className="rise-in mt-7 max-w-md text-lg leading-8 text-ink/60"
           style={{ ["--rise-delay" as string]: "280ms" }}
         >
           {t("hero_subcopy")}

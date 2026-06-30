@@ -28,7 +28,7 @@ export default function RecentlyViewedStrip({ farms }: { farms: Farm[] }) {
 
   return (
     <section className="mt-12">
-      <div className="flex items-center gap-2 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-ink/40">
+      <div className="flex items-center gap-2 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-ink/60">
         <Clock className="h-3.5 w-3.5" />
         {t("recent_title")}
       </div>

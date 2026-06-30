@@ -31,7 +31,7 @@ function FavoriteButton({
       aria-label={saved ? t("card_saved") : t("card_save")}
       aria-pressed={saved}
       className={`relative z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
-        saved ? "bg-pine/10 text-pine" : "bg-tone text-ink/40 hover:text-ink"
+        saved ? "bg-pine/10 text-pine" : "bg-tone text-ink/70 hover:text-ink"
       } ${className}`}
       onClick={(event) => {
         event.stopPropagation();
@@ -58,7 +58,7 @@ interface FarmCardProps {
 
 function CantonTag({ farm }: { farm: Farm }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-tone px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-ink/55">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-tone px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-ink/70">
       <span className="text-pine">{farm.canton}</span>
       {getCantonName(farm.canton)}
     </span>
@@ -105,14 +105,14 @@ function CategoryChips({
     <div className="flex flex-wrap gap-1.5">
       {categories.map((category) => (
         <span
-          className="rounded-full bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/60"
+          className="rounded-full bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/70"
           key={category}
         >
           {tagLabel(category, locale)}
         </span>
       ))}
       {hiddenCount > 0 ? (
-        <span className="rounded-full bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/35">
+        <span className="rounded-full bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/70">
           +{hiddenCount}
         </span>
       ) : null}
@@ -169,7 +169,7 @@ export default function FarmCard({
           </div>
 
           <div className="space-y-1.5 text-sm text-ink/50">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink/35">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink/60">
               {t("card_added")} {formatFarmDate(farm.created_at)}
             </p>
             <a
@@ -201,7 +201,7 @@ export default function FarmCard({
         <CardBadges distanceKm={distanceKm} farm={farm} />
         <div className="flex shrink-0 items-center gap-2">
           <FavoriteButton farm={farm} />
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/40 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
             <ArrowUpRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </span>
         </div>
@@ -217,7 +217,7 @@ export default function FarmCard({
       </p>
 
       <div className="mt-5 flex items-center justify-between gap-3 text-xs">
-        <span className="font-semibold uppercase tracking-[0.1em] text-ink/35">
+        <span className="font-semibold uppercase tracking-[0.1em] text-ink/60">
           {t("card_added")} {formatFarmDate(farm.created_at)}
         </span>
         <a

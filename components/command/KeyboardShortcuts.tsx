@@ -108,7 +108,7 @@ export default function KeyboardShortcuts() {
 
       <div className="space-y-5 px-5 py-5">
         <section>
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-ink/40">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-ink/60">
             {t("shortcuts_general")}
           </p>
           <ul className="space-y-2">
@@ -131,7 +131,7 @@ export default function KeyboardShortcuts() {
         </section>
 
         <section>
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-ink/40">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-ink/60">
             {t("shortcuts_goto")}
           </p>
           <ul className="space-y-2">

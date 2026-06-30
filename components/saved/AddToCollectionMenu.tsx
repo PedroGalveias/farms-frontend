@@ -106,7 +106,7 @@ export default function AddToCollectionMenu({ farmId }: { farmId: string }) {
             }}
           >
             <input
-              className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-2.5 py-1.5 text-sm text-ink outline-none placeholder:text-ink/35 focus:border-pine/50"
+              className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-2.5 py-1.5 text-sm text-ink outline-none placeholder:text-ink/60 focus:border-pine/50"
               onChange={(event) => setName(event.target.value)}
               placeholder={t("collection_name_placeholder")}
               value={name}

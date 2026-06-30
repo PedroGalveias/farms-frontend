@@ -23,7 +23,7 @@ export default function SiteFooter() {
     <footer className="relative mt-32 overflow-hidden border-t border-line/70">
       <div className="mx-auto max-w-6xl px-5 pb-12 pt-16 sm:px-8">
         <div className="text-[15px]">
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-ink/35">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-ink/60">
             {t("footer_source")}
           </p>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-8">
@@ -33,7 +33,7 @@ export default function SiteFooter() {
               rel="noreferrer"
               target="_blank"
             >
-              <GitHubIcon className="h-4 w-4 text-ink/40 transition-colors group-hover:text-pine" />
+              <GitHubIcon className="h-4 w-4 text-ink/60 transition-colors group-hover:text-pine" />
               {t("footer_farmsService")}
               <HoverArrow />
             </a>
@@ -43,7 +43,7 @@ export default function SiteFooter() {
               rel="noreferrer"
               target="_blank"
             >
-              <GitHubIcon className="h-4 w-4 text-ink/40 transition-colors group-hover:text-pine" />
+              <GitHubIcon className="h-4 w-4 text-ink/60 transition-colors group-hover:text-pine" />
               {t("footer_farmsFrontend")}
               <HoverArrow />
             </a>
@@ -58,7 +58,7 @@ export default function SiteFooter() {
           farms.
         </div>
 
-        <div className="mt-6 flex flex-col gap-2 border-t border-line/70 pt-6 text-xs text-ink/40 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-2 border-t border-line/70 pt-6 text-xs text-ink/60 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} farms</p>
           <p>{t("footer_tagline")}</p>
         </div>

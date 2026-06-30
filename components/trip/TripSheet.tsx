@@ -45,7 +45,7 @@ export default function TripSheet({
         </div>
         <button
           aria-label={t("trip_close")}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/60 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
           onClick={onClose}
           type="button"
         >
@@ -55,7 +55,7 @@ export default function TripSheet({
 
       <div className="mt-4 flex-1 overflow-y-auto px-3 sm:px-4">
         {stops.length === 0 ? (
-          <p className="px-2 py-10 text-center text-sm text-ink/55">
+          <p className="px-2 py-10 text-center text-sm text-ink/60">
             {t("trip_empty")}
           </p>
         ) : (
@@ -79,7 +79,7 @@ export default function TripSheet({
                 </span>
                 <button
                   aria-label={t("trip_remove")}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink/40 transition hover:bg-tone hover:text-rose-600 focus-visible:ring-2 focus-visible:ring-ink/20"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink/70 transition hover:bg-tone hover:text-rose-600 focus-visible:ring-2 focus-visible:ring-ink/20"
                   onClick={() => onRemove(stop.id)}
                   type="button"
                 >

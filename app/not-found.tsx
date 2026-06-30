@@ -15,7 +15,7 @@ export default function NotFoundPage() {
           This page wandered <span className="text-pine">off the map.</span>
         </h1>
         <p
-          className="rise-in mt-6 max-w-xl text-lg leading-8 text-ink/55"
+          className="rise-in mt-6 max-w-xl text-lg leading-8 text-ink/60"
           style={{ ["--rise-delay" as string]: "180ms" }}
         >
           The page you&apos;re looking for isn&apos;t here. Head back to where

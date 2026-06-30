@@ -92,7 +92,7 @@ export default function AccountMenu({
           role="menu"
         >
           <div className="px-3 pb-1.5 pt-1">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/35">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60">
               {t("account_signedIn")}
             </p>
             <p className="mt-0.5 text-sm font-semibold text-ink">{roleLabel}</p>

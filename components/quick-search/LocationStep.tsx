@@ -60,7 +60,7 @@ export default function LocationStep({
         <h2 className="text-[28px] font-bold tracking-[-0.035em] text-ink">
           {t("qs_loc_title")}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-ink/55">
+        <p className="mt-2 text-sm leading-6 text-ink/60">
           {t("qs_loc_subcopy")}
         </p>
       </div>
@@ -73,7 +73,7 @@ export default function LocationStep({
           </span>
           <button
             aria-label={t("qs_loc_stop")}
-            className="rounded-full p-1.5 text-ink/40 transition hover:bg-ink/5 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="rounded-full p-1.5 text-ink/60 transition hover:bg-ink/5 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={onClearGeolocation}
             type="button"
           >
@@ -107,7 +107,7 @@ export default function LocationStep({
         </div>
       ) : null}
 
-      <div className="flex items-center gap-3 text-xs font-semibold text-ink/35">
+      <div className="flex items-center gap-3 text-xs font-semibold text-ink/60">
         <span aria-hidden="true" className="h-px flex-1 bg-line" />
         {t("qs_loc_or_type")}
         <span aria-hidden="true" className="h-px flex-1 bg-line" />
@@ -121,7 +121,7 @@ export default function LocationStep({
           <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/30" />
           <input
             autoComplete="off"
-            className="w-full rounded-2xl border border-transparent bg-tone py-3.5 pl-12 pr-4 text-base font-medium text-ink placeholder:font-normal placeholder:text-ink/35 transition duration-300 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10"
+            className="w-full rounded-2xl border border-transparent bg-tone py-3.5 pl-12 pr-4 text-base font-medium text-ink placeholder:font-normal placeholder:text-ink/70 transition duration-300 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10"
             id={inputId}
             onChange={(event) => onLocationInputChange(event.target.value)}
             onKeyDown={handleInputKeyDown}
@@ -141,7 +141,7 @@ export default function LocationStep({
 
       {cantonOptions.length > 0 ? (
         <div>
-          <p className="text-xs font-semibold text-ink/40">
+          <p className="text-xs font-semibold text-ink/60">
             {t("qs_loc_cantons")}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -161,7 +161,7 @@ export default function LocationStep({
                   onClick={() => onLocationInputChange(isActive ? "" : name)}
                   type="button"
                 >
-                  <span className={isActive ? "text-cloud/60" : "text-ink/35"}>
+                  <span className={isActive ? "text-cloud/60" : "text-ink/60"}>
                     {code}
                   </span>{" "}
                   {name}

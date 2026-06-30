@@ -175,7 +175,7 @@ export default function PwaRegister() {
             <p className="text-sm font-bold text-ink">
               {t("pwa_update_title")}
             </p>
-            <p className="mt-0.5 text-xs leading-5 text-ink/55">
+            <p className="mt-0.5 text-xs leading-5 text-ink/60">
               {t("pwa_update_body")}
             </p>
           </div>
@@ -196,7 +196,7 @@ export default function PwaRegister() {
             <p className="text-sm font-bold text-ink">
               {t("pwa_install_title")}
             </p>
-            <p className="mt-0.5 text-xs leading-5 text-ink/55">
+            <p className="mt-0.5 text-xs leading-5 text-ink/60">
               {showIosHint ? t("pwa_install_ios") : t("pwa_install_body")}
             </p>
           </div>

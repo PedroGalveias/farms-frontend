@@ -70,7 +70,7 @@ export default function ResultsStep({
               ? t("qs_res_one_found")
               : t("qs_res_many_found", { n: count })}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-ink/55">{sortNote}</p>
+        <p className="mt-2 text-sm leading-6 text-ink/60">{sortNote}</p>
       </div>
 
       {count > 0 ? (
@@ -93,7 +93,7 @@ export default function ResultsStep({
           <h3 className="mt-4 text-xl font-bold tracking-[-0.03em] text-ink">
             {t("qs_res_loosen_title")}
           </h3>
-          <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-ink/55">
+          <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-ink/60">
             {matchMode === "all" && selectedProducts.length > 1
               ? t("qs_none_all_results")
               : t("qs_none_any")}
@@ -158,7 +158,7 @@ function ResultRow({
         type="button"
       >
         <div className="flex items-center justify-between gap-3">
-          <p className="text-xs font-semibold text-ink/40">
+          <p className="text-xs font-semibold text-ink/60">
             {farm.canton} · {getCantonName(farm.canton)}
           </p>
           {hasDistance ? (
@@ -174,7 +174,7 @@ function ResultRow({
         <h3 className="mt-2 text-lg font-bold leading-tight tracking-[-0.03em] text-ink">
           {farm.name}
         </h3>
-        <p className="mt-1 flex items-center gap-1.5 text-sm text-ink/55">
+        <p className="mt-1 flex items-center gap-1.5 text-sm text-ink/60">
           <MapPin className="h-3.5 w-3.5 shrink-0 text-ink/30" />
           {farm.address}
         </p>
@@ -187,7 +187,7 @@ function ResultRow({
                 className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                   isCategoryMatched(category)
                     ? "bg-pine/10 text-pine"
-                    : "bg-tone text-ink/55"
+                    : "bg-tone text-ink/70"
                 }`}
                 key={category}
               >
@@ -195,7 +195,7 @@ function ResultRow({
               </span>
             ))}
           {hiddenCategoryCount > 0 ? (
-            <span className="rounded-full bg-tone px-2.5 py-1 text-xs font-semibold text-ink/40">
+            <span className="rounded-full bg-tone px-2.5 py-1 text-xs font-semibold text-ink/70">
               {t("qs_res_more", { n: hiddenCategoryCount })}
             </span>
           ) : null}

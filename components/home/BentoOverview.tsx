@@ -58,7 +58,7 @@ export default function BentoOverview({
       />
 
       <div className="flex flex-col justify-center gap-2 rounded-[22px] border border-line bg-cloud px-5 py-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/40">
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60">
           {t("bento_mostWanted")}
         </p>
         <p className="text-sm font-bold leading-snug text-pine">

@@ -27,7 +27,7 @@ const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
 function InfoCard({ children, label }: { children: string; label: string }) {
   return (
     <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
-      <p className="text-xs font-semibold text-ink/40">{label}</p>
+      <p className="text-xs font-semibold text-ink/60">{label}</p>
       <p className="mt-1.5 text-sm leading-6 text-ink/80">{children}</p>
     </div>
   );
@@ -68,7 +68,7 @@ export default function FarmDetail({
   return (
     <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
       <Link
-        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/55 transition hover:text-ink"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/60 transition hover:text-ink"
         href={backHref}
       >
         <ArrowLeft className="h-4 w-4" />
@@ -76,13 +76,13 @@ export default function FarmDetail({
       </Link>
 
       <header className="mt-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink/40">
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink/60">
           {farm.canton} · {getCantonName(farm.canton)}
         </p>
         <h1 className="mt-3 text-[clamp(2.25rem,6vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
           {farm.name}
         </h1>
-        <p className="mt-3 flex items-start gap-1.5 text-base leading-7 text-ink/55">
+        <p className="mt-3 flex items-start gap-1.5 text-base leading-7 text-ink/60">
           <MapPin className="mt-1 h-4 w-4 shrink-0 text-ink/30" />
           {farm.address}
         </p>
@@ -155,7 +155,7 @@ export default function FarmDetail({
         <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold text-ink/40">
+              <p className="text-xs font-semibold text-ink/60">
                 {t("detail_address")}
               </p>
               <p className="mt-1.5 text-sm leading-6 text-ink/80">
@@ -175,13 +175,13 @@ export default function FarmDetail({
         </div>
 
         <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
-          <p className="text-xs font-semibold text-ink/40">
+          <p className="text-xs font-semibold text-ink/60">
             {t("detail_products")}
           </p>
           <div className="mt-2.5 flex flex-wrap gap-1.5">
             {farm.categories.map((category) => (
               <span
-                className="rounded-full bg-tone px-3 py-1 text-sm font-semibold text-ink/60"
+                className="rounded-full bg-tone px-3 py-1 text-sm font-semibold text-ink/70"
                 key={category}
               >
                 {tagLabel(category, locale)}

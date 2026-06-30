@@ -35,7 +35,7 @@ export default function SeasonalCalendar() {
   return (
     <main className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
       <Link
-        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/55 transition hover:text-ink"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/60 transition hover:text-ink"
         href="/"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -46,7 +46,7 @@ export default function SeasonalCalendar() {
         <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
           {t("seasonal_title")}
         </h1>
-        <p className="mt-3 text-lg leading-7 text-ink/55">
+        <p className="mt-3 text-lg leading-7 text-ink/60">
           {t("seasonal_subtitle")}
         </p>
       </header>
@@ -70,7 +70,7 @@ export default function SeasonalCalendar() {
                   {monthName(month)}
                 </h2>
                 {isCurrent ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-pine px-2.5 py-1 text-[11px] font-bold text-white">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-pine px-2.5 py-1 text-[11px] font-bold text-cloud">
                     <Sprout className="h-3 w-3" />
                     {t("season_label")}
                   </span>

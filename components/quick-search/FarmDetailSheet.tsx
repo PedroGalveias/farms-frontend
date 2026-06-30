@@ -154,7 +154,7 @@ export default function FarmDetailSheet({
     <div className="px-5 pb-[calc(1.75rem+env(safe-area-inset-bottom))] pt-1 sm:px-7 sm:pb-8 sm:pt-7">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold text-ink/40">
+          <p className="text-xs font-semibold text-ink/60">
             {farm.canton} · {getCantonName(farm.canton)}
           </p>
           <h2
@@ -167,7 +167,7 @@ export default function FarmDetailSheet({
 
         <button
           aria-label={t("detail_close")}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/60 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
           onClick={onClose}
           ref={closeButtonRef}
           type="button"
@@ -180,7 +180,7 @@ export default function FarmDetailSheet({
         <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold text-ink/40">
+              <p className="text-xs font-semibold text-ink/60">
                 {t("detail_address")}
               </p>
               <p className="mt-1.5 text-sm leading-6 text-ink/80">
@@ -201,7 +201,7 @@ export default function FarmDetailSheet({
         </div>
 
         <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
-          <p className="text-xs font-semibold text-ink/40">
+          <p className="text-xs font-semibold text-ink/60">
             {t("detail_products")}
           </p>
           <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -210,7 +210,7 @@ export default function FarmDetailSheet({
                 className={`rounded-full px-3 py-1 text-sm font-semibold ${
                   isCategoryMatched(category)
                     ? "bg-pine/10 text-pine"
-                    : "bg-tone text-ink/60"
+                    : "bg-tone text-ink/70"
                 }`}
                 key={category}
               >
@@ -219,7 +219,7 @@ export default function FarmDetailSheet({
             ))}
           </div>
           {selectedProducts.length > 0 ? (
-            <p className="mt-2.5 text-xs text-ink/40">
+            <p className="mt-2.5 text-xs text-ink/60">
               {t("detail_highlighted")}
             </p>
           ) : null}
@@ -362,7 +362,7 @@ export default function FarmDetailSheet({
 function InfoCard({ children, label }: { children: ReactNode; label: string }) {
   return (
     <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
-      <p className="text-xs font-semibold text-ink/40">{label}</p>
+      <p className="text-xs font-semibold text-ink/60">{label}</p>
       <p className="mt-1.5 text-sm leading-6 text-ink/80">{children}</p>
     </div>
   );

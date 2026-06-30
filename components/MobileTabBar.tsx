@@ -11,7 +11,7 @@ function tabClassName(isActive: boolean) {
   return `flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
     isActive
       ? "bg-ink text-cloud shadow-[0_6px_16px_-6px_rgba(20,22,27,0.5)]"
-      : "text-ink/55 hover:text-ink"
+      : "text-ink/60 hover:text-ink"
   }`;
 }
 
@@ -62,7 +62,7 @@ export default function MobileTabBar() {
         className={`relative flex shrink-0 items-center justify-center rounded-full px-4 py-3 transition-colors duration-300 ${
           active === "saved"
             ? "bg-ink text-cloud shadow-[0_6px_16px_-6px_rgba(20,22,27,0.5)]"
-            : "text-ink/55 hover:text-ink"
+            : "text-ink/60 hover:text-ink"
         }`}
         href="/saved"
         onClick={() => haptic()}

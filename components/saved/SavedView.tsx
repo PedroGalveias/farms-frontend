@@ -96,7 +96,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
       <Link
-        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/55 transition hover:text-ink"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/60 transition hover:text-ink"
         href="/"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -111,7 +111,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           <h1 className="text-[clamp(2rem,5vw,3rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
             {t("saved_title")}
           </h1>
-          <p className="mt-1 text-sm leading-6 text-ink/55">
+          <p className="mt-1 text-sm leading-6 text-ink/60">
             {usingOfflineCache ? t("saved_offline_cache") : t("saved_subtitle")}
           </p>
         </div>
@@ -136,7 +136,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
         >
           {t("saved_all")}
           <span
-            className={effectiveTab === "all" ? "text-cloud/55" : "text-ink/35"}
+            className={effectiveTab === "all" ? "text-cloud/55" : "text-ink/60"}
           >
             {favorites.length}
           </span>
@@ -152,7 +152,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
             {collection.name}
             <span
               className={
-                effectiveTab === collection.id ? "text-cloud/55" : "text-ink/35"
+                effectiveTab === collection.id ? "text-cloud/55" : "text-ink/60"
               }
             >
               {collection.farmIds.length}
@@ -175,7 +175,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           >
             <input
               autoFocus
-              className="w-44 rounded-full border border-line bg-paper px-3.5 py-1.5 text-[13px] text-ink outline-none placeholder:text-ink/35 focus:border-pine/50"
+              className="w-44 rounded-full border border-line bg-paper px-3.5 py-1.5 text-[13px] text-ink outline-none placeholder:text-ink/60 focus:border-pine/50"
               onChange={(event) => setNewName(event.target.value)}
               placeholder={t("collection_name_placeholder")}
               value={newName}
@@ -190,7 +190,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
             </button>
             <button
               aria-label={t("collection_cancel")}
-              className="grid h-8 w-8 place-items-center rounded-full bg-tone text-ink/60 hover:text-ink"
+              className="grid h-8 w-8 place-items-center rounded-full bg-tone text-ink/70 hover:text-ink"
               onClick={() => {
                 setIsCreating(false);
                 setNewName("");
@@ -202,7 +202,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           </form>
         ) : (
           <button
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-line bg-cloud px-3.5 py-1.5 text-[13px] font-semibold text-ink/55 transition hover:border-ink/30 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-line bg-cloud px-3.5 py-1.5 text-[13px] font-semibold text-ink/60 transition hover:border-ink/30 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={() => setIsCreating(true)}
             type="button"
           >
@@ -240,7 +240,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
               </button>
               <button
                 aria-label={t("collection_cancel")}
-                className="grid h-8 w-8 place-items-center rounded-full bg-tone text-ink/60 hover:text-ink"
+                className="grid h-8 w-8 place-items-center rounded-full bg-tone text-ink/70 hover:text-ink"
                 onClick={() => setRenameValue(null)}
                 type="button"
               >
@@ -288,7 +288,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           ))}
         </div>
       ) : activeCollection ? (
-        <p className="mt-10 rounded-[28px] border border-dashed border-line bg-tone/40 px-6 py-16 text-center text-[15px] leading-7 text-ink/55">
+        <p className="mt-10 rounded-[28px] border border-dashed border-line bg-tone/40 px-6 py-16 text-center text-[15px] leading-7 text-ink/70">
           {t("collection_empty")}
         </p>
       ) : (
@@ -299,7 +299,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           <h2 className="mt-6 text-3xl font-bold tracking-[-0.035em] text-ink">
             {t("saved_empty_title")}
           </h2>
-          <p className="mt-3 text-[15px] leading-7 text-ink/55">
+          <p className="mt-3 text-[15px] leading-7 text-ink/60">
             {t("saved_empty_body")}
           </p>
           <Link
