@@ -43,15 +43,30 @@ export default function PwaRegister() {
   const t = useT();
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [showIosHint, setShowIosHint] = useState(shouldShowIosInstallHint);
+  // Start hidden so SSR and the first client render match. iOS detection reads
+  // navigator.userAgent, which is only available on the client — computing it
+  // during the initial render rendered the hint on iPhone but not on the
+  // server, causing an iOS-only hydration mismatch (React #418). Decide after
+  // mount instead.
+  const [showIosHint, setShowIosHint] = useState(false);
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(
     null,
   );
-  const [visible, setVisible] = useState(shouldShowIosInstallHint);
+  const [visible, setVisible] = useState(false);
   // Only reload after the user explicitly applies an update — never on the
   // first worker's initial clients.claim() (which would yank the page out from
   // under a first-time visitor, e.g. mid email-verification).
   const updateRequested = useRef(false);
+
+  // Surface the iOS "add to home screen" hint only after hydration.
+  useEffect(() => {
+    if (shouldShowIosInstallHint()) {
+      queueMicrotask(() => {
+        setShowIosHint(true);
+        setVisible(true);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const onBeforeInstallPrompt = (event: Event) => {
