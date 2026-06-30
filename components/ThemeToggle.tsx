@@ -18,7 +18,7 @@ export default function ThemeToggle({
       className={`relative inline-flex h-7 w-[52px] shrink-0 items-center rounded-full border transition-colors duration-300 ${
         isDark ? "border-white/10 bg-[#1d2026]" : "border-black/5 bg-[#e8e7e0]"
       } ${className}`}
-      onClick={toggleTheme}
+      onClick={(event) => toggleTheme({ x: event.clientX, y: event.clientY })}
       role="switch"
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       type="button"
