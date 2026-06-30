@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { LogIn, LogOut, User } from "lucide-react";
+import Link from "next/link";
+import { LogIn, LogOut, User, UserRound } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -96,8 +97,17 @@ export default function AccountMenu({
             </p>
             <p className="mt-0.5 text-sm font-semibold text-ink">{roleLabel}</p>
           </div>
-          <button
+          <Link
             className="mt-1 flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-ink/70 transition-colors hover:bg-tone hover:text-ink"
+            href="/profile"
+            onClick={() => setOpen(false)}
+            role="menuitem"
+          >
+            <UserRound className="h-4 w-4" />
+            {t("account_profile")}
+          </Link>
+          <button
+            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-ink/70 transition-colors hover:bg-tone hover:text-ink"
             onClick={() => {
               setOpen(false);
               void logout();
