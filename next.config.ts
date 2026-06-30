@@ -3,25 +3,28 @@ import bundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 
 // Resolve the deployed build's version once, at build time, and expose it to
-// the client. Precedence: an explicit override, then Render's tag/commit env
-// (deploys are gated on v* tags), then `git describe` (the nearest tag, e.g.
-// "v1.2.3"), then a dev fallback.
+// the client. Precedence: an explicit override, then the nearest git tag
+// (clean "v1.2.3" — deploys are gated on v* tags), then Render's commit SHA if
+// no tags are reachable, then a dev fallback.
 function resolveAppVersion(): string {
   if (process.env.NEXT_PUBLIC_APP_VERSION) {
     return process.env.NEXT_PUBLIC_APP_VERSION;
   }
-  if (process.env.RENDER_GIT_COMMIT) {
-    return process.env.RENDER_GIT_COMMIT.slice(0, 7);
-  }
   try {
-    return execSync("git describe --tags --always --dirty", {
+    // --abbrev=0 yields just the latest tag name (no "-28-gabc123-dirty" tail).
+    const tag = execSync("git describe --tags --abbrev=0", {
       stdio: ["ignore", "pipe", "ignore"],
     })
       .toString()
       .trim();
+    if (tag) return tag;
   } catch {
-    return "dev";
+    // No tags reachable (e.g. a shallow clone) — fall through.
   }
+  if (process.env.RENDER_GIT_COMMIT) {
+    return process.env.RENDER_GIT_COMMIT.slice(0, 7);
+  }
+  return "dev";
 }
 
 const APP_VERSION = resolveAppVersion();

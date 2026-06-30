@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Keyboard } from "lucide-react";
 import { GO_SHORTCUTS, gChordHref } from "@/lib/shortcuts";
 import { useT } from "@/components/i18n/LanguageProvider";
+import { useModKey } from "@/components/command/useModKey";
 import { useViewTransitionNavigate } from "@/components/transitions/ViewTransitions";
 
 const OPEN_EVENT = "farms:shortcuts-open";
@@ -26,6 +27,7 @@ function Kbd({ children }: { children: React.ReactNode }) {
  */
 export default function KeyboardShortcuts() {
   const t = useT();
+  const mod = useModKey();
   const navigate = useViewTransitionNavigate();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const pendingGAt = useRef(0);
@@ -115,7 +117,7 @@ export default function KeyboardShortcuts() {
             <li className="flex items-center justify-between gap-4">
               <span className="text-sm text-ink/75">{t("command_open")}</span>
               <span className="flex items-center gap-1">
-                <Kbd>⌘</Kbd>
+                <Kbd>{mod}</Kbd>
                 <Kbd>K</Kbd>
                 <span className="px-1 text-xs text-ink/30">/</span>
                 <Kbd>/</Kbd>
