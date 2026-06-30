@@ -70,7 +70,7 @@ const viewToggleClassName = (isActive: boolean) =>
 
 const segmentClassName = (isActive: boolean) =>
   `rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
-    isActive ? "bg-ink text-cloud" : "text-ink/50 hover:text-ink/80"
+    isActive ? "bg-ink text-cloud" : "text-ink/60 hover:text-ink/80"
   }`;
 
 export default function DirectoryToolbar({
@@ -317,7 +317,7 @@ export default function DirectoryToolbar({
                   isActive
                     ? "border-ink bg-ink text-cloud shadow-[0_8px_20px_-8px_rgba(20,22,27,0.5)]"
                     : isEmpty
-                      ? "border-line bg-cloud text-ink/30 hover:text-ink/50"
+                      ? "border-line bg-cloud text-ink/30 hover:text-ink/60"
                       : "border-line bg-cloud text-ink/60 hover:border-ink/25 hover:text-ink"
                 }`}
                 key={category}

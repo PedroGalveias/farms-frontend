@@ -202,7 +202,7 @@ export default function AuthModal({
                   : t("auth_register_title")}
             </h2>
             {!registered ? (
-              <p className="mt-3 text-sm leading-6 text-ink/50">
+              <p className="mt-3 text-sm leading-6 text-ink/60">
                 {isLogin
                   ? t("auth_login_subtitle")
                   : t("auth_register_subtitle")}
@@ -306,7 +306,7 @@ export default function AuthModal({
                   {t(fieldErrors.password)}
                 </p>
               ) : !isLogin ? (
-                <p className="mt-2 text-xs text-ink/45" id="auth-pw-hint">
+                <p className="mt-2 text-xs text-ink/60" id="auth-pw-hint">
                   {t("auth_password_hint")}
                 </p>
               ) : null}

@@ -327,7 +327,7 @@ export default function CommandPalette() {
         role="listbox"
       >
         {results.length === 0 ? (
-          <p className="px-3 py-10 text-center text-sm text-ink/45">
+          <p className="px-3 py-10 text-center text-sm text-ink/60">
             {farms === null && query.trim() !== ""
               ? t("command_loading")
               : t("command_empty")}
@@ -352,7 +352,7 @@ export default function CommandPalette() {
               >
                 <span
                   className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl ${
-                    isActive ? "bg-pine/15 text-pine" : "bg-tone text-ink/50"
+                    isActive ? "bg-pine/15 text-pine" : "bg-tone text-ink/60"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -362,7 +362,7 @@ export default function CommandPalette() {
                     {item.label}
                   </span>
                   {item.hint ? (
-                    <span className="block truncate text-xs text-ink/45">
+                    <span className="block truncate text-xs text-ink/60">
                       {item.hint}
                     </span>
                   ) : null}

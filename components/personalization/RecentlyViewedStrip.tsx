@@ -45,7 +45,7 @@ export default function RecentlyViewedStrip({ farms }: { farms: Farm[] }) {
             <p className="mt-1.5 truncate text-base font-bold tracking-[-0.02em] text-ink">
               {farm.name}
             </p>
-            <p className="mt-1 flex items-center gap-1 truncate text-xs text-ink/45">
+            <p className="mt-1 flex items-center gap-1 truncate text-xs text-ink/60">
               <MapPin className="h-3 w-3 shrink-0 text-ink/30" />
               {farm.address}
             </p>

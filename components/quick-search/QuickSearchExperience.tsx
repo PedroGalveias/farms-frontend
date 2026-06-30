@@ -488,7 +488,7 @@ export default function QuickSearchExperience({
                       <span className="shrink-0 text-sm font-bold text-ink">
                         {t(meta.labelKey)}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-sm text-ink/45">
+                      <span className="min-w-0 flex-1 truncate text-sm text-ink/60">
                         {stepSummaries[meta.id]}
                       </span>
                       <Pencil className="h-3.5 w-3.5 shrink-0 text-ink/30 transition group-hover:text-ink/70" />

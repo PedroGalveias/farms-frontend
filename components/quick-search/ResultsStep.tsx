@@ -167,7 +167,7 @@ function ResultRow({
               <AnimatedDistance km={result.distanceKm as number} />
             </span>
           ) : (
-            <ChevronRight className="h-4 w-4 shrink-0 text-ink/25 transition group-hover:translate-x-0.5 group-hover:text-ink/50" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-ink/25 transition group-hover:translate-x-0.5 group-hover:text-ink/60" />
           )}
         </div>
 
