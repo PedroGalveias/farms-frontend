@@ -21,7 +21,7 @@ import { detectDirectionsPlatform, directionsUrl } from "@/lib/directions";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { haptic } from "@/lib/haptics";
 import { farmPath } from "@/lib/share";
-import { supportsViewTransitions } from "@/lib/view-transition";
+import { shouldAnimateViewTransitions } from "@/lib/view-transitions";
 import type { Farm } from "@/types/farm";
 
 const DRAG_CLOSE_THRESHOLD_PX = 110;
@@ -69,7 +69,7 @@ export default function FarmDetailSheet({
   );
   // When the browser morphs the row into the sheet via a View Transition, skip
   // the CSS rise so the two animations don't fight.
-  const [useViewTransition] = useState(() => supportsViewTransitions());
+  const [useViewTransition] = useState(() => shouldAnimateViewTransitions());
 
   useEffect(() => {
     const previouslyFocused =
