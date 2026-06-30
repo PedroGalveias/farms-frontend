@@ -610,3 +610,45 @@ html.dark .skeleton::after {
     animation: none !important;
   }
 }
+
+/* ── Cross-route View Transitions ─────────────────────────────────────────
+   A tasteful crossfade + slight vertical drift between routes. The API is
+   feature-detected in JS (components/transitions/ViewTransitions) and these
+   rules only apply where ::view-transition is supported — Chromium, Safari 18+
+   and Firefox builds that ship it — so non-supporting engines simply cut, no
+   layout cost. Honour reduced-motion by collapsing to an instant swap. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.26s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  ::view-transition-old(root) {
+    animation-name: vt-leave;
+  }
+  ::view-transition-new(root) {
+    animation-name: vt-enter;
+  }
+
+  @keyframes vt-leave {
+    to {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+  @keyframes vt-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Snap instantly — no drift, no crossfade. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+    mix-blend-mode: normal;
+  }
+}

@@ -41,6 +41,7 @@ export default defineConfig({
         "lib/trip.ts",
         "lib/seasonal-reminders.ts",
         "lib/command.ts",
+        "lib/view-transitions.ts",
         "lib/haptics.ts",
         "lib/i18n.ts",
         "app/api/health/route.ts",

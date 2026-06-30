@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useViewTransitionNavigate } from "@/components/transitions/ViewTransitions";
 import {
   ArrowRight,
   CornerDownLeft,
@@ -42,7 +42,7 @@ const OPEN_EVENT = "farms:command-open";
 export default function CommandPalette() {
   const t = useT();
   const { locale } = useLanguage();
-  const router = useRouter();
+  const navigate = useViewTransitionNavigate();
   const { toggleTheme } = useTheme();
   const { recent } = usePersonalization();
 
@@ -247,12 +247,12 @@ export default function CommandPalette() {
       if (!item) return;
       setOpen(false);
       if (item.href) {
-        router.push(item.href);
+        navigate(item.href);
       } else {
         item.run?.();
       }
     },
-    [router],
+    [navigate],
   );
 
   const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
