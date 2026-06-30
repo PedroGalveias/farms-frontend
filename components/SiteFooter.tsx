@@ -3,6 +3,7 @@
 import { ArrowUpRight } from "lucide-react";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 import { useT } from "@/components/i18n/LanguageProvider";
+import { APP_VERSION } from "@/lib/version";
 
 const FARMS_SERVICE_REPO = "https://github.com/PedroGalveias/farms";
 const FARMS_FRONTEND_REPO = "https://github.com/PedroGalveias/farms-frontend";
@@ -59,7 +60,18 @@ export default function SiteFooter() {
         </div>
 
         <div className="mt-6 flex flex-col gap-2 border-t border-line/70 pt-6 text-xs text-ink/60 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} farms</p>
+          <p className="flex items-center gap-2">
+            <span>© {new Date().getFullYear()} farms</span>
+            <span
+              className="inline-flex items-center rounded-full bg-pine-surface px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white"
+              title={t("beta_title")}
+            >
+              {t("beta_label")}
+            </span>
+            <span className="font-mono text-ink/45" title={t("beta_title")}>
+              {APP_VERSION}
+            </span>
+          </p>
           <p>{t("footer_tagline")}</p>
         </div>
       </div>
