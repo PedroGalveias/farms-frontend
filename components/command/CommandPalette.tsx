@@ -49,7 +49,7 @@ export default function CommandPalette() {
 
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -317,66 +317,68 @@ export default function CommandPalette() {
         </kbd>
       </div>
 
-      <ul
+      {/* A div (not ul) so the options can be its *direct* children, as the
+          listbox role requires — an <li> between listbox and option breaks the
+          ARIA parent/child contract. */}
+      <div
         className="max-h-[min(24rem,60vh)] overflow-y-auto p-2"
         id="cmdk-list"
         ref={listRef}
         role="listbox"
       >
         {results.length === 0 ? (
-          <li className="px-3 py-10 text-center text-sm text-ink/45">
+          <p className="px-3 py-10 text-center text-sm text-ink/45">
             {farms === null && query.trim() !== ""
               ? t("command_loading")
               : t("command_empty")}
-          </li>
+          </p>
         ) : (
           results.map((item, index) => {
             const Icon = item.icon;
             const isActive = index === active;
             return (
-              <li key={item.id}>
-                <button
-                  aria-selected={isActive}
-                  className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition ${
-                    isActive ? "bg-pine/10 text-ink" : "text-ink/80"
+              <button
+                aria-selected={isActive}
+                className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition ${
+                  isActive ? "bg-pine/10 text-ink" : "text-ink/80"
+                }`}
+                data-index={index}
+                id={item.id}
+                key={item.id}
+                onClick={() => select(item)}
+                onPointerMove={() => setActive(index)}
+                role="option"
+                type="button"
+              >
+                <span
+                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl ${
+                    isActive ? "bg-pine/15 text-pine" : "bg-tone text-ink/50"
                   }`}
-                  data-index={index}
-                  id={item.id}
-                  onClick={() => select(item)}
-                  onPointerMove={() => setActive(index)}
-                  role="option"
-                  type="button"
                 >
-                  <span
-                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl ${
-                      isActive ? "bg-pine/15 text-pine" : "bg-tone text-ink/50"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[15px] font-semibold tracking-[-0.01em]">
+                    {item.label}
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] font-semibold tracking-[-0.01em]">
-                      {item.label}
+                  {item.hint ? (
+                    <span className="block truncate text-xs text-ink/45">
+                      {item.hint}
                     </span>
-                    {item.hint ? (
-                      <span className="block truncate text-xs text-ink/45">
-                        {item.hint}
-                      </span>
-                    ) : null}
-                  </span>
-                  {isActive ? (
-                    item.run ? (
-                      <CornerDownLeft className="h-4 w-4 shrink-0 text-ink/30" />
-                    ) : (
-                      <ArrowRight className="h-4 w-4 shrink-0 text-ink/30" />
-                    )
                   ) : null}
-                </button>
-              </li>
+                </span>
+                {isActive ? (
+                  item.run ? (
+                    <CornerDownLeft className="h-4 w-4 shrink-0 text-ink/30" />
+                  ) : (
+                    <ArrowRight className="h-4 w-4 shrink-0 text-ink/30" />
+                  )
+                ) : null}
+              </button>
             );
           })
         )}
-      </ul>
+      </div>
 
       <div className="flex items-center gap-4 border-t border-line px-4 py-2.5 text-[11px] font-medium text-ink/60">
         <span className="flex items-center gap-1.5">
