@@ -38,6 +38,18 @@ export default function FarmsPageShell({
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);
 
+  // On wide screens the detail opens as a non-modal docked side panel
+  // (master–detail) so the list stays put; below xl it's the modal sheet.
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1280px)");
+    const update = () => setIsDesktop(query.matches);
+    queueMicrotask(update);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  const detailDocked = activeFarm !== null && isDesktop;
+
   useEffect(() => {
     writeCachedFarms(initialFarms);
   }, [initialFarms]);
@@ -85,7 +97,11 @@ export default function FarmsPageShell({
 
   return (
     <div className="relative overflow-clip">
-      <main className="mx-auto max-w-6xl px-5 pt-6 sm:px-8 lg:pt-0">
+      <main
+        className={`mx-auto max-w-6xl px-5 pt-6 transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-8 lg:pt-0 ${
+          detailDocked ? "xl:pr-[27rem]" : ""
+        }`}
+      >
         {/* ---------- Editorial hero ---------- */}
         <section className="relative pt-10 sm:pt-14">
           <HomeHero onAddFarm={requestAddFarm} serviceStatus={serviceStatus} />
@@ -191,6 +207,7 @@ export default function FarmsPageShell({
           farm={activeFarm}
           onClose={() => setActiveFarm(null)}
           selectedProducts={[]}
+          variant={isDesktop ? "dock" : "modal"}
         />
       ) : null}
     </div>
