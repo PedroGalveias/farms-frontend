@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, LayoutGrid, Search } from "lucide-react";
+import { Command, Heart, LayoutGrid, Search } from "lucide-react";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 import Logo from "@/components/Logo";
 import LanguageMenu from "@/components/LanguageMenu";
@@ -56,6 +56,16 @@ export default function SideRail() {
       </Link>
 
       <nav aria-label="Primary" className="flex flex-col items-center gap-2">
+        <button
+          className={`${utilityClassName} mb-1`}
+          onClick={() =>
+            window.dispatchEvent(new CustomEvent("farms:command-open"))
+          }
+          title={`${t("command_open")} (⌘K)`}
+          type="button"
+        >
+          <Command className="h-5 w-5" />
+        </button>
         <Link
           aria-current={active === "directory" ? "page" : undefined}
           className={railLinkClassName(active === "directory")}

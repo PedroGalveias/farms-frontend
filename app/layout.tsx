@@ -14,6 +14,7 @@ import WebVitals from "@/components/WebVitals";
 import AuthProvider from "@/components/auth/AuthProvider";
 import TripProvider from "@/components/trip/TripProvider";
 import SeasonalReminderProvider from "@/components/seasonal/SeasonalReminderProvider";
+import CommandPalette from "@/components/command/CommandPalette";
 import "./globals.css";
 
 // Set the theme class before paint to avoid a flash of the wrong theme.
@@ -78,6 +79,7 @@ export default function RootLayout({
                       <div id="main-content">{children}</div>
                     </div>
                     <MobileTabBar />
+                    <CommandPalette />
                     <CustomCursor />
                     <PwaRegister />
                     <OfflineChip />
