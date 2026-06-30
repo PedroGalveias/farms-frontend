@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { tagLabel } from "@/lib/products";
 import { haptic } from "@/lib/haptics";
-import { formatDistanceShort, isNewThisMonth } from "@/lib/directory";
+import { formatDistanceShort, isRecentlyAdded } from "@/lib/directory";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
@@ -77,7 +77,7 @@ function CardBadges({
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <CantonTag farm={farm} />
-      {isNewThisMonth(farm.created_at) ? (
+      {isRecentlyAdded(farm.created_at) ? (
         <span className="inline-flex items-center gap-1 rounded-full bg-pine-surface px-2.5 py-1 text-[11px] font-bold text-white">
           <Sparkles className="h-3 w-3" />
           {t("card_new")}
