@@ -116,7 +116,14 @@ export function formatDistanceShort(km: number): string {
  * Whether a farm was added in the current calendar month — drives the "New"
  * badge. Returns false for missing/unparseable dates.
  */
-export function isNewThisMonth(
+const NEW_FARM_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Whether a farm counts as "new" — added within the last 30 days (a rolling
+ * window, so a farm doesn't abruptly stop being new at a month boundary).
+ * Future-dated `created_at` (clock skew) is treated as not new.
+ */
+export function isRecentlyAdded(
   createdAt: string,
   now: Date = new Date(),
 ): boolean {
@@ -124,8 +131,6 @@ export function isNewThisMonth(
   if (Number.isNaN(created.getTime())) {
     return false;
   }
-  return (
-    created.getFullYear() === now.getFullYear() &&
-    created.getMonth() === now.getMonth()
-  );
+  const ageMs = now.getTime() - created.getTime();
+  return ageMs >= 0 && ageMs <= NEW_FARM_WINDOW_MS;
 }

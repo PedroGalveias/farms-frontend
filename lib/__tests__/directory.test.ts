@@ -5,7 +5,7 @@ import {
   formatDistanceShort,
   getCantonCounts,
   getCategoryCounts,
-  isNewThisMonth,
+  isRecentlyAdded,
   matchesCanton,
   matchesCategories,
   matchesSearch,
@@ -138,16 +138,19 @@ describe("formatDistanceShort", () => {
   });
 });
 
-describe("isNewThisMonth", () => {
+describe("isRecentlyAdded", () => {
   const now = new Date("2026-06-22T12:00:00Z");
 
-  it("is true within the current calendar month", () => {
-    expect(isNewThisMonth("2026-06-02T00:00:00Z", now)).toBe(true);
+  it("is true within the last 30 days — including across a month boundary", () => {
+    expect(isRecentlyAdded("2026-06-20T00:00:00Z", now)).toBe(true);
+    // 25 days ago, in the previous calendar month — still recent.
+    expect(isRecentlyAdded("2026-05-28T12:00:00Z", now)).toBe(true);
   });
 
-  it("is false for a previous month or bad input", () => {
-    expect(isNewThisMonth("2026-05-31T00:00:00Z", now)).toBe(false);
-    expect(isNewThisMonth("not-a-date", now)).toBe(false);
+  it("is false past 30 days, for the future, or bad input", () => {
+    expect(isRecentlyAdded("2026-05-10T00:00:00Z", now)).toBe(false); // 43 days
+    expect(isRecentlyAdded("2026-07-01T00:00:00Z", now)).toBe(false); // future
+    expect(isRecentlyAdded("not-a-date", now)).toBe(false);
   });
 });
 
