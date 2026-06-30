@@ -11,13 +11,19 @@ export default function GreenSlabCta() {
 
   return (
     <Reveal className="mt-24" once>
-      <section className="relative w-full overflow-hidden bg-pine text-white">
+      <section
+        aria-labelledby="slab-cta-title"
+        className="relative w-full overflow-hidden bg-pine text-white"
+      >
         <div className="grid lg:grid-cols-2">
           <div className="flex flex-col justify-center px-6 py-16 sm:px-12 lg:py-24">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
               {t("slab_eyebrow")}
             </p>
-            <h2 className="mt-5 max-w-md text-[clamp(2.25rem,4.5vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em]">
+            <h2
+              className="mt-5 max-w-md text-[clamp(2.25rem,4.5vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em]"
+              id="slab-cta-title"
+            >
               {t("slab_title")}
             </h2>
             <p className="mt-5 max-w-md text-base leading-7 text-white/65">

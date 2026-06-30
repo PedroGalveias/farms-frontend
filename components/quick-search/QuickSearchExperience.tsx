@@ -426,7 +426,7 @@ export default function QuickSearchExperience({
   );
 
   return (
-    <div className="relative overflow-clip">
+    <main className="relative overflow-clip">
       <div className="lg:flex lg:h-dvh lg:overflow-hidden">
         <div className="relative z-10 mx-auto w-full max-w-xl px-4 pb-12 pt-4 sm:px-6 sm:pt-8 lg:mx-0 lg:flex lg:h-dvh lg:w-[560px] lg:max-w-none lg:shrink-0 lg:flex-col lg:justify-center lg:px-12 lg:py-0">
           <div>
@@ -587,6 +587,6 @@ export default function QuickSearchExperience({
           }`}
         />
       ) : null}
-    </div>
+    </main>
   );
 }
