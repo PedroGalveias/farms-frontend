@@ -685,3 +685,27 @@ html.dark .skeleton::after {
     mix-blend-mode: normal;
   }
 }
+
+/* ── Theme toggle: circular reveal ────────────────────────────────────────
+   While `.theme-vt` is on <html> (set by ThemeProvider for a theme flip only),
+   override the route crossfade: the old theme holds still underneath while the
+   new theme wipes in as a circle growing from the toggle. Scoped so route
+   navigations keep their own transition. */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-vt::view-transition-old(root) {
+    animation: none;
+    z-index: 0;
+  }
+  html.theme-vt::view-transition-new(root) {
+    animation: theme-vt-reveal 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: 1;
+  }
+  @keyframes theme-vt-reveal {
+    from {
+      clip-path: circle(0% at var(--theme-vt-x, 50%) var(--theme-vt-y, 50%));
+    }
+    to {
+      clip-path: circle(150% at var(--theme-vt-x, 50%) var(--theme-vt-y, 50%));
+    }
+  }
+}
