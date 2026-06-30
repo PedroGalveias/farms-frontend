@@ -53,6 +53,12 @@ export default function HomeHero({
           className="rise-in flex flex-wrap items-center gap-2.5"
           style={{ ["--rise-delay" as string]: "0ms" }}
         >
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full bg-pine-surface px-3 py-1.5 text-xs font-bold uppercase tracking-[0.1em] text-white"
+            title={t("beta_title")}
+          >
+            {t("beta_label")}
+          </span>
           <span className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-xs font-semibold text-ink/60">
             <Sparkles className="h-3.5 w-3.5 text-pine" />
             {t("hero_eyebrow")}
