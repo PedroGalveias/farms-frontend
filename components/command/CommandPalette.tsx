@@ -5,6 +5,7 @@ import { useViewTransitionNavigate } from "@/components/transitions/ViewTransiti
 import {
   ArrowRight,
   CornerDownLeft,
+  Keyboard,
   LayoutGrid,
   Leaf,
   type LucideIcon,
@@ -175,6 +176,14 @@ export default function CommandPalette() {
         label: t("command_toggle_theme"),
         icon: Moon,
         run: toggleTheme,
+      },
+      {
+        id: "action:shortcuts",
+        kind: "action",
+        label: t("shortcuts_title"),
+        icon: Keyboard,
+        run: () =>
+          window.dispatchEvent(new CustomEvent("farms:shortcuts-open")),
       },
     ],
     [t, toggleTheme],

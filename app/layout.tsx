@@ -15,6 +15,7 @@ import AuthProvider from "@/components/auth/AuthProvider";
 import TripProvider from "@/components/trip/TripProvider";
 import SeasonalReminderProvider from "@/components/seasonal/SeasonalReminderProvider";
 import CommandPalette from "@/components/command/CommandPalette";
+import KeyboardShortcuts from "@/components/command/KeyboardShortcuts";
 import ViewTransitions from "@/components/transitions/ViewTransitions";
 import "./globals.css";
 
@@ -82,6 +83,7 @@ export default function RootLayout({
                       </div>
                       <MobileTabBar />
                       <CommandPalette />
+                      <KeyboardShortcuts />
                       <CustomCursor />
                       <PwaRegister />
                       <OfflineChip />
