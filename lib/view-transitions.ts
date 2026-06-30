@@ -1,6 +1,15 @@
-// Pure decision helpers for the View Transitions navigation layer. Kept
-// framework-free so the branchy "should we intercept / animate this?" logic is
+// The single home for View Transitions logic — both the cross-route navigation
+// layer (components/transitions/ViewTransitions) and the quick-search row→sheet
+// morph (QuickSearchExperience / FarmDetailSheet) import from here.
+//
+// The pure decision helpers (isInternalHref / shouldInterceptClick /
+// shouldAnimateNavigation) are framework-free so the branchy logic stays
 // unit-testable without a real browser (jsdom has no startViewTransition).
+import { flushSync } from "react-dom";
+
+type ViewTransitionDocument = Document & {
+  startViewTransition?: (callback: () => void) => { finished: Promise<void> };
+};
 
 /** True for app-internal paths ("/farm/x"), not external or protocol URLs. */
 export function isInternalHref(href: string | null | undefined): boolean {
@@ -52,7 +61,16 @@ export function shouldInterceptClick(context: ClickContext): boolean {
 export function supportsViewTransitions(): boolean {
   return (
     typeof document !== "undefined" &&
-    typeof (document as Document).startViewTransition === "function"
+    typeof (document as ViewTransitionDocument).startViewTransition ===
+      "function"
+  );
+}
+
+/** Whether the user has asked for reduced motion. */
+export function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
 }
 
@@ -68,4 +86,44 @@ export interface AnimateOptions {
  */
 export function shouldAnimateNavigation(options: AnimateOptions): boolean {
   return options.supported && !options.reducedMotion;
+}
+
+/** Supported *and* motion is allowed — the gate for the morph helpers below. */
+export function shouldAnimateViewTransitions(): boolean {
+  return supportsViewTransitions() && !prefersReducedMotion();
+}
+
+/**
+ * Run a React state update inside a View Transition so the browser can morph
+ * between the old and new DOM (e.g. a result row expanding into a detail
+ * sheet). `flushSync` forces the update to apply synchronously so the
+ * transition captures the new state. Falls back to a plain update when the API
+ * is unavailable or reduced motion is requested.
+ *
+ * `morphEl` is given a shared `view-transition-name` for the duration of the
+ * transition, then cleaned up — used to tie the originating element to its
+ * destination.
+ */
+export function runViewTransition(
+  update: () => void,
+  morphEl?: HTMLElement | null,
+) {
+  if (!shouldAnimateViewTransitions()) {
+    update();
+    return;
+  }
+
+  if (morphEl) {
+    morphEl.style.viewTransitionName = "qs-farm";
+  }
+
+  const transition = (document as ViewTransitionDocument).startViewTransition!(
+    () => flushSync(update),
+  );
+
+  transition.finished.finally(() => {
+    if (morphEl) {
+      morphEl.style.viewTransitionName = "";
+    }
+  });
 }

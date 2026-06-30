@@ -34,7 +34,7 @@ import { PRODUCTS, tagLabel } from "@/lib/products";
 import { trackSearch } from "@/lib/search-stats";
 import { geolocationErrorKey, requestCurrentPosition } from "@/lib/geolocation";
 import { getCantonName, getUniqueFarmCantons } from "@/lib/farms";
-import { runViewTransition } from "@/lib/view-transition";
+import { runViewTransition } from "@/lib/view-transitions";
 import {
   getQuickSearchProducts,
   getQuickSearchResults,
