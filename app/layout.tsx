@@ -15,6 +15,7 @@ import AuthProvider from "@/components/auth/AuthProvider";
 import TripProvider from "@/components/trip/TripProvider";
 import SeasonalReminderProvider from "@/components/seasonal/SeasonalReminderProvider";
 import CommandPalette from "@/components/command/CommandPalette";
+import ViewTransitions from "@/components/transitions/ViewTransitions";
 import "./globals.css";
 
 // Set the theme class before paint to avoid a flash of the wrong theme.
@@ -68,26 +69,28 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ThemeProvider>
           <LanguageProvider>
-            <AuthProvider>
-              <PersonalizationProvider>
-                <TripProvider>
-                  <SeasonalReminderProvider>
-                    <SkipLink />
-                    <SideRail />
-                    <div className="cursor-zone relative z-[1] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[76px]">
-                      <SiteHeader />
-                      <div id="main-content">{children}</div>
-                    </div>
-                    <MobileTabBar />
-                    <CommandPalette />
-                    <CustomCursor />
-                    <PwaRegister />
-                    <OfflineChip />
-                    <WebVitals />
-                  </SeasonalReminderProvider>
-                </TripProvider>
-              </PersonalizationProvider>
-            </AuthProvider>
+            <ViewTransitions>
+              <AuthProvider>
+                <PersonalizationProvider>
+                  <TripProvider>
+                    <SeasonalReminderProvider>
+                      <SkipLink />
+                      <SideRail />
+                      <div className="cursor-zone relative z-[1] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[76px]">
+                        <SiteHeader />
+                        <div id="main-content">{children}</div>
+                      </div>
+                      <MobileTabBar />
+                      <CommandPalette />
+                      <CustomCursor />
+                      <PwaRegister />
+                      <OfflineChip />
+                      <WebVitals />
+                    </SeasonalReminderProvider>
+                  </TripProvider>
+                </PersonalizationProvider>
+              </AuthProvider>
+            </ViewTransitions>
           </LanguageProvider>
         </ThemeProvider>
       </body>
