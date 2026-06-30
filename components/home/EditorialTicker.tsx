@@ -20,7 +20,7 @@ export default function EditorialTicker() {
       className="marquee mt-12 overflow-hidden border-y border-line py-3.5 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]"
       once
     >
-      <div className="marquee-track flex w-max items-center gap-6 text-xs font-bold uppercase tracking-[0.18em] text-ink/45">
+      <div className="marquee-track flex w-max items-center gap-6 text-xs font-bold uppercase tracking-[0.18em] text-ink/60">
         {[...TICKER_KEYS, ...TICKER_KEYS, ...TICKER_KEYS].map((key, index) => (
           <span className="flex items-center gap-6" key={index}>
             {t(key)}

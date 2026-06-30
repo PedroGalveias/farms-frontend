@@ -17,7 +17,7 @@ export default function GreenSlabCta() {
       >
         <div className="grid lg:grid-cols-2">
           <div className="flex flex-col justify-center px-6 py-16 sm:px-12 lg:py-24">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/90">
               {t("slab_eyebrow")}
             </p>
             <h2

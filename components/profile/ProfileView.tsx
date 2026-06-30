@@ -182,7 +182,7 @@ function ProfileSection({
         <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
           {title}
         </h2>
-        <span className="inline-flex items-center gap-1 rounded-full bg-tone px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/45">
+        <span className="inline-flex items-center gap-1 rounded-full bg-tone px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/60">
           {wipLabel}
         </span>
       </div>

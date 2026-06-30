@@ -64,7 +64,7 @@ export default function ProductsStep({
               className={`rounded-full px-4 py-1.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
                 matchMode === mode
                   ? "bg-white text-ink shadow-[0_1px_3px_rgba(22,26,21,0.12)]"
-                  : "text-ink/45 hover:text-ink/70"
+                  : "text-ink/60 hover:text-ink/70"
               }`}
               key={mode}
               onClick={() => onMatchModeChange(mode)}
@@ -74,7 +74,7 @@ export default function ProductsStep({
             </button>
           ))}
         </div>
-        <p className="text-xs leading-5 text-ink/45">
+        <p className="text-xs leading-5 text-ink/60">
           {matchMode === "all"
             ? t("qs_match_all_hint")
             : t("qs_match_any_hint")}
@@ -121,7 +121,7 @@ export default function ProductsStep({
                       className={`rounded-full px-1.5 py-0.5 text-[0.65rem] font-bold leading-none ${
                         isSelected
                           ? "bg-cloud/20 text-cloud"
-                          : "bg-tone text-ink/50"
+                          : "bg-tone text-ink/60"
                       }`}
                     >
                       {product.farmCount}
@@ -138,7 +138,7 @@ export default function ProductsStep({
                   <button
                     aria-expanded={isOpen}
                     aria-label={t("qs_show_products")}
-                    className="grid w-10 shrink-0 place-items-center rounded-xl text-ink/45 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+                    className="grid w-10 shrink-0 place-items-center rounded-xl text-ink/60 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
                     onClick={() => toggleExpanded(group)}
                     type="button"
                   >
@@ -202,7 +202,7 @@ export default function ProductsStep({
 
       {selectedCount > 0 ? (
         <button
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-ink/45 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-ink/60 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
           onClick={onClearSelection}
           type="button"
         >

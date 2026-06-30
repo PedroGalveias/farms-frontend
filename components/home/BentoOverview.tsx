@@ -35,7 +35,7 @@ export default function BentoOverview({
         <p className="text-4xl font-black tracking-[-0.04em] text-ink">
           <CountUp value={farms.length} />
         </p>
-        <p className="mt-1 text-xs font-semibold text-ink/50">
+        <p className="mt-1 text-xs font-semibold text-ink/70">
           {t("bento_farmsListed")}
         </p>
       </div>
@@ -44,7 +44,7 @@ export default function BentoOverview({
         <p className="text-4xl font-black tracking-[-0.04em] text-ink">
           <CountUp value={cantonCount} />
         </p>
-        <p className="mt-1 text-xs font-semibold text-ink/50">
+        <p className="mt-1 text-xs font-semibold text-ink/70">
           {t("bento_cantonsCovered")}
         </p>
       </div>

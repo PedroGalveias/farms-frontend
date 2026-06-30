@@ -93,18 +93,18 @@ export default function NearestFarmCard({
   };
 
   const cardClassName =
-    "col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine p-5 text-white sm:row-span-2 sm:min-h-0";
+    "col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine dark:bg-[#1c7c47] p-5 text-white sm:row-span-2 sm:min-h-0";
 
   if (status === "ready" && nearest) {
     return (
       <>
-        <div className="group col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine p-5 text-white sm:row-span-2 sm:min-h-0">
+        <div className="group col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine dark:bg-[#1c7c47] p-5 text-white sm:row-span-2 sm:min-h-0">
           <div className="flex items-center justify-between gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold">
               <Navigation className="h-3.5 w-3.5" />
               {compactDistance(nearest.distanceKm)}
             </span>
-            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/55">
+            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white">
               {t("nearest_label")}
             </span>
           </div>
@@ -159,7 +159,7 @@ export default function NearestFarmCard({
         <span className="grid h-10 w-10 place-items-center rounded-full bg-white/15">
           <Navigation className="h-5 w-5" />
         </span>
-        <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/55">
+        <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white">
           {t("nearest_label")}
         </span>
       </div>

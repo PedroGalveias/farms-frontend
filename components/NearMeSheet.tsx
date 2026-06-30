@@ -54,7 +54,7 @@ export default function NearMeSheet({
           >
             {t("near_me_title")}
           </h2>
-          <p className="mt-1.5 text-sm leading-6 text-ink/50">
+          <p className="mt-1.5 text-sm leading-6 text-ink/60">
             {t("near_me_subtitle")}
           </p>
         </div>
@@ -90,7 +90,7 @@ export default function NearMeSheet({
                     <span className="block truncate text-[15px] font-bold tracking-[-0.02em] text-ink">
                       {farm.name}
                     </span>
-                    <span className="mt-0.5 flex items-center gap-1 truncate text-xs text-ink/45">
+                    <span className="mt-0.5 flex items-center gap-1 truncate text-xs text-ink/60">
                       <MapPin className="h-3 w-3 shrink-0 text-ink/30" />
                       {farm.canton} · {getCantonName(farm.canton)}
                     </span>

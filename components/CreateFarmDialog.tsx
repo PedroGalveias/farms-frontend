@@ -185,7 +185,7 @@ export default function CreateFarmDialog({
             >
               {t("cta_addFarm")}
             </h2>
-            <p className="mt-3 max-w-md text-sm leading-6 text-ink/50">
+            <p className="mt-3 max-w-md text-sm leading-6 text-ink/60">
               {t("create_subtitle")}
             </p>
           </div>

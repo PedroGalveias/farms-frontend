@@ -88,7 +88,7 @@ export default function VerifyEmailPage() {
           <p className="mt-3 text-lg leading-8 text-ink/60">
             {t("verify_success_body")}
           </p>
-          <p className="mt-2 text-sm text-ink/45">
+          <p className="mt-2 text-sm text-ink/60">
             {t("verify_redirect", { n: countdown })}
           </p>
           <button

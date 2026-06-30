@@ -162,13 +162,13 @@ export default function FarmCard({
             <h3 className="mt-3 text-2xl font-bold leading-[1.05] tracking-[-0.03em] text-ink">
               {farm.name}
             </h3>
-            <p className="mt-1.5 flex items-center gap-1.5 text-sm leading-6 text-ink/50">
+            <p className="mt-1.5 flex items-center gap-1.5 text-sm leading-6 text-ink/60">
               <MapPin className="h-3.5 w-3.5 shrink-0 text-ink/30" />
               {farm.address}
             </p>
           </div>
 
-          <div className="space-y-1.5 text-sm text-ink/50">
+          <div className="space-y-1.5 text-sm text-ink/60">
             <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink/60">
               {t("card_added")} {formatFarmDate(farm.created_at)}
             </p>
@@ -211,7 +211,7 @@ export default function FarmCard({
         {farm.name}
       </h3>
 
-      <p className="mt-2 flex items-start gap-1.5 text-sm leading-6 text-ink/50">
+      <p className="mt-2 flex items-start gap-1.5 text-sm leading-6 text-ink/60">
         <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink/30" />
         {farm.address}
       </p>

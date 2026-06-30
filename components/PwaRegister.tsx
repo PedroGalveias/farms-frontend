@@ -211,7 +211,7 @@ export default function PwaRegister() {
           ) : null}
           <button
             aria-label={t("pwa_dismiss")}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-tone text-ink/50"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-tone text-ink/60"
             onClick={dismissInstall}
             type="button"
           >

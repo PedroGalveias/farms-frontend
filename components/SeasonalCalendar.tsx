@@ -105,7 +105,7 @@ export default function SeasonalCalendar() {
                         className={`h-3 w-3 transition ${
                           reminded
                             ? "fill-current text-pine"
-                            : "text-ink/25 group-hover/chip:text-ink/45"
+                            : "text-ink/25 group-hover/chip:text-ink/60"
                         }`}
                       />
                     </button>
