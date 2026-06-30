@@ -599,6 +599,19 @@ html.dark .skeleton::after {
   animation: heart-pop 320ms var(--ease-spring);
 }
 
+/* Desktop master–detail: the docked farm panel slides in from the right edge. */
+@media (prefers-reduced-motion: no-preference) {
+  .qs-dock {
+    animation: qs-dock-in 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes qs-dock-in {
+    from {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* No fade/shimmer, but the skeleton must still be visible as feedback. */
   .skeleton {
