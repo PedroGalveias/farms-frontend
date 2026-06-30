@@ -56,7 +56,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1c7c47",
+  // Tint the browser chrome to match the page surface so the UI feels
+  // immersive — and so dark mode doesn't show a green bar over a dark page.
+  // (The installed-PWA brand colour stays green via app/manifest.ts.)
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f4ef" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e0f12" },
+  ],
 };
 
 export default function RootLayout({

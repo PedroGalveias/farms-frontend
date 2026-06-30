@@ -54,6 +54,18 @@ html {
      tab bar with it) doesn't bounce past the top/bottom — a more anchored,
      polished feel. */
   overscroll-behavior: none;
+  /* Native form controls (checkbox/radio/range/progress) pick up the brand. */
+  accent-color: var(--color-pine);
+  /* No grey flash on tap — we supply our own active states (native-app feel). */
+  -webkit-tap-highlight-color: transparent;
+  /* Firefox doesn't honour ::-webkit-scrollbar; give it a slim themed bar to
+     match the WebKit/Blink styling below. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(20, 22, 27, 0.24) transparent;
+}
+
+html.dark {
+  scrollbar-color: rgba(241, 242, 238, 0.24) transparent;
 }
 
 body {
@@ -137,6 +149,14 @@ html.dark body::before {
     @apply font-display;
     letter-spacing: -0.04em;
     line-height: 0.96;
+    /* Even, non-ragged headings — no lonely last word. (No-op where
+       unsupported.) */
+    text-wrap: balance;
+  }
+
+  /* Avoid typographic orphans in body copy. Degrades to normal wrapping. */
+  p {
+    text-wrap: pretty;
   }
 
   button,
