@@ -70,7 +70,7 @@ export default function SeasonalCalendar() {
                   {monthName(month)}
                 </h2>
                 {isCurrent ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-pine px-2.5 py-1 text-[11px] font-bold text-cloud">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-pine-surface px-2.5 py-1 text-[11px] font-bold text-white">
                     <Sprout className="h-3 w-3" />
                     {t("season_label")}
                   </span>
