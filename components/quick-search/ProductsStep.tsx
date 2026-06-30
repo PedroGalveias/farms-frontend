@@ -47,7 +47,7 @@ export default function ProductsStep({
         <h2 className="text-[28px] font-bold tracking-[-0.035em] text-ink">
           {t("qs_prod_title")}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-ink/55">
+        <p className="mt-2 text-sm leading-6 text-ink/60">
           {t("qs_prod_subcopy")}
         </p>
       </div>

@@ -112,13 +112,13 @@ export default function SeasonalReminderProvider({
                       .join(" · ")}
                     {due.length > 4 ? ` +${due.length - 4}` : ""}
                   </p>
-                  <p className="mt-0.5 text-sm leading-6 text-ink/55">
+                  <p className="mt-0.5 text-sm leading-6 text-ink/60">
                     {t("reminder_toast_body")}
                   </p>
                 </div>
                 <button
                   aria-label={t("reminder_dismiss")}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink/40 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink/70 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
                   onClick={dismissDue}
                   type="button"
                 >

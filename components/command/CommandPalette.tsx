@@ -294,13 +294,13 @@ export default function CommandPalette() {
       ref={dialogRef}
     >
       <div className="flex items-center gap-3 border-b border-line px-4">
-        <Search className="h-5 w-5 shrink-0 text-ink/35" />
+        <Search className="h-5 w-5 shrink-0 text-ink/60" />
         <input
           aria-activedescendant={results[active]?.id}
           aria-controls="cmdk-list"
           aria-expanded
           autoComplete="off"
-          className="w-full bg-transparent py-4 text-[15px] text-ink outline-none placeholder:text-ink/35"
+          className="w-full bg-transparent py-4 text-[15px] text-ink outline-none placeholder:text-ink/60"
           onChange={(event) => {
             setQuery(event.target.value);
             setActive(0);
@@ -312,7 +312,7 @@ export default function CommandPalette() {
           type="text"
           value={query}
         />
-        <kbd className="hidden shrink-0 rounded-md border border-line px-1.5 py-0.5 text-[11px] font-semibold text-ink/40 sm:block">
+        <kbd className="hidden shrink-0 rounded-md border border-line px-1.5 py-0.5 text-[11px] font-semibold text-ink/60 sm:block">
           Esc
         </kbd>
       </div>
@@ -378,7 +378,7 @@ export default function CommandPalette() {
         )}
       </ul>
 
-      <div className="flex items-center gap-4 border-t border-line px-4 py-2.5 text-[11px] font-medium text-ink/40">
+      <div className="flex items-center gap-4 border-t border-line px-4 py-2.5 text-[11px] font-medium text-ink/60">
         <span className="flex items-center gap-1.5">
           <kbd className="rounded border border-line px-1 py-0.5">↑↓</kbd>
           {t("command_hint_nav")}

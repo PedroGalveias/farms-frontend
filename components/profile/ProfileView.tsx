@@ -28,7 +28,7 @@ export default function ProfileView() {
     return (
       <main className="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-24">
         <Link
-          className="inline-flex items-center gap-2 text-sm font-semibold text-ink/55 transition hover:text-ink"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-ink/60 transition hover:text-ink"
           href="/"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -41,7 +41,7 @@ export default function ProfileView() {
           <h1 className="mt-4 text-2xl font-black tracking-[-0.03em] text-ink">
             {t("profile_title")}
           </h1>
-          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-ink/55">
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-ink/60">
             {t("profile_signinPrompt")}
           </p>
           {!loading ? (
@@ -64,7 +64,7 @@ export default function ProfileView() {
   return (
     <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
       <Link
-        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/55 transition hover:text-ink"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/60 transition hover:text-ink"
         href="/"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -76,7 +76,7 @@ export default function ProfileView() {
           <h1 className="text-[clamp(2rem,5vw,3rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
             {t("profile_title")}
           </h1>
-          <p className="mt-2 text-base leading-7 text-ink/55">
+          <p className="mt-2 text-base leading-7 text-ink/60">
             {t("profile_subtitle")}
           </p>
         </div>
@@ -105,12 +105,12 @@ export default function ProfileView() {
 
       {/* Real account data */}
       <section className="mt-8">
-        <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/40">
+        <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
           {t("profile_account")}
         </h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
-            <p className="text-xs font-semibold text-ink/40">
+            <p className="text-xs font-semibold text-ink/60">
               {t("profile_accountId")}
             </p>
             <p className="mt-1.5 truncate font-mono text-sm text-ink/80">
@@ -118,7 +118,7 @@ export default function ProfileView() {
             </p>
           </div>
           <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
-            <p className="text-xs font-semibold text-ink/40">
+            <p className="text-xs font-semibold text-ink/60">
               {t("profile_role")}
             </p>
             <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-semibold text-pine">
@@ -178,8 +178,8 @@ function ProfileSection({
   return (
     <section className="mt-8">
       <div className="flex items-center gap-2">
-        <span className="text-ink/40">{icon}</span>
-        <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/40">
+        <span className="text-ink/60">{icon}</span>
+        <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
           {title}
         </h2>
         <span className="inline-flex items-center gap-1 rounded-full bg-tone px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/45">
@@ -210,8 +210,8 @@ function Field({
 }) {
   return (
     <label className="block rounded-2xl bg-paper px-4 py-3 ring-1 ring-inset ring-line">
-      <span className="text-xs font-semibold text-ink/40">{label}</span>
-      <span className="mt-1.5 flex items-center gap-2 text-ink/35">
+      <span className="text-xs font-semibold text-ink/60">{label}</span>
+      <span className="mt-1.5 flex items-center gap-2 text-ink/60">
         {icon}
         <input
           className="w-full bg-transparent text-sm text-ink/70 outline-none placeholder:text-ink/30"

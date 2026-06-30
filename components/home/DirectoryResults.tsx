@@ -53,7 +53,7 @@ export default function DirectoryResults({
               ? t("empty_noneAvailable")
               : t("empty_noneMatch")}
           </h2>
-          <p className="mt-3 text-[15px] leading-7 text-ink/55">
+          <p className="mt-3 text-[15px] leading-7 text-ink/60">
             {totalFarmCount === 0
               ? t("empty_noneAvailableSub")
               : t("empty_noneMatchSub")}
@@ -89,7 +89,7 @@ export default function DirectoryResults({
         <h2 className="text-3xl font-bold tracking-[-0.035em] text-ink">
           {t("results_farms", { n: visibleFarms.length })}
         </h2>
-        <p className="text-sm text-ink/40">
+        <p className="text-sm text-ink/60">
           {viewMode !== "map" && visibleCount < visibleFarms.length
             ? t("results_showing", {
                 shown: visibleCount,
@@ -138,7 +138,7 @@ export default function DirectoryResults({
                 type="button"
               >
                 {t("results_loadMore")}
-                <span className="text-ink/40">
+                <span className="text-ink/60">
                   {t("results_left", {
                     n: visibleFarms.length - visibleCount,
                   })}

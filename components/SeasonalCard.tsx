@@ -55,7 +55,7 @@ export default function SeasonalCard() {
         <span className="grid h-10 w-10 place-items-center rounded-full bg-pine/10 text-pine">
           <Sprout className="h-5 w-5" />
         </span>
-        <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/40">
+        <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60">
           {t("season_label")}
         </span>
       </div>
@@ -74,7 +74,7 @@ export default function SeasonalCard() {
             </span>
           ))}
           {extraCount > 0 ? (
-            <span className="rounded-full bg-tone px-3 py-1.5 text-sm font-semibold text-ink/40">
+            <span className="rounded-full bg-tone px-3 py-1.5 text-sm font-semibold text-ink/70">
               +{extraCount}
             </span>
           ) : null}
@@ -92,7 +92,7 @@ export default function SeasonalCard() {
             <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
           </button>
           <Link
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink/55 transition hover:text-ink"
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink/60 transition hover:text-ink"
             href="/seasonal"
           >
             <CalendarDays className="h-3.5 w-3.5" />

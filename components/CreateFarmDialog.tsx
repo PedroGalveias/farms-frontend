@@ -24,10 +24,10 @@ interface CreateFarmDialogProps {
 }
 
 const fieldClassName =
-  "mt-2 w-full rounded-2xl border border-transparent bg-tone px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:font-normal placeholder:text-ink/35 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10";
+  "mt-2 w-full rounded-2xl border border-transparent bg-tone px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:font-normal placeholder:text-ink/70 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10";
 
 const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.08em] text-ink/55";
+  "text-xs font-bold uppercase tracking-[0.08em] text-ink/60";
 
 export default function CreateFarmDialog({
   open,
@@ -192,7 +192,7 @@ export default function CreateFarmDialog({
 
           <button
             aria-label={t("create_close_aria")}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/60 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isSubmitting}
             onClick={onClose}
             type="button"
@@ -311,7 +311,7 @@ export default function CreateFarmDialog({
             <legend className={labelClassName}>
               {t("create_categories_label")}
             </legend>
-            <p className="mt-2 text-sm text-ink/40">
+            <p className="mt-2 text-sm text-ink/60">
               {t("create_categories_hint")}
             </p>
             <div className="mt-3 space-y-2">
@@ -345,7 +345,7 @@ export default function CreateFarmDialog({
                         </span>
                       ) : null}
                       <ChevronDown
-                        className={`ml-auto h-4 w-4 text-ink/40 transition-transform duration-200 ${
+                        className={`ml-auto h-4 w-4 text-ink/60 transition-transform duration-200 ${
                           isExpanded ? "rotate-180" : ""
                         }`}
                       />

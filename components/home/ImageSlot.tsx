@@ -19,7 +19,7 @@ export default function ImageSlot({
       <span className="relative grid h-12 w-12 place-items-center rounded-full bg-cloud text-pine shadow-[0_1px_2px_rgba(20,22,27,0.06)]">
         <Icon className="h-5 w-5" />
       </span>
-      <span className="relative text-[11px] font-bold uppercase tracking-[0.16em] text-ink/40">
+      <span className="relative text-[11px] font-bold uppercase tracking-[0.16em] text-ink/60">
         {label}
       </span>
     </div>

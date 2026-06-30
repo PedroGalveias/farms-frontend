@@ -56,7 +56,7 @@ interface DirectoryToolbarProps {
 }
 
 const fieldClassName =
-  "w-full rounded-2xl border border-line bg-cloud px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:text-ink/35 placeholder:font-normal focus:border-pine/50 focus:ring-4 focus:ring-pine/10";
+  "w-full rounded-2xl border border-line bg-cloud px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:text-ink/60 placeholder:font-normal focus:border-pine/50 focus:ring-4 focus:ring-pine/10";
 
 const filterChipClassName =
   "inline-flex items-center gap-1.5 rounded-full bg-tone px-3 py-1.5 text-xs font-semibold text-ink/65 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20";
@@ -65,7 +65,7 @@ const viewToggleClassName = (isActive: boolean) =>
   `inline-flex flex-1 items-center justify-center rounded-xl px-3.5 py-2.5 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
     isActive
       ? "bg-ink text-cloud shadow-[0_4px_12px_-4px_rgba(20,22,27,0.5)]"
-      : "text-ink/40 hover:text-ink/70"
+      : "text-ink/60 hover:text-ink/70"
   }`;
 
 const segmentClassName = (isActive: boolean) =>
@@ -145,7 +145,7 @@ export default function DirectoryToolbar({
           <span className="rounded-full bg-tone px-3 py-1.5 text-ink/70">
             {t("toolbar_shown", { n: resultsCount })}
           </span>
-          <span className="rounded-full bg-tone px-3 py-1.5 text-ink/40">
+          <span className="rounded-full bg-tone px-3 py-1.5 text-ink/70">
             {t("toolbar_total", { n: totalCount })}
           </span>
           {activeFiltersCount > 0 ? (
@@ -159,7 +159,7 @@ export default function DirectoryToolbar({
       <div className="mt-4 grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_auto]">
         <label className="relative block">
           <span className="sr-only">{t("a11y_search")}</span>
-          <Search className="pointer-events-none absolute bottom-0 left-4 top-0 my-auto h-4 w-4 text-ink/35" />
+          <Search className="pointer-events-none absolute bottom-0 left-4 top-0 my-auto h-4 w-4 text-ink/60" />
           <input
             className={`${fieldClassName} pl-11 pr-10`}
             onChange={(event) => onSearchTermChange(event.target.value)}
@@ -169,7 +169,7 @@ export default function DirectoryToolbar({
           />
           <kbd
             aria-hidden
-            className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-line bg-tone px-1.5 py-0.5 text-[11px] font-semibold text-ink/40 sm:block"
+            className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-line bg-tone px-1.5 py-0.5 text-[11px] font-semibold text-ink/70 sm:block"
           >
             /
           </kbd>
@@ -198,7 +198,7 @@ export default function DirectoryToolbar({
 
         <label className="relative block">
           <span className="sr-only">{t("a11y_sortBy")}</span>
-          <ArrowDownWideNarrow className="pointer-events-none absolute bottom-0 left-4 top-0 my-auto h-4 w-4 text-ink/35" />
+          <ArrowDownWideNarrow className="pointer-events-none absolute bottom-0 left-4 top-0 my-auto h-4 w-4 text-ink/60" />
           <select
             className={`${fieldClassName} pl-11`}
             onChange={(event) =>
@@ -325,7 +325,7 @@ export default function DirectoryToolbar({
                 type="button"
               >
                 {categoryLabel(category, locale)}
-                <span className={isActive ? "text-cloud/55" : "text-ink/35"}>
+                <span className={isActive ? "text-cloud/55" : "text-ink/60"}>
                   {count}
                 </span>
               </button>

@@ -11,7 +11,7 @@ export default function MapPlaceholder({
   const t = useT();
   return (
     <div
-      className="skeleton grid place-items-center rounded-[24px] border border-line text-sm text-ink/40"
+      className="skeleton grid place-items-center rounded-[24px] border border-line text-sm text-ink/60"
       style={{ height: heightStyle }}
     >
       {t("map_loading")}

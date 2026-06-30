@@ -441,7 +441,7 @@ export default function QuickSearchExperience({
               {t("qs_hero_lead")}{" "}
               <span className="text-pine">{t("qs_hero_accent")}</span>
             </h1>
-            <p className="mt-4 max-w-md text-[15px] leading-7 text-ink/55">
+            <p className="mt-4 max-w-md text-[15px] leading-7 text-ink/60">
               {t("qs_hero_subcopy")}
             </p>
           </div>
@@ -501,7 +501,7 @@ export default function QuickSearchExperience({
                       <span className="text-sm font-bold text-ink">
                         {t(meta.labelKey)}
                       </span>
-                      <span className="ml-auto text-xs font-semibold text-ink/35">
+                      <span className="ml-auto text-xs font-semibold text-ink/60">
                         {t("qs_step_of", { n: index + 1 })}
                       </span>
                     </div>
@@ -550,11 +550,11 @@ export default function QuickSearchExperience({
                     onClick={() => goToStep(meta.id)}
                     type="button"
                   >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-tone text-ink/40">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-tone text-ink/70">
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <span
-                      className={`text-sm font-semibold ${enabled ? "text-ink/55" : "text-ink/30"}`}
+                      className={`text-sm font-semibold ${enabled ? "text-ink/60" : "text-ink/30"}`}
                     >
                       {t(meta.labelKey)}
                     </span>
