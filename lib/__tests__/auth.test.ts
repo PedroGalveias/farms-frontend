@@ -3,8 +3,10 @@ import {
   hasSessionCookie,
   isSameOrigin,
   mapAuthError,
+  normaliseUsername,
   validateEmailFormat,
   validatePassword,
+  validateUsername,
 } from "@/lib/auth";
 
 describe("validateEmailFormat", () => {
@@ -31,6 +33,40 @@ describe("validatePassword", () => {
 
   it("flags passwords over the byte limit", () => {
     expect(validatePassword("a".repeat(1025))).toBe("auth_err_password_long");
+  });
+});
+
+describe("normaliseUsername", () => {
+  it("trims and lowercases", () => {
+    expect(normaliseUsername("  Green-Acres  ")).toBe("green-acres");
+    expect(normaliseUsername("FARMER_42")).toBe("farmer_42");
+  });
+});
+
+describe("validateUsername", () => {
+  it("accepts valid usernames (case-insensitively)", () => {
+    expect(validateUsername("green-acres")).toBeNull();
+    expect(validateUsername("Farmer_42")).toBeNull();
+    expect(validateUsername("abc")).toBeNull();
+    expect(validateUsername("a".repeat(30))).toBeNull();
+  });
+
+  it("flags too short / too long", () => {
+    expect(validateUsername("ab")).toBe("auth_err_username_short");
+    expect(validateUsername("  a ")).toBe("auth_err_username_short");
+    expect(validateUsername("a".repeat(31))).toBe("auth_err_username_long");
+  });
+
+  it("rejects bad characters and bad starts", () => {
+    for (const bad of ["-abc", "_abc", "ab c", "ab@c", "über", "ab.c"]) {
+      expect(validateUsername(bad)).toBe("auth_err_username_invalid");
+    }
+  });
+
+  it("rejects reserved names, case-insensitively", () => {
+    expect(validateUsername("admin")).toBe("auth_err_username_reserved");
+    expect(validateUsername("ADMIN")).toBe("auth_err_username_reserved");
+    expect(validateUsername("Farms")).toBe("auth_err_username_reserved");
   });
 });
 

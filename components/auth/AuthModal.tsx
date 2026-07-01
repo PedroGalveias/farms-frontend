@@ -10,8 +10,10 @@ import {
 import { LoaderCircle, X } from "lucide-react";
 import {
   mapAuthError,
+  normaliseUsername,
   validateEmailFormat,
   validatePassword,
+  validateUsername,
   type AuthUser,
 } from "@/lib/auth";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -32,7 +34,12 @@ const fieldClassName =
 const labelClassName =
   "text-xs font-bold uppercase tracking-[0.08em] text-ink/60";
 
-type FieldErrors = { email?: string; password?: string; confirm?: string };
+type FieldErrors = {
+  username?: string;
+  email?: string;
+  password?: string;
+  confirm?: string;
+};
 
 export default function AuthModal({
   mode,
@@ -42,6 +49,7 @@ export default function AuthModal({
   onAuthenticated,
 }: AuthModalProps) {
   const t = useT();
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -60,6 +68,7 @@ export default function AuthModal({
       return;
     }
     queueMicrotask(() => {
+      setUsername("");
       setEmail("");
       setPassword("");
       setConfirm("");
@@ -129,6 +138,10 @@ export default function AuthModal({
         nextErrors.password = "auth_err_credentials";
       }
     } else {
+      const usernameError = validateUsername(username);
+      if (usernameError) {
+        nextErrors.username = usernameError;
+      }
       const passwordError = validatePassword(password);
       if (passwordError) {
         nextErrors.password = passwordError;
@@ -145,10 +158,17 @@ export default function AuthModal({
     setPending(true);
     try {
       const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
+      const body = isLogin
+        ? { email: email.trim(), password }
+        : {
+            username: normaliseUsername(username),
+            email: email.trim(),
+            password,
+          };
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify(body),
       });
 
       if (isLogin) {
@@ -163,6 +183,12 @@ export default function AuthModal({
       } else {
         if (res.status === 202 || res.ok) {
           setRegistered(true);
+          return;
+        }
+        // Username is public, so a clash is reported on the field (the only
+        // enumerable signal — email stays a generic 202 either way).
+        if (res.status === 409) {
+          setFieldErrors({ username: "auth_err_username_taken" });
           return;
         }
         setFormError(t(mapAuthError(res.status)));
@@ -244,6 +270,51 @@ export default function AuthModal({
               <p className="mb-5 rounded-2xl bg-pine/10 px-4 py-3 text-sm font-medium text-pine">
                 {t(noticeKey)}
               </p>
+            ) : null}
+
+            {!isLogin ? (
+              <div className="mb-5">
+                <label className={labelClassName} htmlFor="auth-username">
+                  {t("auth_username_label")}
+                </label>
+                <input
+                  aria-describedby={
+                    fieldErrors.username
+                      ? "auth-username-err"
+                      : "auth-username-hint"
+                  }
+                  aria-invalid={fieldErrors.username ? true : undefined}
+                  autoComplete="username"
+                  className={fieldClassName}
+                  id="auth-username"
+                  inputMode="text"
+                  onChange={(e) => {
+                    // Lowercase as they type — what they see is what's stored.
+                    setUsername(e.target.value.toLowerCase());
+                    setFieldErrors((p) => ({ ...p, username: undefined }));
+                    setFormError(null);
+                  }}
+                  onBlur={(e) => setUsername(normaliseUsername(e.target.value))}
+                  placeholder={t("auth_username_placeholder")}
+                  type="text"
+                  value={username}
+                />
+                {fieldErrors.username ? (
+                  <p
+                    className="mt-2 text-sm text-rose-600"
+                    id="auth-username-err"
+                  >
+                    {t(fieldErrors.username)}
+                  </p>
+                ) : (
+                  <p
+                    className="mt-2 text-xs text-ink/60"
+                    id="auth-username-hint"
+                  >
+                    {t("auth_username_hint")}
+                  </p>
+                )}
+              </div>
             ) : null}
 
             <div>
