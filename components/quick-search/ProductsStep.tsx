@@ -93,10 +93,7 @@ export default function ProductsStep({
           ).length;
 
           return (
-            <div
-              className="overflow-hidden rounded-2xl border border-line bg-cloud"
-              key={group}
-            >
+            <div className="glass overflow-hidden rounded-2xl" key={group}>
               <div className="flex items-stretch gap-1 p-1">
                 <button
                   aria-pressed={isSelected}

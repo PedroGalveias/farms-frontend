@@ -26,7 +26,7 @@ const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
 
 function InfoCard({ children, label }: { children: string; label: string }) {
   return (
-    <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+    <div className="glass-inset rounded-2xl px-4 py-3.5">
       <p className="text-xs font-semibold text-ink/60">{label}</p>
       <p className="mt-1.5 break-words text-sm leading-6 text-ink/80">
         {children}
@@ -154,7 +154,7 @@ export default function FarmDetail({
       </div>
 
       <div className="mt-7 space-y-3">
-        <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+        <div className="glass-inset rounded-2xl px-4 py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-ink/60">
@@ -176,14 +176,14 @@ export default function FarmDetail({
           </InfoCard>
         </div>
 
-        <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+        <div className="glass-inset rounded-2xl px-4 py-3.5">
           <p className="text-xs font-semibold text-ink/60">
             {t("detail_products")}
           </p>
           <div className="mt-2.5 flex flex-wrap gap-1.5">
             {farm.categories.map((category) => (
               <span
-                className="rounded-full bg-tone px-3 py-1 text-sm font-semibold text-ink/70"
+                className="glass-chip rounded-full px-3 py-1 text-sm font-semibold text-ink/70"
                 key={category}
               >
                 {tagLabel(category, locale)}
