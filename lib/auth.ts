@@ -43,6 +43,57 @@ export function validatePassword(password: string): string | null {
   return null;
 }
 
+// Username rules mirrored from the backend (UX only — the backend stays
+// authoritative, and is the sole source of truth for *uniqueness*).
+export const USERNAME_MIN_LENGTH = 3;
+export const USERNAME_MAX_LENGTH = 30;
+// Start with a letter/digit, then letters/digits/_/-. Checked on the
+// already-lowercased value.
+const USERNAME_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
+const RESERVED_USERNAMES = new Set([
+  "admin",
+  "administrator",
+  "root",
+  "support",
+  "help",
+  "system",
+  "farms",
+  "api",
+  "moderator",
+  "mod",
+  "null",
+  "undefined",
+]);
+
+export type UsernameError =
+  | "auth_err_username_short"
+  | "auth_err_username_long"
+  | "auth_err_username_invalid"
+  | "auth_err_username_reserved";
+
+/** What's actually submitted to (and stored by) the backend: trimmed + lower. */
+export function normaliseUsername(raw: string): string {
+  return raw.trim().toLowerCase();
+}
+
+/** Validate a username client-side; returns an i18n key or null. */
+export function validateUsername(raw: string): UsernameError | null {
+  const value = normaliseUsername(raw);
+  if (value.length < USERNAME_MIN_LENGTH) {
+    return "auth_err_username_short";
+  }
+  if (value.length > USERNAME_MAX_LENGTH) {
+    return "auth_err_username_long";
+  }
+  if (!USERNAME_PATTERN.test(value)) {
+    return "auth_err_username_invalid";
+  }
+  if (RESERVED_USERNAMES.has(value)) {
+    return "auth_err_username_reserved";
+  }
+  return null;
+}
+
 /** Map a backend auth response status to a user-facing i18n key. */
 export function mapAuthError(status: number): string {
   switch (status) {

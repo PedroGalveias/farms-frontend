@@ -63,6 +63,7 @@ test.describe("auth UI", () => {
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("button", { name: /create an account/i }).click();
 
+    await dialog.getByLabel(/username/i).fill("new-farmer");
     await dialog.getByLabel(/email/i).fill("new@example.com");
     await dialog
       .getByLabel("Password", { exact: true })
@@ -72,6 +73,75 @@ test.describe("auth UI", () => {
 
     await expect(dialog.getByText(/check your inbox/i)).toBeVisible();
     expect(registered).toBe(true);
+  });
+
+  test("a taken username (409) shows an inline error on the username field", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName === "webkit",
+      "WebKit driver can't mock the register POST",
+    );
+
+    await page.route("**/api/auth/me", (route) =>
+      route.fulfill({ json: { user: null } }),
+    );
+    await page.route("**/api/auth/register", (route) =>
+      route.fulfill({ status: 409, json: {} }),
+    );
+
+    await page.goto("/");
+    await page
+      .getByRole("button", { name: /log in/i })
+      .first()
+      .click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("button", { name: /create an account/i }).click();
+
+    await dialog.getByLabel(/username/i).fill("taken-name");
+    await dialog.getByLabel(/email/i).fill("fresh@example.com");
+    await dialog
+      .getByLabel("Password", { exact: true })
+      .fill("a-very-long-password");
+    await dialog.getByLabel(/confirm/i).fill("a-very-long-password");
+    await dialog.getByRole("button", { name: /create account/i }).click();
+
+    await expect(dialog.getByText(/that username is taken/i)).toBeVisible();
+  });
+
+  test("an invalid username is caught client-side (no request fired)", async ({
+    page,
+  }) => {
+    let posted = false;
+    await page.route("**/api/auth/me", (route) =>
+      route.fulfill({ json: { user: null } }),
+    );
+    await page.route("**/api/auth/register", (route) => {
+      posted = true;
+      return route.fulfill({ status: 202, json: {} });
+    });
+
+    await page.goto("/");
+    await page
+      .getByRole("button", { name: /log in/i })
+      .first()
+      .click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("button", { name: /create an account/i }).click();
+
+    await dialog.getByLabel(/username/i).fill("ab"); // too short
+    await dialog.getByLabel(/email/i).fill("fresh@example.com");
+    await dialog
+      .getByLabel("Password", { exact: true })
+      .fill("a-very-long-password");
+    await dialog.getByLabel(/confirm/i).fill("a-very-long-password");
+    await dialog.getByRole("button", { name: /create account/i }).click();
+
+    await expect(
+      dialog.getByText(/at least 3 characters/i),
+    ).toBeVisible();
+    expect(posted).toBe(false);
   });
 
   test("adding a farm while logged out prompts login", async ({ page }) => {
