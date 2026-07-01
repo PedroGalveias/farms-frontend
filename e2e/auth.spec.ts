@@ -138,9 +138,7 @@ test.describe("auth UI", () => {
     await dialog.getByLabel(/confirm/i).fill("a-very-long-password");
     await dialog.getByRole("button", { name: /create account/i }).click();
 
-    await expect(
-      dialog.getByText(/at least 3 characters/i),
-    ).toBeVisible();
+    await expect(dialog.getByText(/at least 3 characters/i)).toBeVisible();
     expect(posted).toBe(false);
   });
 
