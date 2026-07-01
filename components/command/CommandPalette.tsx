@@ -286,7 +286,7 @@ export default function CommandPalette() {
   return (
     <dialog
       aria-label={t("command_open")}
-      className="cmdk-dialog mx-auto mb-auto mt-[12vh] w-[min(40rem,calc(100vw-2rem))] rounded-3xl border border-line bg-cloud p-0 text-ink shadow-[0_40px_120px_-24px_rgba(20,22,27,0.55)] backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+      className="glass cmdk-dialog mx-auto mb-auto mt-[12vh] w-[min(40rem,calc(100vw-2rem))] rounded-3xl p-0 text-ink backdrop:bg-black/40 backdrop:backdrop-blur-sm"
       onClick={(event) => {
         if (event.target === dialogRef.current) close();
       }}

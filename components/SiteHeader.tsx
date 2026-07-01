@@ -17,7 +17,7 @@ const utilityClassName =
 export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-4 lg:hidden">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 rounded-full border border-line/80 bg-cloud/70 pl-5 pr-3 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_18px_40px_-24px_rgba(20,22,27,0.25)] backdrop-blur-xl">
+      <div className="glass glass-chrome mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 rounded-full pl-5 pr-3">
         <Link
           className="group flex items-center gap-2 text-[19px] font-extrabold tracking-[-0.04em] text-ink transition-opacity hover:opacity-80"
           href="/"

@@ -15,6 +15,16 @@
   --cloud: #ffffff;
   --rail: #14161b;
   color-scheme: light;
+
+  /* ── Liquid glass (light) ── translucent fill that the backdrop blurs
+     through, a bright rim + top-edge highlight (light catching the glass =
+     depth), and a soft float shadow. --glass-solid is the no-backdrop-filter
+     fallback (kept legible). */
+  --glass-fill: rgba(255, 255, 255, 0.55);
+  --glass-solid: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 12px 40px -14px rgba(20, 22, 27, 0.3);
 }
 
 html.dark {
@@ -27,6 +37,55 @@ html.dark {
   --cloud: #181a20;
   --rail: #1c7c47;
   color-scheme: dark;
+
+  /* ── Liquid glass (dark) ── deeper tint, dimmer rim. */
+  --glass-fill: rgba(30, 33, 41, 0.5);
+  --glass-solid: rgba(24, 26, 32, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 16px 46px -14px rgba(0, 0, 0, 0.55);
+}
+
+/* ── Liquid-glass surface ─────────────────────────────────────────────────
+   Apply to floating chrome and elevated cards. The frost (blur + saturate) is
+   behind an @supports guard; where it's unavailable the fill falls back to a
+   near-opaque colour so content stays legible. The inset top highlight is the
+   key depth cue — the glass rim catching light — and doesn't tint content. */
+.glass {
+  background-color: var(--glass-solid);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 0 var(--glass-highlight);
+}
+
+@supports (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .glass {
+    background-color: var(--glass-fill);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    backdrop-filter: blur(22px) saturate(180%);
+  }
+}
+
+/* Slightly stronger blur for the persistent chrome (header / rail / tab bar). */
+@supports (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .glass-chrome {
+    -webkit-backdrop-filter: blur(28px) saturate(185%);
+    backdrop-filter: blur(28px) saturate(185%);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  /* Respect users who reduce transparency — drop to the opaque fill. */
+  .glass {
+    background-color: var(--glass-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 @theme inline {
