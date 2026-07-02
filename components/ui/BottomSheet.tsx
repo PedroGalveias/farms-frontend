@@ -109,7 +109,7 @@ export default function BottomSheet({
       <div
         aria-labelledby={labelledBy}
         aria-modal="true"
-        className={`qs-sheet relative flex max-h-[85dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-[32px] border border-line bg-cloud shadow-[0_-16px_60px_rgba(20,22,27,0.3)] transition-transform duration-300 sm:max-h-[80dvh] sm:rounded-[32px] sm:shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)] ${className}`}
+        className={`glass qs-sheet relative flex max-h-[85dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-[32px] transition-transform duration-300 sm:max-h-[80dvh] sm:rounded-[32px] ${className}`}
         ref={sheetRef}
         role="dialog"
       >

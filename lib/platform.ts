@@ -11,3 +11,16 @@ export function isApplePlatform(source: {
   const haystack = `${source.platform ?? ""} ${source.userAgent ?? ""}`;
   return /mac|iphone|ipad|ipod/i.test(haystack);
 }
+
+/**
+ * Whether a mouse-like pointer is available. Checks the primary pointer first
+ * and falls back to any-pointer: Firefox on touch-capable Windows hardware
+ * misreports the *primary* pointer as coarse/hover-none even with a mouse
+ * attached, which used to disable the custom cursor and hover effects there.
+ */
+export function hasFinePointer(win: Pick<Window, "matchMedia">): boolean {
+  return (
+    win.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+    win.matchMedia("(any-hover: hover) and (any-pointer: fine)").matches
+  );
+}

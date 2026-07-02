@@ -177,7 +177,7 @@ export default function FarmDetailSheet({
       </div>
 
       <div className="mt-6 space-y-3">
-        <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+        <div className="glass-inset rounded-2xl px-4 py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-ink/60">
@@ -200,7 +200,7 @@ export default function FarmDetailSheet({
           </InfoCard>
         </div>
 
-        <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+        <div className="glass-inset rounded-2xl px-4 py-3.5">
           <p className="text-xs font-semibold text-ink/60">
             {t("detail_products")}
           </p>
@@ -361,7 +361,7 @@ export default function FarmDetailSheet({
 
 function InfoCard({ children, label }: { children: ReactNode; label: string }) {
   return (
-    <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+    <div className="glass-inset rounded-2xl px-4 py-3.5">
       <p className="text-xs font-semibold text-ink/60">{label}</p>
       <p className="mt-1.5 break-words text-sm leading-6 text-ink/80">
         {children}

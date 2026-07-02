@@ -5,6 +5,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import { hasFinePointer } from "@/lib/platform";
 
 interface MagneticProps {
   children: ReactNode;
@@ -28,7 +29,7 @@ export default function Magnetic({
 
   const canHover = () =>
     typeof window !== "undefined" &&
-    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    hasFinePointer(window) &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const handleMove = (event: ReactPointerEvent<HTMLSpanElement>) => {

@@ -150,7 +150,7 @@ export default function FarmCard({
     const hiddenCount = farm.categories.length - visibleCategories.length;
 
     return (
-      <article className="group relative overflow-hidden rounded-[26px] border border-line bg-cloud p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-[0_24px_50px_-28px_rgba(20,22,27,0.35)] sm:p-6">
+      <article className="glass group relative overflow-hidden rounded-[26px] p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-24px_rgba(20,22,27,0.4)] sm:p-6">
         {openOverlay}
         <FavoriteButton
           className="absolute right-5 top-5 sm:right-6 sm:top-6"
@@ -195,7 +195,7 @@ export default function FarmCard({
   }
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-line bg-cloud p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:border-ink/15 hover:shadow-[0_30px_60px_-30px_rgba(20,22,27,0.4)]">
+    <article className="glass group relative flex h-full flex-col overflow-hidden rounded-[28px] p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_30px_60px_-26px_rgba(20,22,27,0.45)]">
       {openOverlay}
       <div className="flex items-start justify-between gap-3">
         <CardBadges distanceKm={distanceKm} farm={farm} />

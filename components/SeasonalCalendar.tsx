@@ -58,10 +58,8 @@ export default function SeasonalCalendar() {
 
           return (
             <section
-              className={`flex flex-col rounded-[24px] border p-5 transition-colors ${
-                isCurrent
-                  ? "border-pine/30 bg-pine/[0.06]"
-                  : "border-line bg-cloud"
+              className={`glass flex flex-col rounded-[24px] p-5 transition-colors ${
+                isCurrent ? "ring-1 ring-inset ring-pine/30" : ""
               }`}
               key={month}
             >
@@ -91,7 +89,7 @@ export default function SeasonalCalendar() {
                       className={`group/chip inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
                         reminded
                           ? "bg-pine/10 text-pine"
-                          : "bg-tone text-ink/70 hover:bg-ink/[0.06]"
+                          : "glass-chip text-ink/70 hover:bg-ink/[0.06]"
                       }`}
                       key={key}
                       onClick={() => toggleReminder(key)}

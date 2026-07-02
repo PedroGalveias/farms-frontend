@@ -87,7 +87,10 @@ export default function CommandPalette() {
         !typing &&
         !event.metaKey &&
         !event.ctrlKey &&
-        !event.altKey
+        !event.altKey &&
+        // Pages with their own slash-search (the directory toolbar) own "/";
+        // the palette only claims it where no such target exists.
+        !document.querySelector("[data-slash-target]")
       ) {
         event.preventDefault();
         setOpen(true);
@@ -286,7 +289,7 @@ export default function CommandPalette() {
   return (
     <dialog
       aria-label={t("command_open")}
-      className="cmdk-dialog mx-auto mb-auto mt-[12vh] w-[min(40rem,calc(100vw-2rem))] rounded-3xl border border-line bg-cloud p-0 text-ink shadow-[0_40px_120px_-24px_rgba(20,22,27,0.55)] backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+      className="glass cmdk-dialog mx-auto mb-auto mt-[12vh] w-[min(40rem,calc(100vw-2rem))] rounded-3xl p-0 text-ink backdrop:bg-black/40 backdrop:backdrop-blur-sm"
       onClick={(event) => {
         if (event.target === dialogRef.current) close();
       }}

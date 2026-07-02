@@ -162,6 +162,9 @@ export default function DirectoryToolbar({
           <Search className="pointer-events-none absolute bottom-0 left-4 top-0 my-auto h-4 w-4 text-ink/60" />
           <input
             className={`${fieldClassName} pl-11 pr-10`}
+            // Marks this page as owning the "/" shortcut — the command
+            // palette's global "/" opener stands down while this is mounted.
+            data-slash-target=""
             onChange={(event) => onSearchTermChange(event.target.value)}
             placeholder={t("toolbar_searchPlaceholder")}
             ref={searchRef}
