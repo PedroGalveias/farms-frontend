@@ -20,21 +20,21 @@
      through, a bright rim + top-edge highlight (light catching the glass =
      depth), and a soft float shadow. --glass-solid is the no-backdrop-filter
      fallback (kept legible). */
-  --glass-fill: rgba(255, 255, 255, 0.5);
+  --glass-fill: rgba(255, 255, 255, 0.26);
   --glass-solid: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.7);
-  --glass-highlight: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
   /* bottom-inner shadow = the visible thickness of the glass slab */
-  --glass-lowlight: rgba(20, 22, 27, 0.07);
+  --glass-lowlight: rgba(20, 22, 27, 0.09);
   /* soft float + a tight contact shadow just under the slab (grounds it) */
   --glass-shadow:
-    0 14px 44px -16px rgba(20, 22, 27, 0.34),
-    0 2px 6px -3px rgba(20, 22, 27, 0.12);
+    0 14px 44px -16px rgba(20, 22, 27, 0.36),
+    0 2px 6px -3px rgba(20, 22, 27, 0.14);
   /* strength of the diagonal specular sheen sliding off the top-left */
-  --glass-sheen: 0.55;
+  --glass-sheen: 0.5;
   /* nested pane (glass on glass): lighter, thinner */
-  --glass-inset-fill: rgba(255, 255, 255, 0.32);
-  --glass-inset-border: rgba(255, 255, 255, 0.55);
+  --glass-inset-fill: rgba(255, 255, 255, 0.22);
+  --glass-inset-border: rgba(255, 255, 255, 0.6);
 }
 
 html.dark {
@@ -49,16 +49,16 @@ html.dark {
   color-scheme: dark;
 
   /* ── Liquid glass (dark) ── deeper tint, dimmer rim. */
-  --glass-fill: rgba(32, 35, 43, 0.46);
+  --glass-fill: rgba(32, 35, 43, 0.32);
   --glass-solid: rgba(24, 26, 32, 0.92);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-highlight: rgba(255, 255, 255, 0.16);
-  --glass-lowlight: rgba(0, 0, 0, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.2);
+  --glass-lowlight: rgba(0, 0, 0, 0.32);
   --glass-shadow:
     0 18px 50px -16px rgba(0, 0, 0, 0.62), 0 2px 6px -3px rgba(0, 0, 0, 0.5);
-  --glass-sheen: 0.09;
-  --glass-inset-fill: rgba(255, 255, 255, 0.05);
-  --glass-inset-border: rgba(255, 255, 255, 0.09);
+  --glass-sheen: 0.12;
+  --glass-inset-fill: rgba(255, 255, 255, 0.06);
+  --glass-inset-border: rgba(255, 255, 255, 0.12);
 }
 
 /* ── Liquid-glass surface ─────────────────────────────────────────────────
@@ -103,8 +103,8 @@ html.dark {
     background-color: var(--glass-fill);
     /* blur + saturate + a touch of brightness/contrast = the optical-glass
        feel (what's behind reads richer, not just blurred). */
-    -webkit-backdrop-filter: blur(24px) saturate(185%) brightness(1.04);
-    backdrop-filter: blur(24px) saturate(185%) brightness(1.04);
+    -webkit-backdrop-filter: blur(28px) saturate(210%) brightness(1.06);
+    backdrop-filter: blur(28px) saturate(210%) brightness(1.06);
   }
 }
 
@@ -113,8 +113,8 @@ html.dark {
   (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
 ) {
   .glass-chrome {
-    -webkit-backdrop-filter: blur(30px) saturate(190%) brightness(1.05);
-    backdrop-filter: blur(30px) saturate(190%) brightness(1.05);
+    -webkit-backdrop-filter: blur(34px) saturate(215%) brightness(1.07);
+    backdrop-filter: blur(34px) saturate(215%) brightness(1.07);
   }
 }
 
@@ -134,8 +134,8 @@ html.dark {
   (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
 ) {
   .glass-inset {
-    -webkit-backdrop-filter: blur(8px) saturate(150%);
-    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(170%);
+    backdrop-filter: blur(10px) saturate(170%);
   }
 }
 
@@ -264,48 +264,58 @@ body::after {
   pointer-events: none;
   background:
     radial-gradient(
-      38rem 38rem at 6% 14%,
-      rgba(33, 160, 90, 0.12),
+      42rem 42rem at 6% 14%,
+      rgba(33, 160, 90, 0.26),
+      transparent 64%
+    ),
+    radial-gradient(
+      36rem 36rem at 96% 22%,
+      rgba(150, 190, 70, 0.22),
       transparent 62%
     ),
     radial-gradient(
-      32rem 32rem at 96% 22%,
-      rgba(150, 190, 70, 0.1),
-      transparent 60%
+      48rem 48rem at 78% 96%,
+      rgba(33, 160, 90, 0.22),
+      transparent 64%
     ),
     radial-gradient(
-      44rem 44rem at 78% 96%,
-      rgba(33, 160, 90, 0.1),
+      34rem 34rem at 20% 88%,
+      rgba(90, 150, 210, 0.14),
       transparent 62%
     ),
     radial-gradient(
-      30rem 30rem at 20% 88%,
-      rgba(90, 150, 210, 0.07),
-      transparent 60%
+      30rem 30rem at 50% 50%,
+      rgba(33, 160, 90, 0.08),
+      transparent 65%
     );
 }
 
 html.dark body::after {
   background:
     radial-gradient(
-      38rem 38rem at 6% 14%,
-      rgba(46, 168, 102, 0.16),
+      42rem 42rem at 6% 14%,
+      rgba(46, 168, 102, 0.3),
+      transparent 64%
+    ),
+    radial-gradient(
+      36rem 36rem at 96% 22%,
+      rgba(150, 190, 70, 0.18),
       transparent 62%
     ),
     radial-gradient(
-      32rem 32rem at 96% 22%,
-      rgba(150, 190, 70, 0.1),
-      transparent 60%
+      48rem 48rem at 78% 96%,
+      rgba(46, 168, 102, 0.26),
+      transparent 64%
     ),
     radial-gradient(
-      44rem 44rem at 78% 96%,
-      rgba(46, 168, 102, 0.14),
+      34rem 34rem at 20% 88%,
+      rgba(90, 150, 210, 0.16),
       transparent 62%
     ),
     radial-gradient(
-      30rem 30rem at 20% 88%,
-      rgba(90, 150, 210, 0.1),
-      transparent 60%
+      30rem 30rem at 50% 50%,
+      rgba(46, 168, 102, 0.1),
+      transparent 65%
     );
 }
 
