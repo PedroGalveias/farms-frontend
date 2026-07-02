@@ -32,6 +32,8 @@
     0 2px 6px -3px rgba(20, 22, 27, 0.14);
   /* strength of the diagonal specular sheen sliding off the top-left */
   --glass-sheen: 0.5;
+  /* peak brightness of the scroll-reactive glint band */
+  --glass-glint-max: 0.45;
   /* nested pane (glass on glass): lighter, thinner */
   --glass-inset-fill: rgba(255, 255, 255, 0.22);
   --glass-inset-border: rgba(255, 255, 255, 0.6);
@@ -57,6 +59,7 @@ html.dark {
   --glass-shadow:
     0 18px 50px -16px rgba(0, 0, 0, 0.62), 0 2px 6px -3px rgba(0, 0, 0, 0.5);
   --glass-sheen: 0.12;
+  --glass-glint-max: 0.16;
   --glass-inset-fill: rgba(255, 255, 255, 0.06);
   --glass-inset-border: rgba(255, 255, 255, 0.12);
 }
@@ -94,6 +97,30 @@ html.dark {
     rgba(255, 255, 255, var(--glass-sheen)) 0%,
     rgba(255, 255, 255, 0) 46%
   );
+}
+
+/* Scroll-reactive glint — a soft light band that sweeps across the pane in
+   the scroll direction, brightness ∝ velocity, easing back to invisible at
+   rest. Driven by components/motion/GlassLight via --glass-glint (intensity)
+   and --glass-glint-x (band position); intensity lands on `opacity`, which
+   stays on the compositor. */
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: calc(var(--glass-glint, 0) * var(--glass-glint-max, 0.45));
+  background: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0) 40%,
+    rgb(255 255 255) 50%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  background-size: 220% 220%;
+  background-position: calc(var(--glass-glint-x, 50) * 1%) 50%;
+  background-repeat: no-repeat;
 }
 
 @supports (
@@ -172,7 +199,8 @@ html.dark {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-  .glass::before {
+  .glass::before,
+  .glass::after {
     display: none;
   }
 }
@@ -259,9 +287,13 @@ body::before {
 body::after {
   content: "";
   position: fixed;
-  inset: 0;
+  /* Overdraw top/bottom so the scroll parallax (GlassLight sets --orb-y) never
+     reveals a gap at the edges. */
+  inset: -22% 0;
   z-index: 0;
   pointer-events: none;
+  transform: translate3d(0, calc(var(--orb-y, 0) * 1px), 0);
+  will-change: transform;
   background:
     radial-gradient(
       42rem 42rem at 6% 14%,
