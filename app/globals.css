@@ -34,6 +34,8 @@
   --glass-sheen: 0.5;
   /* peak brightness of the scroll-reactive glint band */
   --glass-glint-max: 0.45;
+  /* peak brightness of the pointer-following glow */
+  --glass-hover-max: 0.8;
   /* nested pane (glass on glass): lighter, thinner */
   --glass-inset-fill: rgba(255, 255, 255, 0.22);
   --glass-inset-border: rgba(255, 255, 255, 0.6);
@@ -60,6 +62,7 @@ html.dark {
     0 18px 50px -16px rgba(0, 0, 0, 0.62), 0 2px 6px -3px rgba(0, 0, 0, 0.5);
   --glass-sheen: 0.12;
   --glass-glint-max: 0.16;
+  --glass-hover-max: 0.32;
   --glass-inset-fill: rgba(255, 255, 255, 0.06);
   --glass-inset-border: rgba(255, 255, 255, 0.12);
 }
@@ -71,10 +74,18 @@ html.dark {
    key depth cue — the glass rim catching light — and doesn't tint content. */
 .glass {
   position: relative;
-  /* Own stacking context so the sheen pseudo (z-index:-1) sits above the fill
+  /* Own stacking context so the light pseudos (z-index:-1) sit above the fill
      but below the content, and the backdrop blur is contained. */
   isolation: isolate;
   background-color: var(--glass-solid);
+  /* Specular sheen — light sliding off the top-left. Lives on the element's
+     own background layer so ::before/::after stay free for the dynamic
+     lights (pointer glow + scroll glint). */
+  background-image: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, var(--glass-sheen)) 0%,
+    rgba(255, 255, 255, 0) 46%
+  );
   border: 1px solid var(--glass-border);
   box-shadow:
     var(--glass-shadow),
@@ -82,9 +93,11 @@ html.dark {
     inset 0 -1px 1px -0.5px var(--glass-lowlight);
 }
 
-/* Specular sheen — light sliding off the top-left of the pane. Painted behind
-   the content (negative z within the isolated context) so it reads as a
-   property of the glass surface, not a wash over the text. */
+/* Pointer-following glow — the desktop analogue of tilting liquid glass on
+   iOS: a soft light source tracks the cursor across the pane and fades out
+   when it leaves. Position is driven by GlassLight via --glass-px/--glass-py
+   (oversized layer moved with background-position — the same minifier-safe
+   pattern as the glint); intensity lands on `opacity`. */
 .glass::before {
   content: "";
   position: absolute;
@@ -92,11 +105,17 @@ html.dark {
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, var(--glass-sheen)) 0%,
-    rgba(255, 255, 255, 0) 46%
+  opacity: calc(var(--glass-hover, 0) * var(--glass-hover-max, 0.8));
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0) 70%
   );
+  background-size: 220% 220%;
+  background-position: calc(var(--glass-px, 50) * 1%)
+    calc(var(--glass-py, 50) * 1%);
+  background-repeat: no-repeat;
+  transition: opacity 0.45s var(--ease-out-expo);
 }
 
 /* Scroll-reactive glint — a soft light band that sweeps across the pane in
@@ -196,6 +215,7 @@ html.dark {
   .glass,
   .glass-inset {
     background-color: var(--glass-solid);
+    background-image: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }

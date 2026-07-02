@@ -22,7 +22,12 @@ const ORB_LIMIT = 130;
  *   (--orb-y on body::after), so the light each pane refracts genuinely
  *   changes with movement.
  *
- * Renders nothing. The rAF loop only runs while the light is settling, and
+ * On fine pointers it additionally tracks the cursor: the hovered pane gets a
+ * soft glow that follows the pointer (--glass-hover / --glass-px / --glass-py,
+ * consumed by .glass::before) and fades out on leave — the desktop analogue of
+ * tilting liquid glass on iOS.
+ *
+ * Renders nothing. The rAF loops only run while light is in motion, and
  * everything is skipped under prefers-reduced-motion (vars default to rest).
  */
 export default function GlassLight() {
@@ -72,10 +77,69 @@ export default function GlassLight() {
       }
     };
 
+    // ---- Pointer-following glow (fine pointers only) ----------------------
+    let hovered: HTMLElement | null = null;
+    let pointerRaf = 0;
+    let pending: PointerEvent | null = null;
+    const finePointer = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    ).matches;
+
+    const applyPointer = () => {
+      pointerRaf = 0;
+      const event = pending;
+      pending = null;
+      if (!event) return;
+
+      const pane =
+        event.target instanceof Element
+          ? event.target.closest<HTMLElement>(".glass")
+          : null;
+
+      if (pane !== hovered) {
+        // CSS transitions the opacity, so leave/enter cross-fade smoothly.
+        hovered?.style.setProperty("--glass-hover", "0");
+        hovered = pane;
+        hovered?.style.setProperty("--glass-hover", "1");
+      }
+      if (hovered) {
+        const rect = hovered.getBoundingClientRect();
+        // Oversized background layers position inversely, so flip the ratio —
+        // this puts the glow's centre under the cursor.
+        const px = (1 - (event.clientX - rect.left) / rect.width) * 100;
+        const py = (1 - (event.clientY - rect.top) / rect.height) * 100;
+        hovered.style.setProperty("--glass-px", px.toFixed(1));
+        hovered.style.setProperty("--glass-py", py.toFixed(1));
+      }
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      pending = event;
+      if (!pointerRaf) pointerRaf = requestAnimationFrame(applyPointer);
+    };
+
+    const onPointerOut = () => {
+      hovered?.style.setProperty("--glass-hover", "0");
+      hovered = null;
+    };
+
+    if (finePointer) {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      document.documentElement.addEventListener("pointerleave", onPointerOut);
+    }
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(raf);
+      if (finePointer) {
+        window.removeEventListener("pointermove", onPointerMove);
+        document.documentElement.removeEventListener(
+          "pointerleave",
+          onPointerOut,
+        );
+        cancelAnimationFrame(pointerRaf);
+      }
     };
   }, []);
 
