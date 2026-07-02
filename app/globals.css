@@ -20,9 +20,20 @@
      through, a bright rim + top-edge highlight (light catching the glass =
      depth), and a soft float shadow. --glass-solid is the no-backdrop-filter
      fallback (kept legible). */
-  --glass-fill: rgba(255, 255, 255, 0.26);
+  --glass-fill: rgba(255, 255, 255, 0.14);
+  /* Chrome (header / rail / tab bar) is deliberately more frosted than content
+     panes, so floating UI reads as a layer ABOVE the page rather than another
+     card colliding with the one scrolling beneath it. */
+  --glass-chrome-fill: rgba(255, 255, 255, 0.62);
   --glass-solid: rgba(255, 255, 255, 0.9);
   --glass-border: rgba(255, 255, 255, 0.75);
+  /* Frost recipes (whole-value vars so the minifier can't mangle them). Light
+     keeps brightness near 1 so panes don't wash toward white. */
+  --glass-backdrop: blur(28px) saturate(210%) brightness(1.02);
+  --glass-backdrop-chrome: blur(34px) saturate(215%) brightness(1.03);
+  /* Pointer-glow light colour — a whisper of green so it reads on the pale
+     canvas (pure white-on-white disappears). */
+  --glass-glow: rgba(236, 255, 244, 0.85);
   --glass-highlight: rgba(255, 255, 255, 0.95);
   /* bottom-inner shadow = the visible thickness of the glass slab */
   --glass-lowlight: rgba(20, 22, 27, 0.09);
@@ -54,7 +65,11 @@ html.dark {
 
   /* ── Liquid glass (dark) ── deeper tint, dimmer rim. */
   --glass-fill: rgba(32, 35, 43, 0.32);
+  --glass-chrome-fill: rgba(26, 29, 36, 0.62);
   --glass-solid: rgba(24, 26, 32, 0.92);
+  --glass-backdrop: blur(28px) saturate(210%) brightness(1.08);
+  --glass-backdrop-chrome: blur(34px) saturate(215%) brightness(1.1);
+  --glass-glow: rgba(255, 255, 255, 0.5);
   --glass-border: rgba(255, 255, 255, 0.14);
   --glass-highlight: rgba(255, 255, 255, 0.2);
   --glass-lowlight: rgba(0, 0, 0, 0.32);
@@ -108,7 +123,7 @@ html.dark {
   opacity: calc(var(--glass-hover, 0) * var(--glass-hover-max, 0.8));
   background: radial-gradient(
     closest-side,
-    rgba(255, 255, 255, 0.6),
+    var(--glass-glow, rgba(255, 255, 255, 0.6)),
     rgba(255, 255, 255, 0) 70%
   );
   background-size: 220% 220%;
@@ -147,20 +162,33 @@ html.dark {
 ) {
   .glass {
     background-color: var(--glass-fill);
-    /* blur + saturate + a touch of brightness/contrast = the optical-glass
-       feel (what's behind reads richer, not just blurred). */
-    -webkit-backdrop-filter: blur(28px) saturate(210%) brightness(1.06);
-    backdrop-filter: blur(28px) saturate(210%) brightness(1.06);
+    /* blur + saturate + a touch of brightness = the optical-glass feel
+       (what's behind reads richer, not just blurred). */
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    backdrop-filter: var(--glass-backdrop);
   }
 }
 
-/* Slightly stronger blur for the persistent chrome (header / rail / tab bar). */
+/* Persistent chrome (header / rail / tab bar) floats a layer above content:
+   a deeper, tighter shadow than content panes so cards scrolling underneath
+   read as *behind* it, not colliding with it. */
+.glass-chrome {
+  box-shadow:
+    0 18px 44px -16px rgba(20, 22, 27, 0.45),
+    0 4px 12px -4px rgba(20, 22, 27, 0.22),
+    inset 0 1px 0 0 var(--glass-highlight),
+    inset 0 -1px 1px -0.5px var(--glass-lowlight);
+}
+
 @supports (
   (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
 ) {
   .glass-chrome {
-    -webkit-backdrop-filter: blur(34px) saturate(215%) brightness(1.07);
-    backdrop-filter: blur(34px) saturate(215%) brightness(1.07);
+    /* More frosted + more opaque than content panes, so fixed chrome reads as
+       its own layer when cards scroll underneath it. */
+    background-color: var(--glass-chrome-fill);
+    -webkit-backdrop-filter: var(--glass-backdrop-chrome);
+    backdrop-filter: var(--glass-backdrop-chrome);
   }
 }
 
