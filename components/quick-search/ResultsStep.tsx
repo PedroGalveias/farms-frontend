@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { ChevronRight, Leaf, MapPin, Navigation } from "lucide-react";
 import CountUp from "@/components/motion/CountUp";
 import { productGroupOf, tagLabel } from "@/lib/products";
@@ -28,6 +29,12 @@ function AnimatedDistance({ km }: { km: number }) {
 
 const MAX_VISIBLE_CATEGORIES = 4;
 
+// Render the result list incrementally. A broad search can match 800+ farms;
+// mounting them all at once — each row a frosted glass pane — exhausts GPU
+// memory on iOS Safari and crashes the tab. ~2 dozen rows fill any screen;
+// more stream in as you approach the bottom.
+const RESULTS_CHUNK = 24;
+
 interface ResultsStepProps {
   location: QuickSearchLocation;
   matchMode: QuickSearchMatchMode;
@@ -51,6 +58,33 @@ export default function ResultsStep({
 }: ResultsStepProps) {
   const { t } = useLanguage();
   const count = results.length;
+
+  const [visibleCount, setVisibleCount] = useState(RESULTS_CHUNK);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // A new search (or re-entering the step) starts back at the first chunk.
+  useEffect(() => {
+    queueMicrotask(() => setVisibleCount(RESULTS_CHUNK));
+  }, [revealKey, results]);
+
+  // Stream in the next chunk as the visitor nears the end of the list.
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((current) =>
+            Math.min(current + RESULTS_CHUNK, results.length),
+          );
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [results.length, visibleCount]);
+
   const hasCoordinates = location.coordinates !== null;
   const hasTypedLocation = !hasCoordinates && location.label.length > 0;
 
@@ -74,17 +108,22 @@ export default function ResultsStep({
       </div>
 
       {count > 0 ? (
-        <ul className="space-y-2.5" key={revealKey}>
-          {results.map((result, index) => (
-            <ResultRow
-              index={index}
-              key={result.farm.id}
-              onOpen={onOpenFarm}
-              result={result}
-              selectedProducts={selectedProducts}
-            />
-          ))}
-        </ul>
+        <>
+          <ul className="space-y-2.5" key={revealKey}>
+            {results.slice(0, visibleCount).map((result, index) => (
+              <ResultRow
+                index={index}
+                key={result.farm.id}
+                onOpen={onOpenFarm}
+                result={result}
+                selectedProducts={selectedProducts}
+              />
+            ))}
+          </ul>
+          {visibleCount < count ? (
+            <div aria-hidden className="h-px" ref={sentinelRef} />
+          ) : null}
+        </>
       ) : (
         <div className="rounded-[24px] border border-dashed border-line bg-tone/40 px-6 py-10 text-center">
           <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-pine/10 text-pine">

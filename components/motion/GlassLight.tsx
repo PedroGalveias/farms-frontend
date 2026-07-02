@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { hasFinePointer } from "@/lib/platform";
 
 // How strongly scroll velocity lights the glint (px/frame → 0..1).
 const GLINT_GAIN = 24;
@@ -81,9 +82,7 @@ export default function GlassLight() {
     let hovered: HTMLElement | null = null;
     let pointerRaf = 0;
     let pending: PointerEvent | null = null;
-    const finePointer = window.matchMedia(
-      "(hover: hover) and (pointer: fine)",
-    ).matches;
+    const finePointer = hasFinePointer(window);
 
     const applyPointer = () => {
       pointerRaf = 0;

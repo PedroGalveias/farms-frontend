@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { hasFinePointer } from "@/lib/platform";
 
 /**
  * Desktop custom cursor: an instant dot plus a lagging ring that follows the
@@ -22,7 +23,7 @@ export default function CustomCursor() {
   useEffect(() => {
     const check = () =>
       setActive(
-        window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+        hasFinePointer(window) &&
           !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
           window.innerWidth >= 1024,
       );

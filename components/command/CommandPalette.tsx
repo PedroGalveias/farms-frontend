@@ -87,7 +87,10 @@ export default function CommandPalette() {
         !typing &&
         !event.metaKey &&
         !event.ctrlKey &&
-        !event.altKey
+        !event.altKey &&
+        // Pages with their own slash-search (the directory toolbar) own "/";
+        // the palette only claims it where no such target exists.
+        !document.querySelector("[data-slash-target]")
       ) {
         event.preventDefault();
         setOpen(true);

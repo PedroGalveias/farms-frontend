@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Command, Heart, LayoutGrid, Search } from "lucide-react";
+import { Command, Heart, Keyboard, LayoutGrid, Search } from "lucide-react";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 import Logo from "@/components/Logo";
 import LanguageMenu from "@/components/LanguageMenu";
@@ -66,7 +66,12 @@ export default function SideRail() {
           title={`${t("command_open")} (${mod === "⌘" ? "⌘K" : "Ctrl+K"})`}
           type="button"
         >
-          <Command className="h-5 w-5" />
+          {/* ⌘ is a Mac glyph — on Windows/Linux (Ctrl) show a neutral icon. */}
+          {mod === "⌘" ? (
+            <Command className="h-5 w-5" />
+          ) : (
+            <Keyboard className="h-5 w-5" />
+          )}
         </button>
         <Link
           aria-current={active === "directory" ? "page" : undefined}
