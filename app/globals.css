@@ -464,6 +464,25 @@ html.dark body::before {
   textarea {
     @apply outline-none;
   }
+
+  /* Native-app feel on touch: `manipulation` drops the browser's double-tap
+     zoom heuristics so taps fire immediately, and buttons don't smear into
+     text selection on a long-press. (Utilities like `touch-none` on drag
+     handles still win — they come later in the cascade.) */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
+  button,
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 
 /* ---------- Motion system ---------- */

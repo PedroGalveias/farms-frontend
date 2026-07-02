@@ -100,9 +100,11 @@ export function shouldAnimateViewTransitions(): boolean {
  * transition captures the new state. Falls back to a plain update when the API
  * is unavailable or reduced motion is requested.
  *
- * `morphEl` is given a shared `view-transition-name` for the duration of the
- * transition, then cleaned up — used to tie the originating element to its
- * destination.
+ * `morphEl` carries the shared `view-transition-name` only in the OLD
+ * snapshot: it's named before capture and un-named inside the update, so the
+ * new snapshot contains just the destination element. If both kept the name,
+ * the browser would see a duplicate view-transition-name and abort the
+ * transition ("Transition was aborted because of invalid state").
  */
 export function runViewTransition(
   update: () => void,
@@ -118,9 +120,17 @@ export function runViewTransition(
   }
 
   const transition = (document as ViewTransitionDocument).startViewTransition!(
-    () => flushSync(update),
+    () => {
+      flushSync(update);
+      // Clear before the NEW state is captured — the destination (e.g. the
+      // detail sheet) is the only "qs-farm" in the new snapshot.
+      if (morphEl) {
+        morphEl.style.viewTransitionName = "";
+      }
+    },
   );
 
+  // Backstop for aborted/skipped transitions.
   transition.finished.finally(() => {
     if (morphEl) {
       morphEl.style.viewTransitionName = "";
