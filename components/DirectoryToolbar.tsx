@@ -155,7 +155,7 @@ export default function DirectoryToolbar({
   }, []);
 
   return (
-    <section className="sticky top-[84px] z-20 rounded-[30px] border border-line bg-cloud/85 p-4 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_28px_60px_-32px_rgba(20,22,27,0.28)] backdrop-blur-2xl sm:p-5">
+    <section className="glass glass-chrome sticky top-[84px] z-20 rounded-[30px] p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
         <h2 className="text-xl font-bold tracking-[-0.03em] text-ink">
           {t("toolbar_title")}

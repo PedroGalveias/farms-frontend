@@ -93,7 +93,7 @@ export default function SeasonalReminderProvider({
 
       {due.length > 0 && typeof document !== "undefined"
         ? createPortal(
-            <div className="qs-sheet fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-md rounded-3xl border border-line bg-cloud p-4 shadow-[0_24px_60px_-20px_rgba(20,22,27,0.5)] lg:inset-x-auto lg:right-6 lg:bottom-6 lg:left-auto lg:w-[26rem]">
+            <div className="glass glass-chrome qs-sheet fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-md rounded-3xl p-4 lg:inset-x-auto lg:right-6 lg:bottom-6 lg:left-auto lg:w-[26rem]">
               <div className="flex items-start gap-3">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-pine/10 text-pine">
                   <Bell className="h-4 w-4" />

@@ -180,7 +180,7 @@ export default function PwaRegister() {
   }
 
   return (
-    <div className="fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm rounded-3xl border border-line bg-cloud/95 p-3 shadow-[0_18px_50px_-18px_rgba(20,22,27,0.55)] backdrop-blur-xl lg:bottom-5 lg:left-auto lg:right-5 lg:mx-0">
+    <div className="glass glass-chrome fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm rounded-3xl p-3 lg:bottom-5 lg:left-auto lg:right-5 lg:mx-0">
       {waitingWorker ? (
         <div className="flex items-center gap-3">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-pine/10 text-pine">
