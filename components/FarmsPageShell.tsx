@@ -142,6 +142,7 @@ export default function FarmsPageShell({
           <div className="mt-16 scroll-mt-28" id="directory">
             <DirectoryToolbar
               activeFiltersCount={directory.activeFiltersCount}
+              farms={initialFarms}
               cantonCounts={directory.cantonCounts}
               cantonRegions={directory.cantonRegions}
               categoryCounts={directory.categoryCounts}

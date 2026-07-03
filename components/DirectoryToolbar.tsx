@@ -11,7 +11,6 @@ import {
   Plus,
   RefreshCw,
   RotateCcw,
-  Search,
   SlidersHorizontal,
   X,
 } from "lucide-react";
@@ -20,13 +19,16 @@ import { RADIUS_OPTIONS, type CategoryMatchMode } from "@/lib/directory";
 import { getCantonName } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import CategoryFilterSheet from "@/components/CategoryFilterSheet";
-import type { DirectoryViewMode, FarmSortOption } from "@/types/farm";
+import DirectorySearchBox from "@/components/directory/DirectorySearchBox";
+import type { DirectoryViewMode, Farm, FarmSortOption } from "@/types/farm";
 
 // How many categories to show inline before the rest move into the sheet.
 const PRIMARY_CATEGORY_COUNT = 6;
 
 interface DirectoryToolbarProps {
   activeFiltersCount: number;
+  /** Full farm list, for the search box's name/address suggestions. */
+  farms: Farm[];
   categoryOptions: string[];
   categoryCounts: Record<string, number>;
   cantonCounts: Record<string, number>;
@@ -80,6 +82,7 @@ const segmentClassName = (isActive: boolean) =>
 
 export default function DirectoryToolbar({
   activeFiltersCount,
+  farms,
   categoryOptions,
   categoryCounts,
   cantonCounts,
@@ -130,6 +133,16 @@ export default function DirectoryToolbar({
   const clearCategories = () =>
     selectedCategories.forEach((category) => onToggleCategory(category));
 
+  // Suggestion sources for the search box (localised labels resolved here).
+  const searchCategories = categoryOptions.map((value) => ({
+    value,
+    label: categoryLabel(value, locale),
+  }));
+  const searchCantons = Object.keys(cantonCounts).map((code) => ({
+    code,
+    name: getCantonName(code),
+  }));
+
   // "/" focuses the search field — unless the visitor is already typing in a
   // field or editing content elsewhere.
   useEffect(() => {
@@ -176,26 +189,17 @@ export default function DirectoryToolbar({
       </div>
 
       <div className="mt-4 grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_auto]">
-        <label className="relative block">
-          <span className="sr-only">{t("a11y_search")}</span>
-          <Search className="pointer-events-none absolute bottom-0 left-4 top-0 my-auto h-4 w-4 text-ink/60" />
-          <input
-            className={`${fieldClassName} pl-11 pr-10`}
-            // Marks this page as owning the "/" shortcut — the command
-            // palette's global "/" opener stands down while this is mounted.
-            data-slash-target=""
-            onChange={(event) => onSearchTermChange(event.target.value)}
-            placeholder={t("toolbar_searchPlaceholder")}
-            ref={searchRef}
-            value={searchTerm}
-          />
-          <kbd
-            aria-hidden
-            className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-line bg-tone px-1.5 py-0.5 text-[11px] font-semibold text-ink/70 sm:block"
-          >
-            /
-          </kbd>
-        </label>
+        <DirectorySearchBox
+          cantons={searchCantons}
+          categories={searchCategories}
+          farms={farms}
+          inputClassName={fieldClassName}
+          inputRef={searchRef}
+          onChange={onSearchTermChange}
+          onSelectCanton={onSelectedCantonChange}
+          onSelectCategory={onToggleCategory}
+          value={searchTerm}
+        />
 
         <label className="block">
           <span className="sr-only">{t("sort_canton")}</span>
