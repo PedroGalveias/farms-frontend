@@ -310,7 +310,7 @@ export default function FarmDetailSheet({
     return (
       <aside
         aria-labelledby={titleId}
-        className="qs-dock fixed right-0 top-0 z-40 flex h-dvh w-[min(26rem,92vw)] flex-col overflow-y-auto border-l border-line bg-cloud shadow-[-24px_0_60px_-24px_rgba(20,22,27,0.4)]"
+        className="glass glass-chrome qs-dock fixed right-0 top-0 z-40 flex h-dvh w-[min(26rem,92vw)] flex-col overflow-y-auto shadow-[-24px_0_60px_-24px_rgba(20,22,27,0.4)]"
         role="dialog"
       >
         {body}
@@ -330,7 +330,7 @@ export default function FarmDetailSheet({
       <div
         aria-labelledby={titleId}
         aria-modal="true"
-        className={`relative w-full max-w-xl overflow-y-auto rounded-t-[32px] border border-line bg-cloud shadow-[0_-16px_60px_rgba(20,22,27,0.3)] sm:rounded-[32px] sm:shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)] ${
+        className={`glass glass-chrome relative w-full max-w-xl overflow-y-auto rounded-t-[32px] shadow-[0_-16px_60px_rgba(20,22,27,0.3)] sm:rounded-[32px] sm:shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)] ${
           expanded ? "max-h-[92dvh]" : "max-h-[52dvh]"
         } sm:max-h-[88dvh] ${useViewTransition ? "" : "qs-sheet"} ${
           isDragging

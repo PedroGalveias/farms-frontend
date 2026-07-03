@@ -5,13 +5,12 @@ import {
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
-  Image as ImageIcon,
   Plus,
   ShieldAlert,
   Sparkles,
 } from "lucide-react";
 import Magnetic from "@/components/motion/Magnetic";
-import ImageSlot from "@/components/home/ImageSlot";
+import LiquidGlassShowcase from "@/components/hero/LiquidGlassShowcase";
 import { useT } from "@/components/i18n/LanguageProvider";
 import type { ServiceStatus } from "@/types/farm";
 
@@ -114,11 +113,7 @@ export default function HomeHero({
         </div>
       </div>
 
-      <ImageSlot
-        className="rise-in min-h-[260px] rounded-[32px] lg:min-h-0"
-        icon={ImageIcon}
-        label={t("img_farmPhotography")}
-      />
+      <LiquidGlassShowcase className="rise-in min-h-[260px] rounded-[32px] lg:min-h-0" />
     </div>
   );
 }

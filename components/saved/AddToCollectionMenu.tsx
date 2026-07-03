@@ -70,7 +70,7 @@ export default function AddToCollectionMenu({ farmId }: { farmId: string }) {
       </button>
 
       {open ? (
-        <div className="absolute left-0 z-30 mt-2 w-64 rounded-2xl border border-line bg-cloud p-2 shadow-[0_24px_50px_-20px_rgba(20,22,27,0.4)]">
+        <div className="glass glass-chrome absolute left-0 z-30 mt-2 w-64 rounded-2xl p-2">
           {collections.length > 0 ? (
             <div className="max-h-52 overflow-y-auto">
               {collections.map((collection) => {

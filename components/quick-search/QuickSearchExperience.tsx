@@ -468,7 +468,7 @@ export default function QuickSearchExperience({
               return (
                 <article
                   aria-hidden={index > currentIndex}
-                  className="absolute inset-x-0 top-0 flex h-[calc(100%-112px)] origin-top flex-col overflow-hidden rounded-[32px] border border-line bg-cloud shadow-[0_1px_2px_rgba(20,22,27,0.05),0_36px_64px_-24px_rgba(20,22,27,0.3)] outline-none transition-[transform,opacity] duration-[650ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
+                  className="glass glass-chrome absolute inset-x-0 top-0 flex h-[calc(100%-112px)] origin-top flex-col overflow-hidden rounded-[32px] outline-none transition-[transform,opacity] duration-[650ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
                   key={meta.id}
                   ref={(node) => {
                     cardRefs.current[index] = node;
@@ -545,7 +545,7 @@ export default function QuickSearchExperience({
                   }}
                 >
                   <button
-                    className="flex h-12 w-full items-center gap-3 rounded-2xl border border-line bg-cloud/60 px-5 text-left transition enabled:hover:bg-cloud disabled:cursor-not-allowed sm:px-6"
+                    className="glass-inset flex h-12 w-full items-center gap-3 rounded-2xl px-5 text-left transition disabled:cursor-not-allowed sm:px-6"
                     disabled={!isVisible || !enabled}
                     onClick={() => goToStep(meta.id)}
                     type="button"

@@ -94,9 +94,12 @@ export default function PullToRefresh({
 
   return (
     <>
+      {/* Anchored just below the floating header pill (sticky, z-40) so the
+          spinner emerges into clear space instead of hiding behind it; sits
+          above the header (z-45) as it travels down. */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0 z-30 flex justify-center lg:hidden"
+        className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top,0px)+5.25rem)] z-[45] flex justify-center lg:hidden"
         style={{
           transform: `translateY(${Math.max(offset - 40, 0)}px)`,
           opacity: visible ? 1 : 0,
@@ -105,7 +108,7 @@ export default function PullToRefresh({
             : "transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s",
         }}
       >
-        <span className="glass mt-3 grid h-10 w-10 place-items-center rounded-full text-ink/70">
+        <span className="glass grid h-10 w-10 place-items-center rounded-full text-ink/70">
           <RefreshCw
             className={`h-4 w-4 transition-transform ${
               isRefreshing ? "animate-spin" : ""

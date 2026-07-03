@@ -62,7 +62,7 @@ export default function LanguageMenu({
 
       {open ? (
         <div
-          className={`absolute z-50 min-w-[170px] rounded-2xl border border-line bg-cloud p-1.5 shadow-[0_24px_50px_-20px_rgba(20,22,27,0.45)] ${menuPosition}`}
+          className={`glass glass-chrome absolute z-50 min-w-[170px] rounded-2xl p-1.5 ${menuPosition}`}
           role="menu"
         >
           <p className="px-3 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60">

@@ -21,20 +21,36 @@ export function isIosLike(nav: {
   return /macintosh/i.test(ua) && (nav.maxTouchPoints ?? 0) > 1;
 }
 
-/** Toggle a hidden iOS switch control — the click produces a system haptic
- *  tick on iOS 17.4+. Harmless (silent) on older iOS. */
+/**
+ * Toggle a hidden iOS switch control — flipping a native
+ * `<input type="checkbox" switch>` produces a real system haptic tick on iOS
+ * 17.4+ (there is no Vibration API on iOS Safari). Requirements learned the
+ * hard way and why the earlier attempt was silent:
+ *
+ * - The control must be *rendered*, not `display:none`/`opacity:0`/
+ *   `visibility:hidden` — WebKit skips the haptic for non-painted controls. So
+ *   it's parked off-screen (`left:-9999px`) instead, fully opaque.
+ * - It lives inside a `<label>` and we click the label, mirroring a genuine
+ *   user toggle.
+ * - `.click()` must fire inside the user-gesture window — all our call sites
+ *   are pointer/click handlers, so that holds.
+ */
 function iosSwitchTick(): void {
   try {
     if (!iosSwitch || !iosSwitch.isConnected) {
+      const label = document.createElement("label");
+      label.setAttribute("aria-hidden", "true");
+      // Rendered but off-screen — NOT display:none/opacity:0 (that mutes it).
+      label.style.cssText =
+        "position:fixed;top:0;left:-9999px;width:32px;height:20px;pointer-events:none";
       iosSwitch = document.createElement("input");
       iosSwitch.type = "checkbox";
       iosSwitch.setAttribute("switch", "");
-      iosSwitch.setAttribute("aria-hidden", "true");
       iosSwitch.tabIndex = -1;
-      iosSwitch.style.cssText =
-        "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none";
-      document.body.appendChild(iosSwitch);
+      label.appendChild(iosSwitch);
+      document.body.appendChild(label);
     }
+    // Click toggles the switch — the state change is what the OS reacts to.
     iosSwitch.click();
   } catch {
     // Best-effort — never let feedback break the action itself.
