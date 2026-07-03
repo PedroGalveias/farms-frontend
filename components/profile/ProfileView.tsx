@@ -34,7 +34,7 @@ export default function ProfileView() {
           <ArrowLeft className="h-4 w-4" />
           {t("farm_back")}
         </Link>
-        <div className="mt-10 rounded-3xl border border-line bg-cloud p-8 text-center">
+        <div className="glass mt-10 rounded-3xl p-8 text-center">
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-pine/10 text-pine">
             <UserRound className="h-6 w-6" />
           </span>
@@ -109,7 +109,7 @@ export default function ProfileView() {
           {t("profile_account")}
         </h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+          <div className="glass-inset rounded-2xl px-4 py-3.5">
             <p className="text-xs font-semibold text-ink/60">
               {t("profile_accountId")}
             </p>
@@ -117,7 +117,7 @@ export default function ProfileView() {
               {user.user_id}
             </p>
           </div>
-          <div className="rounded-2xl bg-paper px-4 py-3.5 ring-1 ring-inset ring-line">
+          <div className="glass-inset rounded-2xl px-4 py-3.5">
             <p className="text-xs font-semibold text-ink/60">
               {t("profile_role")}
             </p>
@@ -209,7 +209,7 @@ function Field({
   type?: string;
 }) {
   return (
-    <label className="block rounded-2xl bg-paper px-4 py-3 ring-1 ring-inset ring-line">
+    <label className="block glass-inset rounded-2xl px-4 py-3">
       <span className="text-xs font-semibold text-ink/60">{label}</span>
       <span className="mt-1.5 flex items-center gap-2 text-ink/60">
         {icon}

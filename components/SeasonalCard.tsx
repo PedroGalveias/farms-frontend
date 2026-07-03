@@ -50,7 +50,7 @@ export default function SeasonalCard() {
   };
 
   return (
-    <div className="col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] border border-line bg-cloud p-5 sm:row-span-2 sm:min-h-0">
+    <div className="glass col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] p-5 sm:row-span-2 sm:min-h-0">
       <div className="flex items-center justify-between gap-3">
         <span className="grid h-10 w-10 place-items-center rounded-full bg-pine/10 text-pine">
           <Sprout className="h-5 w-5" />
@@ -67,14 +67,14 @@ export default function SeasonalCard() {
         <div className="mt-2.5 flex flex-wrap gap-1.5">
           {shownItems.map((key) => (
             <span
-              className="rounded-full bg-tone px-3 py-1.5 text-sm font-semibold text-ink/70"
+              className="glass-chip rounded-full px-3 py-1.5 text-sm font-semibold text-ink/70"
               key={key}
             >
               {produceEmoji(key)} {produceLabel(key, locale)}
             </span>
           ))}
           {extraCount > 0 ? (
-            <span className="rounded-full bg-tone px-3 py-1.5 text-sm font-semibold text-ink/70">
+            <span className="glass-chip rounded-full px-3 py-1.5 text-sm font-semibold text-ink/70">
               +{extraCount}
             </span>
           ) : null}

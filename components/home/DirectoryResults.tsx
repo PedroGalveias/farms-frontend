@@ -22,7 +22,8 @@ interface DirectoryResultsProps {
   viewMode: DirectoryViewMode;
   visibleCount: number;
   distanceByFarmId: Map<string, number | null>;
-  onOpenFarm: (farm: Farm) => void;
+  onOpenFarm: (farm: Farm, sourceEl?: HTMLElement | null) => void;
+  onLongPressFarm: (farm: Farm) => void;
   onLoadMore: () => void;
   onAddFarm: () => void;
   onResetFilters: () => void;
@@ -35,6 +36,7 @@ export default function DirectoryResults({
   visibleCount,
   distanceByFarmId,
   onOpenFarm,
+  onLongPressFarm,
   onLoadMore,
   onAddFarm,
   onResetFilters,
@@ -123,7 +125,8 @@ export default function DirectoryResults({
                 <FarmCard
                   distanceKm={distanceByFarmId.get(farm.id) ?? null}
                   farm={farm}
-                  onOpen={() => onOpenFarm(farm)}
+                  onLongPress={onLongPressFarm}
+                  onOpen={(sourceEl) => onOpenFarm(farm, sourceEl)}
                   variant={viewMode}
                 />
               </Reveal>

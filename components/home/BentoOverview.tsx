@@ -31,7 +31,7 @@ export default function BentoOverview({
     <Reveal className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4 sm:[grid-auto-rows:158px]">
       <SeasonalCard />
 
-      <div className="flex flex-col justify-center rounded-[22px] bg-tone px-5 py-4">
+      <div className="glass flex flex-col justify-center rounded-[22px] px-5 py-4">
         <p className="text-4xl font-black tracking-[-0.04em] text-ink">
           <CountUp value={farms.length} />
         </p>
@@ -57,7 +57,7 @@ export default function BentoOverview({
         label={t("bento_eggsDairy")}
       />
 
-      <div className="flex flex-col justify-center gap-2 rounded-[22px] border border-line bg-cloud px-5 py-4">
+      <div className="glass flex flex-col justify-center gap-2 rounded-[22px] px-5 py-4">
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60">
           {t("bento_mostWanted")}
         </p>

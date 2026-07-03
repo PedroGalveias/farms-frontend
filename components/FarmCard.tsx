@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import {
   ArrowUpRight,
   Heart,
@@ -13,6 +14,7 @@ import { formatDistanceShort, isRecentlyAdded } from "@/lib/directory";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
+import { useLongPress } from "@/components/motion/useLongPress";
 import type { DirectoryViewMode, Farm } from "@/types/farm";
 
 function FavoriteButton({
@@ -51,7 +53,11 @@ function FavoriteButton({
 interface FarmCardProps {
   farm: Farm;
   variant?: DirectoryViewMode;
-  onOpen?: () => void;
+  /** Open the detail sheet. `sourceEl` (the card) is handed to the View
+   *  Transition so the card morphs into the sheet. */
+  onOpen?: (sourceEl?: HTMLElement | null) => void;
+  /** Long-press (touch) opens the quick-actions sheet for this farm. */
+  onLongPress?: (farm: Farm) => void;
   /** Distance from the visitor's location, when known — shows a badge. */
   distanceKm?: number | null;
 }
@@ -124,6 +130,7 @@ export default function FarmCard({
   farm,
   variant = "grid",
   onOpen,
+  onLongPress,
   distanceKm,
 }: FarmCardProps) {
   const t = useT();
@@ -132,15 +139,23 @@ export default function FarmCard({
     farm.coordinates,
   )}`;
 
-  // A transparent button stretched over the whole card opens the detail sheet,
-  // while the Google Maps link sits above it (z-10) so it stays clickable.
+  // The card element is the View-Transition morph source (card → detail sheet).
+  const articleRef = useRef<HTMLElement>(null);
+  const press = useLongPress(
+    onLongPress ? () => onLongPress(farm) : undefined,
+    () => onOpen?.(articleRef.current),
+  );
+
+  // A transparent button stretched over the whole card opens the detail sheet
+  // (tap) or the quick-actions sheet (long-press on touch), while the Google
+  // Maps link sits above it (z-10) so it stays clickable.
   const openOverlay =
     onOpen != null ? (
       <button
         aria-label={`${t("nearest_view")}: ${farm.name}`}
         className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
         data-cursor="Open"
-        onClick={onOpen}
+        {...press}
         type="button"
       />
     ) : null;
@@ -150,7 +165,10 @@ export default function FarmCard({
     const hiddenCount = farm.categories.length - visibleCategories.length;
 
     return (
-      <article className="group relative overflow-hidden rounded-[26px] border border-line bg-cloud p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-[0_24px_50px_-28px_rgba(20,22,27,0.35)] sm:p-6">
+      <article
+        className="glass group relative overflow-hidden rounded-[26px] p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-24px_rgba(20,22,27,0.4)] sm:p-6"
+        ref={articleRef}
+      >
         {openOverlay}
         <FavoriteButton
           className="absolute right-5 top-5 sm:right-6 sm:top-6"
@@ -195,7 +213,10 @@ export default function FarmCard({
   }
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-line bg-cloud p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:border-ink/15 hover:shadow-[0_30px_60px_-30px_rgba(20,22,27,0.4)]">
+    <article
+      className="glass group relative flex h-full flex-col overflow-hidden rounded-[28px] p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_30px_60px_-26px_rgba(20,22,27,0.45)]"
+      ref={articleRef}
+    >
       {openOverlay}
       <div className="flex items-start justify-between gap-3">
         <CardBadges distanceKm={distanceKm} farm={farm} />
