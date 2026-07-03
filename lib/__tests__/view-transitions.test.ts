@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   isInternalHref,
+  runViewTransition,
   shouldAnimateNavigation,
   shouldInterceptClick,
   type ClickContext,
@@ -65,6 +66,59 @@ describe("shouldInterceptClick", () => {
     expect(shouldInterceptClick({ ...base, href: "/", currentUrl: "/" })).toBe(
       false,
     );
+  });
+});
+
+describe("runViewTransition", () => {
+  const realMatchMedia = window.matchMedia;
+  afterEach(() => {
+    vi.restoreAllMocks();
+    window.matchMedia = realMatchMedia;
+    delete (document as { startViewTransition?: unknown }).startViewTransition;
+  });
+
+  it("runs the update immediately when the API is unavailable", () => {
+    delete (document as { startViewTransition?: unknown }).startViewTransition;
+    const update = vi.fn();
+    const el = document.createElement("div");
+
+    runViewTransition(update, el);
+
+    expect(update).toHaveBeenCalledTimes(1);
+    // No morph name should be applied when there's no transition.
+    expect(el.style.viewTransitionName).toBe("");
+  });
+
+  it("names the source before capture and clears it inside the update", () => {
+    // Motion allowed + API present. jsdom has no matchMedia, so define one.
+    window.matchMedia = vi.fn().mockReturnValue({
+      matches: false,
+    } as unknown as MediaQueryList);
+
+    let nameWhenUpdateRan: string | undefined;
+    const el = document.createElement("div");
+    const update = vi.fn(() => {
+      // At this point the source is still named — the destination doesn't
+      // exist yet, so the OLD snapshot has exactly one "qs-farm".
+      nameWhenUpdateRan = el.style.viewTransitionName;
+    });
+
+    (document as { startViewTransition?: unknown }).startViewTransition = (
+      cb: () => void,
+    ) => {
+      // Name must be applied *before* the callback (old-snapshot capture).
+      expect(el.style.viewTransitionName).toBe("qs-farm");
+      cb();
+      return { finished: Promise.resolve() };
+    };
+
+    runViewTransition(update, el);
+
+    expect(update).toHaveBeenCalledTimes(1);
+    // The update saw the name…
+    expect(nameWhenUpdateRan).toBe("qs-farm");
+    // …and it was cleared before the NEW snapshot (no duplicate name).
+    expect(el.style.viewTransitionName).toBe("");
   });
 });
 
