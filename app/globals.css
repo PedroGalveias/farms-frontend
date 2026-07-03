@@ -24,13 +24,15 @@
   /* Chrome (header / rail / tab bar) is deliberately more frosted than content
      panes, so floating UI reads as a layer ABOVE the page rather than another
      card colliding with the one scrolling beneath it. */
-  --glass-chrome-fill: rgba(255, 255, 255, 0.62);
+  --glass-chrome-fill: rgba(255, 255, 255, 0.5);
   --glass-solid: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.75);
+  /* Brighter, near-opaque rim = the crisp light-catching edge of Liquid Glass. */
+  --glass-border: rgba(255, 255, 255, 0.85);
   /* Frost recipes (whole-value vars so the minifier can't mangle them). Light
-     keeps brightness near 1 so panes don't wash toward white. */
+     keeps brightness near 1 so panes don't wash toward white. A stronger blur
+     lets the fill drop (less opaque) while content behind stays unreadable. */
   --glass-backdrop: blur(28px) saturate(210%) brightness(1.02);
-  --glass-backdrop-chrome: blur(34px) saturate(215%) brightness(1.03);
+  --glass-backdrop-chrome: blur(40px) saturate(220%) brightness(1.04);
   /* Pointer-glow light colour — a whisper of green so it reads on the pale
      canvas (pure white-on-white disappears). */
   --glass-glow: rgba(236, 255, 244, 0.85);
@@ -65,12 +67,12 @@ html.dark {
 
   /* ── Liquid glass (dark) ── deeper tint, dimmer rim. */
   --glass-fill: rgba(32, 35, 43, 0.32);
-  --glass-chrome-fill: rgba(26, 29, 36, 0.62);
+  --glass-chrome-fill: rgba(26, 29, 36, 0.52);
   --glass-solid: rgba(24, 26, 32, 0.92);
   --glass-backdrop: blur(28px) saturate(210%) brightness(1.08);
-  --glass-backdrop-chrome: blur(34px) saturate(215%) brightness(1.1);
+  --glass-backdrop-chrome: blur(40px) saturate(220%) brightness(1.12);
   --glass-glow: rgba(255, 255, 255, 0.5);
-  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.18);
   --glass-highlight: rgba(255, 255, 255, 0.2);
   --glass-lowlight: rgba(0, 0, 0, 0.32);
   --glass-shadow:

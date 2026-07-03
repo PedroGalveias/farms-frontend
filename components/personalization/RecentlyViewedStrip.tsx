@@ -35,7 +35,7 @@ export default function RecentlyViewedStrip({ farms }: { farms: Farm[] }) {
       <div className="mt-3 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {recentFarms.map((farm) => (
           <Link
-            className="group w-56 shrink-0 rounded-2xl border border-line bg-cloud p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-[0_18px_40px_-24px_rgba(20,22,27,0.4)] focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="glass glass-interactive group w-56 shrink-0 rounded-2xl p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-[0_18px_40px_-24px_rgba(20,22,27,0.4)] focus-visible:ring-2 focus-visible:ring-ink/20"
             href={farmPath(farm.id)}
             key={farm.id}
           >

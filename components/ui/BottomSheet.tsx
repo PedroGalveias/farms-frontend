@@ -101,7 +101,7 @@ export default function BottomSheet({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
       <button
         aria-label={closeLabel}
-        className="qs-backdrop absolute inset-0 bg-black/50 backdrop-blur-md"
+        className="qs-backdrop absolute inset-0 bg-black/35 backdrop-blur-lg"
         onClick={onClose}
         type="button"
       />

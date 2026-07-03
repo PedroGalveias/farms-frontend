@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowDownWideNarrow,
   LayoutGrid,
@@ -12,13 +12,18 @@ import {
   RefreshCw,
   RotateCcw,
   Search,
+  SlidersHorizontal,
   X,
 } from "lucide-react";
 import { categoryLabel } from "@/lib/categories";
 import { RADIUS_OPTIONS, type CategoryMatchMode } from "@/lib/directory";
 import { getCantonName } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import CategoryFilterSheet from "@/components/CategoryFilterSheet";
 import type { DirectoryViewMode, FarmSortOption } from "@/types/farm";
+
+// How many categories to show inline before the rest move into the sheet.
+const PRIMARY_CATEGORY_COUNT = 6;
 
 interface DirectoryToolbarProps {
   activeFiltersCount: number;
@@ -110,6 +115,20 @@ export default function DirectoryToolbar({
   const t = useT();
   const { locale } = useLanguage();
   const searchRef = useRef<HTMLInputElement>(null);
+  const [filtersSheetOpen, setFiltersSheetOpen] = useState(false);
+
+  // Keep the toolbar clean: show the top categories inline plus any selected
+  // ones (so an active filter is never hidden); the rest live in the sheet.
+  const primaryCategories = categoryOptions.filter(
+    (category, index) =>
+      index < PRIMARY_CATEGORY_COUNT || selectedCategories.includes(category),
+  );
+  const hiddenCategoryCount = categoryOptions.length - primaryCategories.length;
+  const hiddenSelectedCount = selectedCategories.filter(
+    (category) => !primaryCategories.includes(category),
+  ).length;
+  const clearCategories = () =>
+    selectedCategories.forEach((category) => onToggleCategory(category));
 
   // "/" focuses the search field — unless the visitor is already typing in a
   // field or editing content elsewhere.
@@ -136,7 +155,7 @@ export default function DirectoryToolbar({
   }, []);
 
   return (
-    <section className="sticky top-[84px] z-20 rounded-[30px] border border-line bg-cloud/85 p-4 shadow-[0_1px_2px_rgba(20,22,27,0.04),0_28px_60px_-32px_rgba(20,22,27,0.28)] backdrop-blur-2xl sm:p-5">
+    <section className="glass glass-chrome sticky top-[84px] z-20 rounded-[30px] p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
         <h2 className="text-xl font-bold tracking-[-0.03em] text-ink">
           {t("toolbar_title")}
@@ -305,7 +324,7 @@ export default function DirectoryToolbar({
 
       <div className="mt-3.5 flex flex-col gap-3 px-1 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          {categoryOptions.map((category) => {
+          {primaryCategories.map((category) => {
             const isActive = selectedCategories.includes(category);
             const count = categoryCounts[category] ?? 0;
 
@@ -334,6 +353,24 @@ export default function DirectoryToolbar({
               </button>
             );
           })}
+
+          {hiddenCategoryCount > 0 ? (
+            <button
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-[13px] font-semibold text-ink/70 transition-all duration-300 hover:border-ink/25 hover:text-ink active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20"
+              onClick={() => setFiltersSheetOpen(true)}
+              type="button"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              {t("toolbar_moreFilters")}
+              {hiddenSelectedCount > 0 ? (
+                <span className="grid h-4 min-w-4 place-items-center rounded-full bg-pine-surface px-1 text-[10px] font-bold text-white">
+                  {hiddenSelectedCount}
+                </span>
+              ) : (
+                <span className="text-ink/45">{hiddenCategoryCount}</span>
+              )}
+            </button>
+          ) : null}
 
           {selectedCategories.length >= 2 ? (
             <div className="inline-flex items-center gap-1 rounded-full bg-tone p-1">
@@ -437,6 +474,19 @@ export default function DirectoryToolbar({
             </button>
           ) : null}
         </div>
+      ) : null}
+
+      {filtersSheetOpen ? (
+        <CategoryFilterSheet
+          categoryCounts={categoryCounts}
+          categoryMatchMode={categoryMatchMode}
+          categoryOptions={categoryOptions}
+          onCategoryMatchModeChange={onCategoryMatchModeChange}
+          onClearCategories={clearCategories}
+          onClose={() => setFiltersSheetOpen(false)}
+          onToggleCategory={onToggleCategory}
+          selectedCategories={selectedCategories}
+        />
       ) : null}
     </section>
   );
