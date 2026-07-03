@@ -114,6 +114,32 @@ export function getCantonName(code: string) {
   return cantonNameByCode.get(code.toUpperCase()) ?? code;
 }
 
+/** Whether `code` is a real two-letter Swiss canton code (case-insensitive). */
+export function isValidCantonCode(code: string) {
+  return cantonNameByCode.has(code.toUpperCase());
+}
+
+/** The i18n region key a canton belongs to (or "region_other" if unmapped). */
+export function getRegionKeyForCanton(code: string) {
+  const upper = code.toUpperCase();
+  return (
+    SWISS_REGIONS.find((region) => region.cantons.includes(upper))?.key ??
+    "region_other"
+  );
+}
+
+/** The canton codes in a region (empty for an unknown key). */
+export function getCantonsInRegion(regionKey: string) {
+  return (
+    SWISS_REGIONS.find((region) => region.key === regionKey)?.cantons ?? []
+  );
+}
+
+/** All region keys, for static generation. */
+export function getRegionKeys() {
+  return SWISS_REGIONS.map((region) => region.key);
+}
+
 export function formatFarmDate(value: string) {
   return new Intl.DateTimeFormat("en-CH", {
     day: "numeric",

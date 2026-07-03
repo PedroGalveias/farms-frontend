@@ -2,10 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   formatFarmDate,
   getCantonName,
+  getCantonsInRegion,
+  getRegionKeyForCanton,
+  getRegionKeys,
   getTopFarmCategories,
   getUniqueFarmCantons,
   getUniqueFarmCategories,
   groupCantonsByRegion,
+  isValidCantonCode,
   splitCoordinates,
 } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
@@ -113,5 +117,30 @@ describe("groupCantonsByRegion", () => {
 
   it("returns nothing for an empty input", () => {
     expect(groupCantonsByRegion([])).toEqual([]);
+  });
+});
+
+describe("canton/region helpers", () => {
+  it("validates canton codes case-insensitively", () => {
+    expect(isValidCantonCode("BE")).toBe(true);
+    expect(isValidCantonCode("be")).toBe(true);
+    expect(isValidCantonCode("ZH")).toBe(true);
+    expect(isValidCantonCode("XX")).toBe(false);
+    expect(isValidCantonCode("")).toBe(false);
+  });
+
+  it("maps a canton to its region", () => {
+    expect(getRegionKeyForCanton("GE")).toBe("region_leman");
+    expect(getRegionKeyForCanton("zh")).toBe("region_zurich");
+    expect(getRegionKeyForCanton("TI")).toBe("region_ticino");
+    expect(getRegionKeyForCanton("XX")).toBe("region_other");
+  });
+
+  it("lists cantons in a region and exposes all region keys", () => {
+    expect(getCantonsInRegion("region_leman")).toEqual(["GE", "VD", "VS"]);
+    expect(getCantonsInRegion("nope")).toEqual([]);
+    const keys = getRegionKeys();
+    expect(keys).toContain("region_zurich");
+    expect(keys).toHaveLength(7);
   });
 });

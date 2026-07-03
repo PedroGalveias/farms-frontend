@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getFarms } from "@/lib/farms-service";
+import { SWISS_CANTONS, getRegionKeys } from "@/lib/farms";
 import { getSiteUrl } from "@/lib/site";
 
 // Refresh the sitemap hourly rather than per-request; the farm list changes
@@ -16,9 +17,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    { url: `${siteUrl}/canton`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${siteUrl}/seasonal`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${siteUrl}/saved`, changeFrequency: "monthly", priority: 0.4 },
   ];
+
+  // Canton + region landing pages — the internal-link web into the directory.
+  const cantonRoutes: MetadataRoute.Sitemap = SWISS_CANTONS.map((canton) => ({
+    url: `${siteUrl}/canton/${canton.code.toLowerCase()}`,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+  const regionRoutes: MetadataRoute.Sitemap = getRegionKeys().map((key) => ({
+    url: `${siteUrl}/region/${key}`,
+    changeFrequency: "monthly",
+    priority: 0.5,
+  }));
+  staticRoutes.push(...cantonRoutes, ...regionRoutes);
 
   try {
     const farms = await getFarms();

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -23,32 +24,54 @@ export default function SiteFooter() {
   return (
     <footer className="relative mt-32 overflow-hidden border-t border-line/70">
       <div className="mx-auto max-w-6xl px-5 pb-12 pt-16 sm:px-8">
-        <div className="text-[15px]">
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-ink/60">
-            {t("footer_source")}
-          </p>
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-8">
-            <a
-              className={footerLinkClassName}
-              href={FARMS_SERVICE_REPO}
-              rel="noreferrer"
-              target="_blank"
-            >
-              <GitHubIcon className="h-4 w-4 text-ink/60 transition-colors group-hover:text-pine" />
-              {t("footer_farmsService")}
-              <HoverArrow />
-            </a>
-            <a
-              className={footerLinkClassName}
-              href={FARMS_FRONTEND_REPO}
-              rel="noreferrer"
-              target="_blank"
-            >
-              <GitHubIcon className="h-4 w-4 text-ink/60 transition-colors group-hover:text-pine" />
-              {t("footer_farmsFrontend")}
-              <HoverArrow />
-            </a>
+        <div className="grid gap-10 sm:grid-cols-2">
+          <div className="text-[15px]">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-ink/60">
+              {t("footer_source")}
+            </p>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-8">
+              <a
+                className={footerLinkClassName}
+                href={FARMS_SERVICE_REPO}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <GitHubIcon className="h-4 w-4 text-ink/60 transition-colors group-hover:text-pine" />
+                {t("footer_farmsService")}
+                <HoverArrow />
+              </a>
+              <a
+                className={footerLinkClassName}
+                href={FARMS_FRONTEND_REPO}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <GitHubIcon className="h-4 w-4 text-ink/60 transition-colors group-hover:text-pine" />
+                {t("footer_farmsFrontend")}
+                <HoverArrow />
+              </a>
+            </div>
           </div>
+
+          <nav className="text-[15px]" aria-label={t("footer_browse")}>
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-ink/60">
+              {t("footer_browse")}
+            </p>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-8">
+              <Link className={footerLinkClassName} href="/canton">
+                {t("home_browseByCanton")}
+                <HoverArrow />
+              </Link>
+              <Link className={footerLinkClassName} href="/seasonal">
+                {t("seasonal_title")}
+                <HoverArrow />
+              </Link>
+              <Link className={footerLinkClassName} href="/quick-search">
+                {t("nav_quickSearch")}
+                <HoverArrow />
+              </Link>
+            </div>
+          </nav>
         </div>
 
         {/* Oversized wordmark — a quiet, confident signature. */}
