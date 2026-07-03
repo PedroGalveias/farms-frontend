@@ -52,7 +52,11 @@ describe("haptic", () => {
     const toggle = document.querySelector<HTMLInputElement>("input[switch]");
     expect(toggle).not.toBeNull();
     expect(toggle?.type).toBe("checkbox");
-    expect(toggle?.getAttribute("aria-hidden")).toBe("true");
+    // The control is wrapped in an aria-hidden label and rendered off-screen
+    // (not display:none/opacity:0 — WebKit mutes the haptic for those).
+    const label = toggle?.closest("label");
+    expect(label?.getAttribute("aria-hidden")).toBe("true");
+    expect(label?.style.display).not.toBe("none");
     expect(click).toHaveBeenCalledTimes(1);
 
     // Repeated taps reuse the same hidden control.
