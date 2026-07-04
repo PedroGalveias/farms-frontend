@@ -27,6 +27,7 @@ import LocationStep, {
 } from "@/components/quick-search/LocationStep";
 import ProductsStep from "@/components/quick-search/ProductsStep";
 import ResultsStep from "@/components/quick-search/ResultsStep";
+import QuickSearchCoach from "@/components/quick-search/QuickSearchCoach";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
@@ -445,6 +446,8 @@ export default function QuickSearchExperience({
               {t("qs_hero_subcopy")}
             </p>
           </div>
+
+          <QuickSearchCoach />
 
           {loadError ? (
             <div

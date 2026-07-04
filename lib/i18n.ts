@@ -328,6 +328,10 @@ const en: Dict = {
   qs_hero_accent: "today?",
   qs_hero_subcopy:
     "Set where you are, pick what you're after — get the farms that have it, nearest first.",
+  qs_coach_title: "New here? It's three quick steps",
+  qs_coach_body:
+    "Set where you are, pick what you're after, and get the farms that have it — nearest first.",
+  qs_coach_dismiss: "Got it",
   qs_steps_aria: "Quick search steps",
   qs_step_location: "Location",
   qs_step_products: "Products",
@@ -740,6 +744,10 @@ const de: Dict = {
   qs_hero_accent: "heute?",
   qs_hero_subcopy:
     "Lege fest, wo du bist, und wähle, was du suchst — wir zeigen die Höfe, die es haben, am nächsten zuerst.",
+  qs_coach_title: "Neu hier? Drei kurze Schritte",
+  qs_coach_body:
+    "Standort setzen, Produkte wählen und die Höfe finden, die sie haben — die nächsten zuerst.",
+  qs_coach_dismiss: "Verstanden",
   qs_steps_aria: "Schritte der Schnellsuche",
   qs_step_location: "Standort",
   qs_step_products: "Produkte",
@@ -1157,6 +1165,10 @@ const fr: Dict = {
   qs_hero_accent: "aujourd'hui ?",
   qs_hero_subcopy:
     "Indiquez où vous êtes et choisissez ce que vous cherchez — voici les fermes qui l'ont, au plus près d'abord.",
+  qs_coach_title: "Nouveau ? Trois étapes rapides",
+  qs_coach_body:
+    "Indiquez où vous êtes, choisissez vos produits et trouvez les fermes qui les ont — les plus proches d'abord.",
+  qs_coach_dismiss: "Compris",
   qs_steps_aria: "Étapes de la recherche rapide",
   qs_step_location: "Lieu",
   qs_step_products: "Produits",
@@ -1568,6 +1580,10 @@ const it: Dict = {
   qs_hero_accent: "oggi?",
   qs_hero_subcopy:
     "Indica dove sei e scegli cosa cerchi — ecco le fattorie che ce l'hanno, prima le più vicine.",
+  qs_coach_title: "Novità? Tre passaggi veloci",
+  qs_coach_body:
+    "Imposta dove sei, scegli cosa cerchi e trova le fattorie che li hanno — le più vicine per prime.",
+  qs_coach_dismiss: "Capito",
   qs_steps_aria: "Passaggi della ricerca rapida",
   qs_step_location: "Luogo",
   qs_step_products: "Prodotti",
@@ -1986,6 +2002,10 @@ const rm: Dict = {
   qs_hero_accent: "oz?",
   qs_hero_subcopy:
     "Inditgescha nua che ti es e tscherna tge che ti tschertgas — qua èn ils manaschis che han quai, ils pli datiers l'emprim.",
+  qs_coach_title: "Nov qua? Trais pass svelts",
+  qs_coach_body:
+    "Enditgescha nua che ti es, tscherna products e chatta las fattorias che als han — las pli datiers l'emprim.",
+  qs_coach_dismiss: "Chapì",
   qs_steps_aria: "Pass da la tschertga svelta",
   qs_step_location: "Lieu",
   qs_step_products: "Products",
