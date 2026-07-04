@@ -9,6 +9,7 @@ import FarmDetailSheet from "@/components/quick-search/FarmDetailSheet";
 import FarmQuickActions from "@/components/FarmQuickActions";
 import PullToRefresh from "@/components/motion/PullToRefresh";
 import BentoOverview from "@/components/home/BentoOverview";
+import BrowseByCanton from "@/components/home/BrowseByCanton";
 import DirectoryResults from "@/components/home/DirectoryResults";
 import EditorialTicker from "@/components/home/EditorialTicker";
 import GreenSlabCta from "@/components/home/GreenSlabCta";
@@ -208,6 +209,9 @@ export default function FarmsPageShell({
             visibleCount={directory.visibleCount}
             visibleFarms={directory.visibleFarms}
           />
+
+          {/* ---------- Browse by canton ---------- */}
+          <BrowseByCanton farms={initialFarms} />
         </main>
 
         {/* ---------- Full-bleed green slab ---------- */}
