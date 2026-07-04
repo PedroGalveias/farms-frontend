@@ -31,6 +31,9 @@ import {
   writeCollections,
   type Collection,
 } from "@/lib/collections";
+import { Heart } from "lucide-react";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 interface PersonalizationValue {
   favorites: string[];
@@ -70,6 +73,14 @@ export default function PersonalizationProvider({
     favoritesRef.current = favorites;
   }, [favorites]);
 
+  // Toast + translator held in a ref so the toggle callbacks stay stable.
+  const { toast } = useToast();
+  const t = useT();
+  const feedbackRef = useRef({ toast, t });
+  useEffect(() => {
+    feedbackRef.current = { toast, t };
+  });
+
   useEffect(() => {
     queueMicrotask(() => {
       setFavorites(readFavorites());
@@ -106,6 +117,11 @@ export default function PersonalizationProvider({
     favoritesRef.current = next;
     writeFavorites(next);
     setFavorites(next);
+    const { toast, t } = feedbackRef.current;
+    toast({
+      message: willRemove ? t("toast_removed") : t("toast_saved"),
+      icon: willRemove ? undefined : <Heart className="h-4 w-4 fill-current" />,
+    });
     // Un-favoriting also drops the farm from every collection.
     if (willRemove) {
       setCollections((current) => {

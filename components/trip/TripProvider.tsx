@@ -6,11 +6,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Route } from "lucide-react";
 import { MAX_TRIP_STOPS, readTrip, writeTrip, type TripStop } from "@/lib/trip";
 import { haptic } from "@/lib/haptics";
+import { useToast } from "@/components/ui/ToastProvider";
 import { useT } from "@/components/i18n/LanguageProvider";
 import TripSheet from "@/components/trip/TripSheet";
 
@@ -33,8 +35,19 @@ export default function TripProvider({
   children: React.ReactNode;
 }) {
   const t = useT();
+  const { toast } = useToast();
   const [stops, setStops] = useState<TripStop[]>([]);
   const [open, setOpen] = useState(false);
+
+  // Latest stops + feedback fns in refs so toggleStop can stay []-stable.
+  const stopsRef = useRef(stops);
+  useEffect(() => {
+    stopsRef.current = stops;
+  }, [stops]);
+  const feedbackRef = useRef({ toast, t });
+  useEffect(() => {
+    feedbackRef.current = { toast, t };
+  });
 
   // Hydrate from localStorage after mount (SSR renders an empty plan).
   useEffect(() => {
@@ -56,14 +69,26 @@ export default function TripProvider({
 
   const toggleStop = useCallback((stop: TripStop) => {
     haptic();
-    setStops((current) => {
-      const next = current.some((s) => s.id === stop.id)
-        ? current.filter((s) => s.id !== stop.id)
-        : current.length >= MAX_TRIP_STOPS
-          ? current
-          : [...current, stop];
-      writeTrip(next);
-      return next;
+    const current = stopsRef.current;
+    const isPlanned = current.some((s) => s.id === stop.id);
+    const isFull = !isPlanned && current.length >= MAX_TRIP_STOPS;
+    const next = isPlanned
+      ? current.filter((s) => s.id !== stop.id)
+      : isFull
+        ? current
+        : [...current, stop];
+    stopsRef.current = next;
+    writeTrip(next);
+    setStops(next);
+
+    const { toast, t } = feedbackRef.current;
+    toast({
+      message: isPlanned
+        ? t("toast_planRemoved")
+        : isFull
+          ? t("toast_planFull")
+          : t("toast_planAdded"),
+      icon: isFull ? undefined : <Route className="h-4 w-4" />,
     });
   }, []);
 
