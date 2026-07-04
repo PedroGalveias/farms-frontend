@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { haptic } from "@/lib/haptics";
+import { useToast } from "@/components/ui/ToastProvider";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 interface CopyButtonProps {
@@ -22,6 +23,7 @@ export default function CopyButton({
   className,
 }: CopyButtonProps) {
   const t = useT();
+  const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const text = label ?? t("copy_address");
 
@@ -30,6 +32,10 @@ export default function CopyButton({
       await navigator.clipboard.writeText(value);
       haptic();
       setCopied(true);
+      toast({
+        message: t("toast_copied"),
+        icon: <Check className="h-4 w-4" />,
+      });
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       // Clipboard unavailable (e.g. insecure context) — nothing else to do.

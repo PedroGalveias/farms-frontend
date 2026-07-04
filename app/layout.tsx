@@ -19,6 +19,7 @@ import SeasonalReminderProvider from "@/components/seasonal/SeasonalReminderProv
 import CommandPalette from "@/components/command/CommandPalette";
 import KeyboardShortcuts from "@/components/command/KeyboardShortcuts";
 import ViewTransitions from "@/components/transitions/ViewTransitions";
+import ToastProvider from "@/components/ui/ToastProvider";
 import "./globals.css";
 
 // Set the theme class before paint to avoid a flash of the wrong theme.
@@ -90,29 +91,31 @@ export default function RootLayout({
         <ThemeProvider>
           <LanguageProvider>
             <ViewTransitions>
-              <AuthProvider>
-                <PersonalizationProvider>
-                  <TripProvider>
-                    <SeasonalReminderProvider>
-                      <SkipLink />
-                      <SideRail />
-                      <div className="cursor-zone relative z-[1] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[76px]">
-                        <SiteHeader />
-                        <div id="main-content">{children}</div>
-                      </div>
-                      <MobileTabBar />
-                      <CommandPalette />
-                      <KeyboardShortcuts />
-                      <CustomCursor />
-                      <GlassLight />
-                      <BackToTop />
-                      <PwaRegister />
-                      <OfflineChip />
-                      <WebVitals />
-                    </SeasonalReminderProvider>
-                  </TripProvider>
-                </PersonalizationProvider>
-              </AuthProvider>
+              <ToastProvider>
+                <AuthProvider>
+                  <PersonalizationProvider>
+                    <TripProvider>
+                      <SeasonalReminderProvider>
+                        <SkipLink />
+                        <SideRail />
+                        <div className="cursor-zone relative z-[1] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[76px]">
+                          <SiteHeader />
+                          <div id="main-content">{children}</div>
+                        </div>
+                        <MobileTabBar />
+                        <CommandPalette />
+                        <KeyboardShortcuts />
+                        <CustomCursor />
+                        <GlassLight />
+                        <BackToTop />
+                        <PwaRegister />
+                        <OfflineChip />
+                        <WebVitals />
+                      </SeasonalReminderProvider>
+                    </TripProvider>
+                  </PersonalizationProvider>
+                </AuthProvider>
+              </ToastProvider>
             </ViewTransitions>
           </LanguageProvider>
         </ThemeProvider>
