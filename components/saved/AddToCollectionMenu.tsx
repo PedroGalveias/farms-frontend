@@ -7,7 +7,17 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
 /** Per-card dropdown to add/remove a farm from collections, or make a new one. */
-export default function AddToCollectionMenu({ farmId }: { farmId: string }) {
+export default function AddToCollectionMenu({
+  farmId,
+  className = "relative",
+  triggerClassName = "relative z-10 inline-flex items-center gap-1.5 rounded-full border border-line bg-cloud px-3 py-1.5 text-xs font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20",
+}: {
+  farmId: string;
+  /** Wrapper class (defaults to `relative`; pass `relative w-full` in a grid). */
+  className?: string;
+  /** Trigger button class, to match sibling buttons in different layouts. */
+  triggerClassName?: string;
+}) {
   const t = useT();
   const {
     collections,
@@ -53,14 +63,14 @@ export default function AddToCollectionMenu({ farmId }: { farmId: string }) {
   };
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className={className} ref={containerRef}>
       <button
         aria-expanded={open}
-        className="relative z-10 inline-flex items-center gap-1.5 rounded-full border border-line bg-cloud px-3 py-1.5 text-xs font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+        className={triggerClassName}
         onClick={() => setOpen((value) => !value)}
         type="button"
       >
-        <FolderPlus className="h-3.5 w-3.5" />
+        <FolderPlus className="h-4 w-4" />
         {t("collection_addTo")}
         {memberCount > 0 ? (
           <span className="rounded-full bg-pine/10 px-1.5 text-[0.65rem] font-bold text-pine">

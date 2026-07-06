@@ -90,7 +90,12 @@ html.dark {
    near-opaque colour so content stays legible. The inset top highlight is the
    key depth cue — the glass rim catching light — and doesn't tint content. */
 .glass {
-  position: relative;
+  /* NB: we deliberately do NOT set `position: relative` here. This rule is
+     unlayered, so it would override Tailwind's `fixed`/`sticky`/`absolute`
+     utilities on any element that is glass *and* positioned (the tab bar,
+     back-to-top, sticky toolbar, docked sheet). The `backdrop-filter` below
+     already establishes a containing block for the ::before/::after glow
+     pseudos; the no-backdrop-filter fallback restores `position: relative`. */
   /* Own stacking context so the light pseudos (z-index:-1) sit above the fill
      but below the content, and the backdrop blur is contained. */
   isolation: isolate;
@@ -168,6 +173,18 @@ html.dark {
        (what's behind reads richer, not just blurred). */
     -webkit-backdrop-filter: var(--glass-backdrop);
     backdrop-filter: var(--glass-backdrop);
+  }
+}
+
+/* Where backdrop-filter is unavailable there's no containing block for the
+   glow pseudos, so restore it here. (This branch can't collide with a
+   positioned utility because those browsers don't get the glass frost anyway,
+   and static glass panels are the common case.) */
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .glass {
+    position: relative;
   }
 }
 
