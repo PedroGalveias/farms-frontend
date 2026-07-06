@@ -9,7 +9,7 @@ import FarmDetailSheet from "@/components/quick-search/FarmDetailSheet";
 import FarmQuickActions from "@/components/FarmQuickActions";
 import PullToRefresh from "@/components/motion/PullToRefresh";
 import BentoOverview from "@/components/home/BentoOverview";
-import BrowseByCanton from "@/components/home/BrowseByCanton";
+import CantonRail from "@/components/home/CantonRail";
 import DirectoryResults from "@/components/home/DirectoryResults";
 import EditorialTicker from "@/components/home/EditorialTicker";
 import GreenSlabCta from "@/components/home/GreenSlabCta";
@@ -178,6 +178,17 @@ export default function FarmsPageShell({
             />
           </div>
 
+          {/* Canton browsing lives with the search tools, not buried at the
+              bottom of the page — chips filter the directory in place. Kept
+              OUTSIDE the #directory wrapper: the toolbar is sticky within it,
+              and a sibling below would give the sticky room to travel and sit
+              exactly on top of the rail. */}
+          <CantonRail
+            farms={initialFarms}
+            onSelectCanton={directory.setSelectedCanton}
+            selectedCanton={directory.selectedCanton}
+          />
+
           {loadError ? (
             <section
               className="mt-6 rounded-3xl border border-amber-300/60 bg-amber-50 p-5"
@@ -209,9 +220,6 @@ export default function FarmsPageShell({
             visibleCount={directory.visibleCount}
             visibleFarms={directory.visibleFarms}
           />
-
-          {/* ---------- Browse by canton ---------- */}
-          <BrowseByCanton farms={initialFarms} />
         </main>
 
         {/* ---------- Full-bleed green slab ---------- */}

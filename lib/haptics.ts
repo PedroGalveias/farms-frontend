@@ -9,6 +9,7 @@
 // - Anywhere else: a graceful no-op.
 
 let iosSwitch: HTMLInputElement | null = null;
+let iosLabel: HTMLLabelElement | null = null;
 
 /** iPhone/iPad detection — iPadOS 13+ masquerades as macOS, so a Mac UA with
  *  a touchscreen counts as iPad. Exported for tests. */
@@ -27,9 +28,12 @@ export function isIosLike(nav: {
  * 17.4+ (there is no Vibration API on iOS Safari). Requirements learned the
  * hard way and why the earlier attempt was silent:
  *
- * - The control must be *rendered*, not `display:none`/`opacity:0`/
- *   `visibility:hidden` — WebKit skips the haptic for non-painted controls. So
- *   it's parked off-screen (`left:-9999px`) instead, fully opaque.
+ * - The control must actually be *painted*: `display:none`, `opacity:0`,
+ *   `visibility:hidden` AND parking it outside the viewport (`left:-9999px`)
+ *   all mute it — WebKit culls off-screen content from painting the same way.
+ *   So it sits INSIDE the viewport at 1×1px, tucked behind everything
+ *   (`z-index:-1`, bottom corner, overflow hidden) where a single clipped
+ *   pixel is imperceptible.
  * - It lives inside a `<label>` and we click the label, mirroring a genuine
  *   user toggle.
  * - `.click()` must fire inside the user-gesture window — all our call sites
@@ -38,20 +42,23 @@ export function isIosLike(nav: {
 function iosSwitchTick(): void {
   try {
     if (!iosSwitch || !iosSwitch.isConnected) {
-      const label = document.createElement("label");
-      label.setAttribute("aria-hidden", "true");
-      // Rendered but off-screen — NOT display:none/opacity:0 (that mutes it).
-      label.style.cssText =
-        "position:fixed;top:0;left:-9999px;width:32px;height:20px;pointer-events:none";
+      iosLabel = document.createElement("label");
+      iosLabel.setAttribute("aria-hidden", "true");
+      // In-viewport (bottom-left, under the content stack) and painted — a
+      // 1px window clipping the real control. No opacity/visibility tricks.
+      iosLabel.style.cssText =
+        "position:fixed;bottom:0;left:0;width:1px;height:1px;overflow:hidden;z-index:-1;pointer-events:none";
       iosSwitch = document.createElement("input");
       iosSwitch.type = "checkbox";
       iosSwitch.setAttribute("switch", "");
       iosSwitch.tabIndex = -1;
-      label.appendChild(iosSwitch);
-      document.body.appendChild(label);
+      iosSwitch.style.cssText = "margin:0";
+      iosLabel.appendChild(iosSwitch);
+      document.body.appendChild(iosLabel);
     }
-    // Click toggles the switch — the state change is what the OS reacts to.
-    iosSwitch.click();
+    // Click the LABEL — it forwards to the switch as a genuine user-style
+    // toggle; the state change is what the OS reacts to.
+    (iosLabel ?? iosSwitch).click();
   } catch {
     // Best-effort — never let feedback break the action itself.
   }

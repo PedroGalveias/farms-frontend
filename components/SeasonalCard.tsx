@@ -50,7 +50,7 @@ export default function SeasonalCard() {
   };
 
   return (
-    <div className="glass col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] p-5 sm:row-span-2 sm:min-h-0">
+    <div className="glass glass-card col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] p-5 sm:row-span-2 sm:min-h-0">
       <div className="flex items-center justify-between gap-3">
         <span className="grid h-10 w-10 place-items-center rounded-full bg-pine/10 text-pine">
           <Sprout className="h-5 w-5" />
