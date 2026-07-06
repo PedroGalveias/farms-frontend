@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 import { hasFinePointer } from "@/lib/platform";
+import { prefersReducedMotion } from "@/lib/motion";
+import { useMotionSignal } from "@/components/motion/useMotionSignal";
 
 // How strongly scroll velocity lights the glint (px/frame → 0..1).
 const GLINT_GAIN = 24;
@@ -32,8 +34,12 @@ const ORB_LIMIT = 130;
  * everything is skipped under prefers-reduced-motion (vars default to rest).
  */
 export default function GlassLight() {
+  // Re-runs the effect when the OS preference or the in-app override flips,
+  // so the light comes alive (or settles) without a reload.
+  const motionSignal = useMotionSignal();
+
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (prefersReducedMotion()) {
       return;
     }
 
@@ -140,7 +146,7 @@ export default function GlassLight() {
         cancelAnimationFrame(pointerRaf);
       }
     };
-  }, []);
+  }, [motionSignal]);
 
   return null;
 }

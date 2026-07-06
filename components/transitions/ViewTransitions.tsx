@@ -9,6 +9,7 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  prefersReducedMotion,
   shouldAnimateNavigation,
   shouldInterceptClick,
   supportsViewTransitions,
@@ -54,9 +55,7 @@ export default function ViewTransitions({
 
   const navigate = useCallback(
     (href: string) => {
-      const reducedMotion =
-        typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reducedMotion = prefersReducedMotion();
 
       if (
         !shouldAnimateNavigation({

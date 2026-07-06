@@ -12,9 +12,7 @@ interface CountUpProps {
   suffix?: string;
 }
 
-const prefersReducedMotion = () =>
-  typeof window !== "undefined" &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+import { prefersReducedMotion } from "@/lib/motion";
 
 /**
  * Counts up from zero to `value` the first time it enters the viewport.

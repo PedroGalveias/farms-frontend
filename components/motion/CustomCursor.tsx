@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { hasFinePointer } from "@/lib/platform";
+import { prefersReducedMotion } from "@/lib/motion";
 
 /**
  * Desktop custom cursor: an instant dot plus a lagging ring that follows the
@@ -24,7 +25,7 @@ export default function CustomCursor() {
     const check = () =>
       setActive(
         hasFinePointer(window) &&
-          !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+          !prefersReducedMotion() &&
           window.innerWidth >= 1024,
       );
 

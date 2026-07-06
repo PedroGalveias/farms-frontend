@@ -15,19 +15,24 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
 
 ## ✨ Features
 
-- **Farm directory** — searchable, filterable (by canton and category), sortable, and paginated for large datasets, with grid, list, and **map** views.
+- **Farm directory** — searchable (with instant autocomplete), filterable (canton, categories, distance radius), sortable, and paginated for large datasets, with grid, list, and **map** views.
 - **Quick search** — a guided, three-step flow (location → products → farms) that returns farms holding the products you want, **sorted by distance, nearest first**. Supports a subcategory picker and seasonal deep links.
+- **Browse by canton** — a canton chip rail on the home page that filters the directory in place, plus SEO landing pages for every canton (`/canton/[code]`), the seven great regions (`/region/[key]`), and a canton hub (`/canton`).
 - **Per-farm pages** — each farm has its own shareable page (`/farm/[id]`) with a Web Share / copy-link button, copy-address, SEO metadata, and schema.org JSON-LD.
+- **Accounts** — email + password login and registration with email verification, backed by BFF route handlers (`app/api/auth/*`) so tokens never touch client JS. Adding a farm requires an account.
+- **⌘K command palette** — fuzzy search across farms, products, cantons, pages, and quick actions (theme, shortcuts, animations), built on the native `<dialog>` top layer.
 - **Nearest farm** — on request (never on load, for privacy), uses your browser location to surface the single closest farm.
-- **Saved & collections** — favorite farms and organize them into named collections, plus a "recently viewed" strip; all stored per-device in the browser.
+- **Saved & collections** — favorite farms, organize them into named collections, plan visits, and see a "recently viewed" strip; all stored per-device in the browser.
 - **Most wanted** — a per-device search-stats card (backend-ready) that surfaces the products you search for most.
 - **Seasonal produce** — a date-driven calendar (rebuilt from the official Swiss Farmers calendar) highlighting what's in season in Switzerland right now, to nudge local, lower-impact eating.
 - **Add a farm** — a validated create flow (Swiss canton + coordinate checks) that posts back to the API.
 - **Internationalization** — English, German, French, Italian, and Swiss Romansh, switchable at runtime.
-- **Light & dark mode** — class-based theming with no flash of the wrong theme on load.
+- **Light & dark mode** — class-based theming with no flash of the wrong theme on load, and a circular-reveal theme transition.
 - **Installable PWA** — works offline with a cached directory fallback.
-- **Native-feeling mobile UI** — a slim header and a floating bottom tab bar, plus a `/` keyboard shortcut to jump to search on desktop.
-- **Motion system** — scroll reveals, count-ups, a custom desktop cursor, and view-transition detail sheets (all respect `prefers-reduced-motion`).
+- **Liquid-glass design system** — frosted chrome with pointer-following glow and scroll-reactive glint, a WebGL refraction hero, and a strict GPU budget (repeated cards render glass without live backdrop blur) so it stays smooth on iOS.
+- **Native-feeling mobile UI** — floating bottom tab bar, pull-to-refresh, long-press quick actions, card→sheet morphs, and real haptic feedback (Vibration API on Android; the iOS switch-control trick on iPhone).
+- **Motion system** — scroll reveals, count-ups, a custom desktop cursor, and view-transition detail sheets. Everything respects `prefers-reduced-motion`, with an in-app "always play animations" override (in the command palette) for machines where the OS setting is off unknowingly.
+- **Cross-engine parity** — features are feature-detected with graceful fallbacks and verified on Chromium, Firefox (Gecko), and Safari (WebKit) alike.
 - **Resilient** — branded error boundaries and a graceful 404, so a backend hiccup never leaves a blank screen.
 
 ## 🧱 Tech stack
@@ -95,9 +100,9 @@ Open [http://localhost:3000](http://localhost:3000). The app degrades gracefully
 
 - **Unit & component tests** ([Vitest](https://vitest.dev/) + Testing Library, jsdom) live next to the code in `__tests__/` folders. They cover the `lib/` logic (distance sorting, validation, i18n), key components, and the health API route.
 - **Coverage** is scoped to the modules under test and **enforces thresholds** (lines/statements 85%, functions 85%, branches 75%) — `npm run test:coverage` fails if coverage regresses. An HTML report is written to `coverage/`.
-- **End-to-end tests** ([Playwright](https://playwright.dev/)) in `e2e/` build and boot the app in a real browser and assert the core flows. First time:
+- **End-to-end tests** ([Playwright](https://playwright.dev/)) in `e2e/` build and boot the app and assert the core flows across **all three engines** — Chromium, Firefox, and WebKit — as a cross-engine parity gate. First time:
   ```bash
-  npx playwright install chromium
+  npx playwright install chromium firefox webkit
   npm run test:e2e
   ```
 
@@ -137,35 +142,47 @@ app/
   page.tsx              Server-rendered home — loads farms + service health
   quick-search/         The guided, distance-sorted search experience
   farm/[id]/            Per-farm page (metadata + JSON-LD)
+  canton/ · region/     SEO landing pages: canton hub, per-canton, per-region
   saved/ · seasonal/    Saved/collections and the seasonal calendar
+  profile/ · verify-email/  Account pages
+  offline/              PWA offline fallback
   sitemap.ts · robots.ts  SEO surface (uses NEXT_PUBLIC_SITE_URL)
   error.tsx · not-found.tsx  Branded error/404 boundaries
   api/health/route.ts   Liveness endpoint for Render and uptime checks
   api/farms/route.ts    Local route handler used by the create flow
+  api/auth/*            BFF auth routes (login/register/me/logout — httpOnly cookie)
 components/             UI: directory shell, toolbar, cards, dialogs, motion
+  auth/ · command/ · canton/  Account UI, ⌘K palette, canton pages
   i18n/ · theme/ · personalization/  Cross-cutting providers
+  motion/ · hero/       Motion system + WebGL liquid-glass hero
 lib/
   farms-service.ts      Backend access layer
+  auth.ts · auth-service.ts  Auth validation + BFF service layer
   quick-search.ts       Distance (Haversine), matching, ranking
   farm-form.ts          Create-form normalization & validation
-  farms.ts              Canton metadata & formatters
+  farms.ts              Canton/region metadata & formatters
+  command.ts            Palette fuzzy matching + ranking
+  haptics.ts · motion.ts  Haptic feedback, motion preference override
   share.ts · site.ts    Share URLs, meta description, JSON-LD, site origin
-  i18n.ts               Translation dictionary
+  i18n.ts               Translation dictionary (en/de/fr/it/rm)
 types/farm.ts           Shared TypeScript contracts
-e2e/                    Playwright end-to-end tests
+e2e/                    Playwright end-to-end tests (chromium/firefox/webkit)
 ```
 
 ## 🔌 Backend contract
 
 The frontend is built against these [`farms`](https://github.com/PedroGalveias/farms) endpoints:
 
-| Method | Path            | Purpose        |
-| ------ | --------------- | -------------- |
-| `GET`  | `/health_check` | Service health |
-| `GET`  | `/farms`        | List farms     |
-| `POST` | `/farms`        | Create a farm  |
+| Method | Path            | Purpose                         |
+| ------ | --------------- | ------------------------------- |
+| `GET`  | `/health_check` | Service health                  |
+| `GET`  | `/farms`        | List farms                      |
+| `POST` | `/farms`        | Create a farm                   |
+| `POST` | `/auth/*`       | Login / register / verify email |
 
 `POST /farms` expects `name`, `address`, `canton`, `coordinates`, `categories`, and an `idempotency_key`. The browser submits the farm fields to the local `app/api/farms` route handler, which adds a fresh `idempotency_key` before forwarding to the backend.
+
+Auth goes through the local `app/api/auth/*` BFF handlers, which keep the session token in an `httpOnly` cookie — it is never exposed to client-side JavaScript.
 
 ## 🤝 Contributing
 

@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { hasFinePointer } from "@/lib/platform";
+import { prefersReducedMotion } from "@/lib/motion";
 
 interface MagneticProps {
   children: ReactNode;
@@ -30,7 +31,7 @@ export default function Magnetic({
   const canHover = () =>
     typeof window !== "undefined" &&
     hasFinePointer(window) &&
-    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    !prefersReducedMotion();
 
   const handleMove = (event: ReactPointerEvent<HTMLSpanElement>) => {
     const node = ref.current;
