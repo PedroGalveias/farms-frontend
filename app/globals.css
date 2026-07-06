@@ -356,6 +356,19 @@ html.dark {
   box-sizing: border-box;
 }
 
+/* iOS Safari auto-zooms the page when a form control with a font size under
+   16px is focused — and the zoom sticks after the keyboard closes, leaving
+   the page shifted sideways ("the list isn't centered any more"). Floor all
+   controls at 16px on touch-only devices; desktop keeps the designed sizes.
+   Unlayered, so it deliberately beats `text-sm` utilities on inputs. */
+@media (any-hover: none) and (any-pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
@@ -383,6 +396,9 @@ body {
      visible viewport. vh first as a fallback for engines without dvh support. */
   min-height: 100vh;
   min-height: 100dvh;
+  /* Belt-and-braces: never allow sideways panning from stray overflow (clip,
+     not hidden — it doesn't create a scroll container, so sticky still works). */
+  overflow-x: clip;
   background:
     radial-gradient(
       120% 70% at 50% -20%,
@@ -567,7 +583,12 @@ html.dark body::before {
 
 /* ---------- Motion system ---------- */
 
-/* Scroll reveal — toggled by the <Reveal> component via IntersectionObserver. */
+/* Scroll reveal — toggled by the <Reveal> component via IntersectionObserver.
+   NB: no `will-change` here. It would permanently promote every revealed
+   wrapper (every directory card, forever) to its own composited layer —
+   ~1.4 MB of GPU memory per card at iPhone 3× DPR, growing with each
+   "Load more" until WebKit kills the tab. Browsers layerize transform/opacity
+   transitions on the fly for the 0.9 s they actually run. */
 .reveal {
   opacity: 0;
   transform: translateY(26px);
@@ -575,7 +596,6 @@ html.dark body::before {
     opacity 0.9s var(--ease-out-expo),
     transform 0.9s var(--ease-out-expo);
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
 }
 
 .reveal.is-visible {
