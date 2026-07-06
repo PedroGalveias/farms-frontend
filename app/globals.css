@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* Tailwind v4 gates `hover:` utilities behind `@media (hover: hover)`, which
+   checks the PRIMARY pointer. Firefox on touch-capable Windows hardware
+   misreports the primary pointer as coarse/hover-none even with a mouse
+   attached (same quirk lib/platform.ts works around in JS), which killed every
+   hover animation there. `any-hover` asks "can ANY pointer hover" — true when
+   a mouse is present, still false on pure touch devices, so phones keep no
+   sticky-hover states. */
+@custom-variant hover {
+  @media (any-hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 /* Raw palette — redefined under .dark so every token flips at runtime. */
 :root {
   --ink: #14161b;
@@ -167,13 +182,26 @@ html.dark {
 @supports (
   (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
 ) {
-  .glass {
+  .glass:not(.glass-card) {
     background-color: var(--glass-fill);
     /* blur + saturate + a touch of brightness = the optical-glass feel
        (what's behind reads richer, not just blurred). */
     -webkit-backdrop-filter: var(--glass-backdrop);
     backdrop-filter: var(--glass-backdrop);
   }
+}
+
+/* Repeated content cards (directory list, canton tiles, result rows…): the
+   full glass look — near-opaque fill, sheen, rim, glow/glint pseudos — but NO
+   live backdrop-filter. Dozens of blur regions all re-filtering every scroll
+   frame (the ambient orbs drift behind them) blows GPU memory on iOS Safari
+   and crashes the tab. The material budget: backdrop-filter belongs to chrome
+   and singleton surfaces; anything rendered in a list uses .glass-card.
+   In-flow cards only — never combine with fixed/sticky/absolute utilities
+   (the position here would override them, same trap as the old .glass rule). */
+.glass-card {
+  /* No backdrop-filter = no containing block for the glow pseudos. */
+  position: relative;
 }
 
 /* Where backdrop-filter is unavailable there's no containing block for the
@@ -248,7 +276,9 @@ html.dark {
     transform 0.35s var(--ease-out-expo),
     box-shadow 0.35s var(--ease-out-expo);
 }
-@media (hover: hover) {
+/* any-hover, not hover: Firefox on touch Windows misreports the primary
+   pointer (see the @custom-variant note at the top of this file). */
+@media (any-hover: hover) {
   .glass-interactive:hover {
     transform: translateY(-2px);
   }

@@ -58,7 +58,7 @@ export default function SeasonalCalendar() {
 
           return (
             <section
-              className={`glass flex flex-col rounded-[24px] p-5 transition-colors ${
+              className={`glass glass-card flex flex-col rounded-[24px] p-5 transition-colors ${
                 isCurrent ? "ring-1 ring-inset ring-pine/30" : ""
               }`}
               key={month}

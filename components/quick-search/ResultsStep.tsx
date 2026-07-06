@@ -191,7 +191,7 @@ function ResultRow({
       style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
     >
       <button
-        className="glass glass-interactive group w-full rounded-[20px] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-[0_18px_36px_-16px_rgba(20,22,27,0.28)] focus-visible:ring-2 focus-visible:ring-ink/20"
+        className="glass glass-card glass-interactive group w-full rounded-[20px] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-[0_18px_36px_-16px_rgba(20,22,27,0.28)] focus-visible:ring-2 focus-visible:ring-ink/20"
         data-cursor="Open"
         onClick={(event) => onOpen(farm, event.currentTarget)}
         type="button"
