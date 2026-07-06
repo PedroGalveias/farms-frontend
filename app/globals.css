@@ -972,6 +972,35 @@ html.dark .skeleton::after {
   animation: heart-pop 320ms var(--ease-spring);
 }
 
+/* A pine ring that pulses outward once when a farm is saved — reinforces the
+   toggle with a satisfying "it landed" beat. */
+@keyframes save-ring {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+
+.save-ring {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 9999px;
+  border: 2px solid var(--color-pine);
+  pointer-events: none;
+  animation: save-ring 520ms var(--ease-out-expo) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .save-ring {
+    display: none;
+  }
+}
+
 /* Desktop master–detail: the docked farm panel slides in from the right edge. */
 @media (prefers-reduced-motion: no-preference) {
   .qs-dock {

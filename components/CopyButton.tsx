@@ -50,7 +50,7 @@ export default function CopyButton({
       type="button"
     >
       {copied ? (
-        <Check className="h-3.5 w-3.5 text-pine" />
+        <Check className="check-pop h-3.5 w-3.5 text-pine" />
       ) : (
         <Copy className="h-3.5 w-3.5" />
       )}

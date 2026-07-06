@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowUpRight,
   Heart,
@@ -27,6 +27,9 @@ function FavoriteButton({
   const t = useT();
   const { isFavorite, toggleFavorite } = usePersonalization();
   const saved = isFavorite(farm.id);
+  // Bumped only when the farm is *newly* saved, so the ring pulse plays on save
+  // (via key-remount) but not on un-save.
+  const [ringKey, setRingKey] = useState(0);
 
   return (
     <button
@@ -38,12 +41,16 @@ function FavoriteButton({
       onClick={(event) => {
         event.stopPropagation();
         haptic();
+        if (!saved) setRingKey((k) => k + 1);
         toggleFavorite(farm.id);
       }}
       type="button"
     >
+      {ringKey > 0 ? (
+        <span aria-hidden className="save-ring" key={ringKey} />
+      ) : null}
       <Heart
-        className={`h-4 w-4 ${saved ? "fill-current heart-pop" : ""}`}
+        className={`relative z-10 h-4 w-4 ${saved ? "fill-current heart-pop" : ""}`}
         key={saved ? "saved" : "unsaved"}
       />
     </button>
