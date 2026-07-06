@@ -32,8 +32,25 @@ const VARIANTS: Variant[] = [
     id: "app",
     name: "B — Current app implementation",
     detail:
-      "lib/haptics haptic(): 1px-clipped in-viewport label, label.click()",
+      "lib/haptics haptic(): full-size in-viewport switch at 2% opacity, input.click()",
     run: () => haptic(),
+  },
+  {
+    id: "clipped",
+    name: "H — Previous implementation (1px-clipped label.click())",
+    detail: "Switch inside a 1×1px overflow-hidden label; the label is clicked",
+    run: () => {
+      let label = document.querySelector<HTMLLabelElement>("#lab-clipped");
+      if (!label) {
+        label = document.createElement("label");
+        label.id = "lab-clipped";
+        label.style.cssText =
+          "position:fixed;bottom:0;left:0;width:1px;height:1px;overflow:hidden;z-index:-1;pointer-events:none";
+        label.appendChild(makeSwitch());
+        document.body.appendChild(label);
+      }
+      label.click();
+    },
   },
   {
     id: "bare",
@@ -167,6 +184,24 @@ export default function HapticsLab() {
           </p>
         </div>
         <input ref={visibleRef} type="checkbox" {...{ switch: "" }} />
+      </div>
+
+      <div className="relative mt-3 rounded-2xl border border-line bg-cloud p-4">
+        <p className="text-sm font-bold text-ink">
+          I — Real tap on a nearly invisible switch
+        </p>
+        <p className="mt-0.5 text-xs text-ink/60">
+          Tap the faint area on the right — your finger toggles a REAL switch
+          rendered at 5% opacity. Tests whether a genuine tap ticks even when
+          the switch is (almost) invisible.
+        </p>
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg border border-dashed border-pine/40 p-2">
+          <input
+            style={{ opacity: 0.05 }}
+            type="checkbox"
+            {...{ switch: "" }}
+          />
+        </span>
       </div>
 
       <div className="mt-3 space-y-3">

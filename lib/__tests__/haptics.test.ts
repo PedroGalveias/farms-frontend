@@ -45,7 +45,7 @@ describe("haptic", () => {
     setUserAgent(
       "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15",
     );
-    const click = vi.spyOn(HTMLLabelElement.prototype, "click");
+    const click = vi.spyOn(HTMLInputElement.prototype, "click");
 
     haptic();
 
@@ -53,15 +53,17 @@ describe("haptic", () => {
     expect(toggle).not.toBeNull();
     expect(toggle?.type).toBe("checkbox");
     // The control is wrapped in an aria-hidden label that stays IN-viewport
-    // (WebKit mutes the haptic for display:none/opacity:0 AND off-screen
-    // content — it must be painted), clipped to a single pixel.
+    // at its natural size (WebKit mutes the haptic for display:none, zero
+    // opacity, off-screen AND clipped-to-1px controls — it must genuinely
+    // paint), at near-zero-but-not-zero opacity behind the content stack.
     const label = toggle?.closest("label");
     expect(label?.getAttribute("aria-hidden")).toBe("true");
     expect(label?.style.display).not.toBe("none");
-    expect(label?.style.overflow).toBe("hidden");
+    expect(label?.style.overflow).not.toBe("hidden");
+    expect(Number(label?.style.opacity)).toBeGreaterThan(0);
     expect(label?.style.left).toBe("0px");
     expect(label?.style.bottom).toBe("0px");
-    // We click the label (a genuine user-style toggle), not the input.
+    // We click the switch input itself.
     expect(click).toHaveBeenCalledTimes(1);
 
     // Repeated taps reuse the same hidden control.

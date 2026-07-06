@@ -111,6 +111,23 @@ html.dark {
   --glass-inset-border: rgba(255, 255, 255, 0.12);
 }
 
+/* Touch devices get a lighter frost: blur cost grows with the square of the
+   radius, and on iPhone the blurred chrome re-filters on every scroll frame
+   (the page moves behind it). Half the radius reads near-identically at
+   mobile pane sizes and roughly quarters the GPU work — part of the same
+   budget that keeps the 2500-farm directory from killing the tab. After the
+   html.dark block so both themes are overridden. */
+@media (any-hover: none) {
+  :root {
+    --glass-backdrop: blur(16px) saturate(190%) brightness(1.02);
+    --glass-backdrop-chrome: blur(20px) saturate(200%) brightness(1.04);
+  }
+  html.dark {
+    --glass-backdrop: blur(16px) saturate(190%) brightness(1.08);
+    --glass-backdrop-chrome: blur(20px) saturate(200%) brightness(1.12);
+  }
+}
+
 /* ── Liquid-glass surface ─────────────────────────────────────────────────
    Apply to floating chrome and elevated cards. The frost (blur + saturate) is
    behind an @supports guard; where it's unavailable the fill falls back to a
@@ -229,10 +246,17 @@ html.dark {
 
 /* Long-list render culling for directory/canton cards: off-screen cards skip
    layout, paint and GPU layers entirely; `auto` remembers the real size once
-   rendered so the scrollbar doesn't jump. */
+   rendered so the scrollbar doesn't jump.
+   HEIGHT-ONLY intrinsic size: the earlier `contain-intrinsic-size: auto 340px`
+   also declared an intrinsic WIDTH, and skipped cards fed that bogus
+   min-content width into the mobile grid's auto column — the track inflated
+   to viewport width and every card poked ~40px past the right edge ("the
+   list is not centered"). Card width always comes from the grid/flex
+   container; only the height needs a placeholder. */
 .card-cull {
   content-visibility: auto;
-  contain-intrinsic-size: auto 340px;
+  contain-intrinsic-width: none;
+  contain-intrinsic-height: auto 340px;
 }
 
 /* Where backdrop-filter is unavailable there's no containing block for the
@@ -367,6 +391,30 @@ html.dark {
   textarea {
     font-size: 16px;
   }
+}
+
+/* The other sticky iOS zoom: DOUBLE-TAP zoom. Tapping chips/buttons/cards in
+   quick succession (toggling a filter, tab-bar taps) triggers it, the page
+   zooms ~15% and stays zoomed — the same "list shifted sideways" symptom, and
+   `overflow-x: clip` can't help because it's the VISUAL viewport moving.
+   `manipulation` keeps panning and pinch-zoom but removes the double-tap
+   gesture on everything interactive (touch-action doesn't inherit, hence the
+   explicit list). The viewport's maximum-scale=1 (app/layout.tsx) is the
+   belt-and-braces for the rest of the page. */
+a,
+button,
+input,
+select,
+textarea,
+label,
+summary,
+article,
+[role="button"],
+[role="option"],
+[role="menuitem"],
+[role="menuitemradio"],
+[role="tab"] {
+  touch-action: manipulation;
 }
 
 html {

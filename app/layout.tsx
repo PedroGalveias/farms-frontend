@@ -79,6 +79,11 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#f4f4ef" },
     { media: "(prefers-color-scheme: dark)", color: "#0e0f12" },
   ],
+  // maximum-scale=1 disables iOS Safari's AUTOMATIC zooms (input focus zoom,
+  // double-tap zoom) that left the page stuck zoomed-in and shifted sideways.
+  // iOS deliberately ignores the cap for the user's own pinch gesture, so
+  // accessibility zoom still works.
+  maximumScale: 1,
 };
 
 export default function RootLayout({

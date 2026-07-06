@@ -110,7 +110,7 @@ export default function DirectoryResults({
           <div
             className={
               viewMode === "grid"
-                ? "mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+                ? "mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
                 : "mt-6 flex flex-col gap-3"
             }
           >

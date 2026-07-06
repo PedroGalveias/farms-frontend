@@ -65,6 +65,43 @@ const FARMS = [
   },
 ];
 
+// Pad the directory out to a few hundred farms so the e2e suite exercises the
+// same regime that crashed real devices: multiple "Load more" pages, culled
+// off-screen cards, long scrolls. Deterministic (no randomness) so runs are
+// reproducible; the 5 handcrafted farms above stay first so name-based specs
+// keep working.
+const GENERATED_COUNT = 235;
+const GEN_CANTONS = [
+  ["BE", "46.95", "7.45"],
+  ["ZH", "47.38", "8.54"],
+  ["VD", "46.52", "6.63"],
+  ["AG", "47.39", "8.05"],
+  ["SG", "47.42", "9.37"],
+  ["TI", "46.19", "9.02"],
+  ["GR", "46.85", "9.53"],
+  ["LU", "47.05", "8.31"],
+];
+const GEN_CATEGORIES = [
+  ["Gemüse", "Früchte"],
+  ["Milchprodukte"],
+  ["Eier", "Honig"],
+  ["Fleisch"],
+  ["Käse", "Wein"],
+];
+for (let i = 0; i < GENERATED_COUNT; i++) {
+  const [canton, lat, lng] = GEN_CANTONS[i % GEN_CANTONS.length];
+  FARMS.push({
+    id: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`,
+    name: `Testhof ${canton} ${i + 1}`,
+    address: `Feldweg ${i + 1}, 3000 Testdorf`,
+    canton,
+    coordinates: `${lat}${String((i % 90) + 10)},${lng}${String((i % 90) + 10)}`,
+    categories: GEN_CATEGORIES[i % GEN_CATEGORIES.length],
+    created_at: `2026-05-${String((i % 28) + 1).padStart(2, "0")}T08:00:00Z`,
+    updated_at: null,
+  });
+}
+
 function send(res, status, body, contentType = "application/json") {
   res.writeHead(status, {
     "content-type": contentType,
