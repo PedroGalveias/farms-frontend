@@ -74,6 +74,15 @@ export default function FarmsPageShell({
   // morphs into the sheet.
   const openFarm = (farm: Farm, sourceEl?: HTMLElement | null) => {
     recordView(farm.id);
+    // The desktop DOCK never opens inside a View Transition: while a VT runs,
+    // the live DOM hides behind the old/new snapshots for its full duration,
+    // which read as the panel mounting fully transparent and only "rendering"
+    // half a second later. The dock has its own qs-dock-in slide; the morph
+    // is for the mobile modal sheet.
+    if (isDesktop) {
+      setActiveFarm(farm);
+      return;
+    }
     // Only morph from the card on the FIRST open — the detail sheet keeps
     // `qs-farm` while mounted, so morphing again while it's open (switching
     // farms, e.g. from the docked panel) would duplicate the name and abort.

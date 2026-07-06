@@ -105,7 +105,7 @@ export default function CantonView({
 
       {farms.length > 0 ? (
         <>
-          <section className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {farms.map((farm) => (
               <FarmLinkCard farm={farm} key={farm.id} />
             ))}

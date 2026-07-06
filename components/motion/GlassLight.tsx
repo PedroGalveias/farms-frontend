@@ -43,6 +43,18 @@ export default function GlassLight() {
       return;
     }
 
+    // The scroll-reactive light is a FINE-POINTER (desktop) enhancement, like
+    // the pointer glow. On touch devices it wrote three CSS variables on
+    // <html> every scroll frame — WebKit's custom-property invalidation is
+    // coarse, so with hundreds of directory cards loaded that approached a
+    // full-document style recalc per frame while also forcing the blurred
+    // chrome to re-filter continuously; on iPhones the tab eventually died.
+    // Mobile keeps the static glass material (fill, rim, sheen) untouched.
+    const finePointer = hasFinePointer(window);
+    if (!finePointer) {
+      return;
+    }
+
     const root = document.documentElement;
     let lastY = window.scrollY;
     let glint = 0; // current band intensity, 0..1
@@ -84,11 +96,10 @@ export default function GlassLight() {
       }
     };
 
-    // ---- Pointer-following glow (fine pointers only) ----------------------
+    // ---- Pointer-following glow ------------------------------------------
     let hovered: HTMLElement | null = null;
     let pointerRaf = 0;
     let pending: PointerEvent | null = null;
-    const finePointer = hasFinePointer(window);
 
     const applyPointer = () => {
       pointerRaf = 0;
@@ -128,23 +139,18 @@ export default function GlassLight() {
       hovered = null;
     };
 
-    if (finePointer) {
-      window.addEventListener("pointermove", onPointerMove, { passive: true });
-      document.documentElement.addEventListener("pointerleave", onPointerOut);
-    }
-
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    document.documentElement.addEventListener("pointerleave", onPointerOut);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(raf);
-      if (finePointer) {
-        window.removeEventListener("pointermove", onPointerMove);
-        document.documentElement.removeEventListener(
-          "pointerleave",
-          onPointerOut,
-        );
-        cancelAnimationFrame(pointerRaf);
-      }
+      window.removeEventListener("pointermove", onPointerMove);
+      document.documentElement.removeEventListener(
+        "pointerleave",
+        onPointerOut,
+      );
+      cancelAnimationFrame(pointerRaf);
     };
   }, [motionSignal]);
 

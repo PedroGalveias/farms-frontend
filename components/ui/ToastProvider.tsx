@@ -6,6 +6,7 @@ import {
   useContext,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
@@ -33,6 +34,11 @@ const VISIBLE_MS = 2600;
 const LEAVE_MS = 240;
 const MAX_VISIBLE = 3;
 
+// Hydration-safe "has the client taken over" signal: false during SSR and the
+// hydration render (matching the server HTML exactly), true on every render
+// after. Store-based, so no effect/setState timing is involved.
+const emptySubscribe = () => () => {};
+
 export function useToast(): ToastContextValue {
   return useContext(ToastContext);
 }
@@ -45,6 +51,18 @@ export function useToast(): ToastContextValue {
  */
 export default function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  // The portal must NOT render during hydration: the old
+  // `typeof document !== "undefined"` guard made the server render null and
+  // the client's hydration pass render the portal — a server/client branch
+  // mismatch that failed hydration on EVERY page load and made React throw
+  // away the whole server-rendered tree and re-render it client-side (heavy
+  // enough to matter on iPhones with the full directory loaded). This store
+  // reads false during SSR + hydration and true afterwards.
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
   const idRef = useRef(0);
 
   const remove = useCallback((id: number) => {
@@ -73,7 +91,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      {typeof document !== "undefined"
+      {mounted
         ? createPortal(
             <div
               aria-live="polite"
