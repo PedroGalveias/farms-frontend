@@ -22,8 +22,10 @@ import ViewTransitions from "@/components/transitions/ViewTransitions";
 import ToastProvider from "@/components/ui/ToastProvider";
 import "./globals.css";
 
-// Set the theme class before paint to avoid a flash of the wrong theme.
-const themeScript = `(function(){try{var t=localStorage.getItem("farms.theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.classList.add("dark")}}catch(e){}})();`;
+// Set the theme class before paint to avoid a flash of the wrong theme, and
+// the force-motion class (the user's "always animate" override of the OS
+// reduced-motion setting — see lib/motion.ts) so animations don't flash-freeze.
+const themeScript = `(function(){try{var t=localStorage.getItem("farms.theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.classList.add("dark")}if(localStorage.getItem("farms.motion")==="on"){document.documentElement.classList.add("force-motion")}}catch(e){}})();`;
 
 const archivo = Archivo({
   subsets: ["latin"],

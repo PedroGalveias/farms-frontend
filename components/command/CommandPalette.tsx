@@ -9,14 +9,17 @@ import {
   LayoutGrid,
   Leaf,
   type LucideIcon,
+  Map as MapIcon,
   MapPin,
   Moon,
   Search,
+  Sparkles,
   Sprout,
   Store,
 } from "lucide-react";
 import { rankCommands, type CommandItem } from "@/lib/command";
-import { getCantonName } from "@/lib/farms";
+import { getCantonName, SWISS_CANTONS } from "@/lib/farms";
+import { motionForced, setMotionForced } from "@/lib/motion";
 import { PRODUCTS, productLabel } from "@/lib/products";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
@@ -56,6 +59,12 @@ export default function CommandPalette() {
   const [active, setActive] = useState(0);
   const [farms, setFarms] = useState<Farm[] | null>(null);
   const [farmsError, setFarmsError] = useState(false);
+  // The animations override (see lib/motion.ts) — read lazily on open so the
+  // label reflects reality even when another tab changed it.
+  const [motionOn, setMotionOn] = useState(false);
+  useEffect(() => {
+    if (open) queueMicrotask(() => setMotionOn(motionForced()));
+  }, [open]);
 
   // ---- Open / close, driven through the native dialog --------------------
   const close = useCallback(() => setOpen(false), []);
@@ -188,8 +197,35 @@ export default function CommandPalette() {
         run: () =>
           window.dispatchEvent(new CustomEvent("farms:shortcuts-open")),
       },
+      {
+        // Rescues machines where the OS reduced-motion setting (Windows
+        // "Animation effects" off is common) silently freezes the whole app.
+        id: "action:motion",
+        kind: "action",
+        label: motionOn ? t("command_motion_system") : t("command_motion_on"),
+        keywords: "animation motion reduce animations",
+        icon: Sparkles,
+        run: () => {
+          setMotionForced(!motionOn);
+          setMotionOn(!motionOn);
+        },
+      },
     ],
-    [t, toggleTheme],
+    [t, toggleTheme, motionOn],
+  );
+
+  const cantonItems = useMemo<ResolvedCommand[]>(
+    () =>
+      SWISS_CANTONS.map(({ code }) => ({
+        id: `canton:${code}`,
+        kind: "canton",
+        label: getCantonName(code),
+        hint: t("command_kind_canton"),
+        keywords: code,
+        icon: MapIcon,
+        href: `/canton/${code.toLowerCase()}`,
+      })),
+    [t],
   );
 
   const productItems = useMemo<ResolvedCommand[]>(
@@ -221,8 +257,8 @@ export default function CommandPalette() {
   );
 
   const allItems = useMemo<ResolvedCommand[]>(
-    () => [...pages, ...actions, ...farmItems, ...productItems],
-    [pages, actions, farmItems, productItems],
+    () => [...pages, ...actions, ...cantonItems, ...farmItems, ...productItems],
+    [pages, actions, cantonItems, farmItems, productItems],
   );
 
   // Empty-query default: pages, recently viewed farms, then the theme action.

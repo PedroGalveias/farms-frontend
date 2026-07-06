@@ -173,7 +173,7 @@ export default function FarmCard({
 
     return (
       <article
-        className="glass glass-card group relative overflow-hidden rounded-[26px] p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-24px_rgba(20,22,27,0.4)] sm:p-6"
+        className="glass glass-card card-cull group relative overflow-hidden rounded-[26px] p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-24px_rgba(20,22,27,0.4)] sm:p-6"
         ref={articleRef}
       >
         {openOverlay}
@@ -221,7 +221,7 @@ export default function FarmCard({
 
   return (
     <article
-      className="glass glass-card group relative flex h-full flex-col overflow-hidden rounded-[28px] p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_30px_60px_-26px_rgba(20,22,27,0.45)]"
+      className="glass glass-card card-cull group relative flex h-full flex-col overflow-hidden rounded-[28px] p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_30px_60px_-26px_rgba(20,22,27,0.45)]"
       ref={articleRef}
     >
       {openOverlay}

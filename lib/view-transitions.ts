@@ -6,6 +6,7 @@
 // shouldAnimateNavigation) are framework-free so the branchy logic stays
 // unit-testable without a real browser (jsdom has no startViewTransition).
 import { flushSync } from "react-dom";
+import { prefersReducedMotion } from "@/lib/motion";
 
 type ViewTransitionDocument = Document & {
   startViewTransition?: (callback: () => void) => { finished: Promise<void> };
@@ -66,13 +67,10 @@ export function supportsViewTransitions(): boolean {
   );
 }
 
-/** Whether the user has asked for reduced motion. */
-export function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
+/** Whether the user has asked for reduced motion (honouring the in-app
+ *  force-motion override — see lib/motion.ts). Re-exported so existing
+ *  imports keep working. */
+export { prefersReducedMotion };
 
 export interface AnimateOptions {
   supported: boolean;

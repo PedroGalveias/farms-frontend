@@ -54,7 +54,6 @@ export default function FarmsPageShell({
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
   }, []);
-  const detailDocked = activeFarm !== null && isDesktop;
 
   useEffect(() => {
     writeCachedFarms(initialFarms);
@@ -112,11 +111,10 @@ export default function FarmsPageShell({
       onRefresh={directory.refreshDirectory}
     >
       <div className="relative overflow-clip">
-        <main
-          className={`mx-auto max-w-6xl px-5 pt-6 transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-8 lg:pt-0 ${
-            detailDocked ? "xl:pr-[27rem]" : ""
-          }`}
-        >
+        {/* The docked farm panel floats on its own layer above the page (no
+            padding squeeze — reflowing the grid while it opens looked broken;
+            the list keeps its shape and the panel slides over it). */}
+        <main className="mx-auto max-w-6xl px-5 pt-6 sm:px-8 lg:pt-0">
           {/* ---------- Editorial hero ---------- */}
           <section className="relative pt-10 sm:pt-14">
             <HomeHero

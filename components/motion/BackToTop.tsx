@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { haptic } from "@/lib/haptics";
+import { prefersReducedMotion } from "@/lib/motion";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 // Show the button once the visitor has scrolled roughly a screen-and-a-half.
@@ -40,9 +41,7 @@ export default function BackToTop() {
 
   const toTop = () => {
     haptic();
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduce = prefersReducedMotion();
     window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
   };
 

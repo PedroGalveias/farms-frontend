@@ -57,6 +57,10 @@ export default function AuthModal({
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [registered, setRegistered] = useState(false);
+  // Forgot-password flow (frontend only for now — the reset email backend is
+  // still being built, so submitting shows a "work in progress" notice).
+  const [forgot, setForgot] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
 
   const open = mode !== null;
@@ -76,6 +80,8 @@ export default function AuthModal({
       setFormError(null);
       setPending(false);
       setRegistered(false);
+      setForgot(false);
+      setForgotSent(false);
     });
   }, [open]);
 
@@ -86,6 +92,8 @@ export default function AuthModal({
     queueMicrotask(() => {
       setFieldErrors({});
       setFormError(null);
+      setForgot(false);
+      setForgotSent(false);
     });
   }, [mode]);
 
@@ -132,6 +140,17 @@ export default function AuthModal({
     const nextErrors: FieldErrors = {};
     if (!validateEmailFormat(email)) {
       nextErrors.email = "auth_err_email_invalid";
+    }
+
+    // Forgot-password: validate the email, then show the work-in-progress
+    // notice — no request yet (the backend endpoint doesn't exist).
+    if (isLogin && forgot) {
+      if (nextErrors.email) {
+        setFieldErrors(nextErrors);
+        return;
+      }
+      setForgotSent(true);
+      return;
     }
     if (isLogin) {
       if (password.length === 0) {
@@ -209,7 +228,7 @@ export default function AuthModal({
       <div
         aria-labelledby="auth-heading"
         aria-modal="true"
-        className="glass glass-chrome qs-sheet max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-[32px] shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)]"
+        className="glass glass-card qs-sheet max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-[32px] shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)]"
         role="dialog"
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
@@ -223,15 +242,19 @@ export default function AuthModal({
             >
               {registered
                 ? t("auth_check_email_title")
-                : isLogin
-                  ? t("auth_login_title")
-                  : t("auth_register_title")}
+                : isLogin && forgot
+                  ? t("auth_forgot_title")
+                  : isLogin
+                    ? t("auth_login_title")
+                    : t("auth_register_title")}
             </h2>
             {!registered ? (
               <p className="mt-3 text-sm leading-6 text-ink/60">
-                {isLogin
-                  ? t("auth_login_subtitle")
-                  : t("auth_register_subtitle")}
+                {isLogin && forgot
+                  ? t("auth_forgot_subtitle")
+                  : isLogin
+                    ? t("auth_login_subtitle")
+                    : t("auth_register_subtitle")}
               </p>
             ) : null}
           </div>
@@ -258,6 +281,25 @@ export default function AuthModal({
               type="button"
             >
               {t("auth_check_email_cta")}
+            </button>
+          </div>
+        ) : forgotSent ? (
+          <div className="px-6 pb-8 pt-6 sm:px-8">
+            <p
+              className="rounded-2xl bg-amber-500/10 px-4 py-3.5 text-sm font-medium leading-6 text-amber-700 dark:text-amber-400"
+              role="status"
+            >
+              {t("auth_forgot_wip")}
+            </p>
+            <button
+              className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+              onClick={() => {
+                setForgot(false);
+                setForgotSent(false);
+              }}
+              type="button"
+            >
+              {t("auth_back_to_login")}
             </button>
           </div>
         ) : (
@@ -347,7 +389,7 @@ export default function AuthModal({
               ) : null}
             </div>
 
-            <div className="mt-5">
+            <div className={forgot ? "hidden" : "mt-5"}>
               <label className={labelClassName} htmlFor="auth-password">
                 {t("auth_password_label")}
               </label>
@@ -382,6 +424,23 @@ export default function AuthModal({
                 </p>
               ) : null}
             </div>
+
+            {isLogin && !forgot ? (
+              <div className="mt-2.5 text-right">
+                <button
+                  className="text-xs font-semibold text-ink/60 underline-offset-4 transition hover:text-pine hover:underline"
+                  onClick={() => {
+                    setForgot(true);
+                    setFieldErrors({});
+                    setFormError(null);
+                    queueMicrotask(() => emailRef.current?.focus());
+                  }}
+                  type="button"
+                >
+                  {t("auth_forgot_link")}
+                </button>
+              </div>
+            ) : null}
 
             {!isLogin ? (
               <div className="mt-5">
@@ -433,15 +492,31 @@ export default function AuthModal({
               {pending ? (
                 <LoaderCircle className="h-4 w-4 animate-spin" />
               ) : null}
-              {isLogin ? t("auth_login_submit") : t("auth_register_submit")}
+              {forgot
+                ? t("auth_forgot_submit")
+                : isLogin
+                  ? t("auth_login_submit")
+                  : t("auth_register_submit")}
             </button>
 
             <button
               className="mt-4 w-full text-center text-sm font-semibold text-ink/60 transition hover:text-ink"
-              onClick={() => onSwitch(isLogin ? "register" : "login")}
+              onClick={() => {
+                if (forgot) {
+                  setForgot(false);
+                  setFieldErrors({});
+                  setFormError(null);
+                } else {
+                  onSwitch(isLogin ? "register" : "login");
+                }
+              }}
               type="button"
             >
-              {isLogin ? t("auth_to_register") : t("auth_to_login")}
+              {forgot
+                ? t("auth_back_to_login")
+                : isLogin
+                  ? t("auth_to_register")
+                  : t("auth_to_login")}
             </button>
           </form>
         )}

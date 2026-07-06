@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { prefersReducedMotion } from "@/lib/motion";
+import { useMotionSignal } from "@/components/motion/useMotionSignal";
 
 /**
  * A self-contained WebGL "liquid glass" showcase for the hero — the premium
@@ -22,6 +24,9 @@ export default function LiquidGlassShowcase({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [failed, setFailed] = useState(false);
+  // Re-runs the effect when the OS preference or the in-app override flips,
+  // so the glass starts (or freezes) live instead of needing a reload.
+  const motionSignal = useMotionSignal();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -44,9 +49,7 @@ export default function LiquidGlassShowcase({
       return;
     }
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduceMotion = prefersReducedMotion();
 
     const vert = `
       attribute vec2 p;
@@ -237,7 +240,7 @@ export default function LiquidGlassShowcase({
       gl.deleteProgram(prog);
       gl.deleteBuffer(buf);
     };
-  }, []);
+  }, [motionSignal]);
 
   if (failed) {
     return (

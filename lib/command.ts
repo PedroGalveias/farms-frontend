@@ -2,7 +2,7 @@
 // so it can be unit-tested in isolation; the palette component supplies the
 // candidate items (farms, products, pages, actions) and resolves a selection.
 
-export type CommandKind = "page" | "action" | "farm" | "product";
+export type CommandKind = "page" | "action" | "farm" | "product" | "canton";
 
 export interface CommandItem {
   /** Stable id, unique within a render (e.g. `farm:<uuid>`). */
