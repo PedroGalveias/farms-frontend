@@ -27,6 +27,11 @@ import type { Farm } from "@/types/farm";
 const DRAG_CLOSE_THRESHOLD_PX = 110;
 const SNAP_THRESHOLD_PX = 44;
 
+// Shared shape for the secondary action buttons so they're all identical in the
+// grid (border-colour/fill are added per-button for active/inactive states).
+const SECONDARY_BTN =
+  "inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20";
+
 interface FarmDetailSheetProps {
   farm: Farm;
   onClose: () => void;
@@ -241,11 +246,12 @@ export default function FarmDetailSheet({
             : t("detail_openMaps")}
         </a>
 
-        <div className="flex flex-wrap gap-2">
+        {/* Uniform 2-column grid so every secondary action is the same size. */}
+        <div className="grid grid-cols-2 gap-2">
           <button
             aria-label={saved ? t("card_saved") : t("card_save")}
             aria-pressed={saved}
-            className={`inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
+            className={`${SECONDARY_BTN} ${
               saved
                 ? "border-pine/30 bg-pine/10 text-pine"
                 : "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink"
@@ -264,17 +270,21 @@ export default function FarmDetailSheet({
           </button>
 
           <ShareButton
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-5 py-3 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className={`${SECONDARY_BTN} border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink`}
             text={farm.address}
             title={farm.name}
             url={farmPath(farm.id)}
           />
 
-          <AddToCollectionMenu farmId={farm.id} />
+          <AddToCollectionMenu
+            className="relative"
+            farmId={farm.id}
+            triggerClassName={`${SECONDARY_BTN} border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink`}
+          />
 
           <button
             aria-pressed={planned}
-            className={`inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`${SECONDARY_BTN} disabled:cursor-not-allowed disabled:opacity-50 ${
               planned
                 ? "border-pine/30 bg-pine/10 text-pine"
                 : "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink"
@@ -295,7 +305,7 @@ export default function FarmDetailSheet({
           </button>
 
           <Link
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-5 py-3 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className={`${SECONDARY_BTN} col-span-2 border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink`}
             href={`${farmPath(farm.id)}${viewPageQuery}`}
           >
             <Maximize2 className="h-4 w-4" />
