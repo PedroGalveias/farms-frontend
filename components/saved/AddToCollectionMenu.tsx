@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, FolderPlus, Plus } from "lucide-react";
 import { haptic } from "@/lib/haptics";
+import { playTick } from "@/lib/sound";
 import HapticTap from "@/components/ui/HapticTap";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
@@ -59,6 +60,9 @@ export default function AddToCollectionMenu({
 
   const submitNew = () => {
     if (createCollection(name, farmId)) {
+      // Creating a collection also adds this farm to it — confirm it.
+      haptic();
+      playTick();
       setName("");
     }
   };
@@ -70,6 +74,7 @@ export default function AddToCollectionMenu({
         className={triggerClassName}
         onClick={() => {
           haptic();
+          playTick();
           setOpen((value) => !value);
         }}
         type="button"
@@ -93,10 +98,13 @@ export default function AddToCollectionMenu({
                 return (
                   <button
                     aria-pressed={member}
-                    className="flex w-full items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left text-sm font-medium text-ink/75 transition hover:bg-tone focus-visible:ring-2 focus-visible:ring-ink/20"
+                    className="relative flex w-full items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left text-sm font-medium text-ink/75 transition hover:bg-tone focus-visible:ring-2 focus-visible:ring-ink/20"
                     key={collection.id}
                     onClick={() => {
+                      // Add OR remove from the collection — both get the same
+                      // confirmation (haptic + sound + iOS tap-through).
                       haptic();
+                      playTick();
                       toggleFarmInCollection(collection.id, farmId);
                     }}
                     type="button"
@@ -105,6 +113,7 @@ export default function AddToCollectionMenu({
                     {member ? (
                       <Check className="h-4 w-4 shrink-0 text-pine" />
                     ) : null}
+                    <HapticTap />
                   </button>
                 );
               })}

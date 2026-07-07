@@ -25,9 +25,13 @@ import { isIosLike } from "@/lib/haptics";
  * `position: relative` button.
  */
 
-// Low enough to be imperceptible over any button fill, high enough that
-// WebKit still counts the control as painted (0 would mute the haptic).
-const OPACITY = 0.012;
+// The switch must be a PAINTED layer for WebKit to fire the haptic — the mute
+// gate is a boolean (opacity 0 / display:none / visibility:hidden), not a
+// visibility threshold — so any strictly-positive opacity should qualify. This
+// is pushed near that floor: imperceptible even over dark-glass buttons, with
+// a small margin so a computed opacity never rounds to 0. If a device stops
+// ticking, /haptics-lab's "opacity floor" rows pinpoint the real minimum.
+const OPACITY = 0.004;
 
 export default function HapticTap() {
   const [enabled, setEnabled] = useState(false);
