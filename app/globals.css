@@ -517,6 +517,14 @@ body::after {
     );
 }
 
+/* While the living WebGL backdrop runs (components/hero/AmbientBackdrop sets
+   html.has-ambient), the static CSS orbs bow out — same palette, same
+   geometry, so the swap is seamless and touch/reduced-motion/no-WebGL
+   visitors never notice a difference. */
+html.has-ambient body::after {
+  content: none;
+}
+
 html.dark body::after {
   background:
     radial-gradient(

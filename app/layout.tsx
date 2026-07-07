@@ -8,6 +8,7 @@ import PersonalizationProvider from "@/components/personalization/Personalizatio
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import CustomCursor from "@/components/motion/CustomCursor";
 import GlassLight from "@/components/motion/GlassLight";
+import AmbientBackdrop from "@/components/hero/AmbientBackdrop";
 import BackToTop from "@/components/motion/BackToTop";
 import PwaRegister from "@/components/PwaRegister";
 import OfflineChip from "@/components/OfflineChip";
@@ -114,6 +115,7 @@ export default function RootLayout({
                         <KeyboardShortcuts />
                         <CustomCursor />
                         <GlassLight />
+                        <AmbientBackdrop />
                         <BackToTop />
                         <PwaRegister />
                         <OfflineChip />

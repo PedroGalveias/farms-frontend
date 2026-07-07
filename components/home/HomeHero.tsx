@@ -10,7 +10,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import Magnetic from "@/components/motion/Magnetic";
-import LiquidGlassShowcase from "@/components/hero/LiquidGlassShowcase";
 import { useT } from "@/components/i18n/LanguageProvider";
 import type { ServiceStatus } from "@/types/farm";
 
@@ -113,7 +112,19 @@ export default function HomeHero({
         </div>
       </div>
 
-      <LiquidGlassShowcase className="rise-in min-h-[260px] rounded-[32px] lg:min-h-0" />
+      {/* The hero pane is now plain frosted glass over the sitewide living
+          backdrop (AmbientBackdrop): the pane's backdrop-filter refracts the
+          breathing orbs behind the page, so the "liquid glass" moment costs
+          nothing beyond the blur the chrome already pays — the standalone
+          WebGL showcase it replaces ran its own full render loop. */}
+      <div
+        aria-hidden
+        className="glass rise-in relative min-h-[260px] overflow-hidden rounded-[32px] lg:min-h-0"
+      >
+        <div className="glass-inset absolute left-6 top-6 h-16 w-16 rounded-2xl" />
+        <div className="glass-inset qs-float absolute bottom-8 right-8 h-24 w-24 rounded-[28px]" />
+        <div className="glass-chip absolute bottom-12 left-8 h-8 w-28 rounded-full" />
+      </div>
     </div>
   );
 }

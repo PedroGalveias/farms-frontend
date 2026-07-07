@@ -98,4 +98,47 @@ test.describe("desktop master–detail & directory interactions", () => {
     await backToTop.click();
     await page.waitForFunction(() => window.scrollY < 50);
   });
+
+  test("ambient backdrop: canvas and CSS orbs swap consistently, within budget", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.getByRole("article").first()).toBeVisible();
+    // Give the backdrop's gated mount a beat to settle either way.
+    await page.waitForTimeout(400);
+
+    const state = await page.evaluate(() => {
+      const canvas = document.querySelector<HTMLCanvasElement>(
+        "canvas.ambient-backdrop",
+      );
+      return {
+        hasClass: document.documentElement.classList.contains("has-ambient"),
+        hasCanvas: !!canvas,
+        // Budget: the backing store must stay far below CSS size (quarter-res
+        // scale — the whole point of the "quiet" backdrop).
+        backingRatio: canvas
+          ? canvas.width / Math.max(1, canvas.clientWidth)
+          : 0,
+        // Coverage: a canvas is a replaced element, so left/right don't
+        // stretch it — it must genuinely span the viewport (it once rendered
+        // at the 300×150 default and nobody could tell from the ratio alone).
+        coversViewport: canvas
+          ? canvas.clientWidth >= window.innerWidth &&
+            canvas.clientHeight >= window.innerHeight
+          : false,
+        cssOrbsOff: canvas
+          ? getComputedStyle(document.body, "::after").content === "none"
+          : true,
+      };
+    });
+
+    // Invariant: the WebGL layer and the CSS orbs swap atomically — whichever
+    // is active, exactly one ambience exists.
+    expect(state.hasClass).toBe(state.hasCanvas);
+    if (state.hasCanvas) {
+      expect(state.backingRatio).toBeLessThanOrEqual(0.3);
+      expect(state.coversViewport).toBe(true);
+      expect(state.cssOrbsOff).toBe(true);
+    }
+  });
 });
