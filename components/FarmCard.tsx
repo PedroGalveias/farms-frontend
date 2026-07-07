@@ -154,8 +154,10 @@ export default function FarmCard({
   );
 
   // A transparent button stretched over the whole card opens the detail sheet
-  // (tap) or the quick-actions sheet (long-press on touch), while the Google
-  // Maps link sits above it (z-10) so it stays clickable.
+  // (tap) or the quick-actions sheet (long-press on touch). Display-only
+  // content is pointer-events-none so clicks on the name/address/chips fall
+  // through to this overlay (they used to be dead zones); genuinely
+  // interactive children (Maps link, favorite) re-enable their own events.
   const openOverlay =
     onOpen != null ? (
       <button
@@ -182,7 +184,7 @@ export default function FarmCard({
           farm={farm}
         />
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_auto] lg:items-center">
-          <div className="min-w-0">
+          <div className="pointer-events-none min-w-0">
             <CardBadges distanceKm={distanceKm} farm={farm} />
             <h3 className="mt-3 text-2xl font-bold leading-[1.05] tracking-[-0.03em] text-ink">
               {farm.name}
@@ -193,12 +195,12 @@ export default function FarmCard({
             </p>
           </div>
 
-          <div className="space-y-1.5 text-sm text-ink/60">
+          <div className="pointer-events-none space-y-1.5 text-sm text-ink/60">
             <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink/60">
               {t("card_added")} {formatFarmDate(farm.created_at)}
             </p>
             <a
-              className="relative z-10 inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
+              className="pointer-events-auto relative z-10 inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
               href={mapsUrl}
               rel="noreferrer"
               target="_blank"
@@ -208,7 +210,7 @@ export default function FarmCard({
             </a>
           </div>
 
-          <div className="lg:max-w-xs lg:justify-self-end">
+          <div className="pointer-events-none lg:max-w-xs lg:justify-self-end">
             <CategoryChips
               categories={visibleCategories}
               hiddenCount={hiddenCount}
@@ -226,30 +228,32 @@ export default function FarmCard({
     >
       {openOverlay}
       <div className="flex items-start justify-between gap-3">
-        <CardBadges distanceKm={distanceKm} farm={farm} />
+        <div className="pointer-events-none">
+          <CardBadges distanceKm={distanceKm} farm={farm} />
+        </div>
         <div className="flex shrink-0 items-center gap-2">
           <FavoriteButton farm={farm} />
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
+          <span className="pointer-events-none grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
             <ArrowUpRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </span>
         </div>
       </div>
 
-      <h3 className="mt-4 text-[26px] font-bold leading-[1.04] tracking-[-0.035em] text-ink">
+      <h3 className="pointer-events-none mt-4 text-[26px] font-bold leading-[1.04] tracking-[-0.035em] text-ink">
         {farm.name}
       </h3>
 
-      <p className="mt-2 flex items-start gap-1.5 text-sm leading-6 text-ink/60">
+      <p className="pointer-events-none mt-2 flex items-start gap-1.5 text-sm leading-6 text-ink/60">
         <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink/30" />
         {farm.address}
       </p>
 
-      <div className="mt-5 flex items-center justify-between gap-3 text-xs">
+      <div className="pointer-events-none mt-5 flex items-center justify-between gap-3 text-xs">
         <span className="font-semibold uppercase tracking-[0.1em] text-ink/60">
           {t("card_added")} {formatFarmDate(farm.created_at)}
         </span>
         <a
-          className="relative z-10 inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
+          className="pointer-events-auto relative z-10 inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
           href={mapsUrl}
           rel="noreferrer"
           target="_blank"
@@ -259,7 +263,7 @@ export default function FarmCard({
         </a>
       </div>
 
-      <div className="mt-auto pt-6">
+      <div className="pointer-events-none mt-auto pt-6">
         <CategoryChips categories={farm.categories} />
       </div>
     </article>
