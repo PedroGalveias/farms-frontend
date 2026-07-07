@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { AlertTriangle } from "lucide-react";
 import CreateFarmDialog from "@/components/CreateFarmDialog";
 import DirectoryToolbar from "@/components/DirectoryToolbar";
@@ -29,6 +29,13 @@ interface FarmsPageShellProps {
   serviceStatus: ServiceStatus;
 }
 
+const DESKTOP_QUERY = "(min-width: 1280px)";
+function subscribeToDesktopQuery(callback: () => void) {
+  const query = window.matchMedia(DESKTOP_QUERY);
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+}
+
 export default function FarmsPageShell({
   initialFarms,
   loadError,
@@ -46,14 +53,14 @@ export default function FarmsPageShell({
 
   // On wide screens the detail opens as a non-modal docked side panel
   // (master–detail) so the list stays put; below xl it's the modal sheet.
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const query = window.matchMedia("(min-width: 1280px)");
-    const update = () => setIsDesktop(query.matches);
-    queueMicrotask(update);
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
+  // useSyncExternalStore (not an effect + state): the old effect left a
+  // window right after hydration where isDesktop was still false, so a fast
+  // first click on a desktop opened the MOBILE modal instead of the dock.
+  const isDesktop = useSyncExternalStore(
+    subscribeToDesktopQuery,
+    () => window.matchMedia(DESKTOP_QUERY).matches,
+    () => false,
+  );
 
   useEffect(() => {
     writeCachedFarms(initialFarms);

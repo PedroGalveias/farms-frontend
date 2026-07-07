@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { hasFinePointer } from "@/lib/platform";
 import { prefersReducedMotion } from "@/lib/motion";
+import { useMotionSignal } from "@/components/motion/useMotionSignal";
 
 /**
  * Desktop custom cursor: an instant dot plus a lagging ring that follows the
@@ -20,6 +21,10 @@ export default function CustomCursor() {
 
   const dotRef = useRef<HTMLDivElement | null>(null);
   const ringRef = useRef<HTMLDivElement | null>(null);
+  // Re-check when the OS motion preference or the in-app override flips, so
+  // enabling animations from the ⌘K palette brings the cursor alive without
+  // a reload (Windows machines with "Animation effects" off land here).
+  const motionSignal = useMotionSignal();
 
   useEffect(() => {
     const check = () =>
@@ -32,7 +37,7 @@ export default function CustomCursor() {
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
-  }, []);
+  }, [motionSignal]);
 
   useEffect(() => {
     if (!active) {

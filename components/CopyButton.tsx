@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { haptic } from "@/lib/haptics";
 import { useToast } from "@/components/ui/ToastProvider";
+import HapticTap from "@/components/ui/HapticTap";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 interface CopyButtonProps {
@@ -14,7 +15,7 @@ interface CopyButtonProps {
 }
 
 const defaultClassName =
-  "inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-cloud px-3 py-1.5 text-xs font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20";
+  "relative inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-cloud px-3 py-1.5 text-xs font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20";
 
 /** Copies a string to the clipboard with a brief "Copied!" confirmation. */
 export default function CopyButton({
@@ -28,9 +29,12 @@ export default function CopyButton({
   const text = label ?? t("copy_address");
 
   const copy = async () => {
+    // Haptic FIRST, synchronously: after the clipboard await we're outside
+    // the user-gesture window and iOS mutes the switch-toggle haptic. Native
+    // buttons tick on touch, not on completion, so this is also the right UX.
+    haptic();
     try {
       await navigator.clipboard.writeText(value);
-      haptic();
       setCopied(true);
       toast({
         message: t("toast_copied"),
@@ -55,6 +59,7 @@ export default function CopyButton({
         <Copy className="h-3.5 w-3.5" />
       )}
       {copied ? t("share_copied") : text}
+      <HapticTap />
     </button>
   );
 }

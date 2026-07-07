@@ -63,11 +63,13 @@ const FRAG = `
     float w = u_res.x / u_res.y;
     float t = u_time;
 
-    // Breathing: tiny orbit + radius pulse, minutes-long periods.
-    vec2 d1 = 0.030 * vec2(sin(t*0.11), cos(t*0.09));
-    vec2 d2 = 0.026 * vec2(cos(t*0.07 + 2.0), sin(t*0.10 + 1.0));
-    vec2 d3 = 0.034 * vec2(sin(t*0.08 + 4.0), cos(t*0.06 + 3.0));
-    float pulse = 1.0 + 0.05 * sin(t*0.13);
+    // Breathing: a clearly perceptible slow orbit + radius pulse (the first
+    // cut moved ~3% of the viewport over a minute — nobody could tell it was
+    // alive). Still calm: full cycles take 30–90 seconds.
+    vec2 d1 = 0.10 * vec2(sin(t*0.16), cos(t*0.12));
+    vec2 d2 = 0.09 * vec2(cos(t*0.11 + 2.0), sin(t*0.15 + 1.0));
+    vec2 d3 = 0.11 * vec2(sin(t*0.13 + 4.0), cos(t*0.09 + 3.0));
+    float pulse = 1.0 + 0.10 * sin(t*0.18);
 
     vec3 green = mix(vec3(0.129,0.627,0.353), vec3(0.180,0.659,0.400), u_dark);
     vec3 lime  = vec3(0.588,0.745,0.275);
@@ -83,11 +85,14 @@ const FRAG = `
     vec3 col = green*a1 + lime*a2 + green*a3 + blue*a4 + green*a5;
     float alpha = a1 + a2 + a3 + a4 + a5;
 
-    // Faint caustic filaments drifting through the light — the "living" part.
-    float c = sin((px.x + px.y) * 7.0 + 3.0*noise(px*1.8 + t*0.03) + t*0.10);
-    float fil = pow(max(c, 0.0), 22.0) * mix(0.05, 0.035, u_dark);
-    // Filaments only glow where there's already light, so the paper stays calm.
-    fil *= smoothstep(0.02, 0.25, alpha);
+    // Caustic light drifting across the WHOLE page — sunlight through water
+    // on a wall. Two crossing band systems at different scales/speeds so it
+    // reads organic; brighter inside the orbs, still present on bare paper.
+    float c1 = sin((px.x + px.y) * 6.0 + 3.5*noise(px*1.6 + t*0.05) + t*0.22);
+    float c2 = sin((px.x - px.y*0.7) * 3.5 + 3.0*noise(px*1.1 - t*0.04) - t*0.15);
+    float fil = pow(max(c1, 0.0), 14.0) * 0.6 + pow(max(c2, 0.0), 10.0) * 0.4;
+    fil *= mix(0.10, 0.06, u_dark);
+    fil *= 0.45 + 0.55 * smoothstep(0.02, 0.25, alpha);
     col += mix(vec3(0.55,0.95,0.68), vec3(0.75,0.92,0.5), uv.y) * fil;
     alpha += fil;
 

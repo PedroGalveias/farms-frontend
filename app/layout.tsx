@@ -9,6 +9,7 @@ import ThemeProvider from "@/components/theme/ThemeProvider";
 import CustomCursor from "@/components/motion/CustomCursor";
 import GlassLight from "@/components/motion/GlassLight";
 import AmbientBackdrop from "@/components/hero/AmbientBackdrop";
+import MotionPrompt from "@/components/motion/MotionPrompt";
 import BackToTop from "@/components/motion/BackToTop";
 import PwaRegister from "@/components/PwaRegister";
 import OfflineChip from "@/components/OfflineChip";
@@ -116,6 +117,7 @@ export default function RootLayout({
                         <CustomCursor />
                         <GlassLight />
                         <AmbientBackdrop />
+                        <MotionPrompt />
                         <BackToTop />
                         <PwaRegister />
                         <OfflineChip />

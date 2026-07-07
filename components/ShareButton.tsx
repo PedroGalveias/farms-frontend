@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { haptic } from "@/lib/haptics";
 import { Check, Share2 } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
 
@@ -29,6 +30,8 @@ export default function ShareButton({
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
+    // Haptic first, inside the user-gesture window (awaits below leave it).
+    haptic();
     const absolute = /^https?:\/\//.test(url)
       ? url
       : `${window.location.origin}${url}`;

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { tagLabel } from "@/lib/products";
 import { haptic } from "@/lib/haptics";
+import HapticTap from "@/components/ui/HapticTap";
 import { formatDistanceShort, isRecentlyAdded } from "@/lib/directory";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
@@ -35,7 +36,11 @@ function FavoriteButton({
     <button
       aria-label={saved ? t("card_saved") : t("card_save")}
       aria-pressed={saved}
-      className={`relative z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
+      // NB: no `relative` here — callers pass their own positioning, and two
+      // position utilities on one element resolve by STYLESHEET order, not
+      // class order (a base `relative` silently beat the list variant's
+      // `absolute right-5 top-5` and dropped the heart into normal flow).
+      className={`z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
         saved ? "bg-pine/10 text-pine" : "bg-tone text-ink/70 hover:text-ink"
       } ${className}`}
       onClick={(event) => {
@@ -53,6 +58,7 @@ function FavoriteButton({
         className={`relative z-10 h-4 w-4 ${saved ? "fill-current heart-pop" : ""}`}
         key={saved ? "saved" : "unsaved"}
       />
+      <HapticTap />
     </button>
   );
 }
@@ -232,7 +238,7 @@ export default function FarmCard({
           <CardBadges distanceKm={distanceKm} farm={farm} />
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <FavoriteButton farm={farm} />
+          <FavoriteButton className="relative" farm={farm} />
           <span className="pointer-events-none grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
             <ArrowUpRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </span>

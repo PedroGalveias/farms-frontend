@@ -126,10 +126,21 @@ const VARIANTS: Variant[] = [
   },
 ];
 
+interface EnvInfo {
+  finePointer: boolean;
+  reducedMotion: boolean;
+  forceMotion: boolean;
+  webgl: boolean;
+  ambient: boolean;
+  ambientCanvas: string;
+  cursor: boolean;
+}
+
 export default function HapticsLab() {
   const [supportsSwitch, setSupportsSwitch] = useState<boolean | null>(null);
   const [supportsVibrate, setSupportsVibrate] = useState<boolean | null>(null);
   const [ua, setUa] = useState("");
+  const [env, setEnv] = useState<EnvInfo | null>(null);
   const [log, setLog] = useState<string[]>([]);
   const visibleRef = useRef<HTMLInputElement>(null);
 
@@ -138,6 +149,32 @@ export default function HapticsLab() {
       setSupportsSwitch("switch" in document.createElement("input"));
       setSupportsVibrate(typeof navigator.vibrate === "function");
       setUa(navigator.userAgent);
+      // Environment report — also covers the ambient backdrop and the custom
+      // cursor so a single screenshot from any machine tells us what's active
+      // and why.
+      let webgl = false;
+      try {
+        webgl = !!document.createElement("canvas").getContext("webgl");
+      } catch {
+        webgl = false;
+      }
+      const canvas = document.querySelector<HTMLCanvasElement>(
+        "canvas.ambient-backdrop",
+      );
+      setEnv({
+        finePointer: matchMedia("(any-hover: hover) and (any-pointer: fine)")
+          .matches,
+        reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+        forceMotion:
+          document.documentElement.classList.contains("force-motion"),
+        webgl,
+        ambient: document.documentElement.classList.contains("has-ambient"),
+        ambientCanvas: canvas
+          ? `${canvas.width}×${canvas.height} for ${canvas.clientWidth}×${canvas.clientHeight}`
+          : "none",
+        cursor:
+          document.documentElement.classList.contains("has-custom-cursor"),
+      });
     });
   }, []);
 
@@ -172,6 +209,23 @@ export default function HapticsLab() {
         <p className="break-all">
           <strong>UA:</strong> {ua}
         </p>
+        {env ? (
+          <>
+            <p>
+              <strong>fine pointer:</strong> {env.finePointer ? "yes" : "no"} ·{" "}
+              <strong>reduced motion:</strong>{" "}
+              {env.reducedMotion ? "YES (OS)" : "no"} ·{" "}
+              <strong>force-motion override:</strong>{" "}
+              {env.forceMotion ? "on" : "off"}
+            </p>
+            <p>
+              <strong>WebGL:</strong> {env.webgl ? "yes" : "NO"} ·{" "}
+              <strong>ambient backdrop:</strong>{" "}
+              {env.ambient ? `active (${env.ambientCanvas})` : "CSS fallback"} ·{" "}
+              <strong>custom cursor:</strong> {env.cursor ? "on" : "off"}
+            </p>
+          </>
+        ) : null}
       </div>
 
       <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-pine/30 bg-pine/5 p-4">

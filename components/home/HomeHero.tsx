@@ -9,6 +9,7 @@ import {
   ShieldAlert,
   Sparkles,
 } from "lucide-react";
+import Logo from "@/components/Logo";
 import Magnetic from "@/components/motion/Magnetic";
 import { useT } from "@/components/i18n/LanguageProvider";
 import type { ServiceStatus } from "@/types/farm";
@@ -112,18 +113,21 @@ export default function HomeHero({
         </div>
       </div>
 
-      {/* The hero pane is now plain frosted glass over the sitewide living
-          backdrop (AmbientBackdrop): the pane's backdrop-filter refracts the
-          breathing orbs behind the page, so the "liquid glass" moment costs
-          nothing beyond the blur the chrome already pays — the standalone
-          WebGL showcase it replaces ran its own full render loop. */}
+      {/* The hero pane is a clear glass window onto the sitewide living
+          backdrop (AmbientBackdrop): a light frost (.hero-pane) keeps the
+          breathing orbs and drifting caustics readable through it, with the
+          logo as a quiet watermark — the "liquid glass" moment now costs
+          nothing beyond one blur (the standalone WebGL showcase it replaces
+          ran its own full-resolution render loop). */}
       <div
         aria-hidden
-        className="glass rise-in relative min-h-[260px] overflow-hidden rounded-[32px] lg:min-h-0"
+        className="glass hero-pane rise-in relative grid min-h-[260px] place-items-center overflow-hidden rounded-[32px] lg:min-h-0"
       >
-        <div className="glass-inset absolute left-6 top-6 h-16 w-16 rounded-2xl" />
-        <div className="glass-inset qs-float absolute bottom-8 right-8 h-24 w-24 rounded-[28px]" />
-        <div className="glass-chip absolute bottom-12 left-8 h-8 w-28 rounded-full" />
+        <Logo
+          className="h-28 w-28 opacity-[0.16] saturate-0 lg:h-36 lg:w-36"
+          idPrefix="hero-pane-logo"
+        />
+        <div className="glass-inset qs-float absolute bottom-8 right-8 h-20 w-20 rounded-[24px]" />
       </div>
     </div>
   );
