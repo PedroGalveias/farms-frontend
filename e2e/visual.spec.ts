@@ -85,4 +85,47 @@ test.describe("visual", () => {
     ).toBeVisible();
     await expect(page).toHaveScreenshot("auth-login.png");
   });
+
+  test("farm detail page", async ({ page }) => {
+    await page.goto("/farm/11111111-1111-4111-8111-111111111111");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expect(page).toHaveScreenshot("farm-detail.png", {
+      // The map tiles load asynchronously and aren't layout-relevant.
+      mask: [page.locator(".leaflet-container")],
+    });
+  });
+
+  test("saved page (empty state)", async ({ page }) => {
+    await page.goto("/saved");
+    await expect(page.getByText(/no saved farms yet/i)).toBeVisible();
+    await expect(page).toHaveScreenshot("saved-empty.png");
+  });
+
+  test("region page", async ({ page }) => {
+    await page.goto("/region/region_mittelland");
+    await page.waitForLoadState("networkidle");
+    await expect(page).toHaveScreenshot("region-mittelland.png");
+  });
+});
+
+test.describe("visual (mobile)", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("home mobile (light)", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    await expect(page).toHaveScreenshot("home-mobile-light.png", {
+      mask: mask(page),
+    });
+  });
+
+  test("home mobile (dark)", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    await expect(page).toHaveScreenshot("home-mobile-dark.png", {
+      mask: mask(page),
+    });
+  });
 });

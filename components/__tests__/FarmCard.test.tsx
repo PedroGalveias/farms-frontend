@@ -1,10 +1,19 @@
-import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
 import FarmCard from "@/components/FarmCard";
+import { FAVORITES_STORAGE_KEY } from "@/lib/personalization";
 import type { Farm } from "@/types/farm";
+
+const haptic = vi.hoisted(() => vi.fn());
+const playTick = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/haptics", async (orig) => ({
+  ...(await orig<typeof import("@/lib/haptics")>()),
+  haptic,
+}));
+vi.mock("@/lib/sound", () => ({ playTick }));
 
 const FARM: Farm = {
   id: "bern",
@@ -26,6 +35,11 @@ function renderCard(props: Partial<Parameters<typeof FarmCard>[0]> = {}) {
     </LanguageProvider>,
   );
 }
+
+afterEach(() => {
+  window.localStorage.clear();
+  vi.clearAllMocks();
+});
 
 describe("FarmCard", () => {
   it("renders the farm name, address, and translated categories", () => {
@@ -66,5 +80,32 @@ describe("FarmCard", () => {
     await user.click(mapsLink);
     // Clicking the Maps link must not trigger the card's open action.
     expect(onOpen).not.toHaveBeenCalled();
+  });
+
+  it("favoriting fires haptic + sound and persists", () => {
+    renderCard();
+    const save = screen.getByRole("button", { name: /^save$/i });
+    fireEvent.click(save);
+
+    expect(haptic).toHaveBeenCalled();
+    expect(playTick).toHaveBeenCalled();
+    expect(save).toHaveAttribute("aria-pressed", "true");
+    expect(
+      JSON.parse(window.localStorage.getItem(FAVORITES_STORAGE_KEY) ?? "[]"),
+    ).toContain("bern");
+  });
+
+  it("shows a distance badge when a distance is provided", () => {
+    renderCard({ distanceKm: 12.4 });
+    expect(screen.getByText(/12\s*km/i)).toBeInTheDocument();
+  });
+
+  it("the compact list variant is a dense row with the heart in flow", () => {
+    const { container } = renderCard({ variant: "list", onOpen: vi.fn() });
+    const article = container.querySelector("article")!;
+    // Compact radius, not the extended grid card's rounded-[26px].
+    expect(article.className).toContain("rounded-2xl");
+    const heart = within(article).getByRole("button", { name: /save/i });
+    expect(heart.className).not.toContain("absolute");
   });
 });

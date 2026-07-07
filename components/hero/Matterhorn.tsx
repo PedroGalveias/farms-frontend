@@ -1,9 +1,11 @@
 /**
- * Matterhorn silhouette — the Alps as the hero pane's motif (replacing the app
- * logo watermark). Drawn as layered ridge lines so the sitewide living
- * backdrop reads through the clear glass behind it: a faint back range and the
- * Matterhorn's distinctive hooked summit in front. Pure vector, `currentColor`
- * so it tints with the theme; decorative (aria-hidden via the parent).
+ * Matterhorn silhouette — the Alps as the hero pane's motif, drawn from the
+ * real peak's Zermatt profile: a steep asymmetric pyramid whose summit hooks
+ * and leans north (left), a near-vertical, slightly convex east face on the
+ * right, the stepped Hörnli ridge descending right, and a two-tone sunlit
+ * left face. Layered so the sitewide living backdrop reads through the clear
+ * glass behind it. Pure vector, `currentColor` (tints with the theme);
+ * decorative (aria-hidden via the parent).
  */
 export default function Matterhorn({ className = "" }: { className?: string }) {
   return (
@@ -11,32 +13,57 @@ export default function Matterhorn({ className = "" }: { className?: string }) {
       className={className}
       fill="none"
       preserveAspectRatio="xMidYMax meet"
-      viewBox="0 0 400 220"
+      viewBox="0 0 400 240"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Back range — soft, distant ridge. */}
+      {/* Distant back range — soft. */}
       <path
-        d="M0 220 L58 150 L96 176 L150 128 L196 168 L250 120 L300 172 L352 138 L400 190 L400 220 Z"
+        d="M0 240 L54 176 L104 200 L168 150 L212 186 L268 138 L330 188 L400 150 L400 240 Z"
         fill="currentColor"
-        opacity="0.10"
+        opacity="0.08"
       />
-      {/* Mid ridge. */}
+      {/* Mid ridge with a foreground shoulder on the left. */}
       <path
-        d="M0 220 L70 176 L128 196 L188 150 L250 192 L322 158 L400 200 L400 220 Z"
+        d="M0 240 L60 198 L110 214 L150 176 L210 210 L300 168 L360 206 L400 188 L400 240 Z"
         fill="currentColor"
-        opacity="0.14"
+        opacity="0.13"
       />
-      {/* The Matterhorn — a steep asymmetric pyramid: a long gentle north
-          face, a summit that leans and hooks, then a much steeper east face,
-          the peak's signature profile from Zermatt. */}
+
+      {/* The Matterhorn — full silhouette. Left (north) ridge climbs past the
+          Hörnli shoulder to the hooked summit that leans left; the right
+          (east) face drops near-vertically, bulges, then the Hörnli ridge
+          steps down to the right. */}
       <path
-        d="M104 220 L210 64 L224 44 L236 28 L229 20 L245 32 L258 74 L298 156 L344 220 Z"
+        d="M56 240
+           L150 150
+           L176 132
+           L196 96
+           L206 58
+           L210 34
+           L201 22
+           L214 30
+           L221 58
+           L233 92
+           L246 108
+           L268 150
+           L300 182
+           L338 212
+           L372 240 Z"
         fill="currentColor"
-        opacity="0.22"
+        opacity="0.2"
       />
-      {/* Snow-line accent tracing the steep east face. */}
+
+      {/* Sunlit left (north) face — a brighter plane, echoing the snow/light
+          side in the photos. */}
       <path
-        d="M236 28 L245 32 L258 74 L298 156"
+        d="M201 22 L206 58 L196 96 L176 132 L150 150 L188 120 L205 74 Z"
+        fill="currentColor"
+        opacity="0.12"
+      />
+
+      {/* Summit + east-face edge accent (the crisp snow line). */}
+      <path
+        d="M201 22 L214 30 L221 58 L233 92 L246 108 L268 150"
         stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
