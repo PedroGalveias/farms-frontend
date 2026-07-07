@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, FolderPlus, Plus } from "lucide-react";
 import { haptic } from "@/lib/haptics";
+import HapticTap from "@/components/ui/HapticTap";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
@@ -67,7 +68,10 @@ export default function AddToCollectionMenu({
       <button
         aria-expanded={open}
         className={triggerClassName}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          haptic();
+          setOpen((value) => !value);
+        }}
         type="button"
       >
         <FolderPlus className="h-4 w-4" />
@@ -77,6 +81,7 @@ export default function AddToCollectionMenu({
             {memberCount}
           </span>
         ) : null}
+        <HapticTap />
       </button>
 
       {open ? (

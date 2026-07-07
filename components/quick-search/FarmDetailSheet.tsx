@@ -20,6 +20,7 @@ import { useTrip } from "@/components/trip/TripProvider";
 import { detectDirectionsPlatform, directionsUrl } from "@/lib/directions";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { haptic } from "@/lib/haptics";
+import { playTick } from "@/lib/sound";
 import HapticTap from "@/components/ui/HapticTap";
 import { farmPath } from "@/lib/share";
 import { shouldAnimateViewTransitions } from "@/lib/view-transitions";
@@ -259,6 +260,7 @@ export default function FarmDetailSheet({
             }`}
             onClick={() => {
               haptic();
+              playTick();
               toggleFavorite(farm.id);
             }}
             type="button"

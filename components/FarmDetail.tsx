@@ -14,9 +14,20 @@ import AddToCollectionMenu from "@/components/saved/AddToCollectionMenu";
 import { detectDirectionsPlatform, directionsUrl } from "@/lib/directions";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { haptic } from "@/lib/haptics";
+import { playTick } from "@/lib/sound";
+import HapticTap from "@/components/ui/HapticTap";
 import { tagLabel } from "@/lib/products";
 import { farmPath } from "@/lib/share";
 import type { Farm } from "@/types/farm";
+
+// Shared secondary-action button: every action in the 2-column grid is the
+// same size (the old flex-wrap layout made "Add to collection" a small
+// odd-one-out pill).
+const SECONDARY_BTN =
+  "relative inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 focus-visible:ring-offset-2";
+const SECONDARY_IDLE =
+  "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink";
+const SECONDARY_ACTIVE = "border-pine/30 bg-pine/10 text-pine";
 
 // Client-only Leaflet, same pattern as the directory's map view.
 const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
@@ -90,9 +101,10 @@ export default function FarmDetail({
         </p>
       </header>
 
-      <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
+      <div className="mt-7 space-y-2.5">
+        {/* Primary action, full width. */}
         <a
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
           href={mapsUrl}
           rel="noreferrer"
           target="_blank"
@@ -102,55 +114,60 @@ export default function FarmDetail({
             ? t("detail_openAppleMaps")
             : t("detail_openMaps")}
         </a>
-        <ShareButton
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
-          text={farm.address}
-          title={farm.name}
-          url={farmPath(farm.id)}
-        />
-        <button
-          aria-pressed={saved}
-          className={`inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
-            saved
-              ? "border-pine/30 bg-pine/10 text-pine"
-              : "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink"
-          }`}
-          onClick={() => {
-            haptic();
-            toggleFavorite(farm.id);
-          }}
-          type="button"
-        >
-          <Heart
-            className={`h-4 w-4 ${saved ? "fill-current heart-pop" : ""}`}
-            key={saved ? "saved" : "unsaved"}
+
+        {/* Uniform 2-column grid so every secondary action is the same size. */}
+        <div className="grid grid-cols-2 gap-2.5">
+          <button
+            aria-pressed={saved}
+            className={`${SECONDARY_BTN} ${saved ? SECONDARY_ACTIVE : SECONDARY_IDLE}`}
+            onClick={() => {
+              haptic();
+              playTick();
+              toggleFavorite(farm.id);
+            }}
+            type="button"
+          >
+            <Heart
+              className={`h-4 w-4 ${saved ? "fill-current heart-pop" : ""}`}
+              key={saved ? "saved" : "unsaved"}
+            />
+            {saved ? t("card_saved") : t("card_save")}
+            <HapticTap />
+          </button>
+
+          <ShareButton
+            className={`${SECONDARY_BTN} ${SECONDARY_IDLE}`}
+            text={farm.address}
+            title={farm.name}
+            url={farmPath(farm.id)}
           />
-          {saved ? t("card_saved") : t("card_save")}
-        </button>
-        <div className="flex justify-center sm:items-center">
-          <AddToCollectionMenu farmId={farm.id} />
+
+          <AddToCollectionMenu
+            className="relative"
+            farmId={farm.id}
+            triggerClassName={`${SECONDARY_BTN} ${SECONDARY_IDLE}`}
+          />
+
+          <button
+            aria-pressed={planned}
+            className={`${SECONDARY_BTN} disabled:cursor-not-allowed disabled:opacity-50 ${
+              planned ? SECONDARY_ACTIVE : SECONDARY_IDLE
+            }`}
+            disabled={!planned && isFull}
+            onClick={() =>
+              toggleStop({
+                id: farm.id,
+                name: farm.name,
+                coordinates: farm.coordinates,
+                canton: farm.canton,
+              })
+            }
+            type="button"
+          >
+            <Route className="h-4 w-4" />
+            {planned ? t("trip_added") : t("trip_add")}
+          </button>
         </div>
-        <button
-          aria-pressed={planned}
-          className={`inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50 ${
-            planned
-              ? "border-pine/30 bg-pine/10 text-pine"
-              : "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink"
-          }`}
-          disabled={!planned && isFull}
-          onClick={() =>
-            toggleStop({
-              id: farm.id,
-              name: farm.name,
-              coordinates: farm.coordinates,
-              canton: farm.canton,
-            })
-          }
-          type="button"
-        >
-          <Route className="h-4 w-4" />
-          {planned ? t("trip_added") : t("trip_add")}
-        </button>
       </div>
 
       <div className="mt-7 space-y-3">

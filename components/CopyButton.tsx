@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { haptic } from "@/lib/haptics";
+import { playTick } from "@/lib/sound";
 import { useToast } from "@/components/ui/ToastProvider";
 import HapticTap from "@/components/ui/HapticTap";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -29,10 +30,12 @@ export default function CopyButton({
   const text = label ?? t("copy_address");
 
   const copy = async () => {
-    // Haptic FIRST, synchronously: after the clipboard await we're outside
-    // the user-gesture window and iOS mutes the switch-toggle haptic. Native
-    // buttons tick on touch, not on completion, so this is also the right UX.
+    // Haptic + sound FIRST, synchronously: after the clipboard await we're
+    // outside the user-gesture window and iOS mutes the switch-toggle haptic.
+    // Native buttons tick on touch, not on completion, so this is also the
+    // right UX.
     haptic();
+    playTick();
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);

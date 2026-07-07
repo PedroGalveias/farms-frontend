@@ -224,7 +224,7 @@ export default function DirectoryToolbar({
 
         <label className="relative block">
           <span className="sr-only">{t("a11y_sortBy")}</span>
-          <ArrowDownWideNarrow className="pointer-events-none absolute bottom-0 left-4 top-0 my-auto h-4 w-4 text-ink/60" />
+          <ArrowDownWideNarrow className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/60" />
           <select
             className={`${fieldClassName} pl-11`}
             onChange={(event) =>
