@@ -29,11 +29,17 @@ export function useSlidingIndicator(
         indicator.style.opacity = "0";
         return;
       }
-      const c = container.getBoundingClientRect();
-      const a = active.getBoundingClientRect();
-      indicator.style.width = `${a.width}px`;
-      indicator.style.height = `${a.height}px`;
-      indicator.style.transform = `translate(${a.left - c.left}px, ${a.top - c.top}px)`;
+      // Position from LAYOUT offsets (offsetLeft/Top/Width/Height), not
+      // getBoundingClientRect. Rects are in viewport space and pick up any
+      // CSS transform on an ancestor — during a route View Transition the
+      // root is transformed, so a mid-flight rect read placed the pill at a
+      // wrong spot and it visibly bounced (to the target, back toward the
+      // previous, then to the target). Offsets are transform-immune layout
+      // metrics relative to the positioned container (the nav), so the pill
+      // slides once, cleanly. (The active link's offsetParent is the nav.)
+      indicator.style.width = `${active.offsetWidth}px`;
+      indicator.style.height = `${active.offsetHeight}px`;
+      indicator.style.transform = `translate(${active.offsetLeft}px, ${active.offsetTop}px)`;
       indicator.style.opacity = "1";
     };
 

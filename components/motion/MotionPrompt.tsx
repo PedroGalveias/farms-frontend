@@ -53,7 +53,14 @@ export default function MotionPrompt() {
   };
 
   return (
-    <div className="glass glass-card fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm rounded-3xl p-4 lg:bottom-5 lg:left-auto lg:right-5 lg:mx-0">
+    <div
+      // Bottom-RIGHT on every size, above the mobile tab bar, and it stays put
+      // until the user picks (no auto-dismiss) — the earlier build vanished too
+      // fast to read. z-[60] clears chrome (rail/tab bar are z-40).
+      className="glass glass-card toast-enter fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(22rem,calc(100vw-2rem))] rounded-3xl p-4 lg:bottom-6 lg:right-6"
+      role="dialog"
+      aria-live="polite"
+    >
       <div className="flex items-start gap-3">
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-pine/10 text-pine">
           <Sparkles className="h-4 w-4" />

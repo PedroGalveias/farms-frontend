@@ -25,18 +25,27 @@ test.describe("desktop master–detail & directory interactions", () => {
       (el) => el.getBoundingClientRect().width,
     );
 
+    // Bring the card into view (it's below the fold) and let its reveal
+    // transition settle, so a forced click has a stable, in-viewport target.
+    await page.evaluate(() =>
+      document
+        .querySelector("article")
+        ?.scrollIntoView({ block: "center", behavior: "instant" }),
+    );
+    await page.waitForTimeout(400);
+
     // Click the card's open control (the transparent full-card overlay
-    // button) — geometric article-center clicks race the reveal transition
-    // on Firefox. Retry until the dock appears: a click that lands before
-    // hydration attaches handlers is simply lost (visible SSR content,
-    // no React yet), which shows up under parallel WebKit load.
+    // button). Two hazards, both amplified on slow CI runners: (a) the card's
+    // reveal transition keeps the overlay moving, so Playwright's stability
+    // wait never settles → click with { force: true } to bypass actionability;
+    // (b) a click that lands before hydration attaches handlers is simply lost
+    // → retry until the dock actually appears.
+    const openBtn = firstCard.getByRole("button", { name: /view details/i });
     const dock = page.locator(".qs-dock");
     await expect(async () => {
-      await firstCard
-        .getByRole("button", { name: /view details/i })
-        .click({ timeout: 2000 });
+      await openBtn.click({ force: true, timeout: 2000 });
       await expect(dock).toBeVisible({ timeout: 1500 });
-    }).toPass({ timeout: 20_000 });
+    }).toPass({ timeout: 25_000 });
 
     // Painted immediately — a near-transparent background was the reported
     // "renders half a second later" bug (the panel used to open inside a

@@ -180,9 +180,11 @@ export default function PwaRegister() {
   }
 
   return (
-    <div // Bottom-LEFT on desktop (right of the rail): the bottom-right corner
-      // belongs to back-to-top, which this banner used to cover and block.
-      className="glass glass-chrome fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm rounded-3xl p-3 lg:bottom-5 lg:left-[92px] lg:right-auto lg:mx-0"
+    <div
+      // Bottom-RIGHT, above the mobile tab bar; persists until the user
+      // installs / updates / dismisses (the update banner must stay until
+      // acted on). z-[60] clears the rail/tab bar (z-40).
+      className="glass glass-chrome toast-enter fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(24rem,calc(100vw-2rem))] rounded-3xl p-3 lg:bottom-6 lg:right-6"
     >
       {waitingWorker ? (
         <div className="flex items-center gap-3">

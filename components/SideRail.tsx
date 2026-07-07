@@ -16,18 +16,17 @@ import { usePersonalization } from "@/components/personalization/Personalization
 
 const FRONTEND_REPO = "https://github.com/PedroGalveias/farms-frontend";
 
-// The rail background is dark (ink) in light mode and green in dark mode, so
-// its contents use fixed-light colors that read on both.
+// The rail is now frosted glass (matching the mobile tab bar), so its contents
+// use ink tones — active items ride a dark sliding pill (bg-ink) with a light
+// (cloud) glyph, inactive items are muted ink.
 function railLinkClassName(isActive: boolean) {
   return `relative z-10 grid h-11 w-11 place-items-center rounded-2xl transition-colors duration-300 ${
-    isActive
-      ? "text-[#14161b]"
-      : "text-white/55 hover:bg-white/10 hover:text-white"
+    isActive ? "text-cloud" : "text-ink/55 hover:bg-ink/5 hover:text-ink"
   }`;
 }
 
 const utilityClassName =
-  "grid h-11 w-11 place-items-center rounded-2xl text-white/55 transition-colors hover:bg-white/10 hover:text-white";
+  "grid h-11 w-11 place-items-center rounded-2xl text-ink/55 transition-colors hover:bg-ink/5 hover:text-ink";
 
 /**
  * Persistent desktop utility rail, shown on every page (akukolabs-style):
@@ -66,7 +65,7 @@ export default function SideRail() {
   useSlidingIndicator(navRef, activeRef, indicatorRef, active);
 
   return (
-    <aside className="fixed left-0 top-0 z-40 hidden h-dvh w-[76px] flex-col items-center justify-between border-r border-white/10 bg-rail py-6 transition-colors duration-300 lg:flex">
+    <aside className="glass glass-chrome fixed bottom-3 left-3 top-3 z-40 hidden w-[64px] flex-col items-center justify-between rounded-[28px] py-5 lg:flex">
       <Link
         aria-label="farms — home"
         className="block h-11 w-11 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-rotate-6 hover:scale-105"
@@ -83,7 +82,7 @@ export default function SideRail() {
         {/* Sliding active pill, positioned by useSlidingIndicator. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute left-0 top-0 z-0 rounded-2xl bg-white opacity-0 transition-[transform,width,height,opacity] duration-[450ms] ease-[cubic-bezier(0.34,1.3,0.5,1)]"
+          className="pointer-events-none absolute left-0 top-0 z-0 rounded-2xl bg-ink opacity-0 shadow-[0_6px_16px_-6px_rgba(20,22,27,0.5)] transition-[transform,width,height,opacity] duration-[450ms] ease-[cubic-bezier(0.34,1.3,0.5,1)]"
           ref={indicatorRef}
         />
         <button

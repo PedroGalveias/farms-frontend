@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { tagLabel } from "@/lib/products";
 import { haptic } from "@/lib/haptics";
+import { playTick } from "@/lib/sound";
 import HapticTap from "@/components/ui/HapticTap";
 import { formatDistanceShort, isRecentlyAdded } from "@/lib/directory";
 import { formatFarmDate, getCantonName, splitCoordinates } from "@/lib/farms";
@@ -46,6 +47,7 @@ function FavoriteButton({
       onClick={(event) => {
         event.stopPropagation();
         haptic();
+        playTick();
         if (!saved) setRingKey((k) => k + 1);
         toggleFavorite(farm.id);
       }}
@@ -176,53 +178,53 @@ export default function FarmCard({
     ) : null;
 
   if (variant === "list") {
-    const visibleCategories = farm.categories.slice(0, 4);
-    const hiddenCount = farm.categories.length - visibleCategories.length;
-
+    // Compact/dense row — the "more farms per screen" counterpart to the
+    // extended grid card. One line each for name and address, no product
+    // chips or coordinates; the heart lives in its own flex column so it can
+    // never overlap content (the old absolute heart sat on the chips).
+    const isNew = isRecentlyAdded(farm.created_at);
     return (
       <article
-        className="glass glass-card card-cull group relative overflow-hidden rounded-[26px] p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-24px_rgba(20,22,27,0.4)] sm:p-6"
+        className="glass glass-card card-cull group relative flex items-center gap-3 overflow-hidden rounded-2xl px-4 py-3 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-22px_rgba(20,22,27,0.4)] sm:gap-4 sm:px-5"
         ref={articleRef}
       >
         {openOverlay}
-        <FavoriteButton
-          className="absolute right-5 top-5 sm:right-6 sm:top-6"
-          farm={farm}
-        />
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_auto] lg:items-center">
-          <div className="pointer-events-none min-w-0">
-            <CardBadges distanceKm={distanceKm} farm={farm} />
-            <h3 className="mt-3 text-2xl font-bold leading-[1.05] tracking-[-0.03em] text-ink">
+
+        {/* Leading canton code — a compact geographic anchor. */}
+        <span className="pointer-events-none hidden shrink-0 flex-col items-center justify-center rounded-xl bg-tone px-2.5 py-1.5 text-center sm:flex">
+          <span className="text-[13px] font-black leading-none tracking-[0.02em] text-pine">
+            {farm.canton}
+          </span>
+        </span>
+
+        <div className="pointer-events-none min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="truncate text-[15px] font-bold leading-tight tracking-[-0.01em] text-ink sm:text-base">
               {farm.name}
             </h3>
-            <p className="mt-1.5 flex items-center gap-1.5 text-sm leading-6 text-ink/60">
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-ink/30" />
-              {farm.address}
-            </p>
+            {isNew ? (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-pine-surface px-2 py-0.5 text-[10px] font-bold text-white">
+                <Sparkles className="h-2.5 w-2.5" />
+                {t("card_new")}
+              </span>
+            ) : null}
           </div>
-
-          <div className="pointer-events-none space-y-1.5 text-sm text-ink/60">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink/60">
-              {t("card_added")} {formatFarmDate(farm.created_at)}
-            </p>
-            <a
-              className="pointer-events-auto relative z-10 inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"
-              href={mapsUrl}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {latitude}, {longitude}
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-          </div>
-
-          <div className="pointer-events-none lg:max-w-xs lg:justify-self-end">
-            <CategoryChips
-              categories={visibleCategories}
-              hiddenCount={hiddenCount}
-            />
-          </div>
+          <p className="mt-0.5 flex items-center gap-1 truncate text-[13px] leading-5 text-ink/55">
+            <MapPin className="h-3 w-3 shrink-0 text-ink/30" />
+            <span className="truncate">{farm.address}</span>
+          </p>
         </div>
+
+        {distanceKm != null ? (
+          <span className="pointer-events-none hidden shrink-0 items-center gap-1 rounded-full bg-pine/10 px-2.5 py-1 text-xs font-bold text-pine sm:inline-flex">
+            <Navigation className="h-3 w-3" />
+            {formatDistanceShort(distanceKm)}
+          </span>
+        ) : null}
+
+        <FavoriteButton className="relative shrink-0" farm={farm} />
+
+        <ArrowUpRight className="pointer-events-none hidden h-4 w-4 shrink-0 text-ink/30 transition-colors group-hover:text-ink sm:block" />
       </article>
     );
   }

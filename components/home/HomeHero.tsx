@@ -9,7 +9,7 @@ import {
   ShieldAlert,
   Sparkles,
 } from "lucide-react";
-import Logo from "@/components/Logo";
+import Matterhorn from "@/components/hero/Matterhorn";
 import Magnetic from "@/components/motion/Magnetic";
 import { useT } from "@/components/i18n/LanguageProvider";
 import type { ServiceStatus } from "@/types/farm";
@@ -116,18 +116,14 @@ export default function HomeHero({
       {/* The hero pane is a clear glass window onto the sitewide living
           backdrop (AmbientBackdrop): a light frost (.hero-pane) keeps the
           breathing orbs and drifting caustics readable through it, with the
-          logo as a quiet watermark — the "liquid glass" moment now costs
-          nothing beyond one blur (the standalone WebGL showcase it replaces
-          ran its own full-resolution render loop). */}
+          Alps (the Matterhorn) as the motif — Swiss, on-brand, and it costs
+          nothing beyond the one blur (the standalone WebGL showcase it
+          replaces ran its own full-resolution render loop). */}
       <div
         aria-hidden
-        className="glass hero-pane rise-in relative grid min-h-[260px] place-items-center overflow-hidden rounded-[32px] lg:min-h-0"
+        className="glass hero-pane rise-in relative min-h-[260px] overflow-hidden rounded-[32px] lg:min-h-0"
       >
-        <Logo
-          className="h-28 w-28 opacity-[0.16] saturate-0 lg:h-36 lg:w-36"
-          idPrefix="hero-pane-logo"
-        />
-        <div className="glass-inset qs-float absolute bottom-8 right-8 h-20 w-20 rounded-[24px]" />
+        <Matterhorn className="absolute inset-x-0 bottom-0 h-[78%] w-full text-ink" />
       </div>
     </div>
   );
