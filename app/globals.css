@@ -211,7 +211,10 @@ html.dark {
 @supports (
   (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
 ) {
-  .glass:not(.glass-card) {
+  /* :where() keeps specificity at (0,1,0) — a bare :not() would out-specify
+     .glass-chrome below and thin ALL chrome fills down to the content fill
+     (header/tab bar/dock washed out — caught by the desktop dock e2e). */
+  .glass:where(:not(.glass-card)) {
     background-color: var(--glass-fill);
     /* blur + saturate + a touch of brightness = the optical-glass feel
        (what's behind reads richer, not just blurred). */
