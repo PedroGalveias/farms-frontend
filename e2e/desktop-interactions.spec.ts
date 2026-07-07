@@ -27,11 +27,16 @@ test.describe("desktop master–detail & directory interactions", () => {
 
     // Click the card's open control (the transparent full-card overlay
     // button) — geometric article-center clicks race the reveal transition
-    // on Firefox.
-    await firstCard.getByRole("button", { name: /view details/i }).click();
-
+    // on Firefox. Retry until the dock appears: a click that lands before
+    // hydration attaches handlers is simply lost (visible SSR content,
+    // no React yet), which shows up under parallel WebKit load.
     const dock = page.locator(".qs-dock");
-    await expect(dock).toBeVisible();
+    await expect(async () => {
+      await firstCard
+        .getByRole("button", { name: /view details/i })
+        .click({ timeout: 2000 });
+      await expect(dock).toBeVisible({ timeout: 1500 });
+    }).toPass({ timeout: 20_000 });
 
     // Painted immediately — a near-transparent background was the reported
     // "renders half a second later" bug (the panel used to open inside a

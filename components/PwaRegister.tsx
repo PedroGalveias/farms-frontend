@@ -180,7 +180,10 @@ export default function PwaRegister() {
   }
 
   return (
-    <div className="glass glass-chrome fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm rounded-3xl p-3 lg:bottom-5 lg:left-auto lg:right-5 lg:mx-0">
+    <div // Bottom-LEFT on desktop (right of the rail): the bottom-right corner
+      // belongs to back-to-top, which this banner used to cover and block.
+      className="glass glass-chrome fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm rounded-3xl p-3 lg:bottom-5 lg:left-[92px] lg:right-auto lg:mx-0"
+    >
       {waitingWorker ? (
         <div className="flex items-center gap-3">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-pine/10 text-pine">

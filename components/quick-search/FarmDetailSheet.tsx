@@ -20,6 +20,7 @@ import { useTrip } from "@/components/trip/TripProvider";
 import { detectDirectionsPlatform, directionsUrl } from "@/lib/directions";
 import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { haptic } from "@/lib/haptics";
+import HapticTap from "@/components/ui/HapticTap";
 import { farmPath } from "@/lib/share";
 import { shouldAnimateViewTransitions } from "@/lib/view-transitions";
 import type { Farm } from "@/types/farm";
@@ -30,7 +31,7 @@ const SNAP_THRESHOLD_PX = 44;
 // Shared shape for the secondary action buttons so they're all identical in the
 // grid (border-colour/fill are added per-button for active/inactive states).
 const SECONDARY_BTN =
-  "inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20";
+  "relative inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20";
 
 interface FarmDetailSheetProps {
   farm: Farm;
@@ -267,6 +268,7 @@ export default function FarmDetailSheet({
               key={saved ? "saved" : "unsaved"}
             />
             {saved ? t("card_saved") : t("card_save")}
+            <HapticTap />
           </button>
 
           <ShareButton
