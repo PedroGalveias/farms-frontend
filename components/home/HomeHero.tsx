@@ -113,17 +113,15 @@ export default function HomeHero({
         </div>
       </div>
 
-      {/* The hero pane is a clear glass window onto the sitewide living
-          backdrop (AmbientBackdrop): a light frost (.hero-pane) keeps the
-          breathing orbs and drifting caustics readable through it, with the
-          Alps (the Matterhorn) as the motif — Swiss, on-brand, and it costs
-          nothing beyond the one blur (the standalone WebGL showcase it
-          replaces ran its own full-resolution render loop). */}
+      {/* The hero pane frames a detailed alpenglow Matterhorn illustration —
+          a Swiss, on-brand "postcard" that fills the glass. Static vector, so
+          it costs nothing (the standalone WebGL showcase it replaced ran its
+          own full-resolution render loop). */}
       <div
         aria-hidden
-        className="glass hero-pane rise-in relative min-h-[260px] overflow-hidden rounded-[32px] lg:min-h-0"
+        className="glass rise-in relative min-h-[260px] overflow-hidden rounded-[32px] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] lg:min-h-0"
       >
-        <Matterhorn className="absolute inset-x-0 bottom-0 h-[78%] w-full text-ink" />
+        <Matterhorn className="absolute inset-0 h-full w-full" />
       </div>
     </div>
   );
