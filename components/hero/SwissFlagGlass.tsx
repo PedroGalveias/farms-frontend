@@ -62,18 +62,22 @@ const FRAG = `
     vec2 luv = mix(uv, vec2(0.5), 0.12 * h) - N.xy * 0.05 * (1.0 - h);
     float cm = crossMask(luv);
 
-    // Tinted glass, not paint: a soft, desaturated red field that reads as
-    // translucent, and a white cross laid a touch more opaquely on top.
-    vec3 redCol   = vec3(0.86, 0.40, 0.39);
+    // Tinted glass, not paint: a vivid translucent ruby (Swiss red) you can
+    // still see through, with the white cross laid a touch more opaquely on top.
+    vec3 rubyRed  = vec3(0.85, 0.07, 0.10);
     vec3 whiteCol = vec3(0.98, 0.98, 0.985);
-    vec3 col = mix(redCol, whiteCol, cm);
-    float a  = mix(0.42, 0.66, cm);   // red ~0.42, white cross ~0.66
+    vec3 col = mix(rubyRed, whiteCol, cm);
+    float a  = mix(0.82, 0.93, cm);   // ruby ~0.82, white cross ~0.93
 
-    // Fresnel: grazing angles at the rim go pale and bright, like a bevel —
-    // and the edge firms up slightly so the glass tile has a defined lip.
+    // Beer–Lambert depth: thicker glass toward the rim reads deeper and darker,
+    // like the edge of a cast-acrylic slab.
+    col *= mix(0.64, 1.0, dome);
+
+    // A faint bright glass lip at the very edge (not a white wash), and the
+    // edge firms up slightly so the tile has a defined rim.
     float fres = pow(1.0 - h, 2.5);
-    col = mix(col, vec3(0.96, 0.97, 0.99), fres * 0.35);
-    a = max(a, fres * 0.5);
+    col += fres * 0.10;
+    a = max(a, mix(a, 0.96, fres));
 
     // Moving key light → a crisp specular catch-light; the glint is nearly
     // solid so it reads against whatever glass sits behind.
@@ -94,7 +98,7 @@ const FRAG = `
 
     // Gentle depth: fade the film slightly toward the rim so it melts into the
     // frame's glass rather than ending on a hard edge.
-    a *= 0.82 + 0.18 * dome;
+    a *= 0.9 + 0.1 * dome;
 
     gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
   }
@@ -110,14 +114,14 @@ function FlagFallback() {
       viewBox="0 0 32 32"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="32" height="32" fill="#db6663" fillOpacity="0.5" />
+      <rect width="32" height="32" fill="#d81420" fillOpacity="0.82" />
       <rect
         x="13"
         y="6"
         width="6"
         height="20"
         fill="#fbfafa"
-        fillOpacity="0.72"
+        fillOpacity="0.93"
       />
       <rect
         x="6"
@@ -125,7 +129,7 @@ function FlagFallback() {
         width="20"
         height="6"
         fill="#fbfafa"
-        fillOpacity="0.72"
+        fillOpacity="0.93"
       />
     </svg>
   );
