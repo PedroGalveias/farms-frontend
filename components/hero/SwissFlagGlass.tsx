@@ -27,41 +27,64 @@ const FRAG = `
   uniform vec2 u_res;
   uniform float u_time;
 
-  void main(){
-    vec2 uv = gl_FragCoord.xy / u_res;
-    float t = u_time;
-
-    // Gentle cloth ripple — displace the sampling point.
-    vec2 wuv = uv;
-    wuv.x += 0.012 * sin(uv.y * 9.0 + t * 1.15);
-    wuv.y += 0.010 * sin(uv.x * 7.0 - t * 0.95);
-
-    // Swiss cross (federal proportions ≈ arm 6 : bar 7, centred with margin).
-    vec2 pc = wuv - 0.5;
+  // The flat Swiss flag: red field with the white federal cross
+  // (arm 6 : bar 7, centred with margin).
+  vec3 swissFlag(vec2 uv){
+    vec2 pc = uv - 0.5;
     float bw = 0.096;   // half bar thickness
     float al = 0.303;   // half arm length
-    float aa = 1.6 / u_res.y;
+    float aa = 1.4 / u_res.y;
     float horiz = smoothstep(bw + aa, bw - aa, abs(pc.y)) *
                   smoothstep(al + aa, al - aa, abs(pc.x));
     float vert  = smoothstep(bw + aa, bw - aa, abs(pc.x)) *
                   smoothstep(al + aa, al - aa, abs(pc.y));
     float crossM = clamp(horiz + vert, 0.0, 1.0);
-
-    vec3 red = vec3(0.851, 0.176, 0.153);
+    vec3 red   = vec3(0.851, 0.176, 0.153);
     vec3 white = vec3(0.975, 0.972, 0.965);
-    vec3 col = mix(red, white, crossM);
+    return mix(red, white, crossM);
+  }
 
-    // Cloth folds — soft light/shade from the ripple.
-    float fold = sin(uv.x * 10.0 + t * 1.1) * 0.5 + sin(uv.y * 8.0 - t * 0.9) * 0.5;
-    col *= 1.0 + 0.07 * fold;
+  void main(){
+    vec2 uv = gl_FragCoord.xy / u_res;
+    float t = u_time;
+    vec2 p = uv - 0.5;
+    float r = length(p);
 
-    // Slow specular sheen sweeping diagonally (the "silk/glass" highlight).
-    float band = pow(max(sin((uv.x - uv.y) * 3.2 - t * 0.5), 0.0), 6.0);
-    col += band * 0.1;
+    // Treat the tile as a slab of poured glass: a soft dome, tall in the
+    // middle and falling to the rim. h ≈ surface height (1 centre → 0 edge).
+    float dome = smoothstep(0.86, 0.05, r);
+    float h = pow(dome, 0.5);
 
-    // Soft vignette.
-    float vig = smoothstep(1.15, 0.35, length(uv - 0.5) * 1.4);
-    col *= 0.9 + 0.1 * vig;
+    // Dome normal (leans outward toward the rim) plus a slow liquid undulation
+    // so the surface looks poured, not flat.
+    vec2 slope = p * (1.0 - h) * 2.2;
+    slope += 0.05 * vec2(sin(uv.y * 7.0 + t * 0.7), cos(uv.x * 6.0 - t * 0.6));
+    vec3 N = normalize(vec3(slope, 0.85));
+
+    // Refraction: light bends through the glass, so read the flag pulled toward
+    // the centre (the lens magnifies the cross) and nudged along the normal.
+    vec2 luv = mix(uv, vec2(0.5), 0.12 * h) - N.xy * 0.05 * (1.0 - h);
+    vec3 col = swissFlag(luv);
+
+    // Fresnel: grazing angles at the rim go pale and bright, like a bevel.
+    float fres = pow(1.0 - h, 2.5);
+    col = mix(col, vec3(0.93, 0.95, 0.98), fres * 0.4);
+
+    // Moving key light → a crisp specular catch-light (the glossy glass glint).
+    vec3 L = normalize(vec3(-0.45, 0.5 + 0.15 * sin(t * 0.3), 0.75));
+    float spec = pow(max(dot(N, L), 0.0), 40.0);
+    col += spec * 0.7;
+
+    // A broad sheen band sweeping diagonally across the surface.
+    float sweep = pow(max(sin((uv.x - uv.y) * 3.0 - t * 0.45), 0.0), 8.0);
+    col += sweep * 0.14 * dome;
+
+    // Soft top reflection — the sky caught in the glass.
+    float gloss = smoothstep(0.55, 0.0, distance(uv, vec2(0.33, 0.72)));
+    col += gloss * 0.16;
+
+    // Gentle depth vignette.
+    col *= 0.88 + 0.14 * dome;
 
     gl_FragColor = vec4(col, 1.0);
   }
