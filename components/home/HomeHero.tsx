@@ -9,7 +9,7 @@ import {
   ShieldAlert,
   Sparkles,
 } from "lucide-react";
-import Matterhorn from "@/components/hero/Matterhorn";
+import SwitzerlandRelief from "@/components/hero/SwitzerlandRelief";
 import Magnetic from "@/components/motion/Magnetic";
 import { useT } from "@/components/i18n/LanguageProvider";
 import type { ServiceStatus } from "@/types/farm";
@@ -113,15 +113,14 @@ export default function HomeHero({
         </div>
       </div>
 
-      {/* The hero pane frames a detailed alpenglow Matterhorn illustration —
-          a Swiss, on-brand "postcard" that fills the glass. Static vector, so
-          it costs nothing (the standalone WebGL showcase it replaced ran its
-          own full-resolution render loop). */}
+      {/* The hero pane frames a detailed relief map of Switzerland — the
+          country's outline filled with its alpine topography and lakes, a
+          Swiss, on-brand motif. Static vector, so it costs nothing. */}
       <div
         aria-hidden
-        className="glass rise-in relative min-h-[260px] overflow-hidden rounded-[32px] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] lg:min-h-0"
+        className="glass hero-pane rise-in relative grid min-h-[260px] place-items-center overflow-hidden rounded-[32px] p-4 lg:min-h-0"
       >
-        <Matterhorn className="absolute inset-0 h-full w-full" />
+        <SwitzerlandRelief className="w-full" />
       </div>
     </div>
   );
