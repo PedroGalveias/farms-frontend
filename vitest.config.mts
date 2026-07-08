@@ -54,7 +54,7 @@ export default defineConfig({
         "components/FarmCard.tsx",
         "components/DirectoryToolbar.tsx",
         "components/saved/AddToCollectionMenu.tsx",
-        "components/hero/Matterhorn.tsx",
+        "components/home/SwissBanner.tsx",
         "components/SeasonalCard.tsx",
         "components/ThemeToggle.tsx",
         "components/MobileTabBar.tsx",
