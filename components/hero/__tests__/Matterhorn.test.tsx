@@ -8,8 +8,11 @@ describe("Matterhorn", () => {
     const svg = container.querySelector("svg");
     expect(svg).not.toBeNull();
     expect(svg).toHaveClass("test-class");
-    // Back ranges, the peak, the sunlit face, and the snow-line stroke.
-    expect(container.querySelectorAll("path").length).toBeGreaterThanOrEqual(4);
-    expect(svg?.getAttribute("viewBox")).toBe("0 0 400 240");
+    // Detailed low-poly: back ranges, silhouette, facet fills, aretes,
+    // couloirs, snow bands and foreground — many paths.
+    expect(container.querySelectorAll("path").length).toBeGreaterThanOrEqual(
+      12,
+    );
+    expect(svg?.getAttribute("viewBox")).toBe("0 0 400 300");
   });
 });

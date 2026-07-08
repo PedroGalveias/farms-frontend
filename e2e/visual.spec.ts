@@ -28,8 +28,12 @@ test.beforeEach(async ({ page }) => {
 });
 
 const mask = (page: import("@playwright/test").Page) => [
-  // Month-driven seasonal content.
-  page.locator("section", { has: page.getByText(/in season now/i) }).first(),
+  // Month-driven seasonal content — mask ONLY the seasonal card, not the
+  // whole hero+bento <section> that contains it (the earlier `section:has`
+  // selector masked the entire hero, so the Matterhorn was never checked).
+  page
+    .getByText(/in season now/i)
+    .locator("xpath=ancestor::div[contains(@class,'glass-card')][1]"),
 ];
 
 test.describe("visual", () => {
