@@ -3,16 +3,19 @@ import { render } from "@testing-library/react";
 import Matterhorn from "@/components/hero/Matterhorn";
 
 describe("Matterhorn", () => {
-  it("renders an SVG with layered mountain paths and forwards the class", () => {
+  it("renders the detailed two-tone illustration and forwards the class", () => {
     const { container } = render(<Matterhorn className="test-class" />);
     const svg = container.querySelector("svg");
     expect(svg).not.toBeNull();
     expect(svg).toHaveClass("test-class");
-    // Detailed low-poly: back ranges, silhouette, facet fills, aretes,
-    // couloirs, snow bands and foreground — many paths.
+    expect(svg?.getAttribute("viewBox")).toBe("0 0 220 200");
+    // Sky, base snow, the warm + cool faces, facets, snow streaks and ridge.
     expect(container.querySelectorAll("path").length).toBeGreaterThanOrEqual(
-      12,
+      14,
     );
-    expect(svg?.getAttribute("viewBox")).toBe("0 0 400 300");
+    // Warm/cool alpenglow gradients define the two-tone look.
+    expect(container.querySelectorAll("linearGradient").length).toBeGreaterThan(
+      2,
+    );
   });
 });
