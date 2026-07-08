@@ -19,7 +19,9 @@ describe("SwitzerlandRelief", () => {
 
     // Every canton boundary plus the national outline is drawn as a <path>.
     const paths = svg!.querySelectorAll("path");
-    expect(paths.length).toBeGreaterThanOrEqual(OUTLINE.length + CANTONS.length);
+    expect(paths.length).toBeGreaterThanOrEqual(
+      OUTLINE.length + CANTONS.length,
+    );
   });
 
   it("ships faithful geometry (26 cantons, plausible aspect ratio)", () => {
@@ -62,11 +64,18 @@ describe("SwitzerlandRelief", () => {
     HTMLCanvasElement.prototype.getContext = vi.fn(
       () => stub,
     ) as unknown as typeof origGet;
-    // Path2D may be missing in jsdom — provide a no-op so construction works.
+    // Path2D may be missing in jsdom — provide a no-op stub whose constructor
+    // mirrors the real `new Path2D(path?)` signature (a zero-arg stub makes
+    // CodeQL read every `new Path2D(d)` as passing a superfluous argument).
     const hadPath2D = "Path2D" in globalThis;
     if (!hadPath2D) {
       (globalThis as { Path2D?: unknown }).Path2D = class {
-        addPath() {}
+        constructor(path?: string) {
+          void path;
+        }
+        addPath(path?: unknown) {
+          void path;
+        }
       };
     }
     try {

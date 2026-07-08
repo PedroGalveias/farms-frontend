@@ -18,7 +18,9 @@ describe("SwissBanner", () => {
     expect(
       screen.getByRole("heading", { name: "Every farm, one country" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/every farm in this directory is Swiss/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/every farm in this directory is Swiss/i),
+    ).toBeInTheDocument();
   });
 
   it("frames an ambient flag (canvas or its SVG fallback)", () => {

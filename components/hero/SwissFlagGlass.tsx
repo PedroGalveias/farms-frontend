@@ -27,9 +27,8 @@ const FRAG = `
   uniform vec2 u_res;
   uniform float u_time;
 
-  // The flat Swiss flag: red field with the white federal cross
-  // (arm 6 : bar 7, centred with margin).
-  vec3 swissFlag(vec2 uv){
+  // Coverage of the white federal cross (arm 6 : bar 7, centred with margin).
+  float crossMask(vec2 uv){
     vec2 pc = uv - 0.5;
     float bw = 0.096;   // half bar thickness
     float al = 0.303;   // half arm length
@@ -38,10 +37,7 @@ const FRAG = `
                   smoothstep(al + aa, al - aa, abs(pc.x));
     float vert  = smoothstep(bw + aa, bw - aa, abs(pc.x)) *
                   smoothstep(al + aa, al - aa, abs(pc.y));
-    float crossM = clamp(horiz + vert, 0.0, 1.0);
-    vec3 red   = vec3(0.851, 0.176, 0.153);
-    vec3 white = vec3(0.975, 0.972, 0.965);
-    return mix(red, white, crossM);
+    return clamp(horiz + vert, 0.0, 1.0);
   }
 
   void main(){
@@ -64,29 +60,43 @@ const FRAG = `
     // Refraction: light bends through the glass, so read the flag pulled toward
     // the centre (the lens magnifies the cross) and nudged along the normal.
     vec2 luv = mix(uv, vec2(0.5), 0.12 * h) - N.xy * 0.05 * (1.0 - h);
-    vec3 col = swissFlag(luv);
+    float cm = crossMask(luv);
 
-    // Fresnel: grazing angles at the rim go pale and bright, like a bevel.
+    // Tinted glass, not paint: a soft, desaturated red field that reads as
+    // translucent, and a white cross laid a touch more opaquely on top.
+    vec3 redCol   = vec3(0.86, 0.40, 0.39);
+    vec3 whiteCol = vec3(0.98, 0.98, 0.985);
+    vec3 col = mix(redCol, whiteCol, cm);
+    float a  = mix(0.42, 0.66, cm);   // red ~0.42, white cross ~0.66
+
+    // Fresnel: grazing angles at the rim go pale and bright, like a bevel —
+    // and the edge firms up slightly so the glass tile has a defined lip.
     float fres = pow(1.0 - h, 2.5);
-    col = mix(col, vec3(0.93, 0.95, 0.98), fres * 0.4);
+    col = mix(col, vec3(0.96, 0.97, 0.99), fres * 0.35);
+    a = max(a, fres * 0.5);
 
-    // Moving key light → a crisp specular catch-light (the glossy glass glint).
+    // Moving key light → a crisp specular catch-light; the glint is nearly
+    // solid so it reads against whatever glass sits behind.
     vec3 L = normalize(vec3(-0.45, 0.5 + 0.15 * sin(t * 0.3), 0.75));
     float spec = pow(max(dot(N, L), 0.0), 40.0);
-    col += spec * 0.7;
+    col += spec * 0.5;
+    a += spec * 0.6;
 
     // A broad sheen band sweeping diagonally across the surface.
     float sweep = pow(max(sin((uv.x - uv.y) * 3.0 - t * 0.45), 0.0), 8.0);
-    col += sweep * 0.14 * dome;
+    col += sweep * 0.12 * dome;
+    a += sweep * 0.12 * dome;
 
     // Soft top reflection — the sky caught in the glass.
     float gloss = smoothstep(0.55, 0.0, distance(uv, vec2(0.33, 0.72)));
-    col += gloss * 0.16;
+    col += gloss * 0.12;
+    a += gloss * 0.10;
 
-    // Gentle depth vignette.
-    col *= 0.88 + 0.14 * dome;
+    // Gentle depth: fade the film slightly toward the rim so it melts into the
+    // frame's glass rather than ending on a hard edge.
+    a *= 0.82 + 0.18 * dome;
 
-    gl_FragColor = vec4(col, 1.0);
+    gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
   }
 `;
 
@@ -100,9 +110,23 @@ function FlagFallback() {
       viewBox="0 0 32 32"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="32" height="32" fill="#d82b27" />
-      <rect x="13" y="6" width="6" height="20" fill="#f8f6f2" />
-      <rect x="6" y="13" width="20" height="6" fill="#f8f6f2" />
+      <rect width="32" height="32" fill="#db6663" fillOpacity="0.5" />
+      <rect
+        x="13"
+        y="6"
+        width="6"
+        height="20"
+        fill="#fbfafa"
+        fillOpacity="0.72"
+      />
+      <rect
+        x="6"
+        y="13"
+        width="20"
+        height="6"
+        fill="#fbfafa"
+        fillOpacity="0.72"
+      />
     </svg>
   );
 }
@@ -122,7 +146,11 @@ export default function SwissFlagGlass({
     const fail = () => queueMicrotask(() => setFailed(true));
 
     const gl = canvas.getContext("webgl", {
-      alpha: false,
+      // Translucent output: the frame's glass (and the page behind it) shows
+      // through the tinted flag. Straight (non-premultiplied) alpha so the
+      // shader can output plain colour + coverage.
+      alpha: true,
+      premultipliedAlpha: false,
       antialias: true,
       depth: false,
       stencil: false,
