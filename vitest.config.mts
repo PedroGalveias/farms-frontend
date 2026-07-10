@@ -54,7 +54,7 @@ export default defineConfig({
         "components/FarmCard.tsx",
         "components/DirectoryToolbar.tsx",
         "components/saved/AddToCollectionMenu.tsx",
-        "components/SeasonalCard.tsx",
+        "components/home/HeroLivePanel.tsx",
         "components/ThemeToggle.tsx",
         "components/MobileTabBar.tsx",
         "components/NearestFarmCard.tsx",

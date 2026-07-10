@@ -134,13 +134,15 @@ export default function FarmsPageShell({
           {/* ---------- Editorial hero ---------- */}
           <section className="relative pt-10 sm:pt-14">
             <HomeHero
+              cantonCount={directory.cantonOptions.length}
+              farms={initialFarms}
               onAddFarm={requestAddFarm}
+              onOpenFarm={openFarm}
               serviceStatus={serviceStatus}
             />
 
             {/* ---------- Bento overview (informational — no duplicate CTAs) ---------- */}
             <BentoOverview
-              cantonCount={directory.cantonOptions.length}
               farms={initialFarms}
               mostWanted={directory.mostWanted}
               onOpenFarm={openFarm}

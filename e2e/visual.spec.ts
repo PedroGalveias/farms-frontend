@@ -28,12 +28,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 const mask = (page: import("@playwright/test").Page) => [
-  // Month-driven seasonal content — mask ONLY the seasonal card, not the
-  // whole hero+bento <section> that contains it (the earlier `section:has`
-  // selector masked the entire hero, so the Matterhorn was never checked).
-  page
-    .getByText(/in season now/i)
-    .locator("xpath=ancestor::div[contains(@class,'glass-card')][1]"),
+  // The hero live panel is month-driven (the in-season chips change with the
+  // calendar), so mask just that pane — the rest of the hero stays checked.
+  page.locator("div.hero-pane"),
 ];
 
 test.describe("visual", () => {

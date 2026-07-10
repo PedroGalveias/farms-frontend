@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ShoppingBasket } from "lucide-react";
+import { ArrowRight, MapPin, Route, ShoppingBasket } from "lucide-react";
 import Reveal from "@/components/motion/Reveal";
 import { useT } from "@/components/i18n/LanguageProvider";
 
@@ -40,17 +40,36 @@ export default function GreenSlabCta() {
             </div>
           </div>
 
-          <div
-            aria-hidden
-            className="relative flex min-h-[260px] flex-col items-center justify-center gap-3 bg-[#16713f] text-white/70 lg:min-h-[460px]"
-          >
+          {/* How it works — the three quick-search steps, right where the CTA
+              sits. */}
+          <div className="relative flex min-h-[260px] flex-col justify-center gap-7 bg-[#16713f] px-6 py-14 text-white sm:px-12 lg:min-h-[460px]">
             <div className="absolute inset-0 [background:radial-gradient(120%_120%_at_70%_-10%,rgba(255,255,255,0.12),transparent_60%)]" />
-            <span className="relative grid h-14 w-14 place-items-center rounded-full bg-white/15 text-white">
-              <ShoppingBasket className="h-6 w-6" />
-            </span>
-            <span className="relative text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
-              {t("img_farmPhotography")}
-            </span>
+            <ol className="relative space-y-7">
+              {(
+                [
+                  { icon: MapPin, key: "1" },
+                  { icon: ShoppingBasket, key: "2" },
+                  { icon: Route, key: "3" },
+                ] as const
+              ).map(({ icon: Icon, key }, index) => (
+                <li className="flex items-start gap-4" key={key}>
+                  <span className="relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/15 text-white">
+                    <Icon className="h-5 w-5" />
+                    <span className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-white text-[10px] font-black text-[#14161b]">
+                      {index + 1}
+                    </span>
+                  </span>
+                  <div>
+                    <p className="text-base font-bold leading-6">
+                      {t(`slab_step${key}_title`)}
+                    </p>
+                    <p className="mt-0.5 max-w-xs text-sm leading-6 text-white/65">
+                      {t(`slab_step${key}_body`)}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </section>

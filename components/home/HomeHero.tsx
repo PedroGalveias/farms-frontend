@@ -9,10 +9,10 @@ import {
   ShieldAlert,
   Sparkles,
 } from "lucide-react";
-import SwitzerlandRelief from "@/components/hero/SwitzerlandRelief";
+import HeroLivePanel from "@/components/home/HeroLivePanel";
 import Magnetic from "@/components/motion/Magnetic";
 import { useT } from "@/components/i18n/LanguageProvider";
-import type { ServiceStatus } from "@/types/farm";
+import type { Farm, ServiceStatus } from "@/types/farm";
 
 const serviceStatusCopy = {
   degraded: {
@@ -38,9 +38,15 @@ const serviceStatusCopy = {
 export default function HomeHero({
   serviceStatus,
   onAddFarm,
+  farms,
+  cantonCount,
+  onOpenFarm,
 }: {
   serviceStatus: ServiceStatus;
   onAddFarm: () => void;
+  farms: Farm[];
+  cantonCount: number;
+  onOpenFarm: (farm: Farm) => void;
 }) {
   const t = useT();
   const statusMeta = serviceStatusCopy[serviceStatus];
@@ -72,7 +78,7 @@ export default function HomeHero({
         </div>
 
         <h1
-          className="rise-in mt-6 text-[clamp(3rem,7.5vw,5.5rem)] font-black leading-[0.9] tracking-[-0.045em] text-ink"
+          className="rise-in mt-6 text-[clamp(2.5rem,5.5vw,4rem)] font-black leading-[0.9] tracking-[-0.045em] text-ink"
           style={{ ["--rise-delay" as string]: "80ms" }}
         >
           {t("hero_lead")}{" "}
@@ -113,15 +119,13 @@ export default function HomeHero({
         </div>
       </div>
 
-      {/* The hero pane frames a detailed relief map of Switzerland — the
-          country's outline filled with its alpine topography and lakes, a
-          Swiss, on-brand motif. Static vector, so it costs nothing. */}
-      <div
-        aria-hidden
-        className="glass hero-pane rise-in relative grid min-h-[260px] place-items-center overflow-hidden rounded-[32px] p-4 lg:min-h-0"
-      >
-        <SwitzerlandRelief className="w-full" />
-      </div>
+      {/* The hero pane is a living dashboard of the directory: what's in
+          season, the newest farms, and coverage — real data over decoration. */}
+      <HeroLivePanel
+        cantonCount={cantonCount}
+        farms={farms}
+        onOpenFarm={onOpenFarm}
+      />
     </div>
   );
 }
