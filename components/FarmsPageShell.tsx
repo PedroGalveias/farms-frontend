@@ -13,7 +13,6 @@ import CantonRail from "@/components/home/CantonRail";
 import DirectoryResults from "@/components/home/DirectoryResults";
 import EditorialTicker from "@/components/home/EditorialTicker";
 import GreenSlabCta from "@/components/home/GreenSlabCta";
-import SwissBanner from "@/components/home/SwissBanner";
 import HomeHero from "@/components/home/HomeHero";
 import { useFarmDirectory } from "@/components/home/useFarmDirectory";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -236,9 +235,6 @@ export default function FarmsPageShell({
             visibleFarms={directory.visibleFarms}
           />
         </main>
-
-        {/* ---------- Proudly-Swiss banner (ambient WebGL flag) ---------- */}
-        <SwissBanner />
 
         {/* ---------- Full-bleed green slab ---------- */}
         <GreenSlabCta />
