@@ -26,10 +26,10 @@ export default function BentoOverview({
   const { locale } = useLanguage();
 
   return (
-    <Reveal className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4 sm:[grid-auto-rows:158px]">
+    <Reveal className="mt-5 grid items-stretch gap-4 sm:grid-cols-[2fr_1fr]">
       <NearestFarmCard farms={farms} onOpenFarm={onOpenFarm} />
 
-      <div className="glass glass-card col-span-2 flex min-h-[120px] flex-col justify-center gap-2 rounded-[22px] px-5 py-4 sm:row-span-2">
+      <div className="glass glass-card flex min-h-[120px] flex-col justify-center gap-2 rounded-[22px] px-5 py-4">
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60">
           {t("bento_mostWanted")}
         </p>
