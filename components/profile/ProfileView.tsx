@@ -1,65 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
+  ArrowRight,
   AtSign,
+  Bookmark,
+  Clock,
+  FolderHeart,
   Hammer,
+  Languages,
   LogOut,
+  MoonStar,
   ShieldCheck,
+  Sparkles,
   UserRound,
 } from "lucide-react";
-import { useT } from "@/components/i18n/LanguageProvider";
+import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
+import ThemeToggle from "@/components/ThemeToggle";
+import { LOCALES } from "@/lib/i18n";
+import { motionForced, setMotionForced } from "@/lib/motion";
 
 /**
- * Account / profile management. The backend doesn't expose editable profile
- * fields yet, so the personal-details and security sections are a clearly
- * labelled "work in progress" preview: disabled inputs that show the intended
- * shape without pretending to save anything. The Account section shows the
- * real data we do have (id + role).
+ * Account home. The library (saved farms, collections, recently viewed) and
+ * preferences (language, theme, motion) are device-local and shown to
+ * everyone; the account section needs a session. Editable profile fields are
+ * still a clearly-labelled work-in-progress preview — the backend doesn't
+ * expose them yet.
  */
 export default function ProfileView() {
   const t = useT();
   const { user, loading, openAuth, logout } = useAuth();
-
-  // Signed-out (or still resolving the session): a simple prompt to log in.
-  if (!user) {
-    return (
-      <main className="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-24">
-        <Link
-          className="inline-flex items-center gap-2 text-sm font-semibold text-ink/60 transition hover:text-ink"
-          href="/"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t("farm_back")}
-        </Link>
-        <div className="glass mt-10 rounded-3xl p-8 text-center">
-          <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-pine/10 text-pine">
-            <UserRound className="h-6 w-6" />
-          </span>
-          <h1 className="mt-4 text-2xl font-black tracking-[-0.03em] text-ink">
-            {t("profile_title")}
-          </h1>
-          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-ink/60">
-            {t("profile_signinPrompt")}
-          </p>
-          {!loading ? (
-            <button
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
-              onClick={() => openAuth("login")}
-              type="button"
-            >
-              {t("profile_signinCta")}
-            </button>
-          ) : null}
-        </div>
-      </main>
-    );
-  }
-
-  const roleLabel =
-    user.role === "admin" ? t("account_role_admin") : t("account_role_user");
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
@@ -80,87 +54,278 @@ export default function ProfileView() {
             {t("profile_subtitle")}
           </p>
         </div>
-        <button
-          className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-5 py-2.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
-          onClick={() => void logout()}
-          type="button"
-        >
-          <LogOut className="h-4 w-4" />
-          {t("account_logout")}
-        </button>
+        {user ? (
+          <button
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-5 py-2.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            onClick={() => void logout()}
+            type="button"
+          >
+            <LogOut className="h-4 w-4" />
+            {t("account_logout")}
+          </button>
+        ) : null}
       </header>
 
-      {/* Work-in-progress notice */}
-      <div className="mt-8 flex items-start gap-3 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3.5">
-        <Hammer className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-        <div>
-          <p className="text-sm font-bold text-amber-900">
-            {t("profile_wip_badge")}
+      {/* Signed out: a compact sign-in invitation (the library and
+          preferences below are device-local and work without an account). */}
+      {!user ? (
+        <div className="glass mt-8 flex flex-wrap items-center justify-between gap-4 rounded-3xl p-6">
+          <div className="flex items-center gap-3.5">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-pine/10 text-pine">
+              <UserRound className="h-5 w-5" />
+            </span>
+            <p className="max-w-sm text-sm leading-6 text-ink/60">
+              {t("profile_signinPrompt")}
+            </p>
+          </div>
+          {!loading ? (
+            <button
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+              onClick={() => openAuth("login")}
+              type="button"
+            >
+              {t("profile_signinCta")}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* Account (real data) */}
+      {user ? <AccountSection /> : null}
+
+      <LibrarySection />
+      <PreferencesSection />
+
+      {user ? (
+        <>
+          {/* Work-in-progress notice for the editable fields below. */}
+          <div className="mt-10 flex items-start gap-3 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3.5">
+            <Hammer className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <div>
+              <p className="text-sm font-bold text-amber-900">
+                {t("profile_wip_badge")}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-amber-800/80">
+                {t("profile_wip_note")}
+              </p>
+            </div>
+          </div>
+
+          <ProfileSection
+            icon={<UserRound className="h-4 w-4" />}
+            title={t("profile_personal")}
+            wipLabel={t("profile_comingSoon")}
+          >
+            <Field
+              icon={<UserRound className="h-4 w-4" />}
+              label={t("profile_displayName")}
+              placeholder="—"
+            />
+            <Field
+              icon={<AtSign className="h-4 w-4" />}
+              label={t("profile_email")}
+              placeholder="—"
+            />
+          </ProfileSection>
+
+          <ProfileSection
+            icon={<ShieldCheck className="h-4 w-4" />}
+            title={t("profile_security")}
+            wipLabel={t("profile_comingSoon")}
+          >
+            <Field
+              icon={<ShieldCheck className="h-4 w-4" />}
+              label={t("profile_password")}
+              placeholder="••••••••••••"
+              type="password"
+            />
+          </ProfileSection>
+        </>
+      ) : null}
+    </main>
+  );
+}
+
+function AccountSection() {
+  const t = useT();
+  const { user } = useAuth();
+  if (!user) return null;
+  const roleLabel =
+    user.role === "admin" ? t("account_role_admin") : t("account_role_user");
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
+        {t("profile_account")}
+      </h2>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="glass-inset rounded-2xl px-4 py-3.5">
+          <p className="text-xs font-semibold text-ink/60">
+            {t("profile_accountId")}
           </p>
-          <p className="mt-1 text-sm leading-6 text-amber-800/80">
-            {t("profile_wip_note")}
+          <p className="mt-1.5 truncate font-mono text-sm text-ink/80">
+            {user.user_id}
+          </p>
+        </div>
+        <div className="glass-inset rounded-2xl px-4 py-3.5">
+          <p className="text-xs font-semibold text-ink/60">
+            {t("profile_role")}
+          </p>
+          <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-semibold text-pine">
+            <ShieldCheck className="h-4 w-4" />
+            {roleLabel}
           </p>
         </div>
       </div>
+    </section>
+  );
+}
 
-      {/* Real account data */}
-      <section className="mt-8">
-        <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
-          {t("profile_account")}
-        </h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div className="glass-inset rounded-2xl px-4 py-3.5">
-            <p className="text-xs font-semibold text-ink/60">
-              {t("profile_accountId")}
+/** Saved farms, collections, recently viewed — the visitor's local library. */
+function LibrarySection() {
+  const t = useT();
+  const { favoritesCount, collections, recent } = usePersonalization();
+
+  const tiles = [
+    {
+      href: "/saved",
+      icon: <Bookmark className="h-5 w-5" />,
+      label: t("profile_savedFarms"),
+      count: favoritesCount,
+    },
+    {
+      href: "/saved",
+      icon: <FolderHeart className="h-5 w-5" />,
+      label: t("profile_collections"),
+      count: collections.length,
+    },
+    {
+      href: "/",
+      icon: <Clock className="h-5 w-5" />,
+      label: t("profile_recentlyViewed"),
+      count: recent.length,
+    },
+  ];
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
+        {t("profile_library")}
+      </h2>
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        {tiles.map((tile) => (
+          <Link
+            className="glass glass-card glass-interactive group rounded-2xl px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
+            href={tile.href}
+            key={tile.label}
+          >
+            <span className="flex items-center justify-between text-pine">
+              {tile.icon}
+              <ArrowRight className="h-4 w-4 text-ink/30 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </span>
+            <p className="mt-3 text-3xl font-black tracking-[-0.04em] text-ink">
+              {tile.count}
             </p>
-            <p className="mt-1.5 truncate font-mono text-sm text-ink/80">
-              {user.user_id}
+            <p className="mt-0.5 text-xs font-semibold text-ink/60">
+              {tile.label}
             </p>
-          </div>
-          <div className="glass-inset rounded-2xl px-4 py-3.5">
-            <p className="text-xs font-semibold text-ink/60">
-              {t("profile_role")}
-            </p>
-            <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-semibold text-pine">
-              <ShieldCheck className="h-4 w-4" />
-              {roleLabel}
-            </p>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Language, theme, and motion — the device-local preferences. */
+function PreferencesSection() {
+  const t = useT();
+  const { locale, setLocale } = useLanguage();
+
+  // `motionForced` reads the DOM — resolve after mount to match SSR.
+  const [forced, setForced] = useState(false);
+  useEffect(() => {
+    queueMicrotask(() => setForced(motionForced()));
+  }, []);
+  const toggleMotion = () => {
+    const next = !forced;
+    setMotionForced(next);
+    setForced(next);
+  };
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
+        {t("profile_preferences")}
+      </h2>
+      <div className="mt-3 space-y-3">
+        {/* Language */}
+        <div className="glass-inset rounded-2xl px-4 py-3.5">
+          <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
+            <Languages className="h-4 w-4" />
+            {t("profile_language")}
+          </p>
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {LOCALES.map(({ code, label }) => (
+              <button
+                aria-pressed={locale === code}
+                className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${
+                  locale === code
+                    ? "bg-ink text-cloud"
+                    : "bg-tone text-ink/70 hover:text-ink"
+                }`}
+                key={code}
+                onClick={() => setLocale(code)}
+                type="button"
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
-      </section>
 
-      {/* WIP: personal details */}
-      <ProfileSection
-        icon={<UserRound className="h-4 w-4" />}
-        title={t("profile_personal")}
-        wipLabel={t("profile_comingSoon")}
-      >
-        <Field
-          icon={<UserRound className="h-4 w-4" />}
-          label={t("profile_displayName")}
-          placeholder="—"
-        />
-        <Field
-          icon={<AtSign className="h-4 w-4" />}
-          label={t("profile_email")}
-          placeholder="—"
-        />
-      </ProfileSection>
+        {/* Theme */}
+        <div className="glass-inset flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5">
+          <div>
+            <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
+              <MoonStar className="h-4 w-4" />
+              {t("profile_theme")}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-ink/70">
+              {t("profile_theme_hint")}
+            </p>
+          </div>
+          <ThemeToggle />
+        </div>
 
-      {/* WIP: security */}
-      <ProfileSection
-        icon={<ShieldCheck className="h-4 w-4" />}
-        title={t("profile_security")}
-        wipLabel={t("profile_comingSoon")}
-      >
-        <Field
-          icon={<ShieldCheck className="h-4 w-4" />}
-          label={t("profile_password")}
-          placeholder="••••••••••••"
-          type="password"
-        />
-      </ProfileSection>
-    </main>
+        {/* Motion override */}
+        <div className="glass-inset flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5">
+          <div>
+            <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
+              <Sparkles className="h-4 w-4" />
+              {t("profile_motion")}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-ink/70">
+              {t("profile_motion_hint")}
+            </p>
+          </div>
+          <button
+            aria-pressed={forced}
+            className={`relative inline-flex h-7 w-[52px] shrink-0 items-center rounded-full border transition-colors duration-300 ${
+              forced ? "border-pine/40 bg-pine" : "border-line bg-tone"
+            }`}
+            onClick={toggleMotion}
+            type="button"
+          >
+            <span
+              className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.3)] transition-[left] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                forced ? "left-[26px]" : "left-1"
+              }`}
+            />
+            <span className="sr-only">{t("profile_motion")}</span>
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 
