@@ -95,7 +95,20 @@ export default function SiteFooter() {
               {APP_VERSION}
             </span>
           </p>
-          <p>{t("footer_tagline")}</p>
+          <p className="flex items-center gap-2">
+            {/* Small Swiss flag — official red, square, softly rounded. */}
+            <svg
+              aria-hidden
+              className="h-3.5 w-3.5 shrink-0"
+              viewBox="0 0 32 32"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect width="32" height="32" rx="7" fill="#da291c" />
+              <rect x="13" y="7" width="6" height="18" fill="#fff" />
+              <rect x="7" y="13" width="18" height="6" fill="#fff" />
+            </svg>
+            {t("footer_tagline")}
+          </p>
         </div>
       </div>
     </footer>

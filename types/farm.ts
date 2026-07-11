@@ -7,6 +7,8 @@ export interface Farm {
   categories: string[];
   created_at: string;
   updated_at: string | null;
+  /** Gallery image URLs — not yet served by the backend (template only). */
+  photos?: string[];
 }
 
 export interface CreateFarmInput {

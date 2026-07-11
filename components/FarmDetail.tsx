@@ -3,7 +3,14 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ExternalLink, Heart, MapPin, Route } from "lucide-react";
+import {
+  Camera,
+  ArrowLeft,
+  ExternalLink,
+  Heart,
+  MapPin,
+  Route,
+} from "lucide-react";
 import CopyButton from "@/components/CopyButton";
 import MapPlaceholder from "@/components/MapPlaceholder";
 import ShareButton from "@/components/ShareButton";
@@ -209,6 +216,50 @@ export default function FarmDetail({
           </div>
         </div>
       </div>
+
+      {/* Photo gallery — the backend doesn't serve farm photos yet, so this
+          renders as a quiet template until `farm.photos` arrives. */}
+      <section aria-labelledby="farm-photos-title" className="mt-7">
+        <h2
+          className="text-xs font-semibold uppercase tracking-[0.12em] text-ink/60"
+          id="farm-photos-title"
+        >
+          {t("farm_photos")}
+        </h2>
+        {farm.photos && farm.photos.length > 0 ? (
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            {/* Plain <img>: remote gallery URLs with unknown hosts —
+                next/image needs a domain allowlist we can't provide until the
+                backend ships photos. */}
+            {farm.photos.map((src) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                alt=""
+                className="aspect-[4/3] w-full rounded-2xl object-cover"
+                key={src}
+                loading="lazy"
+                src={src}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-3 grid grid-cols-3 gap-2.5">
+            {[0, 1, 2].map((slot) => (
+              <div
+                className="glass-inset grid aspect-[4/3] place-items-center rounded-2xl"
+                key={slot}
+              >
+                {slot === 1 ? (
+                  <Camera aria-hidden className="h-5 w-5 text-ink/25" />
+                ) : null}
+              </div>
+            ))}
+            <p className="col-span-3 text-xs leading-5 text-ink/50">
+              {t("farm_photosSoon")}
+            </p>
+          </div>
+        )}
+      </section>
 
       {hasCoordinates ? (
         <div className="mt-7">

@@ -93,12 +93,12 @@ export default function NearestFarmCard({
   };
 
   const cardClassName =
-    "col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine-surface p-5 text-white sm:row-span-2 sm:min-h-0";
+    "flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine-surface p-5 text-white";
 
   if (status === "ready" && nearest) {
     return (
       <>
-        <div className="group col-span-2 flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine-surface p-5 text-white sm:row-span-2 sm:min-h-0">
+        <div className="group flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine-surface p-5 text-white">
           <div className="flex items-center justify-between gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold">
               <Navigation className="h-3.5 w-3.5" />

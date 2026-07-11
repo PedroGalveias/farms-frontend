@@ -57,7 +57,7 @@ export default function MotionPrompt() {
       // Bottom-RIGHT on every size, above the mobile tab bar, and it stays put
       // until the user picks (no auto-dismiss) — the earlier build vanished too
       // fast to read. z-[60] clears chrome (rail/tab bar are z-40).
-      className="glass glass-card toast-enter fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(22rem,calc(100vw-2rem))] rounded-3xl p-4 lg:bottom-6 lg:right-6"
+      className="glass glass-card toast-enter cursor-zone fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(22rem,calc(100vw-2rem))] rounded-3xl p-4 lg:bottom-6 lg:right-6"
       role="dialog"
       aria-live="polite"
     >

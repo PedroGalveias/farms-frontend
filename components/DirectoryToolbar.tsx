@@ -53,12 +53,10 @@ interface DirectoryToolbarProps {
   onUseLocation: () => void;
   onViewModeChange: (value: DirectoryViewMode) => void;
   radiusKm: number | null;
-  resultsCount: number;
   searchTerm: string;
   selectedCanton: string;
   selectedCategories: string[];
   sortOption: FarmSortOption;
-  totalCount: number;
   viewMode: DirectoryViewMode;
 }
 
@@ -107,12 +105,10 @@ export default function DirectoryToolbar({
   onUseLocation,
   onViewModeChange,
   radiusKm,
-  resultsCount,
   searchTerm,
   selectedCanton,
   selectedCategories,
   sortOption,
-  totalCount,
   viewMode,
 }: DirectoryToolbarProps) {
   const t = useT();
@@ -173,19 +169,11 @@ export default function DirectoryToolbar({
         <h2 className="text-xl font-bold tracking-[-0.03em] text-ink">
           {t("toolbar_title")}
         </h2>
-        <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
-          <span className="rounded-full bg-tone px-3 py-1.5 text-ink/70">
-            {t("toolbar_shown", { n: resultsCount })}
+        {activeFiltersCount > 0 ? (
+          <span className="rounded-full bg-pine/10 px-3 py-1.5 text-xs font-semibold text-pine">
+            {t("toolbar_filters", { n: activeFiltersCount })}
           </span>
-          <span className="rounded-full bg-tone px-3 py-1.5 text-ink/70">
-            {t("toolbar_total", { n: totalCount })}
-          </span>
-          {activeFiltersCount > 0 ? (
-            <span className="rounded-full bg-pine/10 px-3 py-1.5 text-pine">
-              {t("toolbar_filters", { n: activeFiltersCount })}
-            </span>
-          ) : null}
-        </div>
+        ) : null}
       </div>
 
       <div className="mt-4 grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_auto]">

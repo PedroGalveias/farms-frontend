@@ -65,7 +65,7 @@ export default function SideRail() {
   useSlidingIndicator(navRef, activeRef, indicatorRef, active);
 
   return (
-    <aside className="glass glass-chrome fixed bottom-3 left-3 top-3 z-40 hidden w-[64px] flex-col items-center justify-between rounded-[28px] py-5 lg:flex">
+    <aside className="glass glass-chrome cursor-zone fixed bottom-3 left-3 top-3 z-40 hidden w-[64px] flex-col items-center justify-between rounded-[28px] py-5 lg:flex">
       <Link
         aria-label="farms — home"
         className="block h-11 w-11 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-rotate-6 hover:scale-105"
