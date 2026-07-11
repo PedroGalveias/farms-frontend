@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getFarms } from "@/lib/farms-service";
 import { SWISS_CANTONS, getRegionKeys } from "@/lib/farms";
+import { getProductSlugs } from "@/lib/product-pages";
 import { getSiteUrl } from "@/lib/site";
 
 // Refresh the sitemap hourly rather than per-request; the farm list changes
@@ -18,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     { url: `${siteUrl}/canton`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${siteUrl}/product`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${siteUrl}/seasonal`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${siteUrl}/saved`, changeFrequency: "monthly", priority: 0.4 },
   ];
@@ -33,7 +35,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "monthly",
     priority: 0.5,
   }));
-  staticRoutes.push(...cantonRoutes, ...regionRoutes);
+  // Product landing pages — the second axis of the internal-link web.
+  const productRoutes: MetadataRoute.Sitemap = getProductSlugs().map(
+    (slug) => ({
+      url: `${siteUrl}/product/${slug}`,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }),
+  );
+  staticRoutes.push(...cantonRoutes, ...regionRoutes, ...productRoutes);
 
   try {
     const farms = await getFarms();
