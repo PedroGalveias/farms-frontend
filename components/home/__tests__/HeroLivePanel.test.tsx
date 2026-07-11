@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import HeroLivePanel from "@/components/home/HeroLivePanel";
+import { SEASONAL_BY_MONTH } from "@/lib/seasonal";
 import type { Farm } from "@/types/farm";
 
 function farm(id: string, name: string, createdAt: string): Farm {
@@ -43,6 +44,11 @@ describe("HeroLivePanel", () => {
     expect(link.querySelectorAll("span.rounded-full").length).toBeGreaterThan(
       0,
     );
+    // Months with more items than the chip limit surface the surplus as +N.
+    const monthItems = SEASONAL_BY_MONTH[new Date().getMonth()] ?? [];
+    if (monthItems.length > 4) {
+      expect(screen.getByText(`+${monthItems.length - 4}`)).toBeInTheDocument();
+    }
   });
 
   it("lists the three newest farms, most recent first", () => {

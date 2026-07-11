@@ -31,7 +31,10 @@ export default function HeroLivePanel({
   const { locale } = useLanguage();
 
   const month = new Date().getMonth();
-  const inSeason = (SEASONAL_BY_MONTH[month] ?? []).slice(0, IN_SEASON_LIMIT);
+  const monthItems = SEASONAL_BY_MONTH[month] ?? [];
+  const inSeason = monthItems.slice(0, IN_SEASON_LIMIT);
+  // The chips are a door, not a wall — surface how much more the calendar has.
+  const extraCount = monthItems.length - inSeason.length;
 
   // Newest additions to the directory, most recent first.
   const newest = [...farms]
@@ -71,6 +74,11 @@ export default function HeroLivePanel({
               {produceLabel(key, locale)}
             </span>
           ))}
+          {extraCount > 0 ? (
+            <span className="inline-flex items-center rounded-full bg-pine/10 px-2.5 py-1 text-xs font-bold text-pine">
+              +{extraCount}
+            </span>
+          ) : null}
         </p>
       </Link>
 

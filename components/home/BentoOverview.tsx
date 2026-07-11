@@ -10,6 +10,7 @@ interface BentoOverviewProps {
   farms: Farm[];
   mostWanted: string[];
   onOpenFarm: (farm: Farm) => void;
+  onSelectCategory: (category: string) => void;
 }
 
 /**
@@ -21,6 +22,7 @@ export default function BentoOverview({
   farms,
   mostWanted,
   onOpenFarm,
+  onSelectCategory,
 }: BentoOverviewProps) {
   const t = useT();
   const { locale } = useLanguage();
@@ -33,12 +35,22 @@ export default function BentoOverview({
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60">
           {t("bento_mostWanted")}
         </p>
-        <p className="text-sm font-bold leading-snug text-pine">
-          {mostWanted
-            .slice(0, 3)
-            .map((key) => tagLabel(key, locale))
-            .join(" · ") || "—"}
-        </p>
+        {/* Tappable: each product filters the directory below. */}
+        <div className="flex flex-wrap gap-1.5">
+          {mostWanted.slice(0, 3).map((key) => (
+            <button
+              className="glass-chip rounded-full px-3 py-1.5 text-sm font-bold text-pine transition-colors hover:bg-pine/10 focus-visible:ring-2 focus-visible:ring-pine/40 active:scale-[0.97]"
+              key={key}
+              onClick={() => onSelectCategory(key)}
+              type="button"
+            >
+              {tagLabel(key, locale)}
+            </button>
+          ))}
+          {mostWanted.length === 0 ? (
+            <p className="text-sm font-bold text-pine">—</p>
+          ) : null}
+        </div>
       </div>
     </Reveal>
   );

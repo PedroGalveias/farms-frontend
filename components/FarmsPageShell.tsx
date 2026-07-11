@@ -146,6 +146,13 @@ export default function FarmsPageShell({
               farms={initialFarms}
               mostWanted={directory.mostWanted}
               onOpenFarm={openFarm}
+              onSelectCategory={(category) => {
+                // A most-wanted chip filters the directory and jumps to it.
+                directory.toggleCategory(category);
+                document
+                  .getElementById("directory")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
             />
           </section>
 
@@ -184,12 +191,10 @@ export default function FarmsPageShell({
               onUseLocation={directory.locateMe}
               onViewModeChange={directory.setViewMode}
               radiusKm={directory.radiusKm}
-              resultsCount={directory.visibleFarms.length}
               searchTerm={directory.searchTerm}
               selectedCanton={directory.selectedCanton}
               selectedCategories={directory.selectedCategories}
               sortOption={directory.effectiveSort}
-              totalCount={initialFarms.length}
               viewMode={directory.viewMode}
             />
           </div>

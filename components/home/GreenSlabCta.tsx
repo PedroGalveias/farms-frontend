@@ -52,18 +52,18 @@ export default function GreenSlabCta() {
                   { icon: Route, key: "3" },
                 ] as const
               ).map(({ icon: Icon, key }, index) => (
-                <li className="flex items-start gap-4" key={key}>
-                  <span className="relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/15 text-white">
-                    <Icon className="h-5 w-5" />
-                    <span className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-white text-[10px] font-black text-[#14161b]">
+                <li className="flex items-start gap-5" key={key}>
+                  <span className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/15 text-white">
+                    <Icon className="h-6 w-6" />
+                    <span className="absolute -right-1.5 -top-1.5 grid h-6 w-6 place-items-center rounded-full bg-white text-[11px] font-black text-[#14161b]">
                       {index + 1}
                     </span>
                   </span>
                   <div>
-                    <p className="text-base font-bold leading-6">
+                    <p className="text-lg font-bold leading-7">
                       {t(`slab_step${key}_title`)}
                     </p>
-                    <p className="mt-0.5 max-w-xs text-sm leading-6 text-white/65">
+                    <p className="mt-1 max-w-xs text-sm leading-6 text-white/65">
                       {t(`slab_step${key}_body`)}
                     </p>
                   </div>

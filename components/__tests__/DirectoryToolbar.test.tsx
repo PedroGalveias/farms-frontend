@@ -1,6 +1,12 @@
 import { type ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import DirectoryToolbar from "@/components/DirectoryToolbar";
 import type { Farm } from "@/types/farm";
@@ -60,12 +66,10 @@ function makeProps(overrides: Partial<ToolbarProps> = {}): ToolbarProps {
     onUseLocation: vi.fn(),
     onViewModeChange: vi.fn(),
     radiusKm: null,
-    resultsCount: 1,
     searchTerm: "",
     selectedCanton: "all",
     selectedCategories: [],
     sortOption: "newest" as const,
-    totalCount: 1,
     viewMode: "grid" as const,
     ...overrides,
   };
@@ -82,10 +86,12 @@ function renderToolbar(overrides: Partial<ToolbarProps> = {}) {
 }
 
 describe("DirectoryToolbar", () => {
-  it("shows the result and total counts", () => {
-    renderToolbar({ resultsCount: 7, totalCount: 42 });
-    expect(screen.getByText(/7/)).toBeInTheDocument();
-    expect(screen.getByText(/42/)).toBeInTheDocument();
+  it("shows the active-filters pill only when filters are set", () => {
+    renderToolbar({ activeFiltersCount: 0 });
+    expect(screen.queryByText("2 filters")).not.toBeInTheDocument();
+    cleanup();
+    renderToolbar({ activeFiltersCount: 2 });
+    expect(screen.getByText("2 filters")).toBeInTheDocument();
   });
 
   it("changing the sort fires onSortOptionChange", () => {
