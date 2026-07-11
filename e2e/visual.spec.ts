@@ -1,3 +1,5 @@
+import { existsSync, readdirSync } from "node:fs";
+import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 // Visual regression net. Runs under OS reduced-motion so every page is
@@ -5,13 +7,20 @@ import { expect, test } from "@playwright/test";
 // ambient WebGL canvas yields to the static CSS orbs, count-ups show final
 // values. The seasonal month card changes monthly, so it's masked.
 //
-// Baselines are generated on macOS (`npx playwright test visual
-// --update-snapshots`) and committed; CI runs Linux, whose font rendering
-// differs pixel-by-pixel, so the spec is skipped there until Linux baselines
-// are added via a CI artifact run.
+// Baselines are per-OS (font rendering differs pixel-by-pixel): macOS ones
+// are generated locally (`npx playwright test visual --update-snapshots`),
+// Linux ones by the "Visual baselines (linux)" workflow_dispatch job. The
+// skip below SELF-ARMS: on CI the spec only runs once *-linux.png baselines
+// exist, so merging spec changes is safe before the workflow has ever run.
+const SNAPSHOT_DIR = path.join(__dirname, "visual.spec.ts-snapshots");
+const hasLinuxBaselines =
+  existsSync(SNAPSHOT_DIR) &&
+  readdirSync(SNAPSHOT_DIR).some((file) => file.endsWith("-linux.png"));
 test.skip(
-  !!process.env.CI,
-  "visual baselines are macOS-rendered; generate linux baselines to enable in CI",
+  !!process.env.CI &&
+    !process.env.UPDATE_VISUAL_BASELINES &&
+    !hasLinuxBaselines,
+  "no linux baselines yet — dispatch the 'Visual baselines (linux)' workflow to arm this spec in CI",
 );
 test.skip(
   ({ browserName }) => browserName !== "chromium",

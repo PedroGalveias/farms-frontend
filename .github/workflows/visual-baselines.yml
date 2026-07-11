@@ -1,0 +1,79 @@
+name: Visual baselines (linux)
+
+# Manually dispatched: regenerates the Linux visual-regression baselines on
+# the same OS CI uses and commits them to the branch it was dispatched on.
+# Once *-linux.png baselines exist, the visual spec stops skipping in CI and
+# screenshots start gating merges (see the self-arming check in
+# e2e/visual.spec.ts).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  baselines:
+    name: Regenerate linux baselines
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve Playwright version
+        id: playwright
+        run: |
+          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-cfw-${{ steps.playwright.outputs.version }}
+
+      - name: Install Playwright (browsers + OS deps)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Install Playwright OS deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      # The visual spec is chromium-only; --update-snapshots writes the
+      # *-linux.png set next to the darwin ones.
+      - name: Generate linux baselines
+        run: npx playwright test visual --project=chromium --update-snapshots
+        env:
+          # The self-arming CI skip must not trigger while REGENERATING.
+          UPDATE_VISUAL_BASELINES: "1"
+
+      - name: Commit baselines
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e/visual.spec.ts-snapshots/*-linux.png
+          if git diff --cached --quiet; then
+            echo "Baselines unchanged — nothing to commit."
+          else
+            git commit -m "test(visual): regenerate linux baselines"
+            git push
+          fi
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines-report
+          path: playwright-report/
+          retention-days: 7
