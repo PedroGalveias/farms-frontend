@@ -27,7 +27,12 @@ import "./globals.css";
 // Set the theme class before paint to avoid a flash of the wrong theme, and
 // the force-motion class (the user's "always animate" override of the OS
 // reduced-motion setting — see lib/motion.ts) so animations don't flash-freeze.
-const themeScript = `(function(){try{var t=localStorage.getItem("farms.theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.classList.add("dark")}if(localStorage.getItem("farms.motion")==="on"){document.documentElement.classList.add("force-motion")}}catch(e){}})();`;
+// Applies the theme before paint. Modes: light/dark are explicit; system asks
+// the media query; sun replays the LAST RESOLVED theme ("farms.theme", kept
+// fresh by ThemeProvider) and the provider re-resolves right after mount --
+// worst case is a brief stale theme after a sunrise/sunset passed while away,
+// never a flash.
+const themeScript = `(function(){try{var m=localStorage.getItem("farms.themeMode");var t=localStorage.getItem("farms.theme");var dark;if(m==="dark"){dark=true}else if(m==="light"){dark=false}else if(m==="system"){dark=window.matchMedia("(prefers-color-scheme: dark)").matches}else if(m==="sun"){dark=t==="dark"}else{dark=t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)}if(dark){document.documentElement.classList.add("dark")}if(localStorage.getItem("farms.motion")==="on"){document.documentElement.classList.add("force-motion")}}catch(e){}})();`;
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -63,7 +68,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   title: {
-    default: "Swiss farms",
+    default: "farms.",
     template: "%s | farms",
   },
   appleWebApp: {

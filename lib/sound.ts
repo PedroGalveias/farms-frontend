@@ -6,6 +6,26 @@
 // Deliberately quiet and brief so it reads as a subtle confirmation, never a
 // notification. Reuses one AudioContext across the session.
 
+const SOUND_KEY = "farms.sound";
+
+/** Whether the confirmation tick is enabled (on unless explicitly muted). */
+export function soundEnabled(): boolean {
+  try {
+    return localStorage.getItem(SOUND_KEY) !== "off";
+  } catch {
+    return true;
+  }
+}
+
+export function setSoundEnabled(on: boolean): void {
+  try {
+    if (on) localStorage.removeItem(SOUND_KEY);
+    else localStorage.setItem(SOUND_KEY, "off");
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 let ctx: AudioContext | null = null;
 
 function getContext(): AudioContext | null {
@@ -30,6 +50,7 @@ function getContext(): AudioContext | null {
  * is unavailable or blocked, it simply does nothing.
  */
 export function playTick(): void {
+  if (!soundEnabled()) return;
   const audio = getContext();
   if (!audio) return;
   try {
