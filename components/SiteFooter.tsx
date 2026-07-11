@@ -62,6 +62,10 @@ export default function SiteFooter() {
                 {t("home_browseByCanton")}
                 <HoverArrow />
               </Link>
+              <Link className={footerLinkClassName} href="/product">
+                {t("product_hub_title")}
+                <HoverArrow />
+              </Link>
               <Link className={footerLinkClassName} href="/seasonal">
                 {t("seasonal_title")}
                 <HoverArrow />

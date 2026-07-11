@@ -10,6 +10,8 @@ const ROUTES = [
   "/seasonal",
   "/canton",
   "/canton/be",
+  "/product",
+  "/product/dairy",
   "/region/region_mittelland",
   "/farm/11111111-1111-4111-8111-111111111111",
   "/profile",
