@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import CantonDirectory, {
   type CantonGroup,
 } from "@/components/canton/CantonDirectory";
 import { getFarms } from "@/lib/farms-service";
-import { localeFromAcceptLanguage, translate } from "@/lib/i18n";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  translate,
+  localeAlternates,
+} from "@/lib/i18n";
 import { SWISS_REGIONS, getCantonName, getCantonsInRegion } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
@@ -18,16 +22,19 @@ async function safeGetFarms(): Promise<Farm[]> {
   }
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const title = translate(locale, "canton_hub_title");
   const description = translate(locale, "canton_hub_subtitle");
   return {
     title,
     description,
-    alternates: { canonical: "/canton" },
+    alternates: localeAlternates("/canton"),
     openGraph: { title, description, type: "website", url: "/canton" },
   };
 }
@@ -41,10 +48,13 @@ function countByCanton(farms: Farm[]) {
   return counts;
 }
 
-export default async function CantonHubPage() {
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+export default async function CantonHubPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const farms = await safeGetFarms();
   const counts = countByCanton(farms);
 

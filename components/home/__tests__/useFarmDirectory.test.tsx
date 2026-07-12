@@ -9,7 +9,9 @@ import {
 import type { Farm } from "@/types/farm";
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh: vi.fn() }),
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 function farm(overrides: Partial<Farm> & Pick<Farm, "id">): Farm {

@@ -22,7 +22,8 @@ import CommandPalette from "@/components/command/CommandPalette";
 import KeyboardShortcuts from "@/components/command/KeyboardShortcuts";
 import ViewTransitions from "@/components/transitions/ViewTransitions";
 import ToastProvider from "@/components/ui/ToastProvider";
-import "./globals.css";
+import { LOCALE_CODES, isLocale, type Locale } from "@/lib/i18n";
+import "../globals.css";
 
 // Set the theme class before paint to avoid a flash of the wrong theme, and
 // the force-motion class (the user's "always animate" override of the OS
@@ -93,17 +94,27 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({
+// Pre-render one tree per locale; the middleware rewrites unprefixed URLs to
+// /en and passes /de|/fr|/it|/rm straight through.
+export function generateStaticParams() {
+  return LOCALE_CODES.map((lang) => ({ lang }));
+}
+
+export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ lang: string }>;
 }>) {
+  const { lang } = await params;
+  const locale: Locale = isLocale(lang) ? lang : "en";
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={archivo.variable}>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ThemeProvider>
-          <LanguageProvider>
+          <LanguageProvider initialLocale={locale}>
             <ViewTransitions>
               <ToastProvider>
                 <AuthProvider>

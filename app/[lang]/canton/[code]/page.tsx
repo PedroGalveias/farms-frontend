@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import CantonView, { type CantonSibling } from "@/components/canton/CantonView";
 import { getFarms } from "@/lib/farms-service";
-import { localeFromAcceptLanguage, translate } from "@/lib/i18n";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  translate,
+  localeAlternates,
+} from "@/lib/i18n";
 import {
   SWISS_CANTONS,
   getCantonName,
@@ -33,15 +37,13 @@ async function safeGetFarms(): Promise<Farm[]> {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ code: string }>;
+  params: Promise<{ lang: string; code: string }>;
 }): Promise<Metadata> {
-  const { code } = await params;
+  const { lang, code } = await params;
   if (!isValidCantonCode(code)) {
     return { title: "Canton not found" };
   }
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const name = getCantonName(code);
   const region = translate(locale, getRegionKeyForCanton(code));
   const title = translate(locale, "canton_title", { canton: name });
@@ -53,7 +55,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: localeAlternates(canonical),
     openGraph: { title, description, type: "website", url: canonical },
     twitter: { card: "summary_large_image", title, description },
   };
@@ -62,7 +64,7 @@ export async function generateMetadata({
 export default async function CantonPage({
   params,
 }: {
-  params: Promise<{ code: string }>;
+  params: Promise<{ lang: string; code: string }>;
 }) {
   const { code } = await params;
   if (!isValidCantonCode(code)) {

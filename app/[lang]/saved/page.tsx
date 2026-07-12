@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import SavedView from "@/components/saved/SavedView";
 import { getFarms } from "@/lib/farms-service";
-import { localeFromAcceptLanguage, translate } from "@/lib/i18n";
+import { DEFAULT_LOCALE, isLocale, translate } from "@/lib/i18n";
 import type { Farm } from "@/types/farm";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   return {
     title: translate(locale, "saved_title"),
     description: translate(locale, "saved_subtitle"),
