@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   baselines:
@@ -58,16 +59,29 @@ jobs:
           # The self-arming CI skip must not trigger while REGENERATING.
           UPDATE_VISUAL_BASELINES: "1"
 
+      # Direct push when the dispatched branch allows it; main is protected
+      # (GH013), so fall back to a fresh branch + PR there.
       - name: Commit baselines
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add e2e/visual.spec.ts-snapshots/*-linux.png
           if git diff --cached --quiet; then
             echo "Baselines unchanged — nothing to commit."
+            exit 0
+          fi
+          git commit -m "test(visual): regenerate linux baselines"
+          if git push; then
+            echo "Pushed to ${GITHUB_REF_NAME}."
           else
-            git commit -m "test(visual): regenerate linux baselines"
-            git push
+            branch="ci/visual-baselines-${GITHUB_RUN_ID}"
+            git checkout -b "$branch"
+            git push -u origin "$branch"
+            gh pr create --base "${GITHUB_REF_NAME}" --head "$branch" \
+              --title "test(visual): regenerate linux baselines" \
+              --body "Automated baselines from the Visual baselines (linux) workflow (run ${GITHUB_RUN_ID}). Merging arms screenshot gating in CI."
           fi
 
       - name: Upload report on failure
