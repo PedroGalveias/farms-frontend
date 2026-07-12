@@ -61,7 +61,7 @@ export default function ProductView({
         current={label}
       />
 
-      <header className="mt-6">
+      <header className="rise-in mt-6">
         <span aria-hidden className="text-4xl">
           {categoryEmoji(category)}
         </span>
@@ -110,7 +110,10 @@ export default function ProductView({
 
       {farms.length > 0 ? (
         <>
-          <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <section
+            className="rise-in mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+            style={{ ["--rise-delay" as string]: "120ms" }}
+          >
             {farms.map((farm) => (
               <FarmLinkCard farm={farm} key={farm.id} />
             ))}

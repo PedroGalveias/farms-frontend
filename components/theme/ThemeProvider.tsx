@@ -98,6 +98,15 @@ export default function ThemeProvider({
   const apply = useCallback((next: Theme) => {
     setThemeState(next);
     document.documentElement.classList.toggle("dark", next === "dark");
+    // Keep the browser/PWA chrome (address bar, iOS status bar) in step with
+    // the RESOLVED theme — the static media-query metas only track the OS, so
+    // a forced/sun theme would otherwise sit under mismatched chrome.
+    const color = next === "dark" ? "#0e0f12" : "#f4f4ef";
+    for (const meta of document.querySelectorAll<HTMLMetaElement>(
+      'meta[name="theme-color"]',
+    )) {
+      meta.setAttribute("content", color);
+    }
     try {
       localStorage.setItem(RESOLVED_KEY, next);
     } catch {

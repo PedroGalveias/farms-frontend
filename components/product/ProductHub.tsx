@@ -35,7 +35,7 @@ export default function ProductHub({ entries }: { entries: ProductEntry[] }) {
         <span className="text-ink/80">{t("product_breadcrumb")}</span>
       </nav>
 
-      <header className="mt-6 max-w-2xl">
+      <header className="rise-in mt-6 max-w-2xl">
         <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
           {t("product_hub_title")}
         </h1>
@@ -44,7 +44,10 @@ export default function ProductHub({ entries }: { entries: ProductEntry[] }) {
         </p>
       </header>
 
-      <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        className="rise-in mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        style={{ ["--rise-delay" as string]: "120ms" }}
+      >
         {entries.map((entry) => (
           <Link
             className="glass glass-card glass-interactive group flex items-center justify-between gap-3 rounded-2xl px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
