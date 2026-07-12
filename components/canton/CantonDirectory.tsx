@@ -59,14 +59,17 @@ export default function CantonDirectory({
         <span className="text-ink/80">{current}</span>
       </nav>
 
-      <header className="mt-6 max-w-2xl">
+      <header className="rise-in mt-6 max-w-2xl">
         <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
           {title}
         </h1>
         <p className="mt-3 text-lg leading-7 text-ink/60">{subtitle}</p>
       </header>
 
-      <div className="mt-10 space-y-10">
+      <div
+        className="rise-in mt-10 space-y-10"
+        style={{ ["--rise-delay" as string]: "120ms" }}
+      >
         {groups.map((group) => (
           <section key={group.key}>
             {showRegionHeadings ? (

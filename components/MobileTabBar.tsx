@@ -53,7 +53,7 @@ export default function MobileTabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="glass glass-chrome mobile-tab-bar fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[min(92%,360px)] items-center gap-1.5 rounded-full p-1.5 lg:hidden"
+      className="glass glass-chrome mobile-tab-bar fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[min(92%,360px)] items-center gap-1.5 rounded-full p-1.5 [view-transition-name:tab-bar] lg:hidden"
       ref={navRef}
     >
       {/* The sliding active pill, positioned by useSlidingIndicator. */}

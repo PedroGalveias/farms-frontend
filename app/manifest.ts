@@ -8,7 +8,7 @@ import type { MetadataRoute } from "next";
 // Regenerate the PNGs with: node scripts/generate-icons.mjs
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Swiss farms",
+    name: "farms.",
     short_name: "farms",
     description:
       "Fresh products, direct from Swiss farms — find what you need at the farm nearest to you.",
