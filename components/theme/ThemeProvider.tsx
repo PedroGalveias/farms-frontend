@@ -113,14 +113,19 @@ export default function ThemeProvider({
         sunTimer.current = null;
       }
       if (activeMode !== "sun") return;
-      const { latitude, longitude } = sunCoords();
-      const flip = nextSunFlip(new Date(), latitude, longitude);
-      // +5s of slack so we land safely on the other side of the flip.
-      const delay = Math.max(1_000, flip.getTime() - Date.now() + 5_000);
-      sunTimer.current = setTimeout(() => {
-        apply(resolveTheme("sun"));
-        scheduleSun("sun");
-      }, delay);
+      // Local recursion (not the useCallback binding): each flip re-arms the
+      // timer for the one after.
+      const arm = () => {
+        const { latitude, longitude } = sunCoords();
+        const flip = nextSunFlip(new Date(), latitude, longitude);
+        // +5s of slack so we land safely on the other side of the flip.
+        const delay = Math.max(1_000, flip.getTime() - Date.now() + 5_000);
+        sunTimer.current = setTimeout(() => {
+          apply(resolveTheme("sun"));
+          arm();
+        }, delay);
+      };
+      arm();
     },
     [apply],
   );
