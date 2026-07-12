@@ -8,6 +8,14 @@ const pathname = vi.hoisted(() => ({ value: "/" }));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => pathname.value,
+  useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({
+    push: () => {},
+    replace: () => {},
+    back: () => {},
+    refresh: () => {},
+    prefetch: () => {},
+  }),
 }));
 
 function renderBar() {

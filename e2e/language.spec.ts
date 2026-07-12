@@ -23,6 +23,8 @@ test.describe("language switching", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       /Frisch vom Hof/i,
     );
+    // The switch is a navigation: German lives at /de.
+    await expect(page).toHaveURL(/\/de(\/|$)/);
 
     // Persisted: a reload keeps German.
     await page.reload();

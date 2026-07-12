@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import CantonDirectory, {
   type CantonGroup,
 } from "@/components/canton/CantonDirectory";
 import { getFarms } from "@/lib/farms-service";
-import { localeFromAcceptLanguage, translate } from "@/lib/i18n";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  translate,
+  localeAlternates,
+} from "@/lib/i18n";
 import { getCantonName, getCantonsInRegion, getRegionKeys } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
@@ -30,15 +34,13 @@ function isValidRegion(key: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ key: string }>;
+  params: Promise<{ lang: string; key: string }>;
 }): Promise<Metadata> {
-  const { key } = await params;
+  const { lang, key } = await params;
   if (!isValidRegion(key)) {
     return { title: "Region not found" };
   }
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const region = translate(locale, key);
   const title = translate(locale, "region_page_title", { region });
   const description = translate(locale, "region_page_meta", {
@@ -50,7 +52,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: localeAlternates(canonical),
     openGraph: { title, description, type: "website", url: canonical },
   };
 }
@@ -58,16 +60,14 @@ export async function generateMetadata({
 export default async function RegionPage({
   params,
 }: {
-  params: Promise<{ key: string }>;
+  params: Promise<{ lang: string; key: string }>;
 }) {
-  const { key } = await params;
+  const { lang, key } = await params;
   if (!isValidRegion(key)) {
     notFound();
   }
 
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const farms = await safeGetFarms();
   const region = translate(locale, key);
 

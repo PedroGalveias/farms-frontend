@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import ProductHub, { type ProductEntry } from "@/components/product/ProductHub";
 import { getFarms } from "@/lib/farms-service";
-import { localeFromAcceptLanguage, translate } from "@/lib/i18n";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  translate,
+  localeAlternates,
+} from "@/lib/i18n";
 import { getFarmGroups } from "@/lib/farms";
 import { categoryForSlug, getProductSlugs } from "@/lib/product-pages";
 import type { Farm } from "@/types/farm";
@@ -17,16 +21,19 @@ async function safeGetFarms(): Promise<Farm[]> {
   }
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const title = translate(locale, "product_hub_title");
   const description = translate(locale, "product_hub_subtitle");
   return {
     title,
     description,
-    alternates: { canonical: "/product" },
+    alternates: localeAlternates("/product"),
     openGraph: { title, description, type: "website", url: "/product" },
   };
 }

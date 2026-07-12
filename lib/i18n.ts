@@ -2567,3 +2567,39 @@ export function localeFromAcceptLanguage(
   }
   return DEFAULT_LOCALE;
 }
+
+// ---------- Locale-aware URLs ----------
+
+/** All locale codes, for [lang] static params and the middleware. */
+export const LOCALE_CODES: Locale[] = ["en", "de", "fr", "it", "rm"];
+
+export function isLocale(value: string): value is Locale {
+  return (LOCALE_CODES as string[]).includes(value);
+}
+
+/**
+ * The public URL for `path` in `locale`. English is canonical and unprefixed
+ * (/canton/be); the other locales carry their segment (/de/canton/be).
+ */
+export function localizedPath(path: string, locale: Locale): string {
+  const clean = path.startsWith("/") ? path : `/${path}`;
+  if (locale === DEFAULT_LOCALE) return clean;
+  return clean === "/" ? `/${locale}` : `/${locale}${clean}`;
+}
+
+/**
+ * hreflang alternates for a page, for `metadata.alternates`: one URL per
+ * locale plus x-default pointing at the unprefixed English page.
+ */
+export function localeAlternates(path: string): {
+  canonical: string;
+  languages: Record<string, string>;
+} {
+  const languages: Record<string, string> = {};
+  for (const code of LOCALE_CODES) {
+    // Swiss-flavoured hreflang tags (de-CH etc.) plus the bare language.
+    languages[code] = localizedPath(path, code);
+  }
+  languages["x-default"] = localizedPath(path, DEFAULT_LOCALE);
+  return { canonical: localizedPath(path, DEFAULT_LOCALE), languages };
+}

@@ -1,7 +1,7 @@
 // Shown while the home page resolves its farm data (the backend can be slow on a
 // cold start). Mirrors the hero → toolbar → card-grid layout with shimmering
 // placeholders so the page settles in place instead of flashing blank.
-export default function HomeLoading() {
+export default function HomeSkeleton() {
   return (
     <main className="mx-auto max-w-6xl px-5 pt-6 sm:px-8 lg:pt-0">
       <section className="pt-10 sm:pt-14">

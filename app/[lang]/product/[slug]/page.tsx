@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import ProductView, {
   type ProductSibling,
 } from "@/components/product/ProductView";
 import { getFarms } from "@/lib/farms-service";
-import { localeFromAcceptLanguage, translate } from "@/lib/i18n";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  translate,
+  localeAlternates,
+} from "@/lib/i18n";
 import { categoryLabel } from "@/lib/categories";
 import { getFarmGroups } from "@/lib/farms";
 import { matchesCategories } from "@/lib/directory";
@@ -35,16 +39,14 @@ async function safeGetFarms(): Promise<Farm[]> {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { lang, slug } = await params;
   const category = categoryForSlug(slug);
   if (!category) {
     return { title: "Product not found" };
   }
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const label = categoryLabel(category, locale);
   const title = translate(locale, "product_title", { product: label });
   const description = translate(locale, "product_meta", { product: label });
@@ -52,7 +54,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: localeAlternates(canonical),
     openGraph: { title, description, type: "website", url: canonical },
     twitter: { card: "summary_large_image", title, description },
   };
@@ -61,9 +63,9 @@ export async function generateMetadata({
 export default async function ProductPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { lang, slug } = await params;
   const category = categoryForSlug(slug);
   if (!category) {
     notFound();
@@ -101,9 +103,7 @@ export default async function ProductPage({
     .filter((sibling) => sibling.category !== category && sibling.count > 0);
 
   const siteUrl = getSiteUrl();
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const label = categoryLabel(category, locale);
   const jsonLd = {
     "@context": "https://schema.org",

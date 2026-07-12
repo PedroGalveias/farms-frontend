@@ -8,6 +8,8 @@ const router = vi.hoisted(() => ({ back: vi.fn(), push: vi.fn() }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => router,
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 function setHistoryLength(length: number) {

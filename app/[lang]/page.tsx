@@ -1,5 +1,8 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import FarmsPageShell from "@/components/FarmsPageShell";
+import HomeSkeleton from "@/components/home/HomeSkeleton";
+import { localeAlternates } from "@/lib/i18n";
 import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
 import type { ServiceStatus } from "@/types/farm";
 
@@ -13,6 +16,10 @@ function getErrorMessage(error: unknown, fallback: string) {
   }
 
   return fallback;
+}
+
+export function generateMetadata(): Metadata {
+  return { alternates: localeAlternates("/") };
 }
 
 export default async function HomePage() {
@@ -39,7 +46,7 @@ export default async function HomePage() {
   }
 
   return (
-    <Suspense>
+    <Suspense fallback={<HomeSkeleton />}>
       <FarmsPageShell
         initialFarms={farms}
         loadError={loadError}
