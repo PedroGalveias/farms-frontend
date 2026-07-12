@@ -16,6 +16,9 @@ const ROUTES = [
   "/farm/11111111-1111-4111-8111-111111111111",
   "/profile",
   "/settings",
+  "/de",
+  "/de/canton/be",
+  "/fr/product/dairy",
   "/offline",
   "/haptics-lab",
 ];

@@ -1,6 +1,26 @@
 import "@testing-library/jest-dom/vitest";
-import { afterEach } from "vitest";
+import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
+
+// LanguageProvider (and other chrome) reads the router/pathname; give every
+// test an inert default so components mount without per-file boilerplate.
+// Tests that assert on navigation re-mock next/navigation locally.
+vi.mock("next/navigation", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next/navigation")>();
+  return {
+    ...actual,
+    usePathname: () => "/",
+    useSearchParams: () => new URLSearchParams(),
+    useRouter: () => ({
+      push: () => {},
+      replace: () => {},
+      back: () => {},
+      forward: () => {},
+      refresh: () => {},
+      prefetch: () => {},
+    }),
+  };
+});
 
 // Production runs over HTTPS (a secure context); mirror that in jsdom so
 // geolocation code under test isn't short-circuited as "insecure".

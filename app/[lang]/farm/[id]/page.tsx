@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import FarmDetail from "@/components/FarmDetail";
 import { getFarms } from "@/lib/farms-service";
-import { localeFromAcceptLanguage } from "@/lib/i18n";
+import { DEFAULT_LOCALE, isLocale, localeAlternates } from "@/lib/i18n";
 import { farmJsonLd, farmMetaDescription } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
@@ -22,25 +21,22 @@ async function findFarm(id: string): Promise<Farm | null> {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ lang: string; id: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { lang, id } = await params;
   const farm = await findFarm(id);
 
   if (!farm) {
     return { title: "Farm not found" };
   }
 
-  // Localize the description from the request's Accept-Language (the client
-  // locale isn't available during server render).
-  const locale = localeFromAcceptLanguage(
-    (await headers()).get("accept-language"),
-  );
+  // Localize the description from the URL's locale segment.
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const description = farmMetaDescription(farm, locale);
   return {
     title: farm.name,
     description,
-    alternates: { canonical: `/farm/${encodeURIComponent(farm.id)}` },
+    alternates: localeAlternates(`/farm/${encodeURIComponent(farm.id)}`),
     openGraph: {
       title: farm.name,
       description,
@@ -56,7 +52,7 @@ export default async function FarmPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ lang: string; id: string }>;
   searchParams: Promise<{ from?: string; products?: string }>;
 }) {
   const { id } = await params;

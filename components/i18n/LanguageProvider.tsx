@@ -1,16 +1,12 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
+  isLocale,
+  localizedPath,
   translate,
   type Locale,
 } from "@/lib/i18n";
@@ -28,37 +24,44 @@ interface LanguageContextValue {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-const VALID: Locale[] = ["en", "de", "fr", "it", "rm"];
+/** The current path with any locale segment stripped. */
+function unlocalizedPathname(pathname: string): string {
+  const [, first, ...rest] = pathname.split("/");
+  if (isLocale(first)) {
+    return `/${rest.join("/")}`;
+  }
+  return pathname;
+}
 
 export default function LanguageProvider({
   children,
+  initialLocale = DEFAULT_LOCALE,
 }: {
   children: React.ReactNode;
+  /** The URL's locale segment — the single source of truth (SSR included). */
+  initialLocale?: Locale;
 }) {
-  // Start from the default so SSR and first client render match, then adopt the
-  // saved choice once mounted (a brief flash for non-default locales, no
-  // hydration mismatch).
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale = initialLocale;
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem(
-      LOCALE_STORAGE_KEY,
-    ) as Locale | null;
-    if (stored && VALID.includes(stored) && stored !== DEFAULT_LOCALE) {
-      // Defer out of the effect body so we adopt the saved locale after the
-      // first (default) render without a hydration mismatch.
-      queueMicrotask(() => setLocaleState(stored));
-    }
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
-
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
-    window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
-  }, []);
+  // Switching language = navigating to the same page under the new locale.
+  // The choice is persisted in a cookie so the middleware redirects future
+  // unprefixed visits, and mirrored to localStorage for anything client-side
+  // that wants it without a request.
+  const setLocale = useCallback(
+    (next: Locale) => {
+      try {
+        document.cookie = `${LOCALE_STORAGE_KEY}=${next};path=/;max-age=31536000;samesite=lax`;
+        window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
+      } catch {
+        /* storage unavailable */
+      }
+      const target = localizedPath(unlocalizedPathname(pathname ?? "/"), next);
+      router.push(target);
+    },
+    [router, pathname],
+  );
 
   const value = useMemo<LanguageContextValue>(
     () => ({
