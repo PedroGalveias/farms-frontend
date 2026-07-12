@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   LOCALES,
+  LOCALE_CODES,
   MESSAGES,
+  isLocale,
+  localeAlternates,
   localeFromAcceptLanguage,
+  localizedPath,
   translate,
   type Locale,
 } from "@/lib/i18n";
@@ -66,5 +70,32 @@ describe("locale dictionaries", () => {
 
   it("exposes all five supported locales", () => {
     expect(LOCALES.map((l) => l.code)).toEqual(["en", "de", "fr", "it", "rm"]);
+  });
+});
+
+describe("locale-aware URLs", () => {
+  it("validates locale codes", () => {
+    expect(isLocale("de")).toBe(true);
+    expect(isLocale("en")).toBe(true);
+    expect(isLocale("xx")).toBe(false);
+    expect(isLocale("")).toBe(false);
+  });
+
+  it("keeps English unprefixed and prefixes the rest", () => {
+    expect(localizedPath("/canton/be", "en")).toBe("/canton/be");
+    expect(localizedPath("/canton/be", "de")).toBe("/de/canton/be");
+    expect(localizedPath("/", "fr")).toBe("/fr");
+    expect(localizedPath("/", "en")).toBe("/");
+    expect(localizedPath("settings", "it")).toBe("/it/settings");
+  });
+
+  it("emits hreflang alternates for every locale plus x-default", () => {
+    const { canonical, languages } = localeAlternates("/product/dairy");
+    expect(canonical).toBe("/product/dairy");
+    expect(languages.en).toBe("/product/dairy");
+    expect(languages.de).toBe("/de/product/dairy");
+    expect(languages.rm).toBe("/rm/product/dairy");
+    expect(languages["x-default"]).toBe("/product/dairy");
+    expect(Object.keys(languages)).toHaveLength(LOCALE_CODES.length + 1);
   });
 });
