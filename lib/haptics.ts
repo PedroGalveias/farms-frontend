@@ -66,8 +66,31 @@ function iosSwitchTick(): void {
 }
 
 /** A short, light tap — for confirmations like save, copy, or a tab switch. */
+const HAPTICS_KEY = "farms.haptics";
+
+/** Whether haptic feedback is enabled (on unless explicitly disabled). */
+export function hapticsEnabled(): boolean {
+  try {
+    return localStorage.getItem(HAPTICS_KEY) !== "off";
+  } catch {
+    return true;
+  }
+}
+
+export function setHapticsEnabled(on: boolean): void {
+  try {
+    if (on) localStorage.removeItem(HAPTICS_KEY);
+    else localStorage.setItem(HAPTICS_KEY, "off");
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 export function haptic(durationMs = 10): void {
   if (typeof navigator === "undefined") {
+    return;
+  }
+  if (!hapticsEnabled()) {
     return;
   }
   if (typeof navigator.vibrate === "function") {

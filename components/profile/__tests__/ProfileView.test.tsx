@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
 import ThemeProvider from "@/components/theme/ThemeProvider";
@@ -41,10 +41,10 @@ describe("ProfileView", () => {
   it("signed out: shows the sign-in prompt plus the device-local sections", () => {
     renderProfile();
     expect(screen.getByText(/sign in/i)).toBeInTheDocument();
-    // Library + preferences work without an account.
+    // The library works without an account; settings live on their own page.
     expect(screen.getByText("Your library")).toBeInTheDocument();
     expect(screen.getByText("Saved farms")).toBeInTheDocument();
-    expect(screen.getByText("Preferences")).toBeInTheDocument();
+    expect(screen.getByText("Settings")).toBeInTheDocument();
     // No logout, no account section, no WIP fields.
     expect(screen.queryByText(/log out/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/account id/i)).not.toBeInTheDocument();
@@ -60,32 +60,13 @@ describe("ProfileView", () => {
     expect(screen.getByText(/work in progress/i)).toBeInTheDocument();
   });
 
-  it("offers all five languages and switches locale on tap", () => {
+  it("links to the settings page", () => {
     renderProfile();
-    const de = screen.getByRole("button", { name: "Deutsch" });
-    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    fireEvent.click(de);
-    expect(de).toHaveAttribute("aria-pressed", "true");
-    // The page copy switched to German.
-    expect(screen.getByText("Deine Bibliothek")).toBeInTheDocument();
-  });
-
-  it("motion override toggles the force-motion class", () => {
-    renderProfile();
-    const toggle = screen.getByRole("button", { name: /always animate/i });
-    expect(toggle).toHaveAttribute("aria-pressed", "false");
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAttribute("aria-pressed", "true");
-    expect(document.documentElement.classList.contains("force-motion")).toBe(
-      true,
-    );
-    fireEvent.click(toggle);
-    expect(document.documentElement.classList.contains("force-motion")).toBe(
-      false,
-    );
+    const settings = screen
+      .getAllByRole("link")
+      .find((link) => link.getAttribute("href") === "/settings");
+    expect(settings).toBeDefined();
+    expect(settings).toHaveTextContent("Settings");
   });
 
   it("library tiles link to the saved page", () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isIosLike } from "@/lib/haptics";
+import { hapticsEnabled, isIosLike } from "@/lib/haptics";
 
 /**
  * iOS haptic tap-through — the /haptics-lab ground truth, productised.
@@ -37,7 +37,7 @@ export default function HapticTap() {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => setEnabled(isIosLike(navigator)));
+    queueMicrotask(() => setEnabled(isIosLike(navigator) && hapticsEnabled()));
   }, []);
 
   if (!enabled) return null;

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -10,19 +9,14 @@ import {
   Clock,
   FolderHeart,
   Hammer,
-  Languages,
   LogOut,
-  MoonStar,
+  Settings,
   ShieldCheck,
-  Sparkles,
   UserRound,
 } from "lucide-react";
-import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
-import ThemeToggle from "@/components/ThemeToggle";
-import { LOCALES } from "@/lib/i18n";
-import { motionForced, setMotionForced } from "@/lib/motion";
 
 /**
  * Account home. The library (saved farms, collections, recently viewed) and
@@ -94,7 +88,7 @@ export default function ProfileView() {
       {user ? <AccountSection /> : null}
 
       <LibrarySection />
-      <PreferencesSection />
+      <SettingsLink />
 
       {user ? (
         <>
@@ -236,95 +230,30 @@ function LibrarySection() {
   );
 }
 
-/** Language, theme, and motion — the device-local preferences. */
-function PreferencesSection() {
+/** The web-app settings live on their own page — link there. */
+function SettingsLink() {
   const t = useT();
-  const { locale, setLocale } = useLanguage();
-
-  // `motionForced` reads the DOM — resolve after mount to match SSR.
-  const [forced, setForced] = useState(false);
-  useEffect(() => {
-    queueMicrotask(() => setForced(motionForced()));
-  }, []);
-  const toggleMotion = () => {
-    const next = !forced;
-    setMotionForced(next);
-    setForced(next);
-  };
-
   return (
     <section className="mt-8">
-      <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
-        {t("profile_preferences")}
-      </h2>
-      <div className="mt-3 space-y-3">
-        {/* Language */}
-        <div className="glass-inset rounded-2xl px-4 py-3.5">
-          <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
-            <Languages className="h-4 w-4" />
-            {t("profile_language")}
-          </p>
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
-            {LOCALES.map(({ code, label }) => (
-              <button
-                aria-pressed={locale === code}
-                className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${
-                  locale === code
-                    ? "bg-ink text-cloud"
-                    : "bg-tone text-ink/70 hover:text-ink"
-                }`}
-                key={code}
-                onClick={() => setLocale(code)}
-                type="button"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Theme */}
-        <div className="glass-inset flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5">
-          <div>
-            <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
-              <MoonStar className="h-4 w-4" />
-              {t("profile_theme")}
-            </p>
-            <p className="mt-1 text-sm leading-6 text-ink/70">
-              {t("profile_theme_hint")}
-            </p>
-          </div>
-          <ThemeToggle />
-        </div>
-
-        {/* Motion override */}
-        <div className="glass-inset flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5">
-          <div>
-            <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
-              <Sparkles className="h-4 w-4" />
-              {t("profile_motion")}
-            </p>
-            <p className="mt-1 text-sm leading-6 text-ink/70">
-              {t("profile_motion_hint")}
-            </p>
-          </div>
-          <button
-            aria-pressed={forced}
-            className={`relative inline-flex h-7 w-[52px] shrink-0 items-center rounded-full border transition-colors duration-300 ${
-              forced ? "border-pine/40 bg-pine" : "border-line bg-tone"
-            }`}
-            onClick={toggleMotion}
-            type="button"
-          >
-            <span
-              className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.3)] transition-[left] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                forced ? "left-[26px]" : "left-1"
-              }`}
-            />
-            <span className="sr-only">{t("profile_motion")}</span>
-          </button>
-        </div>
-      </div>
+      <Link
+        className="glass glass-card glass-interactive group flex items-center justify-between gap-4 rounded-2xl px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
+        href="/settings"
+      >
+        <span className="flex items-center gap-3.5">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-pine/10 text-pine">
+            <Settings className="h-5 w-5" />
+          </span>
+          <span>
+            <span className="block text-sm font-bold text-ink">
+              {t("settings_title")}
+            </span>
+            <span className="mt-0.5 block text-xs font-semibold text-ink/60">
+              {t("settings_subtitle")}
+            </span>
+          </span>
+        </span>
+        <ArrowRight className="h-4 w-4 text-ink/30 transition-transform duration-300 group-hover:translate-x-0.5" />
+      </Link>
     </section>
   );
 }
