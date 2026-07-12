@@ -50,7 +50,7 @@ export default function ProductHub({ entries }: { entries: ProductEntry[] }) {
       >
         {entries.map((entry) => (
           <Link
-            className="glass glass-card glass-interactive group flex items-center justify-between gap-3 rounded-2xl px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
+            className="glass glass-card glass-interactive group flex items-center justify-between gap-3 rounded-2xl px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
             href={`/product/${entry.slug}`}
             key={entry.slug}
           >

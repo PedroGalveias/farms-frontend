@@ -209,7 +209,7 @@ function LibrarySection() {
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         {tiles.map((tile) => (
           <Link
-            className="glass glass-card glass-interactive group rounded-2xl px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
+            className="glass glass-card glass-interactive group rounded-2xl px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
             href={tile.href}
             key={tile.label}
           >
@@ -236,7 +236,7 @@ function SettingsLink() {
   return (
     <section className="mt-8">
       <Link
-        className="glass glass-card glass-interactive group flex items-center justify-between gap-4 rounded-2xl px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
+        className="glass glass-card glass-interactive group flex items-center justify-between gap-4 rounded-2xl px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
         href="/settings"
       >
         <span className="flex items-center gap-3.5">
