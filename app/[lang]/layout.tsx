@@ -72,6 +72,9 @@ export const metadata: Metadata = {
     default: "farms.",
     template: "%s | farms",
   },
+  // Next 16 emits the standardized mobile-web-app-capable meta; iOS gates the
+  // launch (splash) images on the LEGACY apple-prefixed name, so emit it too.
+  other: { "apple-mobile-web-app-capable": "yes" },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
