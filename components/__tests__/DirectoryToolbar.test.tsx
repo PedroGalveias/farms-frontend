@@ -138,4 +138,54 @@ describe("DirectoryToolbar", () => {
       screen.getByRole("option", { name: /nearest/i }),
     ).toBeInTheDocument();
   });
+
+  it("typing in the search box fires onSearchTermChange", () => {
+    const props = renderToolbar();
+    const input = screen.getByPlaceholderText(/search by name/i);
+    fireEvent.change(input, { target: { value: "cheese" } });
+    expect(props.onSearchTermChange).toHaveBeenCalledWith("cheese");
+  });
+
+  it("switching to map view fires onViewModeChange", () => {
+    const props = renderToolbar();
+    fireEvent.click(screen.getByRole("button", { name: /show map/i }));
+    expect(props.onViewModeChange).toHaveBeenCalledWith("map");
+  });
+
+  it("Use my location requests the browser position", () => {
+    const props = renderToolbar({ locationActive: false });
+    fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
+    expect(props.onUseLocation).toHaveBeenCalled();
+  });
+
+  it("with location active, a radius button fires onRadiusChange and clear fires onClearLocation", () => {
+    const props = renderToolbar({ locationActive: true });
+    fireEvent.click(screen.getByRole("button", { name: /within 25 km/i }));
+    expect(props.onRadiusChange).toHaveBeenCalledWith(25);
+    fireEvent.click(screen.getByRole("button", { name: /^clear$/i }));
+    expect(props.onClearLocation).toHaveBeenCalled();
+  });
+
+  it("Reset and Refresh fire their handlers", () => {
+    const props = renderToolbar({ activeFiltersCount: 1 });
+    fireEvent.click(screen.getByRole("button", { name: /^reset$/i }));
+    expect(props.onReset).toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: /^refresh$/i }));
+    expect(props.onRefresh).toHaveBeenCalled();
+  });
+
+  it("a category chip fires onToggleCategory", () => {
+    const props = renderToolbar();
+    // Category chips are labelled with their localized name.
+    const veg = screen.getAllByRole("button", { name: /vegetables/i })[0];
+    fireEvent.click(veg);
+    expect(props.onToggleCategory).toHaveBeenCalled();
+  });
+
+  it("Add a farm fires onCreateFarm", () => {
+    const props = renderToolbar();
+    const add = screen.getAllByRole("button", { name: /add a farm/i })[0];
+    fireEvent.click(add);
+    expect(props.onCreateFarm).toHaveBeenCalled();
+  });
 });
