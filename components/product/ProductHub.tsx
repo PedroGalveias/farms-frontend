@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ChevronRight } from "lucide-react";
 import { categoryEmoji, categoryLabel } from "@/lib/categories";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";

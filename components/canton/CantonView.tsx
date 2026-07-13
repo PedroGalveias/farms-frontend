@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ArrowRight, ChevronRight, MapPin, Search } from "lucide-react";
 import FarmLinkCard from "@/components/directory/FarmLinkCard";
 import { categoryLabel } from "@/lib/categories";

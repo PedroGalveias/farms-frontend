@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ArrowUpRight } from "lucide-react";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 import { useT } from "@/components/i18n/LanguageProvider";

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import {

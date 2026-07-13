@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ArrowLeft, ArrowRight, Bell, Sprout } from "lucide-react";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useSeasonalReminders } from "@/components/seasonal/SeasonalReminderProvider";

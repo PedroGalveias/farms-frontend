@@ -7,7 +7,7 @@ import ProfileView from "@/components/profile/ProfileView";
 
 // The auth session comes from /api/auth/me; control it per-test instead.
 const authState: {
-  user: { user_id: string; role: string } | null;
+  user: { user_id: string; role: string; username?: string } | null;
   loading: boolean;
 } = { user: null, loading: false };
 const openAuth = vi.fn();
@@ -51,13 +51,24 @@ describe("ProfileView", () => {
   });
 
   it("signed in: shows account data, logout, and the WIP sections", () => {
-    authState.user = { user_id: "user-123", role: "user" };
+    authState.user = { user_id: "user-123", role: "user", username: "pedro" };
     renderProfile();
-    expect(screen.getByText("user-123")).toBeInTheDocument();
+    // Shows the username, never the raw id.
+    expect(screen.getByText("pedro")).toBeInTheDocument();
+    expect(screen.queryByText("user-123")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /log out/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/work in progress/i)).toBeInTheDocument();
+  });
+
+  it("falls back to the role label when no username is provided", () => {
+    authState.user = { user_id: "user-123", role: "user" };
+    renderProfile();
+    // "Member" appears as both the display name and the role tile — the point
+    // is simply that the raw id is never shown.
+    expect(screen.getAllByText("Member").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("user-123")).not.toBeInTheDocument();
   });
 
   it("links to the settings page", () => {

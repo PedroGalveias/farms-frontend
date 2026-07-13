@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import { Command, Heart, Keyboard, LayoutGrid, Search } from "lucide-react";
