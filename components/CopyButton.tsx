@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Check, Copy } from "lucide-react";
 import { haptic } from "@/lib/haptics";
 import { playTick } from "@/lib/sound";
@@ -27,6 +27,14 @@ export default function CopyButton({
   const t = useT();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  // Reset-timer handle — cleared on unmount so a fast close can't
+  // setState on an unmounted component.
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    };
+  }, []);
   const text = label ?? t("copy_address");
 
   const copy = async () => {
@@ -43,7 +51,7 @@ export default function CopyButton({
         message: t("toast_copied"),
         icon: <Check className="h-4 w-4" />,
       });
-      window.setTimeout(() => setCopied(false), 2000);
+      copiedTimer.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       // Clipboard unavailable (e.g. insecure context) — nothing else to do.
     }

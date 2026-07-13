@@ -24,7 +24,7 @@ import {
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useTheme, type ThemeMode } from "@/components/theme/ThemeProvider";
-import { LOCALES } from "@/lib/i18n";
+import { LOCALES } from "@/lib/i18n-core";
 import { motionForced, setMotionForced } from "@/lib/motion";
 import { hapticsEnabled, setHapticsEnabled, haptic } from "@/lib/haptics";
 import { playTick, setSoundEnabled, soundEnabled } from "@/lib/sound";

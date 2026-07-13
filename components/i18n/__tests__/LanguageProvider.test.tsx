@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import LanguageProvider, {
   useLanguage,
 } from "@/components/i18n/LanguageProvider";
+import { de } from "@/lib/messages/de";
 
 const push = vi.fn();
 const pathname = { value: "/" };
@@ -38,8 +39,9 @@ beforeEach(() => {
 
 describe("LanguageProvider (locale from the URL)", () => {
   it("translates from the initialLocale (SSR source of truth)", () => {
+    // The server layout supplies the active locale's table; mirror that here.
     render(
-      <LanguageProvider initialLocale="de">
+      <LanguageProvider initialLocale="de" messages={de}>
         <Probe />
       </LanguageProvider>,
     );

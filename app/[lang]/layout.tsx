@@ -22,7 +22,7 @@ import CommandPalette from "@/components/command/CommandPalette";
 import KeyboardShortcuts from "@/components/command/KeyboardShortcuts";
 import ViewTransitions from "@/components/transitions/ViewTransitions";
 import ToastProvider from "@/components/ui/ToastProvider";
-import { LOCALE_CODES, isLocale, type Locale } from "@/lib/i18n";
+import { LOCALE_CODES, MESSAGES, isLocale, type Locale } from "@/lib/i18n";
 import "../globals.css";
 
 // Set the theme class before paint to avoid a flash of the wrong theme, and
@@ -189,7 +189,7 @@ export default async function RootLayout({
       <body className={archivo.variable}>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ThemeProvider>
-          <LanguageProvider initialLocale={locale}>
+          <LanguageProvider initialLocale={locale} messages={MESSAGES[locale]}>
             <ViewTransitions>
               <ToastProvider>
                 <AuthProvider>
