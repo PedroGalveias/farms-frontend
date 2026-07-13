@@ -70,6 +70,60 @@ jobs:
         run: npm run build
 
   # End-to-end smoke tests against a production build in a real browser.
+  # Real-Windows coverage: unit tests + production build on windows-latest,
+  # plus the Firefox e2e specs that guard Windows-specific regressions (the
+  # fixed-glass anchoring bug only reproduced on Windows Firefox). Kept to the
+  # targeted specs so the runner stays fast; the full matrix runs on Linux.
+  windows:
+    name: Windows (unit, build, Firefox e2e)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npx vitest run
+
+      - name: Production build
+        run: npm run build
+
+      - name: Resolve Playwright version
+        id: playwright
+        shell: bash
+        run: |
+          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\ms-playwright
+          key: ${{ runner.os }}-playwright-firefox-${{ steps.playwright.outputs.version }}
+
+      - name: Install Playwright Firefox
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install firefox
+
+      - name: Firefox e2e (Windows-sensitive specs)
+        run: npx playwright test fixed-chrome smoke navigation --project=firefox
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-windows
+          path: playwright-report/
+          if-no-files-found: ignore
+
   e2e:
     name: E2E smoke tests
     runs-on: ubuntu-latest
@@ -126,7 +180,7 @@ jobs:
   # never deploy — cut a `v*` tag to ship.
   deploy:
     name: Deploy to Render
-    needs: [verify, e2e]
+    needs: [verify, e2e, windows]
     if: >-
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
       || github.event_name == 'workflow_dispatch'
