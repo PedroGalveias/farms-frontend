@@ -28,10 +28,38 @@ export default defineConfig({
   // Run every engine — Blink, Gecko, and WebKit — because the product must feel
   // equally premium on Chromium, Firefox, and Safari. A Chromium-only suite
   // would hide engine-specific regressions (WebKit especially).
+  // Phone flows live in *.mobile.spec.ts and run ONLY on the mobile projects;
+  // the desktop engines skip them (and everything else runs desktop-only).
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
-    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+    // Desktop engines: Blink, Gecko, WebKit.
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+      testIgnore: /\.mobile\.spec\.ts/,
+    },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+      testIgnore: /\.mobile\.spec\.ts/,
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+      testIgnore: /\.mobile\.spec\.ts/,
+    },
+    // Mobile emulation — the product is mobile-first, so the touch flows
+    // (tab bar, sheets, safe-area chrome) run on phone viewports with a coarse
+    // pointer. iOS Safari (WebKit) + Android Chrome (Blink).
+    {
+      name: "mobile-safari",
+      use: { ...devices["iPhone 14"] },
+      testMatch: /\.mobile\.spec\.ts/,
+    },
+    {
+      name: "mobile-chrome",
+      use: { ...devices["Pixel 7"] },
+      testMatch: /\.mobile\.spec\.ts/,
+    },
   ],
   // Two servers: the local mock backend (started first so it's serving before
   // the app build's server-side fetches run), then the app pointed at it via
