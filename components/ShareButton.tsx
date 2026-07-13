@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { haptic } from "@/lib/haptics";
 import { Check, Share2 } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -28,6 +28,14 @@ export default function ShareButton({
 }: ShareButtonProps) {
   const t = useT();
   const [copied, setCopied] = useState(false);
+  // Reset-timer handle — cleared on unmount so a fast close can't
+  // setState on an unmounted component.
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    };
+  }, []);
 
   const share = async () => {
     // Haptic first, inside the user-gesture window (awaits below leave it).
@@ -55,7 +63,7 @@ export default function ShareButton({
     try {
       await navigator.clipboard.writeText(absolute);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      copiedTimer.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       // Clipboard unavailable (e.g. insecure context) — nothing else to do.
     }

@@ -84,10 +84,13 @@ export default function FarmsMap({
     map.addLayer(cluster);
     mapRef.current = map;
     clusterRef.current = cluster;
-    // Tiles can misrender if the container sized after init.
-    setTimeout(() => map.invalidateSize(), 0);
+    // Tiles can misrender if the container sized after init. Tracked so an
+    // immediate unmount (dev StrictMode double-mount, fast nav) can't call
+    // invalidateSize on a removed map.
+    const sizeTimer = setTimeout(() => map.invalidateSize(), 0);
 
     return () => {
+      clearTimeout(sizeTimer);
       map.remove();
       mapRef.current = null;
       clusterRef.current = null;

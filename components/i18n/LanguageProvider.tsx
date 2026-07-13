@@ -5,11 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
+  interpolate,
   isLocale,
   localizedPath,
-  translate,
+  type Dict,
   type Locale,
-} from "@/lib/i18n";
+} from "@/lib/i18n-core";
+import { en } from "@/lib/messages/en";
 
 type Translate = (
   key: string,
@@ -36,10 +38,15 @@ function unlocalizedPathname(pathname: string): string {
 export default function LanguageProvider({
   children,
   initialLocale = DEFAULT_LOCALE,
+  messages,
 }: {
   children: React.ReactNode;
   /** The URL's locale segment — the single source of truth (SSR included). */
   initialLocale?: Locale;
+  /** The ACTIVE locale's strings, provided by the server layout so the other
+   *  four dictionaries never reach the client bundle. English needs no table
+   *  (the imported fallback IS English). */
+  messages?: Dict;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -67,9 +74,12 @@ export default function LanguageProvider({
     () => ({
       locale,
       setLocale,
-      t: (key, vars) => translate(locale, key, vars),
+      // Active-locale table first, English fallback, then the raw key (the
+      // no-gaps unit test keeps all five tables in sync, so the fallback only
+      // matters for genuinely unknown keys).
+      t: (key, vars) => interpolate(messages?.[key] ?? en[key] ?? key, vars),
     }),
-    [locale, setLocale],
+    [locale, setLocale, messages],
   );
 
   return (

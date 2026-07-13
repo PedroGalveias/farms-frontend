@@ -4,7 +4,7 @@ import { forwardRef } from "react";
 import NextLink from "next/link";
 import type { ComponentProps } from "react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
-import { localizedPath } from "@/lib/i18n";
+import { localizedPath } from "@/lib/i18n-core";
 
 type NextLinkProps = ComponentProps<typeof NextLink>;
 

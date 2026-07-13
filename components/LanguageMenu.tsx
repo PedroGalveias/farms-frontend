@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, Globe } from "lucide-react";
-import { LOCALES } from "@/lib/i18n";
+import { LOCALES } from "@/lib/i18n-core";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface LanguageMenuProps {

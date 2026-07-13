@@ -10,7 +10,7 @@ import {
   produceLabel,
   seasonalProductsForMonth,
 } from "@/lib/seasonal";
-import type { Locale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n-core";
 
 const INTL_LOCALE: Record<Locale, string> = {
   en: "en-CH",
