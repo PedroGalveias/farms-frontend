@@ -91,4 +91,31 @@ describe("SettingsView", () => {
       screen.getByRole("button", { name: /log out/i }),
     ).toBeInTheDocument();
   });
+
+  it("clears recently-viewed and confirms with a transient label", async () => {
+    localStorage.setItem("farms.recent", JSON.stringify(["x1", "x2"]));
+    renderSettings();
+    fireEvent.click(screen.getByRole("button", { name: /^clear$/i }));
+    expect(localStorage.getItem("farms.recent")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /cleared/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("offers all five languages and handles a switch without error", () => {
+    renderSettings();
+    for (const label of [
+      "English",
+      "Deutsch",
+      "Français",
+      "Italiano",
+      "Rumantsch",
+    ]) {
+      expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
+    }
+    // Clicking one runs setLocale (navigation is mocked) without throwing.
+    expect(() =>
+      fireEvent.click(screen.getByRole("button", { name: "Deutsch" })),
+    ).not.toThrow();
+  });
 });

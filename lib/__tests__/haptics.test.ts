@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { haptic, isIosLike } from "@/lib/haptics";
+import {
+  haptic,
+  isIosLike,
+  hapticsEnabled,
+  setHapticsEnabled,
+} from "@/lib/haptics";
 
 function setUserAgent(value: string) {
   Object.defineProperty(navigator, "userAgent", {
@@ -101,5 +106,31 @@ describe("isIosLike", () => {
   it("is false for Windows/Android", () => {
     expect(isIosLike({ userAgent: "… Windows NT 10.0 …" })).toBe(false);
     expect(isIosLike({ userAgent: "… Linux; Android 15 …" })).toBe(false);
+  });
+});
+
+describe("haptics preference gate", () => {
+  it("is enabled by default and reflects the stored flag", () => {
+    localStorage.clear();
+    expect(hapticsEnabled()).toBe(true);
+    setHapticsEnabled(false);
+    expect(localStorage.getItem("farms.haptics")).toBe("off");
+    expect(hapticsEnabled()).toBe(false);
+    setHapticsEnabled(true);
+    expect(localStorage.getItem("farms.haptics")).toBeNull();
+  });
+
+  it("haptic() does nothing while disabled", () => {
+    const vibrate = vi.fn();
+    Object.defineProperty(navigator, "vibrate", {
+      configurable: true,
+      value: vibrate,
+    });
+    setHapticsEnabled(false);
+    haptic();
+    expect(vibrate).not.toHaveBeenCalled();
+    setHapticsEnabled(true);
+    haptic();
+    expect(vibrate).toHaveBeenCalledWith(10);
   });
 });

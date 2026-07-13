@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
@@ -113,5 +113,62 @@ describe("SavedView", () => {
     expect(
       await screen.findByRole("button", { name: /Summer haul/i }),
     ).toBeInTheDocument();
+  });
+
+  it("renames the active collection", async () => {
+    const user = userEvent.setup();
+    seedCollections([{ id: "c1", name: "Old name", farmIds: ["bern"] }]);
+    renderView();
+    await user.click(await screen.findByRole("button", { name: /Old name/i }));
+    await user.click(screen.getByRole("button", { name: /rename/i }));
+    const input = screen.getByDisplayValue("Old name");
+    await user.clear(input);
+    await user.type(input, "New name");
+    // The confirm button is the Rename action in edit mode.
+    await user.click(screen.getAllByRole("button", { name: /rename/i })[0]);
+    expect(
+      await screen.findByRole("button", { name: /New name/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("deletes the active collection and falls back to All saved", async () => {
+    const user = userEvent.setup();
+    seedFavorites(["bern"]);
+    seedCollections([{ id: "c1", name: "Trash me", farmIds: ["bern"] }]);
+    renderView();
+    await user.click(await screen.findByRole("button", { name: /Trash me/i }));
+    await user.click(screen.getByRole("button", { name: /delete/i }));
+    // The collection tab is gone; All saved remains.
+    expect(
+      screen.queryByRole("button", { name: /Trash me/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /All saved/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("exports the shown farms to a CSV download", async () => {
+    const user = userEvent.setup();
+    seedFavorites(["bern", "zurich"]);
+    const createUrl = vi.fn(() => "blob:mock");
+    const revokeUrl = vi.fn();
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: createUrl,
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: revokeUrl,
+    });
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => {});
+    renderView();
+    await user.click(
+      await screen.findByRole("button", { name: /export csv/i }),
+    );
+    expect(createUrl).toHaveBeenCalled();
+    expect(click).toHaveBeenCalled();
+    click.mockRestore();
   });
 });

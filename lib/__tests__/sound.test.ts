@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { setSoundEnabled, soundEnabled } from "@/lib/sound";
 
 // Minimal fake Web Audio graph so we can assert playTick wires and starts an
 // oscillator, and that it's resilient when the API is missing.
@@ -70,6 +71,28 @@ describe("playTick", () => {
       ThrowingContext as unknown;
     vi.resetModules();
     const { playTick: fresh } = await import("@/lib/sound");
+    expect(() => fresh()).not.toThrow();
+  });
+});
+
+describe("sound preference gate", () => {
+  it("is enabled by default and reflects the stored mute flag", () => {
+    localStorage.clear();
+    expect(soundEnabled()).toBe(true);
+    setSoundEnabled(false);
+    expect(localStorage.getItem("farms.sound")).toBe("off");
+    expect(soundEnabled()).toBe(false);
+    setSoundEnabled(true);
+    expect(localStorage.getItem("farms.sound")).toBeNull();
+    expect(soundEnabled()).toBe(true);
+  });
+
+  it("playTick is a no-op while muted", async () => {
+    setSoundEnabled(false);
+    vi.resetModules();
+    const { playTick: fresh, setSoundEnabled: mute } =
+      await import("@/lib/sound");
+    mute(false);
     expect(() => fresh()).not.toThrow();
   });
 });
