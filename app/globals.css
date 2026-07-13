@@ -47,14 +47,17 @@
      through, a bright rim + top-edge highlight (light catching the glass =
      depth), and a soft float shadow. --glass-solid is the no-backdrop-filter
      fallback (kept legible). */
-  --glass-fill: rgba(255, 255, 255, 0.14);
+  /* Light glass sat almost invisible on the pale canvas next to dark mode's
+     obvious panes. Nudged so it reads as present without going solid: a touch
+     more fill, a firmer rim, and a deeper float shadow below. */
+  --glass-fill: rgba(255, 255, 255, 0.22);
   /* Chrome (header / rail / tab bar) is deliberately more frosted than content
      panes, so floating UI reads as a layer ABOVE the page rather than another
      card colliding with the one scrolling beneath it. */
-  --glass-chrome-fill: rgba(255, 255, 255, 0.5);
+  --glass-chrome-fill: rgba(255, 255, 255, 0.58);
   --glass-solid: rgba(255, 255, 255, 0.9);
   /* Brighter, near-opaque rim = the crisp light-catching edge of Liquid Glass. */
-  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.95);
   /* Frost recipes (whole-value vars so the minifier can't mangle them). Light
      keeps brightness near 1 so panes don't wash toward white. A stronger blur
      lets the fill drop (less opaque) while content behind stays unreadable. */
@@ -68,8 +71,8 @@
   --glass-lowlight: rgba(20, 22, 27, 0.09);
   /* soft float + a tight contact shadow just under the slab (grounds it) */
   --glass-shadow:
-    0 14px 44px -16px rgba(20, 22, 27, 0.36),
-    0 2px 6px -3px rgba(20, 22, 27, 0.14);
+    0 16px 48px -16px rgba(20, 22, 27, 0.44),
+    0 3px 8px -3px rgba(20, 22, 27, 0.18);
   /* strength of the diagonal specular sheen sliding off the top-left */
   --glass-sheen: 0.5;
   /* peak brightness of the scroll-reactive glint band */
@@ -263,13 +266,16 @@ html.dark {
 }
 
 /* Where backdrop-filter is unavailable there's no containing block for the
-   glow pseudos, so restore it here. (This branch can't collide with a
-   positioned utility because those browsers don't get the glass frost anyway,
-   and static glass panels are the common case.) */
+   glow pseudos, so restore one here. `:where()` keeps this at ZERO specificity
+   so any positioning utility still wins: without it, `.glass` (0,1,0) tied the
+   `.fixed` utility and — coming later in the sheet — clobbered it, turning every
+   fixed glass surface (motion prompt, install/update banner, back-to-top) into
+   `position: relative` in no-backdrop-filter Firefox, so they scrolled away with
+   the page instead of staying pinned. Static glass panes still get `relative`. */
 @supports not (
   (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
 ) {
-  .glass {
+  :where(.glass) {
     position: relative;
   }
 }

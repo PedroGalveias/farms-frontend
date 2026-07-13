@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// Locale routing. English is canonical and unprefixed (/canton/be); the other
+// Locale routing (Next's request proxy, formerly `middleware`). English is canonical and unprefixed (/canton/be); the other
 // locales live under a segment (/de/canton/be). Every page component sits in
 // app/[lang], so:
 //
@@ -16,7 +16,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const PREFIXED = ["de", "fr", "it", "rm"];
 const COOKIE = "farms.locale";
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const [, first, ...rest] = pathname.split("/");
 

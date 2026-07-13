@@ -6,6 +6,20 @@ export type Role = "user" | "admin";
 export interface AuthUser {
   user_id: string;
   role: Role;
+  /** Optional — present when the backend /me response includes it. */
+  username?: string;
+}
+
+/**
+ * What to show for a signed-in user: their username when the backend provides
+ * one, else the localized role label ("Member"/"Admin"). Never the raw user_id.
+ */
+export function accountDisplayName(
+  user: Pick<AuthUser, "username" | "role">,
+  roleLabel: string,
+): string {
+  const name = user.username?.trim();
+  return name && name.length > 0 ? name : roleLabel;
 }
 
 /** Name of the backend's httpOnly session cookie. */

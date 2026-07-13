@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ArrowRight, MapPin, Route, ShoppingBasket } from "lucide-react";
 import Reveal from "@/components/motion/Reveal";
 import { useT } from "@/components/i18n/LanguageProvider";

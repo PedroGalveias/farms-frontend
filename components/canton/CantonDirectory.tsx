@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ChevronRight, MapPin } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
 

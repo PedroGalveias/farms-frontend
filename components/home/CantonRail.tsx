@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ArrowRight, MapPin } from "lucide-react";
 import { getCantonName } from "@/lib/farms";
 import { haptic } from "@/lib/haptics";

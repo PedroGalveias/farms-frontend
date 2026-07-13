@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ArrowRight, Sparkles } from "lucide-react";
 import CountUp from "@/components/motion/CountUp";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";

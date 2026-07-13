@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { accountDisplayName } from "@/lib/auth";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
 /**
@@ -146,6 +147,7 @@ function AccountSection() {
   if (!user) return null;
   const roleLabel =
     user.role === "admin" ? t("account_role_admin") : t("account_role_user");
+  const displayName = accountDisplayName(user, roleLabel);
 
   return (
     <section className="mt-8">
@@ -155,11 +157,9 @@ function AccountSection() {
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div className="glass-inset rounded-2xl px-4 py-3.5">
           <p className="text-xs font-semibold text-ink/60">
-            {t("profile_accountId")}
+            {user.username ? t("profile_username") : t("profile_accountId")}
           </p>
-          <p className="mt-1.5 truncate font-mono text-sm text-ink/80">
-            {user.user_id}
-          </p>
+          <p className="mt-1.5 truncate text-sm text-ink/80">{displayName}</p>
         </div>
         <div className="glass-inset rounded-2xl px-4 py-3.5">
           <p className="text-xs font-semibold text-ink/60">

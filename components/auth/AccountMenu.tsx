@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { accountDisplayName } from "@/lib/auth";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { LogIn, LogOut, User, UserRound } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -96,6 +97,7 @@ export default function AccountMenu({
 
   const roleLabel =
     user.role === "admin" ? t("account_role_admin") : t("account_role_user");
+  const displayName = accountDisplayName(user, roleLabel);
 
   return (
     <>
@@ -124,8 +126,8 @@ export default function AccountMenu({
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60">
                   {t("account_signedIn")}
                 </p>
-                <p className="mt-0.5 text-sm font-semibold text-ink">
-                  {roleLabel}
+                <p className="mt-0.5 truncate text-sm font-semibold text-ink">
+                  {displayName}
                 </p>
               </div>
               <Link

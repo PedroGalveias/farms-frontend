@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import { tagLabel } from "@/lib/products";
 import { getCantonName } from "@/lib/farms";

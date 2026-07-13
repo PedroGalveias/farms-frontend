@@ -7,6 +7,7 @@ import {
   validateEmailFormat,
   validatePassword,
   validateUsername,
+  accountDisplayName,
 } from "@/lib/auth";
 
 describe("validateEmailFormat", () => {
@@ -128,5 +129,19 @@ describe("isSameOrigin", () => {
 
   it("allows requests with neither origin nor referer (relies on SameSite)", () => {
     expect(isSameOrigin(request({ host: "localhost:3000" }))).toBe(true);
+  });
+});
+
+describe("accountDisplayName", () => {
+  it("prefers the username when present", () => {
+    expect(
+      accountDisplayName({ username: "pedro", role: "user" }, "Member"),
+    ).toBe("pedro");
+  });
+  it("falls back to the role label when username is missing or blank", () => {
+    expect(accountDisplayName({ role: "user" }, "Member")).toBe("Member");
+    expect(accountDisplayName({ username: "  ", role: "admin" }, "Admin")).toBe(
+      "Admin",
+    );
   });
 });
