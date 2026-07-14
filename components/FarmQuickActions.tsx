@@ -156,8 +156,10 @@ function ActionRow({
       <Icon className="h-5 w-5 shrink-0" />
       {label}
       {/* Real-switch tap-through: the reliable iOS system haptic (the
-          programmatic tick in runAndClose covers Android). */}
-      {disabled ? null : <HapticTap />}
+          programmatic tick in runAndClose covers Android). These rows are
+          full-width — tile the switches so a tap on the label still lands
+          on one. */}
+      {disabled ? null : <HapticTap wide />}
     </button>
   );
 }

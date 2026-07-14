@@ -86,7 +86,7 @@ export default function AddToCollectionMenu({
             {memberCount}
           </span>
         ) : null}
-        <HapticTap />
+        <HapticTap wide />
       </button>
 
       {open ? (
@@ -113,7 +113,7 @@ export default function AddToCollectionMenu({
                     {member ? (
                       <Check className="h-4 w-4 shrink-0 text-pine" />
                     ) : null}
-                    <HapticTap />
+                    <HapticTap wide />
                   </button>
                 );
               })}

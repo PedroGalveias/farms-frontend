@@ -55,3 +55,32 @@ describe("HapticTap", () => {
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 });
+
+describe("HapticTap wide", () => {
+  it("tiles multiple painted switches across a full-width row", async () => {
+    setUserAgent(
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15",
+    );
+    const onClick = vi.fn();
+    render(
+      <button onClick={onClick} type="button">
+        Save
+        <HapticTap wide />
+      </button>,
+    );
+    await act(async () => {});
+
+    const toggles =
+      document.querySelectorAll<HTMLInputElement>("input[switch]");
+    // A single native switch is ~51px and can't be resized without losing
+    // the haptic — coverage comes from tiling, so there must be several.
+    expect(toggles.length).toBeGreaterThan(4);
+    for (const toggle of toggles) {
+      expect(Number(toggle.style.opacity)).toBeGreaterThan(0);
+    }
+
+    // A tap landing on ANY tile still reaches the button's handler.
+    fireEvent.click(toggles[toggles.length - 1]);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+});
