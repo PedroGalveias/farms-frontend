@@ -62,6 +62,21 @@ describe("category canonicalisation", () => {
     expect(canonicalCategory("  Honig ")).toBe("Honig und Süßstoffe");
   });
 
+  it("rolls leaked subcategories up to their canonical group", () => {
+    // Verified against the live dataset's 32 groups (2026-07-14).
+    expect(canonicalCategory("Beeren")).toBe("Früchte");
+    expect(canonicalCategory("Kernobst")).toBe("Früchte");
+    expect(canonicalCategory("Wurzelgemüse")).toBe("Gemüse");
+    expect(canonicalCategory("Zwiebelgemüse")).toBe("Gemüse");
+    expect(canonicalCategory("Fruchtsäfte")).toBe("Getränke");
+    expect(canonicalCategory("Weine")).toBe("Getränke");
+    expect(canonicalCategory("Eier")).toBe("Sonstiges");
+    expect(canonicalCategory("Freilandeier")).toBe("Sonstiges");
+    expect(canonicalCategory("Schalenobst und Nüsse")).toBe(
+      "Nüsse, Samen und Öle",
+    );
+  });
+
   it("passes canonical and unknown values through untouched", () => {
     expect(canonicalCategory("Gemüse")).toBe("Gemüse");
     expect(canonicalCategory("Brandneue Gruppe")).toBe("Brandneue Gruppe");

@@ -161,26 +161,55 @@ const DEFAULT_CATEGORY_EMOJI = "🧺";
 export const KNOWN_CATEGORY_KEYS = Object.keys(CATEGORY_CATALOG);
 
 /**
- * German is the canonical category language, but the live data contains
- * variant group names (older imports, hand-entered farms) that the catalog
- * doesn't know — they'd render as raw German among translated labels and
- * split the counts ("Früchte und Obst" 120 next to "Fruits" 789). Map each
- * known variant to its canonical key at the data boundary; genuinely new
- * groups still fall through raw (visible = noticed = added here or seeded
- * properly in the backend).
+ * German is the canonical category language, but the live `/farms` data mixes
+ * three things into each farm's `categories`: the 13 canonical GROUPS, plain
+ * synonyms of them ("Fleisch" for "Fleisch und Geflügel"), and — while the
+ * backend's group/subcategory split is still being built — SUBCATEGORIES that
+ * leak up as top-level values ("Beeren", "Kernobst", "Eier", "Wurzelgemüse").
+ * Untouched, they render as raw German beside translated labels and split the
+ * counts ("Früchte und Obst" 120 next to "Fruits" 789).
+ *
+ * The directory + quick-search facets are group-level (13 curated groups by
+ * design; subcategories live in each group's expandable sub-list), so every
+ * known synonym and subcategory rolls up to its canonical GROUP here, at the
+ * data boundary. Group assignments follow lib/products.ts' own taxonomy
+ * (berries/pome fruit → Früchte, root/allium veg → Gemüse, juices/wine →
+ * Getränke, eggs → Sonstiges, mirroring Wachteleier). When the backend
+ * finishes the split, group values will already be canonical (no-op) and
+ * subcategories move to the sub-list. Genuinely unknown groups still fall
+ * through raw — visible = noticed = added here or seeded properly backend-side.
+ *
+ * Every value is verified against the live dataset (32 distinct groups as of
+ * 2026-07-14); enumerate again if the backend taxonomy shifts.
  */
 export const CATEGORY_ALIASES: Record<string, string> = {
+  // Synonyms of a canonical group
   Backwaren: "Backwaren und Gebäck",
   Blumen: "Blumen und Pflanzen",
   Fisch: "Fisch und Meeresfrüchte",
   Fleisch: "Fleisch und Geflügel",
   "Früchte und Obst": "Früchte",
-  Geflügel: "Fleisch und Geflügel",
   Gebäck: "Backwaren und Gebäck",
+  Geflügel: "Fleisch und Geflügel",
   Getreide: "Getreide und Cerealien",
   Honig: "Honig und Süßstoffe",
   Obst: "Früchte",
   Sonstige: "Sonstiges",
+  // Subcategories rolled up to their group (until the backend split lands)
+  Äpfel: "Früchte",
+  Beeren: "Früchte",
+  Eier: "Sonstiges",
+  Freilandeier: "Sonstiges",
+  Frischkäse: "Milchprodukte",
+  Fruchtsäfte: "Getränke",
+  Kernobst: "Früchte",
+  Konfitüren: "Verarbeitete und haltbare Produkte",
+  "Schalenobst und Nüsse": "Nüsse, Samen und Öle",
+  Teigwaren: "Getreide und Cerealien",
+  Weine: "Getränke",
+  Wurzelgemüse: "Gemüse",
+  Zwiebeln: "Gemüse",
+  Zwiebelgemüse: "Gemüse",
 };
 
 /** Canonical catalog key for a raw category string (trim + alias lookup). */
