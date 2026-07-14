@@ -161,6 +161,40 @@ const DEFAULT_CATEGORY_EMOJI = "🧺";
 export const KNOWN_CATEGORY_KEYS = Object.keys(CATEGORY_CATALOG);
 
 /**
+ * German is the canonical category language, but the live data contains
+ * variant group names (older imports, hand-entered farms) that the catalog
+ * doesn't know — they'd render as raw German among translated labels and
+ * split the counts ("Früchte und Obst" 120 next to "Fruits" 789). Map each
+ * known variant to its canonical key at the data boundary; genuinely new
+ * groups still fall through raw (visible = noticed = added here or seeded
+ * properly in the backend).
+ */
+export const CATEGORY_ALIASES: Record<string, string> = {
+  Backwaren: "Backwaren und Gebäck",
+  Blumen: "Blumen und Pflanzen",
+  Fisch: "Fisch und Meeresfrüchte",
+  Fleisch: "Fleisch und Geflügel",
+  "Früchte und Obst": "Früchte",
+  Geflügel: "Fleisch und Geflügel",
+  Gebäck: "Backwaren und Gebäck",
+  Getreide: "Getreide und Cerealien",
+  Honig: "Honig und Süßstoffe",
+  Obst: "Früchte",
+  Sonstige: "Sonstiges",
+};
+
+/** Canonical catalog key for a raw category string (trim + alias lookup). */
+export function canonicalCategory(value: string): string {
+  const trimmed = value.trim();
+  return CATEGORY_ALIASES[trimmed] ?? trimmed;
+}
+
+/** A farm's categories, canonicalised and de-duplicated. */
+export function normalizeFarmCategories(categories: string[]): string[] {
+  return [...new Set(categories.map(canonicalCategory))];
+}
+
+/**
  * Localized display label for a category. Falls back to English, then to the
  * raw key (the German string the backend sent) so an unmapped category still
  * renders sensibly instead of breaking.
