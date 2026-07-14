@@ -39,15 +39,15 @@ const THEMES = {
   light: {
     // The light canvas + the ambient green wash (mirrors body's gradients).
     base: "#f4f4ef",
-    glowTop: "rgba(33, 160, 90, 0.16)",
-    glowBottom: "rgba(33, 160, 90, 0.10)",
+    glowTop: "rgba(33, 160, 90, 0.30)",
+    glowBottom: "rgba(33, 160, 90, 0.22)",
     word: "#14161b",
     dot: "#1c7c47",
   },
   dark: {
     base: "#0e0f12",
-    glowTop: "rgba(46, 168, 102, 0.20)",
-    glowBottom: "rgba(46, 168, 102, 0.12)",
+    glowTop: "rgba(46, 168, 102, 0.32)",
+    glowBottom: "rgba(46, 168, 102, 0.22)",
     word: "#f4f4ef",
     dot: "#2ea866",
   },
