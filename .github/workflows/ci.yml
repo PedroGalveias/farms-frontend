@@ -75,7 +75,7 @@ jobs:
   # fixed-glass anchoring bug only reproduced on Windows Firefox). Kept to the
   # targeted specs so the runner stays fast; the full matrix runs on Linux.
   windows:
-    name: Windows (unit, build, Firefox e2e)
+    name: Windows (unit, build, Firefox + Chromium e2e)
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -107,20 +107,72 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~\AppData\Local\ms-playwright
-          key: ${{ runner.os }}-playwright-firefox-${{ steps.playwright.outputs.version }}
+          key: ${{ runner.os }}-playwright-ff-cr-${{ steps.playwright.outputs.version }}
 
-      - name: Install Playwright Firefox
+      - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install firefox
+        run: npx playwright install firefox chromium
 
-      - name: Firefox e2e (Windows-sensitive specs)
-        run: npx playwright test fixed-chrome smoke navigation --project=firefox
+      # Firefox has a history of real Windows-only bugs here (frozen
+      # animations, fixed-glass positioning); Chromium stands in for
+      # Chrome/Edge, the other engines Windows users actually run.
+      - name: Firefox + Chromium e2e (Windows-sensitive specs)
+        run: npx playwright test fixed-chrome smoke navigation --project=firefox --project=chromium
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-windows
+          path: playwright-report/
+          if-no-files-found: ignore
+
+  # macOS is where Safari actually lives — WebKit on macOS exercises the
+  # native font stack, scrollbars, and compositor the Linux webkit build
+  # only approximates. Lean spec list; the full matrix runs on Linux.
+  macos:
+    name: macOS (unit, WebKit e2e)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npx vitest run
+
+      - name: Resolve Playwright version
+        id: playwright
+        run: |
+          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/ms-playwright
+          key: ${{ runner.os }}-playwright-webkit-${{ steps.playwright.outputs.version }}
+
+      - name: Install Playwright WebKit
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install webkit
+
+      - name: WebKit e2e (Safari-sensitive specs)
+        run: npx playwright test smoke navigation fixed-chrome quick-search --project=webkit
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-macos
           path: playwright-report/
           if-no-files-found: ignore
 
@@ -180,7 +232,7 @@ jobs:
   # never deploy — cut a `v*` tag to ship.
   deploy:
     name: Deploy to Render
-    needs: [verify, e2e, windows]
+    needs: [verify, e2e, windows, macos]
     if: >-
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
       || github.event_name == 'workflow_dispatch'
