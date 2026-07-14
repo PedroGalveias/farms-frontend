@@ -79,9 +79,11 @@
   --glass-glint-max: 0.45;
   /* peak brightness of the pointer-following glow */
   --glass-hover-max: 0.8;
-  /* nested pane (glass on glass): lighter, thinner */
-  --glass-inset-fill: rgba(255, 255, 255, 0.22);
-  --glass-inset-border: rgba(255, 255, 255, 0.6);
+  /* nested pane (glass on glass): white-on-white was invisible on a light
+     glass card — an ink tint gives the nested layer real presence, mirroring
+     how the dark theme's chips read. */
+  --glass-inset-fill: rgba(20, 22, 27, 0.045);
+  --glass-inset-border: rgba(20, 22, 27, 0.12);
 }
 
 html.dark {
@@ -515,27 +517,27 @@ body::after {
   background:
     radial-gradient(
       42rem 42rem at 6% 14%,
-      rgba(33, 160, 90, 0.26),
+      rgba(33, 160, 90, 0.4),
       transparent 64%
     ),
     radial-gradient(
       36rem 36rem at 96% 22%,
-      rgba(150, 190, 70, 0.22),
+      rgba(150, 190, 70, 0.34),
       transparent 62%
     ),
     radial-gradient(
       48rem 48rem at 78% 96%,
-      rgba(33, 160, 90, 0.22),
+      rgba(33, 160, 90, 0.36),
       transparent 64%
     ),
     radial-gradient(
       34rem 34rem at 20% 88%,
-      rgba(90, 150, 210, 0.14),
+      rgba(90, 150, 210, 0.24),
       transparent 62%
     ),
     radial-gradient(
       30rem 30rem at 50% 50%,
-      rgba(33, 160, 90, 0.08),
+      rgba(33, 160, 90, 0.16),
       transparent 65%
     );
 }

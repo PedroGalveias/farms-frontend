@@ -57,10 +57,10 @@ export default function LocationStep({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-[28px] font-bold tracking-[-0.035em] text-ink">
+        <h2 className="text-xl font-bold tracking-[-0.035em] text-ink sm:text-[28px]">
           {t("qs_loc_title")}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-ink/60">
+        <p className="mt-1.5 text-sm leading-6 text-ink/60">
           {t("qs_loc_subcopy")}
         </p>
       </div>

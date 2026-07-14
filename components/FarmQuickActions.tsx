@@ -14,6 +14,8 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { useTrip } from "@/components/trip/TripProvider";
 import { haptic } from "@/lib/haptics";
+import { playTick } from "@/lib/sound";
+import HapticTap from "@/components/ui/HapticTap";
 import { farmShareUrl } from "@/lib/share";
 import { getCantonName } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
@@ -44,6 +46,7 @@ export default function FarmQuickActions({
 
   const runAndClose = (action: () => void) => {
     haptic();
+    playTick();
     action();
     onClose();
   };
@@ -141,7 +144,7 @@ function ActionRow({
 }) {
   return (
     <button
-      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`relative flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-40 ${
         active
           ? "bg-pine/10 text-pine"
           : "text-ink/80 hover:bg-ink/[0.05] active:bg-ink/[0.08]"
@@ -152,6 +155,9 @@ function ActionRow({
     >
       <Icon className="h-5 w-5 shrink-0" />
       {label}
+      {/* Real-switch tap-through: the reliable iOS system haptic (the
+          programmatic tick in runAndClose covers Android). */}
+      {disabled ? null : <HapticTap />}
     </button>
   );
 }

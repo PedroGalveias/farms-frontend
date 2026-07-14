@@ -35,6 +35,7 @@ import { PRODUCTS, tagLabel } from "@/lib/products";
 import { trackSearch } from "@/lib/search-stats";
 import { geolocationErrorKey, requestCurrentPosition } from "@/lib/geolocation";
 import { getCantonName, getUniqueFarmCantons } from "@/lib/farms";
+import { prefersReducedMotion } from "@/lib/motion";
 import { runViewTransition } from "@/lib/view-transitions";
 import {
   getQuickSearchProducts,
@@ -116,6 +117,7 @@ export default function QuickSearchExperience({
   const [resultsVisit, setResultsVisit] = useState(0);
 
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
+  const deckRef = useRef<HTMLDivElement | null>(null);
   const hasMountedRef = useRef(false);
 
   const products = useMemo(() => getQuickSearchProducts(farms), [farms]);
@@ -202,6 +204,18 @@ export default function QuickSearchExperience({
     }
 
     setStep(nextStep);
+
+    // Below lg the hero sits above the deck and would keep the active card
+    // half off-screen — bring the deck to the top so each step gets the whole
+    // viewport. Desktop centres the deck in a fixed column; leave it alone.
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      requestAnimationFrame(() => {
+        deckRef.current?.scrollIntoView({
+          behavior: prefersReducedMotion() ? "auto" : "smooth",
+          block: "start",
+        });
+      });
+    }
   };
 
   const isStepEnabled = (index: number) =>
@@ -460,7 +474,8 @@ export default function QuickSearchExperience({
 
           <div
             aria-label={t("qs_steps_aria")}
-            className="relative mt-8 h-[clamp(460px,calc(100dvh-400px),640px)] lg:h-[clamp(520px,calc(100dvh-360px),660px)]"
+            className="relative mt-8 scroll-mt-20 h-[clamp(520px,calc(100dvh_-_230px),820px)] lg:h-[clamp(560px,calc(100dvh_-_240px),780px)]"
+            ref={deckRef}
             role="group"
           >
             {STEPS.map((meta, index) => {

@@ -75,12 +75,14 @@ const FRAG = `
     vec3 lime  = vec3(0.588,0.745,0.275);
     vec3 blue  = vec3(0.353,0.588,0.824);
 
-    // CSS y% is top-down; GL y is bottom-up → y = 1 - y%.
-    float a1 = orb(px, vec2(0.06*w, 0.86) + d1, 0.75*pulse) * mix(0.26, 0.30, u_dark);
-    float a2 = orb(px, vec2(0.96*w, 0.78) + d2, 0.64)        * mix(0.22, 0.18, u_dark);
-    float a3 = orb(px, vec2(0.78*w, 0.04) + d3, 0.85*pulse) * mix(0.22, 0.26, u_dark);
-    float a4 = orb(px, vec2(0.20*w, 0.12) - d1, 0.60)        * mix(0.14, 0.16, u_dark);
-    float a5 = orb(px, vec2(0.50*w, 0.50) + d2, 0.53)        * mix(0.08, 0.10, u_dark);
+    // Light mode runs noticeably hotter than dark: on the pale canvas the
+    // original alphas washed out to near-invisible, while dark's tuning was
+    // already right. CSS y% is top-down; GL y is bottom-up → y = 1 - y%.
+    float a1 = orb(px, vec2(0.06*w, 0.86) + d1, 0.75*pulse) * mix(0.40, 0.30, u_dark);
+    float a2 = orb(px, vec2(0.96*w, 0.78) + d2, 0.64)        * mix(0.34, 0.18, u_dark);
+    float a3 = orb(px, vec2(0.78*w, 0.04) + d3, 0.85*pulse) * mix(0.36, 0.26, u_dark);
+    float a4 = orb(px, vec2(0.20*w, 0.12) - d1, 0.60)        * mix(0.24, 0.16, u_dark);
+    float a5 = orb(px, vec2(0.50*w, 0.50) + d2, 0.53)        * mix(0.16, 0.10, u_dark);
 
     vec3 col = green*a1 + lime*a2 + green*a3 + blue*a4 + green*a5;
     float alpha = a1 + a2 + a3 + a4 + a5;
@@ -91,7 +93,7 @@ const FRAG = `
     float c1 = sin((px.x + px.y) * 6.0 + 3.5*noise(px*1.6 + t*0.05) + t*0.22);
     float c2 = sin((px.x - px.y*0.7) * 3.5 + 3.0*noise(px*1.1 - t*0.04) - t*0.15);
     float fil = pow(max(c1, 0.0), 14.0) * 0.6 + pow(max(c2, 0.0), 10.0) * 0.4;
-    fil *= mix(0.10, 0.06, u_dark);
+    fil *= mix(0.17, 0.06, u_dark);
     fil *= 0.45 + 0.55 * smoothstep(0.02, 0.25, alpha);
     col += mix(vec3(0.55,0.95,0.68), vec3(0.75,0.92,0.5), uv.y) * fil;
     alpha += fil;
