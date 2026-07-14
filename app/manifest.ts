@@ -27,6 +27,13 @@ export default function manifest(): MetadataRoute.Manifest {
         icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
       },
       {
+        name: "Repeat last search",
+        short_name: "Resume",
+        description: "Run your last quick search again.",
+        url: "/quick-search?resume=1",
+        icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
+      },
+      {
         name: "Saved farms",
         short_name: "Saved",
         description: "Open your saved farms and collections.",

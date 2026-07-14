@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ChevronDown, X } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Check, ChevronDown, Search, X } from "lucide-react";
 import { categoryEmoji, categoryLabel } from "@/lib/categories";
-import { PRODUCTS_BY_GROUP, productLabel } from "@/lib/products";
+import { PRODUCTS_BY_GROUP, productLabel, tagLabel } from "@/lib/products";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type {
   QuickSearchMatchMode,
@@ -18,6 +18,7 @@ interface ProductsStepProps {
   onToggleProduct: (product: string) => void;
   products: QuickSearchProduct[];
   selectedProducts: string[];
+  starterKeys: string[];
 }
 
 export default function ProductsStep({
@@ -28,11 +29,14 @@ export default function ProductsStep({
   onToggleProduct,
   products,
   selectedProducts,
+  starterKeys,
 }: ProductsStepProps) {
   const { locale, t } = useLanguage();
   const selectedCount = selectedProducts.length;
   const hasAnyAvailability = products.some((product) => product.farmCount > 0);
   const [expanded, setExpanded] = useState<string[]>([]);
+  const [filter, setFilter] = useState("");
+  const gridRef = useRef<HTMLDivElement | null>(null);
 
   const toggleExpanded = (group: string) =>
     setExpanded((current) =>
@@ -40,6 +44,68 @@ export default function ProductsStep({
         ? current.filter((value) => value !== group)
         : [...current, group],
     );
+
+  // Type-to-filter: a group stays visible when its own label matches OR any
+  // of its products match; groups that match only through a product
+  // auto-expand so the hit is on screen. 183 products across 13 groups is
+  // too much taxonomy to browse when you already know the word.
+  const query = filter.trim().toLowerCase();
+  const filtered = useMemo(() => {
+    if (!query) {
+      return { matchedSubs: new Set<string>(), visible: products };
+    }
+    const visible: QuickSearchProduct[] = [];
+    const matchedSubs = new Set<string>();
+    for (const product of products) {
+      const group = product.category;
+      const groupHit = categoryLabel(group, locale)
+        .toLowerCase()
+        .includes(query);
+      const subHits = (PRODUCTS_BY_GROUP[group] ?? []).filter((key) =>
+        productLabel(key, locale).toLowerCase().includes(query),
+      );
+      if (groupHit || subHits.length > 0) {
+        visible.push(product);
+        for (const key of subHits) {
+          matchedSubs.add(key);
+        }
+      }
+    }
+    return { matchedSubs, visible };
+  }, [locale, products, query]);
+
+  const isFiltering = query.length > 0;
+
+  // Keyboard flow (desktop): arrows move across the category grid without
+  // tabbing through every chevron.
+  const handleGridKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const keys = ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"];
+    if (!keys.includes(event.key)) {
+      return;
+    }
+    const grid = gridRef.current;
+    if (!grid) {
+      return;
+    }
+    const toggles = [
+      ...grid.querySelectorAll<HTMLButtonElement>("button[aria-pressed]"),
+    ];
+    const index = toggles.indexOf(document.activeElement as HTMLButtonElement);
+    if (index === -1) {
+      return;
+    }
+    event.preventDefault();
+    const columns = window.innerWidth >= 640 ? 2 : 1;
+    const delta =
+      event.key === "ArrowDown"
+        ? columns
+        : event.key === "ArrowUp"
+          ? -columns
+          : event.key === "ArrowRight"
+            ? 1
+            : -1;
+    toggles[Math.min(Math.max(index + delta, 0), toggles.length - 1)]?.focus();
+  };
 
   return (
     <div className="space-y-4">
@@ -51,6 +117,56 @@ export default function ProductsStep({
           {t("qs_prod_subcopy")}
         </p>
       </div>
+
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
+        <input
+          className="w-full rounded-2xl border border-line bg-cloud py-2.5 pl-10 pr-9 text-base text-ink placeholder:text-ink/40 focus:border-pine/50 focus:outline-none focus:ring-2 focus:ring-pine/15 sm:text-sm"
+          onChange={(event) => setFilter(event.target.value)}
+          placeholder={t("qs_filter_placeholder")}
+          type="search"
+          value={filter}
+        />
+        {isFiltering ? (
+          <button
+            aria-label={t("qs_filter_clear")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-ink/50 transition hover:bg-tone hover:text-ink"
+            onClick={() => setFilter("")}
+            type="button"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
+      </div>
+
+      {!isFiltering && starterKeys.length > 0 ? (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink/45">
+            {t("qs_starters_label")}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {starterKeys.map((key) => {
+              const isSelected = selectedProducts.includes(key);
+              return (
+                <button
+                  aria-pressed={isSelected}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                    isSelected
+                      ? "border-pine bg-pine/10 text-pine"
+                      : "border-line bg-cloud text-ink/65 hover:border-ink/25 hover:text-ink"
+                  }`}
+                  key={key}
+                  onClick={() => onToggleProduct(key)}
+                  type="button"
+                >
+                  {isSelected ? <Check className="h-3 w-3" /> : null}
+                  {tagLabel(key, locale)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
         <div
@@ -82,14 +198,23 @@ export default function ProductsStep({
       </div>
 
       {/* Two columns from sm up — twice the catalog visible per screen. */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {products.map((product) => {
+      <div
+        className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+        onKeyDown={handleGridKeyDown}
+        ref={gridRef}
+      >
+        {filtered.visible.map((product) => {
           const group = product.category;
           const isSelected = selectedProducts.includes(group);
           const isUnavailable = hasAnyAvailability && product.farmCount === 0;
-          const subProducts = PRODUCTS_BY_GROUP[group] ?? [];
-          const isOpen = expanded.includes(group);
-          const selectedSubCount = subProducts.filter((key) =>
+          const allSubs = PRODUCTS_BY_GROUP[group] ?? [];
+          const subProducts = isFiltering
+            ? allSubs.filter((key) => filtered.matchedSubs.has(key))
+            : allSubs;
+          const isOpen = isFiltering
+            ? subProducts.length > 0
+            : expanded.includes(group);
+          const selectedSubCount = allSubs.filter((key) =>
             selectedProducts.includes(key),
           ).length;
 
@@ -135,7 +260,7 @@ export default function ProductsStep({
                   ) : null}
                 </button>
 
-                {subProducts.length > 0 ? (
+                {allSubs.length > 0 && !isFiltering ? (
                   <button
                     aria-expanded={isOpen}
                     aria-label={t("qs_show_products")}
@@ -181,6 +306,12 @@ export default function ProductsStep({
           );
         })}
       </div>
+
+      {isFiltering && filtered.visible.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-line bg-tone/40 px-4 py-6 text-center text-sm leading-6 text-ink/60">
+          {t("qs_filter_no_matches", { query: filter.trim() })}
+        </p>
+      ) : null}
 
       {matchCount === 0 && selectedCount > 0 ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3">

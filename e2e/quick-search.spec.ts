@@ -70,3 +70,55 @@ test.describe("quick search flow", () => {
     ).toBeVisible();
   });
 });
+
+test.describe("search ritual", () => {
+  test("type-to-filter narrows the catalog and surfaces the product", async ({
+    page,
+  }) => {
+    await page.goto("/quick-search");
+    await page
+      .getByRole("button", { name: /choose products/i })
+      .first()
+      .click();
+
+    await page.getByPlaceholder(/try eggs, honey/i).fill("brocc");
+    const grid = page.locator(".grid").filter({ hasText: "Vegetables" });
+    await expect(
+      grid.getByRole("button", { name: /^Broccoli$/ }),
+    ).toBeVisible();
+    await expect(grid.getByRole("button", { name: /Fruits/ })).toHaveCount(0);
+  });
+
+  test("results offer hearts, a map handoff, and a resumable search", async ({
+    page,
+  }) => {
+    await page.goto("/quick-search?products=Käse");
+    await page
+      .getByRole("button", { name: /show \d+ farms/i })
+      .first()
+      .click();
+
+    // Save straight from a result row.
+    const firstHeart = page
+      .locator("li")
+      .filter({ has: page.locator("h3") })
+      .first()
+      .getByRole("button", { name: /save|saved/i });
+    await firstHeart.click();
+    await expect(firstHeart).toHaveAttribute("aria-pressed", "true");
+
+    // Map handoff carries the selection as its category group.
+    const mapLink = page.getByRole("link", { name: /see these on the map/i });
+    await expect(mapLink).toHaveAttribute("href", /view=map/);
+    await expect(mapLink).toHaveAttribute("href", /cat=/);
+
+    // A fresh visit offers to resume the finished search.
+    await page.goto("/quick-search");
+    const resume = page.getByRole("button", { name: /resume last search/i });
+    await expect(resume).toBeVisible();
+    await resume.click();
+    await expect(
+      page.getByRole("heading", { name: /farms? found/i }),
+    ).toBeVisible();
+  });
+});

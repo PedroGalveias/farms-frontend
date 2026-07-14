@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   formatQuickSearchDistance,
   getNearestFarm,
@@ -7,6 +7,9 @@ import {
   getQuickSearchResults,
   parseQuickSearchCoordinates,
   productMatchesCategory,
+  LAST_SEARCH_STORAGE_KEY,
+  readLastQuickSearch,
+  writeLastQuickSearch,
 } from "@/lib/quick-search";
 import type { Farm } from "@/types/farm";
 
@@ -256,5 +259,38 @@ describe("formatQuickSearchDistance", () => {
     expect(formatQuickSearchDistance(0.4)).toBe("Less than 1 km away");
     expect(formatQuickSearchDistance(3.45)).toBe("3.5 km away");
     expect(formatQuickSearchDistance(42.6)).toBe("43 km away");
+  });
+});
+
+describe("last quick search persistence", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("round-trips products and match mode", () => {
+    writeLastQuickSearch({ matchMode: "any", products: ["Käse", "Honig"] });
+    expect(readLastQuickSearch()).toEqual({
+      matchMode: "any",
+      products: ["Käse", "Honig"],
+    });
+  });
+
+  it("returns null when nothing is stored or products are empty", () => {
+    expect(readLastQuickSearch()).toBeNull();
+    writeLastQuickSearch({ matchMode: "all", products: [] });
+    expect(readLastQuickSearch()).toBeNull();
+  });
+
+  it("survives corrupt JSON and strips junk entries", () => {
+    window.localStorage.setItem(LAST_SEARCH_STORAGE_KEY, "{not json");
+    expect(readLastQuickSearch()).toBeNull();
+    window.localStorage.setItem(
+      LAST_SEARCH_STORAGE_KEY,
+      JSON.stringify({ matchMode: "weird", products: ["ok", 7, ""] }),
+    );
+    expect(readLastQuickSearch()).toEqual({
+      matchMode: "all",
+      products: ["ok"],
+    });
   });
 });

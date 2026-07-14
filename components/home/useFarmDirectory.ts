@@ -106,6 +106,10 @@ export function useFarmDirectory(initialFarms: Farm[]) {
       setCategoryMatchMode(params.get("match") === "all" ? "all" : "any");
       setSortOption(sort);
       setRadiusKm(radius);
+      const viewParam = params.get("view");
+      setViewMode(
+        viewParam === "map" || viewParam === "list" ? viewParam : "grid",
+      );
     };
 
     // Defer setState out of the effect body (repo lint: no sync setState here).
@@ -149,6 +153,9 @@ export function useFarmDirectory(initialFarms: Farm[]) {
     if (radiusKm !== null) {
       params.set("radius", String(radiusKm));
     }
+    if (viewMode !== "grid") {
+      params.set("view", viewMode);
+    }
     const query = params.toString();
     window.history.replaceState(
       null,
@@ -163,6 +170,7 @@ export function useFarmDirectory(initialFarms: Farm[]) {
     sortOption,
     originCoords,
     radiusKm,
+    viewMode,
   ]);
 
   const cantonOptions = useMemo(

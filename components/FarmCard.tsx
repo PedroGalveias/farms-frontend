@@ -19,7 +19,7 @@ import { usePersonalization } from "@/components/personalization/Personalization
 import { useLongPress } from "@/components/motion/useLongPress";
 import type { DirectoryViewMode, Farm } from "@/types/farm";
 
-function FavoriteButton({
+export function FavoriteButton({
   farm,
   className = "",
 }: {

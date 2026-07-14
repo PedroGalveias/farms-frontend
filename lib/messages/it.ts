@@ -442,6 +442,13 @@ export const it: Dict = {
   qs_anywhere: "Ovunque in Svizzera",
   qs_nothing_picked: "Niente di selezionato",
   qs_prod_title: "Di cosa hai bisogno?",
+  qs_filter_placeholder: "Es. uova, miele, broccoli…",
+  qs_filter_clear: "Cancella filtro",
+  qs_filter_no_matches:
+    "Nessun risultato per «{query}» — prova un'altra parola.",
+  qs_starters_label: "Popolari ora",
+  qs_resume_chip: "Riprendi l'ultima ricerca: {items}",
+  qs_see_on_map: "Vedi sulla mappa",
   qs_prod_subcopy:
     "Scegli uno o più prodotti — i numeri indicano quante fattorie li offrono.",
   qs_match_all: "Tutti",

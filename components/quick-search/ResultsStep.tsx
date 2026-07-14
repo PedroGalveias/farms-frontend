@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronRight, Leaf, MapPin, Navigation } from "lucide-react";
+import { ChevronRight, Leaf, Map, MapPin, Navigation } from "lucide-react";
+import Link from "next/link";
 import CountUp from "@/components/motion/CountUp";
+import { FavoriteButton } from "@/components/FarmCard";
+import { localizedPath } from "@/lib/i18n-core";
 import { productGroupOf, tagLabel } from "@/lib/products";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { getCantonName } from "@/lib/farms";
@@ -56,7 +59,7 @@ export default function ResultsStep({
   revealKey,
   selectedProducts,
 }: ResultsStepProps) {
-  const { t } = useLanguage();
+  const { locale, t } = useLanguage();
   const count = results.length;
 
   const [visibleCount, setVisibleCount] = useState(RESULTS_CHUNK);
@@ -88,6 +91,15 @@ export default function ResultsStep({
   const hasCoordinates = location.coordinates !== null;
   const hasTypedLocation = !hasCoordinates && location.label.length > 0;
 
+  const selectedGroups = [
+    ...new Set(selectedProducts.map((key) => productGroupOf(key))),
+  ];
+  const mapParams = new URLSearchParams({ view: "map" });
+  if (selectedGroups.length > 0) {
+    mapParams.set("cat", selectedGroups.join(","));
+  }
+  const mapHref = localizedPath(`/?${mapParams.toString()}`, locale);
+
   const sortNote = hasCoordinates
     ? t("qs_res_nearest")
     : hasTypedLocation
@@ -105,6 +117,15 @@ export default function ResultsStep({
               : t("qs_res_many_found", { n: count })}
         </h2>
         <p className="mt-1 text-sm leading-6 text-ink/60">{sortNote}</p>
+        {count > 0 && mapHref ? (
+          <Link
+            className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-xs font-bold text-ink/70 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            href={mapHref}
+          >
+            <Map className="h-3.5 w-3.5 text-pine" />
+            {t("qs_see_on_map")}
+          </Link>
+        ) : null}
       </div>
 
       {count > 0 ? (
@@ -187,16 +208,17 @@ function ResultRow({
 
   return (
     <li
-      className="qs-fade-up"
+      className="qs-fade-up relative"
       style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
     >
+      <FavoriteButton className="absolute right-2.5 top-2.5" farm={farm} />
       <button
         className="glass glass-card glass-interactive group w-full rounded-[20px] p-3.5 text-left sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-[0_18px_36px_-16px_rgba(20,22,27,0.28)] focus-visible:ring-2 focus-visible:ring-ink/20"
         data-cursor="Open"
         onClick={(event) => onOpen(farm, event.currentTarget)}
         type="button"
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 pr-10">
           <p className="text-xs font-semibold text-ink/60">
             {farm.canton} · {getCantonName(farm.canton)}
           </p>

@@ -323,3 +323,61 @@ export function formatQuickSearchDistance(distanceKm: number | null) {
 
   return `${Math.round(distanceKm)} km away`;
 }
+
+// ---------------------------------------------------------------------------
+// Last search — lets a returning visitor resume in one tap (and powers the
+// "Repeat last search" PWA shortcut). Only products + match mode are stored;
+// location stays out of both storage and URLs.
+
+export const LAST_SEARCH_STORAGE_KEY = "farms.lastQuickSearch";
+
+export interface LastQuickSearch {
+  matchMode: QuickSearchMatchMode;
+  products: string[];
+}
+
+export function readLastQuickSearch(): LastQuickSearch | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const raw = window.localStorage.getItem(LAST_SEARCH_STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return null;
+    }
+    const candidate = parsed as Partial<LastQuickSearch>;
+    const products = Array.isArray(candidate.products)
+      ? candidate.products.filter(
+          (value): value is string =>
+            typeof value === "string" && value.length > 0 && value.length < 80,
+        )
+      : [];
+    if (products.length === 0) {
+      return null;
+    }
+    return {
+      matchMode: candidate.matchMode === "any" ? "any" : "all",
+      products: products.slice(0, 24),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function writeLastQuickSearch(search: LastQuickSearch): void {
+  if (typeof window === "undefined" || search.products.length === 0) {
+    return;
+  }
+  try {
+    window.localStorage.setItem(
+      LAST_SEARCH_STORAGE_KEY,
+      JSON.stringify(search),
+    );
+  } catch {
+    // Storage full or disabled — non-fatal.
+  }
+}
