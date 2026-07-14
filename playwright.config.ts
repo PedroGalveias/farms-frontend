@@ -60,6 +60,15 @@ export default defineConfig({
       use: { ...devices["Pixel 7"] },
       testMatch: /\.mobile\.spec\.ts/,
     },
+    // iPadOS: portrait iPad gets the mobile layout (834 < the lg breakpoint)
+    // with WebKit + touch — the exact engine/input combination real iPads run.
+    // Landscape iPad (1194px) renders the desktop layout the desktop projects
+    // already exercise.
+    {
+      name: "ipad-safari",
+      use: { ...devices["iPad Pro 11"] },
+      testMatch: /\.mobile\.spec\.ts/,
+    },
   ],
   // Two servers: the local mock backend (started first so it's serving before
   // the app build's server-side fetches run), then the app pointed at it via
