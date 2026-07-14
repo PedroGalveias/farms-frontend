@@ -80,76 +80,157 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "farms",
     // iOS launch screens — without these the installed app cold-launches to a
-    // white flash. iOS picks by EXACT device match, hence one image per
-    // device class (regenerate with: node scripts/generate-splash.mjs).
+    // white flash. iOS picks by EXACT device match; each device gets a dark
+    // variant (prefers-color-scheme gated) plus the light fallback
+    // (regenerate with: node scripts/generate-splash.mjs).
     startupImage: [
       {
-        url: "/splash/750x1334.png",
+        url: "/splash/750x1334-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/750x1334-light.png",
         media:
           "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
       },
       {
-        url: "/splash/1170x2532.png",
+        url: "/splash/1170x2532-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1170x2532-light.png",
         media:
           "(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
       },
       {
-        url: "/splash/1179x2556.png",
+        url: "/splash/1179x2556-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1179x2556-light.png",
         media:
           "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
       },
       {
-        url: "/splash/1206x2622.png",
+        url: "/splash/1206x2622-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1206x2622-light.png",
         media:
           "(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
       },
       {
-        url: "/splash/1242x2688.png",
+        url: "/splash/1242x2688-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1242x2688-light.png",
         media:
           "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
       },
       {
-        url: "/splash/1284x2778.png",
+        url: "/splash/1260x2736-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1260x2736-light.png",
+        media:
+          "(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1284x2778-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1284x2778-light.png",
         media:
           "(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
       },
       {
-        url: "/splash/1290x2796.png",
+        url: "/splash/1290x2796-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1290x2796-light.png",
         media:
           "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
       },
       {
-        url: "/splash/1320x2868.png",
+        url: "/splash/1320x2868-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1320x2868-light.png",
         media:
           "(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
       },
       {
-        url: "/splash/828x1792.png",
+        url: "/splash/828x1792-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/828x1792-light.png",
         media:
           "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
       },
       {
-        url: "/splash/1125x2436.png",
+        url: "/splash/1125x2436-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1125x2436-light.png",
         media:
           "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
       },
       {
-        url: "/splash/1620x2160.png",
+        url: "/splash/1620x2160-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1620x2160-light.png",
         media:
           "(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
       },
       {
-        url: "/splash/1640x2360.png",
+        url: "/splash/1640x2360-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1640x2360-light.png",
         media:
           "(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
       },
       {
-        url: "/splash/1668x2388.png",
+        url: "/splash/1668x2388-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/1668x2388-light.png",
         media:
           "(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
       },
       {
-        url: "/splash/2048x2732.png",
+        url: "/splash/2048x2732-dark.png",
+        media:
+          "(prefers-color-scheme: dark) and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        url: "/splash/2048x2732-light.png",
         media:
           "(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
       },

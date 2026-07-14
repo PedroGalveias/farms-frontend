@@ -118,8 +118,20 @@ test.describe("desktop master–detail & directory interactions", () => {
   }) => {
     await page.goto("/");
     await expect(page.getByRole("article").first()).toBeVisible();
-    // Give the backdrop's gated mount a beat to settle either way.
-    await page.waitForTimeout(400);
+    // The canvas mounts on one render and the has-ambient class lands in the
+    // following effect, so there's a legitimate one-tick window where they
+    // disagree — WAIT for the pair to settle rather than sampling once
+    // (WebKit occasionally caught the gap mid-swap).
+    await page.waitForFunction(
+      () => {
+        const hasCanvas = !!document.querySelector("canvas.ambient-backdrop");
+        const hasClass =
+          document.documentElement.classList.contains("has-ambient");
+        return hasCanvas === hasClass;
+      },
+      undefined,
+      { timeout: 5_000 },
+    );
 
     const state = await page.evaluate(() => {
       const canvas = document.querySelector<HTMLCanvasElement>(

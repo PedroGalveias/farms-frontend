@@ -184,7 +184,7 @@ export default function PwaRegister() {
       // Bottom-RIGHT, above the mobile tab bar; persists until the user
       // installs / updates / dismisses (the update banner must stay until
       // acted on). z-[60] clears the rail/tab bar (z-40).
-      className="glass glass-chrome toast-enter fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(24rem,calc(100vw-2rem))] rounded-3xl p-3 lg:bottom-6 lg:right-6"
+      className="glass glass-chrome toast-enter fixed bottom-[calc(10.5rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(24rem,calc(100vw-2rem))] rounded-3xl p-3 lg:bottom-24 lg:right-6"
     >
       {waitingWorker ? (
         <div className="flex items-center gap-3">

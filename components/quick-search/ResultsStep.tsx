@@ -97,14 +97,14 @@ export default function ResultsStep({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-[28px] font-bold tracking-[-0.035em] text-ink">
+        <h2 className="text-xl font-bold tracking-[-0.035em] text-ink sm:text-[28px]">
           {count === 0
             ? t("qs_res_none_title")
             : count === 1
               ? t("qs_res_one_found")
               : t("qs_res_many_found", { n: count })}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-ink/60">{sortNote}</p>
+        <p className="mt-1 text-sm leading-6 text-ink/60">{sortNote}</p>
       </div>
 
       {count > 0 ? (
@@ -191,7 +191,7 @@ function ResultRow({
       style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
     >
       <button
-        className="glass glass-card glass-interactive group w-full rounded-[20px] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-[0_18px_36px_-16px_rgba(20,22,27,0.28)] focus-visible:ring-2 focus-visible:ring-ink/20"
+        className="glass glass-card glass-interactive group w-full rounded-[20px] p-3.5 text-left sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-[0_18px_36px_-16px_rgba(20,22,27,0.28)] focus-visible:ring-2 focus-visible:ring-ink/20"
         data-cursor="Open"
         onClick={(event) => onOpen(farm, event.currentTarget)}
         type="button"
@@ -218,7 +218,7 @@ function ResultRow({
           {farm.address}
         </p>
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
           {orderedCategories
             .slice(0, MAX_VISIBLE_CATEGORIES)
             .map((category) => (

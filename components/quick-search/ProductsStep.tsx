@@ -42,12 +42,12 @@ export default function ProductsStep({
     );
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div>
-        <h2 className="text-[28px] font-bold tracking-[-0.035em] text-ink">
+        <h2 className="text-xl font-bold tracking-[-0.035em] text-ink sm:text-[28px]">
           {t("qs_prod_title")}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-ink/60">
+        <p className="mt-1.5 hidden text-sm leading-6 text-ink/60 sm:block">
           {t("qs_prod_subcopy")}
         </p>
       </div>
@@ -81,7 +81,8 @@ export default function ProductsStep({
         </p>
       </div>
 
-      <div className="space-y-2">
+      {/* Two columns from sm up — twice the catalog visible per screen. */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {products.map((product) => {
           const group = product.category;
           const isSelected = selectedProducts.includes(group);

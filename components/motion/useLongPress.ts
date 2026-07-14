@@ -2,6 +2,7 @@
 
 import { useRef, type PointerEvent as ReactPointerEvent } from "react";
 import { haptic } from "@/lib/haptics";
+import { playTick } from "@/lib/sound";
 
 const LONG_PRESS_MS = 450;
 // Cancel the press if the finger drifts more than this (it's a scroll, not a
@@ -47,7 +48,11 @@ export function useLongPress(
       startRef.current = { x: event.clientX, y: event.clientY };
       timer.current = window.setTimeout(() => {
         firedRef.current = true;
+        // Android vibrates here; iOS can't fire a system haptic from a timer
+        // (outside the gesture window), so the audible tick carries the
+        // feedback there once the AudioContext has been warmed by any tap.
         haptic(18);
+        playTick();
         onLongPress();
         clear();
       }, LONG_PRESS_MS);
