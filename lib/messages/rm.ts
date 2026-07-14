@@ -446,6 +446,13 @@ export const rm: Dict = {
   qs_anywhere: "Dapertut en Svizra",
   qs_nothing_picked: "Anc nagut tschernì",
   qs_prod_title: "Da tge has ti basegn?",
+  qs_filter_placeholder: "P. ex. ovs, mel, brocoli…",
+  qs_filter_clear: "Stizzar il filter",
+  qs_filter_no_matches:
+    "Nagut na correspunda a «{query}» — emprova in auter pled.",
+  qs_starters_label: "Popular actualmain",
+  qs_resume_chip: "Cuntinuar l'ultima tschertga: {items}",
+  qs_see_on_map: "Vesair sin la charta",
   qs_prod_subcopy:
     "Tscherna in u plirs products — ils numers mussan quants manaschis als han.",
   qs_match_all: "Tuts",

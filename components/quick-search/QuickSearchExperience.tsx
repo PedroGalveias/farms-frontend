@@ -32,7 +32,9 @@ import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
 import { PRODUCTS, tagLabel } from "@/lib/products";
-import { trackSearch } from "@/lib/search-stats";
+import { readSearchCounts, topKeys, trackSearch } from "@/lib/search-stats";
+import { haptic } from "@/lib/haptics";
+import { playTick } from "@/lib/sound";
 import { geolocationErrorKey, requestCurrentPosition } from "@/lib/geolocation";
 import { getCantonName, getUniqueFarmCantons } from "@/lib/farms";
 import { prefersReducedMotion } from "@/lib/motion";
@@ -41,6 +43,8 @@ import {
   getQuickSearchProducts,
   getQuickSearchResults,
   parseQuickSearchCoordinates,
+  readLastQuickSearch,
+  writeLastQuickSearch,
   type QuickSearchCoordinates,
   type QuickSearchLocation,
   type QuickSearchMatchMode,
@@ -58,6 +62,17 @@ interface StepMeta {
   id: QuickSearchStep;
   labelKey: string;
 }
+
+// Evergreen starter products — granular catalog keys (German, like the
+// dataset) whose labels localize via productLabel.
+const DEFAULT_STARTERS = [
+  "Käse",
+  "Honig",
+  "Kartoffeln",
+  "Äpfel",
+  "Brot",
+  "Milch",
+];
 
 const STEPS: StepMeta[] = [
   { icon: MapPin, id: "location", labelKey: "qs_step_location" },
@@ -115,12 +130,29 @@ export default function QuickSearchExperience({
   const [matchMode, setMatchMode] = useState<QuickSearchMatchMode>("all");
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);
   const [resultsVisit, setResultsVisit] = useState(0);
+  const [resumable, setResumable] = useState<{
+    matchMode: QuickSearchMatchMode;
+    products: string[];
+  } | null>(null);
 
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const deckRef = useRef<HTMLDivElement | null>(null);
   const hasMountedRef = useRef(false);
+  // Gates URL writes until state has hydrated from the URL on mount.
+  const urlHydratedRef = useRef(false);
 
   const products = useMemo(() => getQuickSearchProducts(farms), [farms]);
+
+  // One-tap starters above the grid: this device's own most-searched keys,
+  // topped up with evergreen picks so first-time visitors see them too.
+  const [starterKeys, setStarterKeys] = useState<string[]>(DEFAULT_STARTERS);
+  useEffect(() => {
+    const personal = topKeys(readSearchCounts(), 6).filter(
+      (key) => key in PRODUCTS || KNOWN_CATEGORY_KEYS.includes(key),
+    );
+    const merged = [...new Set([...personal, ...DEFAULT_STARTERS])].slice(0, 6);
+    queueMicrotask(() => setStarterKeys(merged));
+  }, []);
 
   const cantonOptions = useMemo(
     () =>
@@ -160,25 +192,59 @@ export default function QuickSearchExperience({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const raw = params.get("products");
-    if (!raw) {
-      return;
-    }
-    const keys = raw
+    const keys = (raw ?? "")
       .split(",")
       .map((value) => value.trim())
       .filter(
         (value) => KNOWN_CATEGORY_KEYS.includes(value) || value in PRODUCTS,
       );
-    if (keys.length > 0) {
-      // Defer out of the effect body (repo lint: no sync setState in effects).
-      queueMicrotask(() => {
+    const stored = readLastQuickSearch();
+
+    // Defer out of the effect body (repo lint: no sync setState in effects).
+    queueMicrotask(() => {
+      if (keys.length > 0) {
         setSelectedProducts(keys);
         if (params.get("match") === "any") {
           setMatchMode("any");
         }
-      });
-    }
+      } else if (params.get("resume") === "1" && stored) {
+        // The "Repeat last search" PWA shortcut: jump straight to results.
+        setSelectedProducts(stored.products);
+        setMatchMode(stored.matchMode);
+        setResultsVisit((visit) => visit + 1);
+        setStep("results");
+      } else if (stored) {
+        // A previous search exists — offer it as a one-tap resume chip.
+        setResumable(stored);
+      }
+      urlHydratedRef.current = true;
+    });
   }, []);
+
+  // Mirror the selection into the URL so a search is shareable and
+  // Back-button friendly. Products + match mode only — location never
+  // enters the URL. replaceState keeps it client-side.
+  useEffect(() => {
+    if (!urlHydratedRef.current) {
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    params.delete("products");
+    params.delete("match");
+    params.delete("resume");
+    if (selectedProducts.length > 0) {
+      params.set("products", selectedProducts.join(","));
+      if (matchMode === "any") {
+        params.set("match", "any");
+      }
+    }
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}`,
+    );
+  }, [matchMode, selectedProducts]);
 
   // Move focus to the card that just came to the foreground so keyboard
   // users are not stranded on a button that became inert.
@@ -199,9 +265,15 @@ export default function QuickSearchExperience({
     if (nextStep === "results") {
       setResultsVisit((visit) => visit + 1);
       // Viewing results is the strongest "search" signal — feed the home
-      // Most-wanted card (per-device stats).
+      // Most-wanted card (per-device stats) and the resume chip.
       trackSearch(selectedProducts);
+      writeLastQuickSearch({ matchMode, products: selectedProducts });
     }
+
+    // The deck slide is the page's signature move — make it felt. goToStep
+    // only ever runs inside a tap/click, so the iOS gesture window is open.
+    haptic(12);
+    playTick();
 
     setStep(nextStep);
 
@@ -260,11 +332,22 @@ export default function QuickSearchExperience({
   };
 
   const toggleProduct = (product: string) => {
+    setResumable(null);
     setSelectedProducts((current) =>
       current.includes(product)
         ? current.filter((value) => value !== product)
         : [...current, product],
     );
+  };
+
+  const resumeLastSearch = () => {
+    if (!resumable) {
+      return;
+    }
+    setSelectedProducts(resumable.products);
+    setMatchMode(resumable.matchMode);
+    setResumable(null);
+    goToStep("results");
   };
 
   const startOver = () => {
@@ -354,6 +437,7 @@ export default function QuickSearchExperience({
       return (
         <ProductsStep
           matchCount={results.length}
+          starterKeys={starterKeys}
           matchMode={matchMode}
           onClearSelection={() => setSelectedProducts([])}
           onMatchModeChange={setMatchMode}
@@ -462,6 +546,27 @@ export default function QuickSearchExperience({
           </div>
 
           <QuickSearchCoach />
+
+          {resumable ? (
+            <button
+              className="mt-6 inline-flex max-w-full items-center gap-2 rounded-full border border-pine/25 bg-pine/[0.07] px-4 py-2.5 text-sm font-semibold text-pine transition-all duration-300 hover:-translate-y-0.5 hover:border-pine/40 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-pine/30"
+              onClick={resumeLastSearch}
+              type="button"
+            >
+              <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">
+                {t("qs_resume_chip", {
+                  items: resumable.products
+                    .slice(0, 3)
+                    .map((key) => tagLabel(key, locale))
+                    .join(", "),
+                })}
+                {resumable.products.length > 3
+                  ? ` +${resumable.products.length - 3}`
+                  : ""}
+              </span>
+            </button>
+          ) : null}
 
           {loadError ? (
             <div
@@ -586,7 +691,13 @@ export default function QuickSearchExperience({
           </div>
         </div>
 
-        <DiscoveryPanel step={step} selectedProducts={selectedProducts} />
+        <DiscoveryPanel
+          farms={farms}
+          location={location}
+          results={results}
+          selectedProducts={selectedProducts}
+          step={step}
+        />
       </div>
 
       <div className="lg:hidden">

@@ -438,6 +438,12 @@ export const en: Dict = {
   qs_anywhere: "Anywhere in Switzerland",
   qs_nothing_picked: "Nothing picked yet",
   qs_prod_title: "What do you need?",
+  qs_filter_placeholder: "Try eggs, honey, broccoli…",
+  qs_filter_clear: "Clear filter",
+  qs_filter_no_matches: "Nothing matches “{query}” — try another word.",
+  qs_starters_label: "Popular right now",
+  qs_resume_chip: "Resume last search: {items}",
+  qs_see_on_map: "See these on the map",
   qs_prod_subcopy:
     "Pick one or more products — the numbers show how many farms carry each.",
   qs_match_all: "Match all",
