@@ -4,6 +4,9 @@ import {
   KNOWN_CATEGORY_KEYS,
   categoryEmoji,
   categoryLabel,
+  canonicalCategory,
+  CATEGORY_ALIASES,
+  normalizeFarmCategories,
 } from "@/lib/categories";
 import { LOCALES, type Locale } from "@/lib/i18n";
 
@@ -49,5 +52,45 @@ describe("category catalog completeness", () => {
     for (const key of KNOWN_CATEGORY_KEYS) {
       expect(CATEGORY_CATALOG[key].labels.de).toBe(key);
     }
+  });
+});
+
+describe("category canonicalisation", () => {
+  it("maps known German variants onto catalog keys", () => {
+    expect(canonicalCategory("Früchte und Obst")).toBe("Früchte");
+    expect(canonicalCategory("Fleisch")).toBe("Fleisch und Geflügel");
+    expect(canonicalCategory("  Honig ")).toBe("Honig und Süßstoffe");
+  });
+
+  it("rolls leaked subcategories up to their canonical group", () => {
+    // Verified against the live dataset's 32 groups (2026-07-14).
+    expect(canonicalCategory("Beeren")).toBe("Früchte");
+    expect(canonicalCategory("Kernobst")).toBe("Früchte");
+    expect(canonicalCategory("Wurzelgemüse")).toBe("Gemüse");
+    expect(canonicalCategory("Zwiebelgemüse")).toBe("Gemüse");
+    expect(canonicalCategory("Fruchtsäfte")).toBe("Getränke");
+    expect(canonicalCategory("Weine")).toBe("Getränke");
+    expect(canonicalCategory("Eier")).toBe("Sonstiges");
+    expect(canonicalCategory("Freilandeier")).toBe("Sonstiges");
+    expect(canonicalCategory("Schalenobst und Nüsse")).toBe(
+      "Nüsse, Samen und Öle",
+    );
+  });
+
+  it("passes canonical and unknown values through untouched", () => {
+    expect(canonicalCategory("Gemüse")).toBe("Gemüse");
+    expect(canonicalCategory("Brandneue Gruppe")).toBe("Brandneue Gruppe");
+  });
+
+  it("every alias points at a real catalog key", () => {
+    for (const target of Object.values(CATEGORY_ALIASES)) {
+      expect(KNOWN_CATEGORY_KEYS).toContain(target);
+    }
+  });
+
+  it("normalizeFarmCategories de-duplicates after aliasing", () => {
+    expect(
+      normalizeFarmCategories(["Früchte", "Früchte und Obst", "Obst"]),
+    ).toEqual(["Früchte"]);
   });
 });

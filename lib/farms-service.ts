@@ -3,6 +3,7 @@ import {
   getFarmsApiBaseUrl,
   readErrorMessage,
 } from "@/lib/backend";
+import { normalizeFarmCategories } from "@/lib/categories";
 import type { CreateFarmPayload, Farm } from "@/types/farm";
 
 // Re-exported so existing importers of these from farms-service keep working.
@@ -57,7 +58,13 @@ export async function getFarms(): Promise<Farm[]> {
     throw new FarmsApiError(await readErrorMessage(response), response.status);
   }
 
-  return (await response.json()) as Farm[];
+  const farms = (await response.json()) as Farm[];
+  // Canonicalise category variants ONCE at the boundary so every consumer
+  // (facets, quick search, cards, map handoff) sees one vocabulary.
+  return farms.map((farm) => ({
+    ...farm,
+    categories: normalizeFarmCategories(farm.categories ?? []),
+  }));
 }
 
 export async function createFarm(payload: CreateFarmPayload, cookie?: string) {
