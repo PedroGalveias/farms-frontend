@@ -33,38 +33,105 @@ export async function getFarmsHealth() {
 /** Cache tag for the farm list — bust it with revalidateTag(FARMS_CACHE_TAG). */
 export const FARMS_CACHE_TAG = "farms";
 
-export async function getFarms(): Promise<Farm[]> {
-  let response: Response;
-  try {
-    response = await fetch(`${getFarmsApiBaseUrl()}/farms`, {
-      // Serve the directory from the Next Data Cache (shared across requests and
-      // routes) and refresh at most every 5 minutes, instead of hammering the
-      // backend on every page view. A successful create busts the tag. The
-      // signal only bounds a cache *miss* — cached hits never hit the network.
-      next: { revalidate: 300, tags: [FARMS_CACHE_TAG] },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "TimeoutError") {
-      throw new FarmsApiError(
-        "The farms service took too long to respond.",
-        504,
-      );
-    }
-    throw error;
+// The taxonomy-aware backend paginates `GET /farms` (keyset cursor, max 100 per
+// page). Request the largest page and follow the cursor so the directory keeps
+// getting the full dataset it does its client-side facets/sorting/map over.
+const FARMS_PAGE_LIMIT = 100;
+// Safety valve: bound the follow-the-cursor loop so a misbehaving backend (a
+// cursor that never clears) can never spin forever. 100 pages × 100 = 10k farms,
+// comfortably above the ~3.2k dataset.
+const FARMS_MAX_PAGES = 100;
+
+/** One page of the list endpoint, tolerant of both backend response shapes. */
+interface FarmsPage {
+  farms: Farm[];
+  nextCursor?: string;
+}
+
+/**
+ * Parse a `GET /farms` body from either backend:
+ *  - taxonomy-aware backend: `{ farms: [...], next_cursor: string | null }`
+ *  - older backend: a bare `Farm[]` with no pagination.
+ * Keeping both shapes working means this can ship before the backend does.
+ */
+function parseFarmsPage(body: unknown): FarmsPage {
+  if (
+    body !== null &&
+    typeof body === "object" &&
+    !Array.isArray(body) &&
+    Array.isArray((body as { farms?: unknown }).farms)
+  ) {
+    const page = body as { farms: Farm[]; next_cursor?: string | null };
+    return { farms: page.farms, nextCursor: page.next_cursor ?? undefined };
   }
 
-  if (!response.ok) {
-    throw new FarmsApiError(await readErrorMessage(response), response.status);
+  if (Array.isArray(body)) {
+    return { farms: body as Farm[] };
   }
 
-  const farms = (await response.json()) as Farm[];
-  // Canonicalise category variants ONCE at the boundary so every consumer
-  // (facets, quick search, cards, map handoff) sees one vocabulary.
-  return farms.map((farm) => ({
+  throw new FarmsApiError(
+    "The farms service returned an unexpected response shape.",
+    502,
+  );
+}
+
+/** Canonicalise category variants ONCE at the boundary so every consumer
+ * (facets, quick search, cards, map handoff) sees one vocabulary. Products
+ * (when present) pass through untouched. */
+function normalizeFarm(farm: Farm): Farm {
+  return {
     ...farm,
     categories: normalizeFarmCategories(farm.categories ?? []),
-  }));
+  };
+}
+
+export async function getFarms(): Promise<Farm[]> {
+  const farms: Farm[] = [];
+  let after: string | undefined;
+
+  for (let page = 0; page < FARMS_MAX_PAGES; page++) {
+    const url = new URL(`${getFarmsApiBaseUrl()}/farms`);
+    url.searchParams.set("limit", String(FARMS_PAGE_LIMIT));
+    if (after) {
+      url.searchParams.set("after", after);
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        // Serve the directory from the Next Data Cache (shared across requests
+        // and routes) and refresh at most every 5 minutes, instead of hammering
+        // the backend on every page view. A successful create busts the tag.
+        // The signal only bounds a cache *miss* — cached hits never hit the
+        // network. Each page caches under its own URL.
+        next: { revalidate: 300, tags: [FARMS_CACHE_TAG] },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "TimeoutError") {
+        throw new FarmsApiError(
+          "The farms service took too long to respond.",
+          504,
+        );
+      }
+      throw error;
+    }
+
+    if (!response.ok) {
+      throw new FarmsApiError(await readErrorMessage(response), response.status);
+    }
+
+    const parsed = parseFarmsPage(await response.json());
+    farms.push(...parsed.farms);
+
+    // No cursor (or the older backend, which returns the whole list at once).
+    if (!parsed.nextCursor) {
+      break;
+    }
+    after = parsed.nextCursor;
+  }
+
+  return farms.map(normalizeFarm);
 }
 
 export async function createFarm(payload: CreateFarmPayload, cookie?: string) {

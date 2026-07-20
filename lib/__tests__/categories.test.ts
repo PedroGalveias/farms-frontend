@@ -77,6 +77,38 @@ describe("category canonicalisation", () => {
     );
   });
 
+  it("folds taxonomy-aware backend group slugs to canonical keys", () => {
+    // The new backend sends English group slugs; every one must resolve to a
+    // real catalog key so labels, icons and facet counts stay stable.
+    const slugToKey: Record<string, string> = {
+      fruits: "Früchte",
+      vegetables: "Gemüse",
+      dairy: "Milchprodukte",
+      "meat-poultry": "Fleisch und Geflügel",
+      preserves: "Verarbeitete und haltbare Produkte",
+      "honey-sweeteners": "Honig und Süßstoffe",
+      drinks: "Getränke",
+      bakery: "Backwaren und Gebäck",
+      "flowers-plants": "Blumen und Pflanzen",
+      "nuts-oils": "Nüsse, Samen und Öle",
+      grains: "Getreide und Cerealien",
+      "fish-seafood": "Fisch und Meeresfrüchte",
+      other: "Sonstiges",
+    };
+    for (const [slug, key] of Object.entries(slugToKey)) {
+      expect(canonicalCategory(slug)).toBe(key);
+      expect(KNOWN_CATEGORY_KEYS).toContain(key);
+    }
+  });
+
+  it("normalizes a mixed old/new-backend category list to one vocabulary", () => {
+    // A German group, an English slug for the same group, and a subcategory —
+    // all collapse to a single canonical key.
+    expect(normalizeFarmCategories(["Früchte", "fruits", "Beeren"])).toEqual([
+      "Früchte",
+    ]);
+  });
+
   it("passes canonical and unknown values through untouched", () => {
     expect(canonicalCategory("Gemüse")).toBe("Gemüse");
     expect(canonicalCategory("Brandneue Gruppe")).toBe("Brandneue Gruppe");
