@@ -33,7 +33,14 @@ import { hapticsEnabled, isIosLike } from "@/lib/haptics";
 // ticking, /haptics-lab's "opacity floor" rows pinpoint the real minimum.
 const OPACITY = 0.004;
 
-export default function HapticTap() {
+// A native iOS switch paints ~51px wide and CANNOT be resized without losing
+// its native rendering (and with it the haptic). One centered switch covers a
+// small square button, but on a full-width row the finger taps the label near
+// the left edge and misses it — so `wide` tiles a strip of real switches
+// (slightly overlapped, extras clipped) across the whole surface instead.
+const WIDE_TILE_COUNT = 12;
+
+export default function HapticTap({ wide = false }: { wide?: boolean }) {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
@@ -45,15 +52,25 @@ export default function HapticTap() {
   return (
     <span
       aria-hidden
-      className="pointer-events-none absolute inset-0 z-20 grid place-items-center overflow-hidden rounded-[inherit]"
+      className={`pointer-events-none absolute inset-0 z-20 overflow-hidden rounded-[inherit] ${
+        wide ? "flex items-center" : "grid place-items-center"
+      }`}
     >
-      <input
-        className="pointer-events-auto cursor-[inherit]"
-        style={{ opacity: OPACITY, margin: 0 }}
-        tabIndex={-1}
-        type="checkbox"
-        {...{ switch: "" }}
-      />
+      {Array.from({ length: wide ? WIDE_TILE_COUNT : 1 }).map((_, i) => (
+        <input
+          className="pointer-events-auto shrink-0 cursor-[inherit]"
+          key={i}
+          style={{
+            opacity: OPACITY,
+            // Overlap neighbours a touch so there is no dead gap between
+            // switch tracks anywhere along the row.
+            margin: wide ? "0 -4px" : 0,
+          }}
+          tabIndex={-1}
+          type="checkbox"
+          {...{ switch: "" }}
+        />
+      ))}
     </span>
   );
 }
