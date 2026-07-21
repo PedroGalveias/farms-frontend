@@ -78,11 +78,14 @@ const FRAG = `
     // Light mode runs noticeably hotter than dark: on the pale canvas the
     // original alphas washed out to near-invisible, while dark's tuning was
     // already right. CSS y% is top-down; GL y is bottom-up → y = 1 - y%.
-    float a1 = orb(px, vec2(0.06*w, 0.86) + d1, 0.75*pulse) * mix(0.40, 0.30, u_dark);
-    float a2 = orb(px, vec2(0.96*w, 0.78) + d2, 0.64)        * mix(0.34, 0.18, u_dark);
-    float a3 = orb(px, vec2(0.78*w, 0.04) + d3, 0.85*pulse) * mix(0.36, 0.26, u_dark);
-    float a4 = orb(px, vec2(0.20*w, 0.12) - d1, 0.60)        * mix(0.24, 0.16, u_dark);
-    float a5 = orb(px, vec2(0.50*w, 0.50) + d2, 0.53)        * mix(0.16, 0.10, u_dark);
+    // Light-mode alphas raised ~15% (§2) so the green is present where content
+    // sits, not just at the page edges; a5 (centre, under the content column)
+    // gets the largest relative bump. Dark's second operand is unchanged.
+    float a1 = orb(px, vec2(0.06*w, 0.86) + d1, 0.75*pulse) * mix(0.46, 0.30, u_dark);
+    float a2 = orb(px, vec2(0.96*w, 0.78) + d2, 0.64)        * mix(0.39, 0.18, u_dark);
+    float a3 = orb(px, vec2(0.78*w, 0.04) + d3, 0.85*pulse) * mix(0.41, 0.26, u_dark);
+    float a4 = orb(px, vec2(0.20*w, 0.12) - d1, 0.60)        * mix(0.27, 0.16, u_dark);
+    float a5 = orb(px, vec2(0.50*w, 0.50) + d2, 0.53)        * mix(0.20, 0.10, u_dark);
 
     vec3 col = green*a1 + lime*a2 + green*a3 + blue*a4 + green*a5;
     float alpha = a1 + a2 + a3 + a4 + a5;
@@ -97,6 +100,13 @@ const FRAG = `
     fil *= 0.45 + 0.55 * smoothstep(0.02, 0.25, alpha);
     col += mix(vec3(0.55,0.95,0.68), vec3(0.75,0.92,0.5), uv.y) * fil;
     alpha += fil;
+
+    // Ordered dither (§3A): a sub-1/255 animated hash breaks the 8-bit
+    // quantisation boundary so the quarter-res radial falloff stops posterising
+    // into concentric rings on large/dark displays. The + u_time makes it a
+    // gentle temporal grain that reads as film noise, on-brand with body::before.
+    float d = (hash(gl_FragCoord.xy + u_time) - 0.5) / 255.0;
+    col += d;
 
     // Premultiplied output over the page background.
     gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0));
