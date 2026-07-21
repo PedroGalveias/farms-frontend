@@ -38,9 +38,7 @@ function makeFarm(overrides: Partial<Farm> = {}): Farm {
 
 describe("getFarms — response-shape tolerance", () => {
   it("reads the taxonomy-aware `{ farms, next_cursor }` shape", async () => {
-    mockFetchSequence(
-      jsonResponse({ farms: [makeFarm()], next_cursor: null }),
-    );
+    mockFetchSequence(jsonResponse({ farms: [makeFarm()], next_cursor: null }));
 
     const farms = await getFarms();
 

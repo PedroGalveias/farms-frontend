@@ -118,7 +118,10 @@ export async function getFarms(): Promise<Farm[]> {
     }
 
     if (!response.ok) {
-      throw new FarmsApiError(await readErrorMessage(response), response.status);
+      throw new FarmsApiError(
+        await readErrorMessage(response),
+        response.status,
+      );
     }
 
     const parsed = parseFarmsPage(await response.json());
