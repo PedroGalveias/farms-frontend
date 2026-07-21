@@ -23,9 +23,9 @@ import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { haptic } from "@/lib/haptics";
 import { playTick } from "@/lib/sound";
 import HapticTap from "@/components/ui/HapticTap";
-import { tagLabel } from "@/lib/products";
+import { productKeyForSlug, productLabel, tagLabel } from "@/lib/products";
 import { farmPath } from "@/lib/share";
-import type { Farm } from "@/types/farm";
+import type { Farm, StockStatus } from "@/types/farm";
 
 // Shared secondary-action button: every action in the 2-column grid is the
 // same size (the old flex-wrap layout made "Add to collection" a small
@@ -35,6 +35,13 @@ const SECONDARY_BTN =
 const SECONDARY_IDLE =
   "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink";
 const SECONDARY_ACTIVE = "border-pine/30 bg-pine/10 text-pine";
+
+// Stock status → translation key for the per-product availability badge.
+const STOCK_LABEL_KEY: Record<StockStatus, string> = {
+  AVAILABLE: "detail_stock_available",
+  SEASONAL: "detail_stock_seasonal",
+  UNAVAILABLE: "detail_stock_unavailable",
+};
 
 // Client-only Leaflet, same pattern as the directory's map view.
 const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
@@ -205,14 +212,47 @@ export default function FarmDetail({
             {t("detail_products")}
           </p>
           <div className="mt-2.5 flex flex-wrap gap-1.5">
-            {farm.categories.map((category) => (
-              <span
-                className="glass-chip rounded-full px-3 py-1 text-sm font-semibold text-ink/70"
-                key={category}
-              >
-                {tagLabel(category, locale)}
-              </span>
-            ))}
+            {farm.products && farm.products.length > 0
+              ? // Taxonomy-aware backend: show the real products the farm lists,
+                // each with its availability. Falls back to the category chips
+                // below for the current backend (no product-level data).
+                farm.products.map((item) => {
+                  const key = productKeyForSlug(item.slug);
+                  const name = key
+                    ? productLabel(key, locale)
+                    : (item.name_en ?? item.slug);
+                  return (
+                    <span
+                      className={`glass-chip inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
+                        item.status === "UNAVAILABLE"
+                          ? "text-ink/40"
+                          : "text-ink/70"
+                      }`}
+                      key={item.slug}
+                    >
+                      {name}
+                      {item.status !== "AVAILABLE" && (
+                        <span
+                          className={`rounded-full px-1.5 py-0.5 text-[11px] font-medium ${
+                            item.status === "SEASONAL"
+                              ? "bg-pine/10 text-pine"
+                              : "bg-ink/10 text-ink/50"
+                          }`}
+                        >
+                          {t(STOCK_LABEL_KEY[item.status])}
+                        </span>
+                      )}
+                    </span>
+                  );
+                })
+              : farm.categories.map((category) => (
+                  <span
+                    className="glass-chip rounded-full px-3 py-1 text-sm font-semibold text-ink/70"
+                    key={category}
+                  >
+                    {tagLabel(category, locale)}
+                  </span>
+                ))}
           </div>
         </div>
       </div>

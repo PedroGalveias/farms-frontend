@@ -183,6 +183,24 @@ export const KNOWN_CATEGORY_KEYS = Object.keys(CATEGORY_CATALOG);
  * 2026-07-14); enumerate again if the backend taxonomy shifts.
  */
 export const CATEGORY_ALIASES: Record<string, string> = {
+  // Backend group SLUGS (the taxonomy-aware backend returns these English
+  // slugs in `categories` instead of German group names). Fold each to its
+  // canonical German catalog key so display, icons and facet counts stay
+  // identical whichever backend answers. Source of truth: the backend's
+  // GROUPS table (scripts/seed_products.py) — keep these 13 in sync with it.
+  fruits: "Früchte",
+  vegetables: "Gemüse",
+  dairy: "Milchprodukte",
+  "meat-poultry": "Fleisch und Geflügel",
+  preserves: "Verarbeitete und haltbare Produkte",
+  "honey-sweeteners": "Honig und Süßstoffe",
+  drinks: "Getränke",
+  bakery: "Backwaren und Gebäck",
+  "flowers-plants": "Blumen und Pflanzen",
+  "nuts-oils": "Nüsse, Samen und Öle",
+  grains: "Getreide und Cerealien",
+  "fish-seafood": "Fisch und Meeresfrüchte",
+  other: "Sonstiges",
   // Synonyms of a canonical group
   Backwaren: "Backwaren und Gebäck",
   Blumen: "Blumen und Pflanzen",

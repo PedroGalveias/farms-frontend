@@ -785,6 +785,39 @@ export function productGroupOf(value: string): string {
   return PRODUCTS[value]?.group ?? value;
 }
 
+/**
+ * Stable public slug for a product, matching the backend's `products.slug`.
+ * The backend derives it as `slugify(name_en)` with these exact rules
+ * (NFKD → ASCII → non-alphanumeric runs to hyphens → lowercase); the frontend
+ * catalog's English label is the same source string, so the two agree for
+ * every catalog product (verified: 183/183). This is the identity that bridges
+ * a catalog product to a farm's `products[]`.
+ */
+export function productSlug(key: string): string {
+  const en = PRODUCTS[key]?.labels.en ?? key;
+  return (
+    en
+      .normalize("NFKD")
+      // Faithful port of the backend's `.encode("ascii", "ignore")`: after NFKD
+      // the accents are separate combining marks, so dropping every non-ASCII
+      // code point turns ä→a, é→e and removes anything undecomposable.
+      .replace(/[^\x00-\x7F]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase() || "item"
+  );
+}
+
+/** Reverse of {@link productSlug}: backend product slug → catalog German key. */
+const PRODUCT_KEY_BY_SLUG: Record<string, string> = Object.fromEntries(
+  Object.keys(PRODUCTS).map((key) => [productSlug(key), key]),
+);
+
+/** Catalog German key for a backend product slug, or `undefined` if unknown. */
+export function productKeyForSlug(slug: string): string | undefined {
+  return PRODUCT_KEY_BY_SLUG[slug];
+}
+
 export function productLabel(key: string, locale: Locale): string {
   const meta = PRODUCTS[key];
   if (!meta) return key;

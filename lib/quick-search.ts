@@ -1,5 +1,5 @@
 import { getCantonName } from "@/lib/farms";
-import { productGroupOf } from "@/lib/products";
+import { PRODUCTS, productGroupOf, productSlug } from "@/lib/products";
 import type { Farm } from "@/types/farm";
 
 export type QuickSearchMatchMode = "all" | "any";
@@ -53,10 +53,26 @@ export function productMatchesCategory(product: string, category: string) {
   return left.includes(right) || right.includes(left);
 }
 
-// A selection can be a category group OR a specific product (subcategory). Farm
-// data is stored at the group level, so we roll the selection up to its group
-// and match on that; the fuzzy text match stays as a fallback for free-text.
+// A selection can be a category group OR a specific product (subcategory).
+//
+// When the farm carries real per-product data (the taxonomy-aware backend's
+// `products[]`) and the selection is a *known product*, that set is
+// authoritative: the farm matches iff it actually lists the product's slug —
+// no category rollup — exactly mirroring the backend's own `?product=` filter.
+// Picking "strawberries" then matches only farms that list strawberries, not
+// every fruit farm.
+//
+// Otherwise (a group selection, or a farm without granular product data — the
+// current backend, or the ~28% group-only farms) we roll the selection up to
+// its group and match on the farm's categories, with a fuzzy text fallback.
+// This keeps behaviour identical against today's product-less backend and
+// sharpens automatically once product data arrives.
 function farmMatchesProduct(farm: Farm, product: string) {
+  if (farm.products && PRODUCTS[product]) {
+    const slug = productSlug(product);
+    return farm.products.some((item) => item.slug === slug);
+  }
+
   const selectedGroup = productGroupOf(product);
   return farm.categories.some(
     (category) =>

@@ -294,3 +294,80 @@ describe("last quick search persistence", () => {
     });
   });
 });
+
+describe("getQuickSearchResults — precise product matching", () => {
+  const withStrawberries = makeFarm({
+    id: "straw",
+    categories: ["Früchte"],
+    products: [
+      {
+        slug: "strawberries",
+        name_en: "Strawberries",
+        group: "fruits",
+        status: "AVAILABLE",
+        last_confirmed_at: null,
+      },
+    ],
+  });
+  const withCherries = makeFarm({
+    id: "cherry",
+    categories: ["Früchte"],
+    products: [
+      {
+        slug: "cherries",
+        name_en: "Cherries",
+        group: "fruits",
+        status: "AVAILABLE",
+        last_confirmed_at: null,
+      },
+    ],
+  });
+
+  it("matches only farms that actually list the selected product", () => {
+    const results = getQuickSearchResults({
+      farms: [withStrawberries, withCherries],
+      location: { coordinates: null, label: "" },
+      matchMode: "any",
+      selectedProducts: ["Erdbeeren"], // strawberries
+    });
+    expect(results.map((r) => r.farm.id)).toEqual(["straw"]);
+  });
+
+  it("a farm with an empty products list matches no product", () => {
+    const barren = makeFarm({
+      id: "barren",
+      categories: ["Früchte"],
+      products: [],
+    });
+    const results = getQuickSearchResults({
+      farms: [barren],
+      location: { coordinates: null, label: "" },
+      matchMode: "any",
+      selectedProducts: ["Erdbeeren"],
+    });
+    expect(results).toEqual([]);
+  });
+
+  it("falls back to category rollup when products data is absent", () => {
+    // No `products` field → current backend behaviour: any fruit farm matches a
+    // fruit product selection (zero regression until real product data lands).
+    const noProductData = makeFarm({ id: "legacy", categories: ["Früchte"] });
+    const results = getQuickSearchResults({
+      farms: [noProductData],
+      location: { coordinates: null, label: "" },
+      matchMode: "any",
+      selectedProducts: ["Erdbeeren"],
+    });
+    expect(results.map((r) => r.farm.id)).toEqual(["legacy"]);
+  });
+
+  it("a group selection still matches group-only farms via categories", () => {
+    const results = getQuickSearchResults({
+      farms: [withCherries],
+      location: { coordinates: null, label: "" },
+      matchMode: "any",
+      selectedProducts: ["Früchte"], // group, not a product
+    });
+    expect(results.map((r) => r.farm.id)).toEqual(["cherry"]);
+  });
+});
