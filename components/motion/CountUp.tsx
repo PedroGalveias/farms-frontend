@@ -29,6 +29,12 @@ export default function CountUp({
   const ref = useRef<HTMLSpanElement | null>(null);
   const [display, setDisplay] = useState(0);
   const factor = 10 ** decimals;
+  // Odometer (§7): roll from wherever the number currently sits to the new
+  // value, so a filter change rolls the digits instead of hard-swapping. The
+  // first paint rolls 0 → value once the number scrolls into view; every later
+  // value change rolls from the last shown number.
+  const fromRef = useRef(0);
+  const seenRef = useRef(false);
 
   useEffect(() => {
     const node = ref.current;
@@ -39,6 +45,7 @@ export default function CountUp({
     const reduceMotion = prefersReducedMotion();
     let frame = 0;
     let start: number | null = null;
+    const from = fromRef.current;
 
     const tick = (now: number) => {
       if (start === null) {
@@ -46,26 +53,40 @@ export default function CountUp({
       }
       const progress = Math.min((now - start) / durationMs, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(eased * value * factor) / factor);
+      setDisplay(Math.round((from + (value - from) * eased) * factor) / factor);
       if (progress < 1) {
+        frame = requestAnimationFrame(tick);
+      } else {
+        fromRef.current = value;
+      }
+    };
+
+    const roll = () => {
+      if (reduceMotion) {
+        setDisplay(value);
+        fromRef.current = value;
+      } else {
         frame = requestAnimationFrame(tick);
       }
     };
 
+    // Already revealed once → a value update: roll straight from the last shown
+    // number. First time → wait until it scrolls into view, then roll 0 → value.
+    if (seenRef.current) {
+      roll();
+      return () => cancelAnimationFrame(frame);
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          if (reduceMotion) {
-            setDisplay(value);
-          } else {
-            frame = requestAnimationFrame(tick);
-          }
+          seenRef.current = true;
+          roll();
           observer.disconnect();
         }
       },
       { threshold: 0.4 },
     );
-
     observer.observe(node);
 
     return () => {
