@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { tagLabel } from "@/lib/products";
 import { haptic } from "@/lib/haptics";
+import { prefetchFarmDetail } from "@/lib/prefetch";
 import { playTick } from "@/lib/sound";
 import HapticTap from "@/components/ui/HapticTap";
 import { formatDistanceShort, isRecentlyAdded } from "@/lib/directory";
@@ -185,6 +186,16 @@ export default function FarmCard({
         className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
         data-cursor="Open"
         {...press}
+        // Instant navigation (§7): warm the lazy map chunk the moment the user
+        // signals intent — hovering, or the first touch of a press — so the
+        // detail sheet's map is already loaded when the morph runs. Declared
+        // AFTER {...press} so this pointer-down wins; it re-invokes the
+        // long-press handler so press tracking is preserved.
+        onPointerDown={(event) => {
+          prefetchFarmDetail();
+          press.onPointerDown(event);
+        }}
+        onPointerEnter={prefetchFarmDetail}
         type="button"
       />
     ) : null;
