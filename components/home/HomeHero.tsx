@@ -78,7 +78,7 @@ export default function HomeHero({
         </div>
 
         <h1
-          className="rise-in mt-6 text-[clamp(2.5rem,5.5vw,4rem)] font-black leading-[0.9] tracking-[-0.045em] text-ink"
+          className="rise-in mt-6 text-display font-black leading-[0.9] tracking-[-0.045em] text-ink"
           style={{ ["--rise-delay" as string]: "80ms" }}
         >
           {t("hero_lead")}{" "}

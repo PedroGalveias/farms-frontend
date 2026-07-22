@@ -42,7 +42,7 @@ export default function ProfileView() {
 
       <header className="mt-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[clamp(2rem,5vw,3rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
+          <h1 className="text-title font-black leading-[0.95] tracking-[-0.04em] text-ink">
             {t("profile_title")}
           </h1>
           <p className="mt-2 text-base leading-7 text-ink/60">

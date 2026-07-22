@@ -36,7 +36,7 @@ export default function ProductHub({ entries }: { entries: ProductEntry[] }) {
       </nav>
 
       <header className="rise-in mt-6 max-w-2xl">
-        <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
+        <h1 className="text-title font-black leading-[0.95] tracking-[-0.04em] text-ink">
           {t("product_hub_title")}
         </h1>
         <p className="mt-3 text-lg leading-7 text-ink/60">

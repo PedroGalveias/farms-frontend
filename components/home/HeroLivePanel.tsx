@@ -113,7 +113,7 @@ export default function HeroLivePanel({
       {/* Coverage footer */}
       <div className="flex items-end gap-6 border-t border-line/70 pt-4">
         <p className="flex flex-col">
-          <span className="text-3xl font-black tracking-[-0.04em] text-ink">
+          <span className="text-3xl font-black tabular-nums tracking-[-0.04em] text-ink">
             <CountUp value={farms.length} />
           </span>
           <span className="text-xs font-semibold text-ink/60">
@@ -121,7 +121,7 @@ export default function HeroLivePanel({
           </span>
         </p>
         <p className="flex flex-col">
-          <span className="text-3xl font-black tracking-[-0.04em] text-ink">
+          <span className="text-3xl font-black tabular-nums tracking-[-0.04em] text-ink">
             <CountUp value={cantonCount} />
           </span>
           <span className="text-xs font-semibold text-ink/60">

@@ -342,7 +342,7 @@ export default function DiscoveryPanel({
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">
           Swiss farm map
         </p>
-        <h2 className="mt-3 text-[clamp(2.5rem,4.5vw,4rem)] font-black leading-[0.92] tracking-[-0.04em] text-white">
+        <h2 className="mt-3 text-display font-black leading-[0.92] tracking-[-0.04em] text-white">
           Nearest <span className="text-white/80">first.</span>
         </h2>
         {selectedProducts.length > 0 ? (

@@ -65,7 +65,7 @@ export default function ProductView({
         <span aria-hidden className="text-4xl">
           {categoryEmoji(category)}
         </span>
-        <h1 className="mt-3 text-[clamp(2.25rem,6vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
+        <h1 className="mt-3 text-title font-black leading-[0.95] tracking-[-0.04em] text-ink">
           {t("product_title", { product: label })}
         </h1>
         <p className="mt-3 text-lg leading-7 text-ink/60">

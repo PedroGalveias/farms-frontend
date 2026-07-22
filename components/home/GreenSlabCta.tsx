@@ -21,7 +21,7 @@ export default function GreenSlabCta() {
               {t("slab_eyebrow")}
             </p>
             <h2
-              className="mt-5 max-w-md text-[clamp(2.25rem,4.5vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em]"
+              className="mt-5 max-w-md text-title font-black leading-[0.95] tracking-[-0.04em]"
               id="slab-cta-title"
             >
               {t("slab_title")}

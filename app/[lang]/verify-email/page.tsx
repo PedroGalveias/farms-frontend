@@ -82,7 +82,7 @@ export default function VerifyEmailPage() {
         <>
           <LetterToFarm className="w-full max-w-[360px]" />
           <CheckCircle2 className="mt-2 h-10 w-10 text-pine" />
-          <h1 className="mt-4 text-[clamp(2rem,5vw,3rem)] font-black leading-[0.98] tracking-[-0.04em] text-ink">
+          <h1 className="mt-4 text-title font-black leading-[0.98] tracking-[-0.04em] text-ink">
             {t("verify_success_title")}
           </h1>
           <p className="mt-3 text-lg leading-8 text-ink/60">
@@ -102,7 +102,7 @@ export default function VerifyEmailPage() {
       ) : status === "error" || status === "missing" ? (
         <>
           <MailX className="h-12 w-12 text-rose-500" />
-          <h1 className="mt-5 text-[clamp(2rem,5vw,3rem)] font-black leading-[0.98] tracking-[-0.04em] text-ink">
+          <h1 className="mt-5 text-title font-black leading-[0.98] tracking-[-0.04em] text-ink">
             {t("verify_error_title")}
           </h1>
           <p className="mt-3 max-w-md text-lg leading-8 text-ink/60">
@@ -122,7 +122,7 @@ export default function VerifyEmailPage() {
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-pine">
             farms
           </p>
-          <h1 className="mt-4 text-[clamp(2rem,5vw,3rem)] font-black leading-[0.98] tracking-[-0.04em] text-ink">
+          <h1 className="mt-4 text-title font-black leading-[0.98] tracking-[-0.04em] text-ink">
             {t("verify_title")}
           </h1>
           <p className="mt-3 max-w-md text-lg leading-8 text-ink/60">

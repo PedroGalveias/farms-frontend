@@ -456,6 +456,24 @@ html.dark {
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
+  /* ── Type scale (§7) ── a modular ramp so no screen invents a one-off size.
+     display/title/heading collapse the eight ad-hoc hero clamp()s; paired
+     line-heights ship with each. Display sizes inherit the base h1–h4 tracking
+     (-0.04em). Generates text-display / text-title / text-heading. */
+  --text-display: clamp(2.5rem, 7vw, 4.5rem);
+  --text-display--line-height: 0.95;
+  --text-title: clamp(2rem, 5vw, 3.25rem);
+  --text-title--line-height: 1;
+  --text-heading: clamp(1.375rem, 3vw, 1.75rem);
+  --text-heading--line-height: 1.15;
+
+  /* ── Vertical rhythm (§7) ── section spacing on the 8px baseline grid,
+     formalised so the 24/48/64/96 mix stops being ad-hoc. */
+  --spacing-section-sm: 1.5rem; /* 24 */
+  --spacing-section: 3rem; /* 48 */
+  --spacing-section-lg: 4rem; /* 64 */
+  --spacing-section-xl: 6rem; /* 96 */
+
   /* ── Radius scale (§6) ── one 4-step system; `rounded-chip/field/card/panel`.
      Ad-hoc 6–32px radii collapse onto these; nested surfaces step down a level. */
   --radius-chip: 999px;
@@ -688,12 +706,17 @@ html.dark body::before {
   body {
     @apply font-sans antialiased;
     text-rendering: optimizeLegibility;
+    /* Optical detail (§7): Archivo's stylistic set + character alternates
+       where the font offers them (ignored otherwise — safe everywhere). */
+    font-feature-settings: "ss01", "cv11";
   }
 
   h1,
   h2,
   h3,
-  h4 {
+  h4,
+  h5,
+  h6 {
     @apply font-display;
     letter-spacing: -0.04em;
     line-height: 0.96;
