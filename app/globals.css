@@ -278,6 +278,33 @@ html.dark {
   }
 }
 
+/* ── Selective live-glass card (design §1) ────────────────────────────────
+   A "featured" card that DOES carry a live backdrop-filter, applied only to a
+   small, bounded, fixed slice (the hero row: top ≤3 cards). Everything else
+   stays .glass-card (near-opaque, no live blur). This is the deliberate,
+   budgeted exception to the material rule — never the full scrolling list.
+
+   The element keeps `glass glass-card glass-card-live`: retaining .glass-card
+   is load-bearing — it EXCLUDES the card from the unconditional
+   `.glass:where(:not(.glass-card))` backdrop rule above, so the ONLY place a
+   live blur turns on is the gated rule below. .glass supplies the rim, sheen,
+   shadow and ::before/::after light pseudos; we just swap in the frost. */
+@supports (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  /* Fine-pointer only. Touch (any-hover: none) keeps the static .glass-card
+     fill — mobile already halves blur radius for GPU reasons and dozens of
+     re-filtering blur regions is the exact iOS Safari crash vector, so touch
+     profiles carry ZERO live-blur cards (hero row falls back to solid). */
+  @media (any-hover: hover) {
+    .glass-card-live {
+      background-color: var(--glass-fill);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      backdrop-filter: var(--glass-backdrop);
+    }
+  }
+}
+
 /* Long-list render culling for directory/canton cards: off-screen cards skip
    layout, paint and GPU layers entirely; `auto` remembers the real size once
    rendered so the scrollbar doesn't jump.
