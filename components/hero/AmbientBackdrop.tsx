@@ -26,8 +26,21 @@ import { useMotionSignal } from "@/components/motion/useMotionSignal";
  * transform) so GlassLight's scroll parallax keeps working untouched.
  */
 
-// Backing-store scale: 1/4 of CSS pixels in each axis (1/16 of the fragments).
-const RESOLUTION_SCALE = 0.25;
+// Backing-store scale (design §3B). Quarter-res in each axis (1/16 of the
+// fragments) is right for a phone, but the smooth radial falloff posterises
+// into visible concentric rings when scaled up on a 27" display. Widen the
+// backing store on large viewports — 0.34 ≈ 1.85× the fragments of 0.25, still
+// a fraction of native ("soft is the point"), the fragment count stays bounded.
+// Read at resize time (not module load — SSR has no window) so moving the
+// window to a bigger display re-tiers. The §3A shader dither remains the
+// primary de-banding fix; this is the belt-and-suspenders for wide displays.
+const RESOLUTION_SCALE_BASE = 0.25;
+const RESOLUTION_SCALE_WIDE = 0.34;
+const WIDE_VIEWPORT_PX = 1600;
+const resolutionScale = () =>
+  typeof window !== "undefined" && window.innerWidth > WIDE_VIEWPORT_PX
+    ? RESOLUTION_SCALE_WIDE
+    : RESOLUTION_SCALE_BASE;
 const FRAME_MS = 1000 / 30;
 
 const VERT = `
@@ -194,14 +207,9 @@ export default function AmbientBackdrop() {
     document.documentElement.classList.add("has-ambient");
 
     const resize = () => {
-      const w = Math.max(
-        160,
-        Math.floor(canvas.clientWidth * RESOLUTION_SCALE),
-      );
-      const h = Math.max(
-        160,
-        Math.floor(canvas.clientHeight * RESOLUTION_SCALE),
-      );
+      const scale = resolutionScale();
+      const w = Math.max(160, Math.floor(canvas.clientWidth * scale));
+      const h = Math.max(160, Math.floor(canvas.clientHeight * scale));
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
