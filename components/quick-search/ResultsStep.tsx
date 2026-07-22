@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronRight, Leaf, Map, MapPin, Navigation } from "lucide-react";
 import Link from "next/link";
 import CountUp from "@/components/motion/CountUp";
+import NearestBurst from "@/components/quick-search/NearestBurst";
 import { FavoriteButton } from "@/components/FarmCard";
 import { localizedPath } from "@/lib/i18n-core";
 import { productGroupOf, tagLabel } from "@/lib/products";
@@ -65,10 +66,24 @@ export default function ResultsStep({
   const [visibleCount, setVisibleCount] = useState(RESULTS_CHUNK);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
+  // The "nearest farm found" payoff (design §8): a one-shot ripple burst that
+  // plays once per completed search that yields a result, then unmounts itself.
+  const [showBurst, setShowBurst] = useState(false);
+
   // A new search (or re-entering the step) starts back at the first chunk.
   useEffect(() => {
     queueMicrotask(() => setVisibleCount(RESULTS_CHUNK));
   }, [revealKey, results]);
+
+  // Fire the burst on a fresh search that actually found something. Keyed on
+  // revealKey so it plays once per search, not on every chunk/scroll re-render;
+  // deferred via microtask (matching the chunk-reset effect) so the state write
+  // lands after commit rather than synchronously inside the effect.
+  useEffect(() => {
+    if (results.length === 0) return;
+    queueMicrotask(() => setShowBurst(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealKey]);
 
   // Stream in the next chunk as the visitor nears the end of the list.
   useEffect(() => {
@@ -108,7 +123,8 @@ export default function ResultsStep({
 
   return (
     <div className="space-y-4">
-      <div>
+      <div className="relative">
+        {showBurst ? <NearestBurst onDone={() => setShowBurst(false)} /> : null}
         <h2 className="text-xl font-bold tracking-[-0.035em] text-ink sm:text-[28px]">
           {count === 0
             ? t("qs_res_none_title")
