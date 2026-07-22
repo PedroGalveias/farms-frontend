@@ -75,6 +75,10 @@ interface FarmCardProps {
   onLongPress?: (farm: Farm) => void;
   /** Distance from the visitor's location, when known — shows a badge. */
   distanceKm?: number | null;
+  /** Featured hero-row card: carries a live backdrop-filter (design §1) on
+   *  fine-pointer devices. Only the bounded top slice sets this — never a
+   *  whole scrolling list — and it is inert on touch (the iOS crash vector). */
+  live?: boolean;
 }
 
 function CantonTag({ farm }: { farm: Farm }) {
@@ -147,7 +151,15 @@ export default function FarmCard({
   onOpen,
   onLongPress,
   distanceKm,
+  live = false,
 }: FarmCardProps) {
+  // Featured live-glass only makes sense on the extended grid card; the dense
+  // list row never carries it. Keeping `.glass-card` alongside `.glass-card-live`
+  // is deliberate — see the globals.css note (it gates the live blur).
+  const surface =
+    live && variant === "grid"
+      ? "glass glass-card glass-card-live"
+      : "glass glass-card";
   const t = useT();
   const { latitude, longitude } = splitCoordinates(farm.coordinates);
   const mapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(
@@ -231,7 +243,7 @@ export default function FarmCard({
 
   return (
     <article
-      className="glass glass-card card-cull group relative flex h-full flex-col overflow-hidden rounded-panel p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-elev-3"
+      className={`${surface} card-cull group relative flex h-full flex-col overflow-hidden rounded-panel p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-elev-3`}
       ref={articleRef}
     >
       {openOverlay}

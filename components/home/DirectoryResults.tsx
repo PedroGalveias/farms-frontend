@@ -125,6 +125,11 @@ export default function DirectoryResults({
                 <FarmCard
                   distanceKm={distanceByFarmId.get(farm.id) ?? null}
                   farm={farm}
+                  // Hero row only (design §1): the first ≤3 grid cards carry a
+                  // live backdrop-filter. A fixed index slice — never a function
+                  // of scroll/load-more — so the live-blur budget (≤6, and 0 on
+                  // touch) is computed once and can't grow with the list.
+                  live={viewMode === "grid" && index < 3}
                   onLongPress={onLongPressFarm}
                   onOpen={(sourceEl) => onOpenFarm(farm, sourceEl)}
                   variant={viewMode}
