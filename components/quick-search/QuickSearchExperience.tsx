@@ -536,7 +536,7 @@ export default function QuickSearchExperience({
               </span>
               {serviceStatus !== "online" ? statusBadge : null}
             </div>
-            <h1 className="mt-5 text-[clamp(2.75rem,11vw,4rem)] font-extrabold leading-[0.92] tracking-[-0.045em] text-ink">
+            <h1 className="mt-5 text-display font-extrabold leading-[0.92] tracking-[-0.045em] text-ink">
               {t("qs_hero_lead")}{" "}
               <span className="text-pine">{t("qs_hero_accent")}</span>
             </h1>

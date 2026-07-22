@@ -49,7 +49,13 @@ const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
   loading: () => <MapPlaceholder heightStyle="360px" />,
 });
 
-function InfoCard({ children, label }: { children: string; label: string }) {
+function InfoCard({
+  children,
+  label,
+}: {
+  children: React.ReactNode;
+  label: string;
+}) {
   return (
     <div className="glass-inset rounded-field px-4 py-3.5">
       <p className="text-xs font-semibold text-ink/60">{label}</p>
@@ -106,7 +112,7 @@ export default function FarmDetail({
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink/60">
           {farm.canton} · {getCantonName(farm.canton)}
         </p>
-        <h1 className="mt-3 text-[clamp(2.25rem,6vw,3.5rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
+        <h1 className="mt-3 text-title font-black leading-[0.95] tracking-[-0.04em] text-ink">
           {farm.name}
         </h1>
         <p className="mt-3 flex items-start gap-1.5 text-base leading-7 text-ink/60">
@@ -200,7 +206,7 @@ export default function FarmDetail({
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <InfoCard label={t("detail_coordinates")}>
-            {farm.coordinates}
+            <span className="tabular-nums">{farm.coordinates}</span>
           </InfoCard>
           <InfoCard label={t("detail_added")}>
             {formatFarmDate(farm.created_at)}

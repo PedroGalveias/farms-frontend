@@ -50,7 +50,7 @@ export default function SettingsView() {
       </Link>
 
       <header className="mt-6">
-        <h1 className="text-[clamp(2rem,5vw,3rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
+        <h1 className="text-title font-black leading-[0.95] tracking-[-0.04em] text-ink">
           {t("settings_title")}
         </h1>
         <p className="mt-2 text-base leading-7 text-ink/60">

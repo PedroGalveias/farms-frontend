@@ -75,7 +75,9 @@ export default function CountUp({
   }, [durationMs, factor, value]);
 
   return (
-    <span className={className} ref={ref}>
+    // Tabular figures (§7): fixed-width digits so the number doesn't jitter
+    // horizontally as it counts, and stats line up column-wise.
+    <span className={`tabular-nums ${className}`} ref={ref}>
       {display.toFixed(decimals)}
       {suffix}
     </span>

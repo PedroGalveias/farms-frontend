@@ -108,7 +108,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           <Heart className="h-6 w-6 fill-current" />
         </span>
         <div className="min-w-0">
-          <h1 className="text-[clamp(2rem,5vw,3rem)] font-black leading-[0.95] tracking-[-0.04em] text-ink">
+          <h1 className="text-title font-black leading-[0.95] tracking-[-0.04em] text-ink">
             {t("saved_title")}
           </h1>
           <p className="mt-1 text-sm leading-6 text-ink/60">
