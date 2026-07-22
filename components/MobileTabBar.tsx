@@ -2,7 +2,7 @@
 
 import Link from "@/components/i18n/LocalizedLink";
 import { usePathname } from "next/navigation";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Heart, LayoutGrid, Search } from "lucide-react";
 import { haptic } from "@/lib/haptics";
 import { useSlidingIndicator } from "@/components/motion/useSlidingIndicator";
@@ -34,6 +34,31 @@ export default function MobileTabBar() {
           ? "directory"
           : undefined;
 
+  // Hide on scroll down, reveal on scroll up (§5) — reclaims vertical space
+  // while browsing the long directory, and snaps back the instant the user
+  // scrolls up or nears the top. rAF-throttled; ignores sub-6px jitter.
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const y = window.scrollY;
+        const dy = y - lastY;
+        if (Math.abs(dy) < 6) return;
+        setHidden(y > 80 && dy > 0);
+        lastY = y;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   const navRef = useRef<HTMLElement>(null);
   const indicatorRef = useRef<HTMLSpanElement>(null);
   const directoryRef = useRef<HTMLAnchorElement>(null);
@@ -54,6 +79,7 @@ export default function MobileTabBar() {
     <nav
       aria-label="Primary"
       className="glass glass-chrome mobile-tab-bar fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[min(92%,360px)] items-center gap-1.5 rounded-chip p-1.5 [view-transition-name:tab-bar] lg:hidden"
+      data-hidden={hidden || undefined}
       ref={navRef}
     >
       {/* The sliding active pill, positioned by useSlidingIndicator. */}
