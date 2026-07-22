@@ -56,6 +56,13 @@ const FRAG = `
   uniform vec2 u_res;
   uniform float u_time;
   uniform float u_dark;
+  // §8 uniforms — updates on the existing 30fps loop, no new draws.
+  // u_pointer: smoothed cursor in aspect-true px space (x in 0..w, y in 0..1),
+  //   centred at (0.5*w, 0.5) when idle. The orbs lean gently toward it.
+  // u_scroll: decaying scroll velocity 0..1 — brightens/quickens the caustics
+  //   so the light "breathes" as the page moves.
+  uniform vec2 u_pointer;
+  uniform float u_scroll;
 
   float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
   float noise(vec2 p){
@@ -84,6 +91,11 @@ const FRAG = `
     vec2 d3 = 0.11 * vec2(sin(t*0.13 + 4.0), cos(t*0.09 + 3.0));
     float pulse = 1.0 + 0.10 * sin(t*0.18);
 
+    // Pointer lean (§8): shift every orb a few percent toward the cursor so the
+    // whole field tilts to follow it — the desktop analogue of liquid glass
+    // leaning under a device tilt. Idle pointer sits at centre → zero lean.
+    vec2 lean = (u_pointer - vec2(0.5*w, 0.5)) * 0.05;
+
     vec3 green = mix(vec3(0.129,0.627,0.353), vec3(0.180,0.659,0.400), u_dark);
     vec3 lime  = vec3(0.588,0.745,0.275);
     vec3 blue  = vec3(0.353,0.588,0.824);
@@ -94,11 +106,11 @@ const FRAG = `
     // Light-mode alphas raised ~15% (§2) so the green is present where content
     // sits, not just at the page edges; a5 (centre, under the content column)
     // gets the largest relative bump. Dark's second operand is unchanged.
-    float a1 = orb(px, vec2(0.06*w, 0.86) + d1, 0.75*pulse) * mix(0.46, 0.30, u_dark);
-    float a2 = orb(px, vec2(0.96*w, 0.78) + d2, 0.64)        * mix(0.39, 0.18, u_dark);
-    float a3 = orb(px, vec2(0.78*w, 0.04) + d3, 0.85*pulse) * mix(0.41, 0.26, u_dark);
-    float a4 = orb(px, vec2(0.20*w, 0.12) - d1, 0.60)        * mix(0.27, 0.16, u_dark);
-    float a5 = orb(px, vec2(0.50*w, 0.50) + d2, 0.53)        * mix(0.20, 0.10, u_dark);
+    float a1 = orb(px, vec2(0.06*w, 0.86) + d1 + lean, 0.75*pulse) * mix(0.46, 0.30, u_dark);
+    float a2 = orb(px, vec2(0.96*w, 0.78) + d2 + lean, 0.64)        * mix(0.39, 0.18, u_dark);
+    float a3 = orb(px, vec2(0.78*w, 0.04) + d3 + lean, 0.85*pulse) * mix(0.41, 0.26, u_dark);
+    float a4 = orb(px, vec2(0.20*w, 0.12) - d1 + lean, 0.60)        * mix(0.27, 0.16, u_dark);
+    float a5 = orb(px, vec2(0.50*w, 0.50) + d2 + lean, 0.53)        * mix(0.20, 0.10, u_dark);
 
     vec3 col = green*a1 + lime*a2 + green*a3 + blue*a4 + green*a5;
     float alpha = a1 + a2 + a3 + a4 + a5;
@@ -106,10 +118,14 @@ const FRAG = `
     // Caustic light drifting across the WHOLE page — sunlight through water
     // on a wall. Two crossing band systems at different scales/speeds so it
     // reads organic; brighter inside the orbs, still present on bare paper.
-    float c1 = sin((px.x + px.y) * 6.0 + 3.5*noise(px*1.6 + t*0.05) + t*0.22);
-    float c2 = sin((px.x - px.y*0.7) * 3.5 + 3.0*noise(px*1.1 - t*0.04) - t*0.15);
+    // Scroll-coupled (§8): a little extra phase drift and up to +70% brightness
+    // while the page is moving, decaying back to rest — the caustics "breathe"
+    // with scroll velocity. u_scroll is 0 at rest so the baseline is unchanged.
+    float cs = u_scroll;
+    float c1 = sin((px.x + px.y) * 6.0 + 3.5*noise(px*1.6 + t*0.05) + t*0.22 + cs*2.4);
+    float c2 = sin((px.x - px.y*0.7) * 3.5 + 3.0*noise(px*1.1 - t*0.04) - t*0.15 - cs*1.8);
     float fil = pow(max(c1, 0.0), 14.0) * 0.6 + pow(max(c2, 0.0), 10.0) * 0.4;
-    fil *= mix(0.17, 0.06, u_dark);
+    fil *= mix(0.17, 0.06, u_dark) * (1.0 + 0.7*cs);
     fil *= 0.45 + 0.55 * smoothstep(0.02, 0.25, alpha);
     col += mix(vec3(0.55,0.95,0.68), vec3(0.75,0.92,0.5), uv.y) * fil;
     alpha += fil;
@@ -202,9 +218,38 @@ export default function AmbientBackdrop() {
     const uRes = gl.getUniformLocation(prog, "u_res");
     const uTime = gl.getUniformLocation(prog, "u_time");
     const uDark = gl.getUniformLocation(prog, "u_dark");
+    const uPointer = gl.getUniformLocation(prog, "u_pointer");
+    const uScroll = gl.getUniformLocation(prog, "u_scroll");
 
     // The CSS orbs are off while the living layer runs.
     document.documentElement.classList.add("has-ambient");
+
+    // ── §8 reactive state (all fed as uniforms on the existing loop) ─────────
+    // Pointer target in aspect-true px space; smoothed toward each frame. Idle
+    // value is centre so a page with no pointer movement shows zero lean.
+    const aspect = () => canvas.clientWidth / Math.max(1, canvas.clientHeight);
+    let pTargetX = 0.5 * aspect();
+    let pTargetY = 0.5;
+    let pCurX = pTargetX;
+    let pCurY = pTargetY;
+    const onPointer = (e: PointerEvent) => {
+      // clientX/Y → uv (y up), x scaled by aspect to match the shader's px space.
+      pTargetX = (e.clientX / window.innerWidth) * aspect();
+      pTargetY = 1 - e.clientY / window.innerHeight;
+    };
+    // Scroll velocity 0..1, ramped on scroll and decayed each frame.
+    let scrollVel = 0;
+    let lastScrollY = window.scrollY;
+    const onScroll = () => {
+      const dy = Math.abs(window.scrollY - lastScrollY);
+      lastScrollY = window.scrollY;
+      scrollVel = Math.min(1, scrollVel + dy / 600);
+    };
+    // Theme cross-fade: u_dark is lerped, not hard-switched, so a theme/sun-cycle
+    // flip reads as the room's light changing (~600ms) rather than a snap.
+    let darkCur = document.documentElement.classList.contains("dark") ? 1 : 0;
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     const resize = () => {
       const scale = resolutionScale();
@@ -231,7 +276,17 @@ export default function AmbientBackdrop() {
       last = now;
       resize();
       gl.uniform1f(uTime, (now - start) / 1000);
-      gl.uniform1f(uDark, isDark() ? 1 : 0);
+      // Smooth the pointer toward its target (~frame-rate-independent enough at
+      // the fixed 30fps clock); a gentle 0.12 factor trails the cursor softly.
+      pCurX += (pTargetX - pCurX) * 0.12;
+      pCurY += (pTargetY - pCurY) * 0.12;
+      gl.uniform2f(uPointer, pCurX, pCurY);
+      // Decay scroll velocity toward rest; ~0.85/frame settles in ~0.4s.
+      scrollVel *= 0.85;
+      gl.uniform1f(uScroll, scrollVel);
+      // Lerp u_dark toward the live theme — 0.12/frame ≈ 600ms cross-fade.
+      darkCur += ((isDark() ? 1 : 0) - darkCur) * 0.12;
+      gl.uniform1f(uDark, darkCur);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -256,6 +311,8 @@ export default function AmbientBackdrop() {
     return () => {
       stop();
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("scroll", onScroll);
       document.documentElement.classList.remove("has-ambient");
       gl.deleteProgram(prog);
       gl.deleteBuffer(buf);
