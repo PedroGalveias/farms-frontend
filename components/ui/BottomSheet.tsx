@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { haptic } from "@/lib/haptics";
 
 interface BottomSheetProps {
   /** Close the sheet (backdrop tap, Escape, or a downward flick on mobile). */
@@ -17,6 +18,12 @@ interface BottomSheetProps {
 
 // How far the grabber must travel down before release dismisses the sheet.
 const DISMISS_THRESHOLD = 110;
+// A fast downward flick dismisses regardless of distance (px per ms) — the iOS
+// "throw it away" gesture, so a short quick flick works like a long slow drag.
+const FLICK_VELOCITY = 0.55;
+// Spring the sheet back to rest / to the finger (the --ease-spring token gives
+// a subtle overshoot; a linear tween reads as cheap).
+const SPRING_BACK = "transform var(--dur-3) var(--ease-spring)";
 const MOBILE_QUERY = "(max-width: 639px)";
 
 /**
@@ -39,7 +46,14 @@ export default function BottomSheet({
   className = "",
 }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
-  const drag = useRef({ startY: 0, offset: 0, active: false });
+  const drag = useRef({
+    startY: 0,
+    lastY: 0,
+    lastT: 0,
+    velocity: 0,
+    offset: 0,
+    active: false,
+  });
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -57,39 +71,70 @@ export default function BottomSheet({
   }, [onClose]);
 
   // Drive the drag straight through the DOM node to avoid a re-render per move.
-  const setOffset = (y: number) => {
+  // `active` follows the finger 1:1 (no transition); on release we spring.
+  const setOffset = (y: number, spring = false) => {
     const el = sheetRef.current;
     if (!el) return;
-    el.style.transition = drag.current.active ? "none" : "";
+    el.style.transition = drag.current.active
+      ? "none"
+      : spring
+        ? SPRING_BACK
+        : "";
     el.style.transform = y > 0 ? `translateY(${y}px)` : "";
   };
 
   const onPointerDown = (event: React.PointerEvent) => {
     // Drag-to-dismiss is a mobile gesture; on ≥sm the sheet is a centred modal.
     if (!window.matchMedia(MOBILE_QUERY).matches) return;
-    drag.current = { startY: event.clientY, offset: 0, active: true };
+    const now = performance.now();
+    drag.current = {
+      startY: event.clientY,
+      lastY: event.clientY,
+      lastT: now,
+      velocity: 0,
+      offset: 0,
+      active: true,
+    };
+    // Promote to a layer only for the duration of the gesture.
+    if (sheetRef.current) sheetRef.current.style.willChange = "transform";
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const onPointerMove = (event: React.PointerEvent) => {
     if (!drag.current.active) return;
-    drag.current.offset = Math.max(0, event.clientY - drag.current.startY);
-    setOffset(drag.current.offset);
+    const now = performance.now();
+    const raw = event.clientY - drag.current.startY;
+    // Downward tracks 1:1; dragging up past rest rubber-bands (there's no higher
+    // detent on this sheet), so the top feels elastic instead of stuck.
+    const offset = raw >= 0 ? raw : raw * 0.18;
+    const dt = now - drag.current.lastT || 1;
+    drag.current.velocity = (event.clientY - drag.current.lastY) / dt;
+    drag.current.lastY = event.clientY;
+    drag.current.lastT = now;
+    drag.current.offset = offset;
+    setOffset(offset);
   };
 
   const endDrag = (event: React.PointerEvent) => {
     if (!drag.current.active) return;
-    const { offset } = drag.current;
+    const { offset, velocity } = drag.current;
     drag.current.active = false;
     try {
       event.currentTarget.releasePointerCapture(event.pointerId);
     } catch {
       // Pointer may already be released — safe to ignore.
     }
-    if (offset > DISMISS_THRESHOLD) {
+    // Dismiss on enough travel OR a fast downward flick from any distance.
+    if (offset > DISMISS_THRESHOLD || velocity > FLICK_VELOCITY) {
+      haptic();
       onClose();
     } else {
-      setOffset(0);
+      setOffset(0, true);
+      // Drop the layer promotion once the spring-back settles.
+      const el = sheetRef.current;
+      window.setTimeout(() => {
+        if (el && !drag.current.active) el.style.willChange = "";
+      }, 380);
     }
   };
 
