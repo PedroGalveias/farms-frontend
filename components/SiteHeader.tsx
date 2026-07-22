@@ -7,7 +7,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AccountMenu from "@/components/auth/AccountMenu";
 
 const utilityClassName =
-  "grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink/70 transition-colors hover:bg-tone hover:text-ink";
+  "grid h-10 w-10 shrink-0 place-items-center rounded-chip text-ink/70 transition-colors hover:bg-tone hover:text-ink";
 
 /**
  * Mobile top bar — a slim floating pill with the brand and utilities (theme,
@@ -17,7 +17,7 @@ const utilityClassName =
 export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 [view-transition-name:site-header] sm:px-5 sm:pt-4 lg:hidden">
-      <div className="glass glass-chrome mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 rounded-full pl-5 pr-3">
+      <div className="glass glass-chrome mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 rounded-chip pl-5 pr-3">
         <Link
           className="group flex items-center gap-2 text-[19px] font-extrabold tracking-[-0.04em] text-ink transition-opacity hover:opacity-80"
           href="/"

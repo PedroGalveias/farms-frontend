@@ -87,7 +87,7 @@ export default function SettingsView() {
               label={t("settings_deleteAccount")}
             />
             <button
-              className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-5 py-2.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+              className="inline-flex items-center gap-2 rounded-chip border border-line bg-cloud px-5 py-2.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
               onClick={() => void logout()}
               type="button"
             >
@@ -142,7 +142,7 @@ function AppearanceSection() {
       <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
         {t("settings_appearance")}
       </h2>
-      <div className="glass-inset mt-3 rounded-2xl px-4 py-4">
+      <div className="glass-inset mt-3 rounded-field px-4 py-4">
         <div
           aria-label={t("settings_appearance")}
           className="grid grid-cols-2 gap-1.5 sm:grid-cols-4"
@@ -151,9 +151,9 @@ function AppearanceSection() {
           {options.map((option) => (
             <button
               aria-checked={mode === option.value}
-              className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition ${
+              className={`flex items-center justify-center gap-2 rounded-field px-3 py-2.5 text-[13px] font-semibold transition ${
                 mode === option.value
-                  ? "bg-ink text-cloud shadow-[0_6px_16px_-8px_rgba(20,22,27,0.6)]"
+                  ? "bg-ink text-cloud shadow-elev-2"
                   : "bg-tone text-ink/70 hover:text-ink"
               }`}
               key={option.value}
@@ -180,7 +180,7 @@ function LanguageSection() {
       <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
         {t("profile_language")}
       </h2>
-      <div className="glass-inset mt-3 rounded-2xl px-4 py-4">
+      <div className="glass-inset mt-3 rounded-field px-4 py-4">
         <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
           <Languages className="h-4 w-4" />
           {t("settings_language_hint")}
@@ -189,7 +189,7 @@ function LanguageSection() {
           {LOCALES.map(({ code, label }) => (
             <button
               aria-pressed={locale === code}
-              className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${
+              className={`rounded-chip px-3.5 py-1.5 text-[13px] font-semibold transition ${
                 locale === code
                   ? "bg-ink text-cloud"
                   : "bg-tone text-ink/70 hover:text-ink"
@@ -314,7 +314,7 @@ function DataSection() {
         {t("settings_data")}
       </h2>
       <div className="mt-3 space-y-3">
-        <div className="glass-inset flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5">
+        <div className="glass-inset flex items-center justify-between gap-4 rounded-field px-4 py-3.5">
           <div>
             <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
               <Eraser className="h-4 w-4" />
@@ -325,7 +325,7 @@ function DataSection() {
             </p>
           </div>
           <button
-            className="shrink-0 rounded-full border border-line bg-cloud px-4 py-2 text-[13px] font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="shrink-0 rounded-chip border border-line bg-cloud px-4 py-2 text-[13px] font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={clearRecent}
             type="button"
           >
@@ -333,7 +333,7 @@ function DataSection() {
           </button>
         </div>
 
-        <div className="glass-inset flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5">
+        <div className="glass-inset flex items-center justify-between gap-4 rounded-field px-4 py-3.5">
           <div>
             <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
               <Bell className="h-4 w-4" />
@@ -344,7 +344,7 @@ function DataSection() {
             </p>
           </div>
           <button
-            className={`shrink-0 rounded-full px-4 py-2 text-[13px] font-semibold transition focus-visible:ring-2 ${
+            className={`shrink-0 rounded-chip px-4 py-2 text-[13px] font-semibold transition focus-visible:ring-2 ${
               confirmReset
                 ? "bg-rose-600 text-white focus-visible:ring-rose-400"
                 : "border border-rose-300/70 bg-rose-50 text-rose-700 hover:border-rose-400 focus-visible:ring-rose-300"
@@ -374,7 +374,7 @@ function SwitchRow({
   onToggle: () => void;
 }) {
   return (
-    <div className="glass-inset flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5">
+    <div className="glass-inset flex items-center justify-between gap-4 rounded-field px-4 py-3.5">
       <div>
         <p className="flex items-center gap-2 text-xs font-semibold text-ink/60">
           {icon}
@@ -384,14 +384,14 @@ function SwitchRow({
       </div>
       <button
         aria-pressed={on}
-        className={`relative inline-flex h-7 w-[52px] shrink-0 items-center rounded-full border transition-colors duration-300 ${
+        className={`relative inline-flex h-7 w-[52px] shrink-0 items-center rounded-chip border transition-colors duration-300 ${
           on ? "border-pine/40 bg-pine" : "border-line bg-tone"
         }`}
         onClick={onToggle}
         type="button"
       >
         <span
-          className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.3)] transition-[left] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-chip bg-white shadow-elev-1 transition-[left] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
             on ? "left-[26px]" : "left-1"
           }`}
         />
@@ -415,7 +415,7 @@ function WipRow({
   return (
     <div
       aria-disabled
-      className="glass-inset flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5 opacity-60"
+      className="glass-inset flex items-center justify-between gap-4 rounded-field px-4 py-3.5 opacity-60"
     >
       <p
         className={`flex items-center gap-2 text-sm font-semibold ${
@@ -425,7 +425,7 @@ function WipRow({
         {icon}
         {label}
       </p>
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-tone px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/60">
+      <span className="inline-flex items-center gap-1.5 rounded-chip bg-tone px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/60">
         <ShieldCheck className="h-3 w-3" />
         {t("profile_comingSoon")}
       </span>

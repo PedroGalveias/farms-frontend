@@ -41,7 +41,7 @@ describe("HeroLivePanel", () => {
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/seasonal");
     // At least one produce chip for the current month.
-    expect(link.querySelectorAll("span.rounded-full").length).toBeGreaterThan(
+    expect(link.querySelectorAll("span.rounded-chip").length).toBeGreaterThan(
       0,
     );
     // Months with more items than the chip limit surface the surplus as +N.

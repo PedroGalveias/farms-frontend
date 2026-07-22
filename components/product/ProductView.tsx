@@ -74,14 +74,14 @@ export default function ProductView({
 
         <div className="mt-7 flex flex-wrap gap-3">
           <Link
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
             href={directoryHref}
           >
             <MapPin className="h-4 w-4" />
             {t("product_openDirectory")}
           </Link>
           <Link
-            className="glass glass-interactive inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="glass glass-interactive inline-flex items-center gap-2 rounded-chip px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             href="/quick-search"
           >
             <Search className="h-4 w-4" />
@@ -96,7 +96,7 @@ export default function ProductView({
             </span>
             {topCantons.map(([code, count]) => (
               <Link
-                className="glass-chip rounded-full px-3 py-1.5 text-[13px] font-semibold text-ink/70 transition hover:text-ink"
+                className="glass-chip rounded-chip px-3 py-1.5 text-[13px] font-semibold text-ink/70 transition hover:text-ink"
                 href={`/canton/${code.toLowerCase()}`}
                 key={code}
               >
@@ -121,7 +121,7 @@ export default function ProductView({
           {totalCount > farms.length ? (
             <div className="mt-8 flex justify-center">
               <Link
-                className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+                className="group inline-flex items-center gap-2 rounded-chip bg-ink px-7 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
                 href={directoryHref}
               >
                 {t("product_seeAll", { n: totalCount })}
@@ -131,12 +131,12 @@ export default function ProductView({
           ) : null}
         </>
       ) : (
-        <section className="glass mt-10 rounded-[28px] p-10 text-center">
+        <section className="glass mt-10 rounded-panel p-10 text-center">
           <p className="text-base leading-7 text-ink/60">
             {t("product_summary_zero", { product: label })}
           </p>
           <Link
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98]"
+            className="mt-6 inline-flex items-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98]"
             href="/"
           >
             {t("product_empty_cta")}
@@ -153,7 +153,7 @@ export default function ProductView({
           <div className="mt-4 flex flex-wrap gap-2.5">
             {siblings.map((sibling) => (
               <Link
-                className="glass glass-interactive inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-ink/75 transition hover:text-ink"
+                className="glass glass-interactive inline-flex items-center gap-2 rounded-chip px-4 py-2.5 text-sm font-semibold text-ink/75 transition hover:text-ink"
                 href={`/product/${sibling.slug}`}
                 key={sibling.slug}
               >

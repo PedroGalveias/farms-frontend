@@ -144,7 +144,7 @@ function ActionRow({
 }) {
   return (
     <button
-      className={`relative flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`relative flex w-full items-center gap-3 rounded-field px-4 py-3.5 text-left text-[15px] font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-40 ${
         active
           ? "bg-pine/10 text-pine"
           : "text-ink/80 hover:bg-ink/[0.05] active:bg-ink/[0.08]"

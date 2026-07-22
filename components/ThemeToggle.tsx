@@ -15,7 +15,7 @@ export default function ThemeToggle({
     <button
       aria-checked={isDark}
       aria-label="Toggle dark mode"
-      className={`relative inline-flex h-7 w-[52px] shrink-0 items-center rounded-full border transition-colors duration-300 ${
+      className={`relative inline-flex h-7 w-[52px] shrink-0 items-center rounded-chip border transition-colors duration-300 ${
         isDark ? "border-white/10 bg-[#1d2026]" : "border-black/5 bg-[#e8e7e0]"
       } ${className}`}
       onClick={(event) => toggleTheme({ x: event.clientX, y: event.clientY })}
@@ -24,7 +24,7 @@ export default function ThemeToggle({
       type="button"
     >
       <span
-        className={`absolute top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-full shadow-[0_2px_6px_rgba(0,0,0,0.3)] transition-[left] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        className={`absolute top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-chip shadow-elev-1 transition-[left] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
           isDark
             ? "left-[29px] bg-[#0e0f12] text-amber-300"
             : "left-[3px] bg-white text-amber-500"

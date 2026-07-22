@@ -197,7 +197,7 @@ export default function HapticsLab() {
         the others can work.
       </p>
 
-      <div className="mt-6 rounded-2xl border border-line bg-cloud p-4 text-xs leading-6 text-ink/70">
+      <div className="mt-6 rounded-field border border-line bg-cloud p-4 text-xs leading-6 text-ink/70">
         <p>
           <strong>switch control supported:</strong>{" "}
           {supportsSwitch === null ? "…" : supportsSwitch ? "yes" : "NO"}
@@ -228,7 +228,7 @@ export default function HapticsLab() {
         ) : null}
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-pine/30 bg-pine/5 p-4">
+      <div className="mt-6 flex items-center justify-between gap-4 rounded-field border border-pine/30 bg-pine/5 p-4">
         <div>
           <p className="text-sm font-bold text-ink">
             A — Real visible switch (ground truth)
@@ -240,7 +240,7 @@ export default function HapticsLab() {
         <input ref={visibleRef} type="checkbox" {...{ switch: "" }} />
       </div>
 
-      <div className="relative mt-3 rounded-2xl border border-line bg-cloud p-4">
+      <div className="relative mt-3 rounded-field border border-line bg-cloud p-4">
         <p className="text-sm font-bold text-ink">
           I — Real tap on a nearly invisible switch
         </p>
@@ -249,7 +249,7 @@ export default function HapticsLab() {
           rendered at 5% opacity. Tests whether a genuine tap ticks even when
           the switch is (almost) invisible.
         </p>
-        <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg border border-dashed border-pine/40 p-2">
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-field border border-dashed border-pine/40 p-2">
           <input
             style={{ opacity: 0.05 }}
             type="checkbox"
@@ -261,7 +261,7 @@ export default function HapticsLab() {
       <div className="mt-3 space-y-3">
         {VARIANTS.map((variant) => (
           <button
-            className="w-full rounded-2xl border border-line bg-cloud p-4 text-left transition hover:border-ink/25 active:scale-[0.99]"
+            className="w-full rounded-field border border-line bg-cloud p-4 text-left transition hover:border-ink/25 active:scale-[0.99]"
             key={variant.id}
             onClick={() => {
               variant.run();
@@ -276,7 +276,7 @@ export default function HapticsLab() {
       </div>
 
       {log.length > 0 ? (
-        <div className="mt-6 rounded-2xl bg-tone p-4 text-xs leading-6 text-ink/70">
+        <div className="mt-6 rounded-field bg-tone p-4 text-xs leading-6 text-ink/70">
           {log.map((entry) => (
             <p key={entry}>{entry}</p>
           ))}

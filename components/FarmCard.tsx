@@ -41,7 +41,7 @@ export function FavoriteButton({
       // position utilities on one element resolve by STYLESHEET order, not
       // class order (a base `relative` silently beat the list variant's
       // `absolute right-5 top-5` and dropped the heart into normal flow).
-      className={`z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
+      className={`z-10 grid h-9 w-9 shrink-0 place-items-center rounded-chip transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
         saved ? "bg-pine/10 text-pine" : "bg-tone text-ink/70 hover:text-ink"
       } ${className}`}
       onClick={(event) => {
@@ -79,7 +79,7 @@ interface FarmCardProps {
 
 function CantonTag({ farm }: { farm: Farm }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-tone px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-ink/70">
+    <span className="inline-flex items-center gap-1.5 rounded-chip bg-tone px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-ink/70">
       <span className="text-pine">{farm.canton}</span>
       {getCantonName(farm.canton)}
     </span>
@@ -99,13 +99,13 @@ function CardBadges({
     <div className="flex flex-wrap items-center gap-1.5">
       <CantonTag farm={farm} />
       {isRecentlyAdded(farm.created_at) ? (
-        <span className="inline-flex items-center gap-1 rounded-full bg-pine-surface px-2.5 py-1 text-[11px] font-bold text-white">
+        <span className="inline-flex items-center gap-1 rounded-chip bg-pine-surface px-2.5 py-1 text-[11px] font-bold text-white">
           <Sparkles className="h-3 w-3" />
           {t("card_new")}
         </span>
       ) : null}
       {distanceKm != null ? (
-        <span className="inline-flex items-center gap-1 rounded-full bg-pine/10 px-2.5 py-1 text-[11px] font-bold text-pine">
+        <span className="inline-flex items-center gap-1 rounded-chip bg-pine/10 px-2.5 py-1 text-[11px] font-bold text-pine">
           <Navigation className="h-3 w-3" />
           {formatDistanceShort(distanceKm)}
         </span>
@@ -126,14 +126,14 @@ function CategoryChips({
     <div className="flex flex-wrap gap-1.5">
       {categories.map((category) => (
         <span
-          className="rounded-full bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/70"
+          className="rounded-chip bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/70"
           key={category}
         >
           {tagLabel(category, locale)}
         </span>
       ))}
       {hiddenCount > 0 ? (
-        <span className="rounded-full bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/70">
+        <span className="rounded-chip bg-tone/70 px-3 py-1 text-xs font-semibold text-ink/70">
           +{hiddenCount}
         </span>
       ) : null}
@@ -185,13 +185,13 @@ export default function FarmCard({
     const isNew = isRecentlyAdded(farm.created_at);
     return (
       <article
-        className="glass glass-card card-cull group relative flex items-center gap-3 overflow-hidden rounded-2xl px-4 py-3 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-22px_rgba(20,22,27,0.4)] sm:gap-4 sm:px-5"
+        className="glass glass-card card-cull group relative flex items-center gap-3 overflow-hidden rounded-field px-4 py-3 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-elev-3 sm:gap-4 sm:px-5"
         ref={articleRef}
       >
         {openOverlay}
 
         {/* Leading canton code — a compact geographic anchor. */}
-        <span className="pointer-events-none hidden shrink-0 flex-col items-center justify-center rounded-xl bg-tone px-2.5 py-1.5 text-center sm:flex">
+        <span className="pointer-events-none hidden shrink-0 flex-col items-center justify-center rounded-field bg-tone px-2.5 py-1.5 text-center sm:flex">
           <span className="text-[13px] font-black leading-none tracking-[0.02em] text-pine">
             {farm.canton}
           </span>
@@ -203,7 +203,7 @@ export default function FarmCard({
               {farm.name}
             </h3>
             {isNew ? (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-pine-surface px-2 py-0.5 text-[10px] font-bold text-white">
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-chip bg-pine-surface px-2 py-0.5 text-[10px] font-bold text-white">
                 <Sparkles className="h-2.5 w-2.5" />
                 {t("card_new")}
               </span>
@@ -216,7 +216,7 @@ export default function FarmCard({
         </div>
 
         {distanceKm != null ? (
-          <span className="pointer-events-none hidden shrink-0 items-center gap-1 rounded-full bg-pine/10 px-2.5 py-1 text-xs font-bold text-pine sm:inline-flex">
+          <span className="pointer-events-none hidden shrink-0 items-center gap-1 rounded-chip bg-pine/10 px-2.5 py-1 text-xs font-bold text-pine sm:inline-flex">
             <Navigation className="h-3 w-3" />
             {formatDistanceShort(distanceKm)}
           </span>
@@ -231,7 +231,7 @@ export default function FarmCard({
 
   return (
     <article
-      className="glass glass-card card-cull group relative flex h-full flex-col overflow-hidden rounded-[28px] p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_30px_60px_-26px_rgba(20,22,27,0.45)]"
+      className="glass glass-card card-cull group relative flex h-full flex-col overflow-hidden rounded-panel p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-elev-3"
       ref={articleRef}
     >
       {openOverlay}
@@ -241,7 +241,7 @@ export default function FarmCard({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <FavoriteButton className="relative" farm={farm} />
-          <span className="pointer-events-none grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
+          <span className="pointer-events-none grid h-9 w-9 shrink-0 place-items-center rounded-chip bg-tone text-ink/70 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-ink group-hover:text-cloud">
             <ArrowUpRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </span>
         </div>

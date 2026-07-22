@@ -30,7 +30,7 @@ interface AuthModalProps {
 }
 
 const fieldClassName =
-  "mt-2 w-full rounded-2xl border border-transparent bg-tone px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:font-normal placeholder:text-ink/70 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10";
+  "mt-2 w-full rounded-field border border-transparent bg-tone px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:font-normal placeholder:text-ink/70 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10";
 const labelClassName =
   "text-xs font-bold uppercase tracking-[0.08em] text-ink/60";
 
@@ -228,7 +228,7 @@ export default function AuthModal({
       <div
         aria-labelledby="auth-heading"
         aria-modal="true"
-        className="glass glass-card qs-sheet max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-[32px] shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)]"
+        className="glass glass-card qs-sheet max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-panel shadow-elev-3"
         role="dialog"
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
@@ -260,7 +260,7 @@ export default function AuthModal({
           </div>
           <button
             aria-label={t("auth_close")}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:opacity-50"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-chip bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:opacity-50"
             disabled={pending}
             onClick={onClose}
             type="button"
@@ -276,7 +276,7 @@ export default function AuthModal({
               {t("auth_check_email_body")}
             </p>
             <button
-              className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+              className="mt-7 inline-flex w-full items-center justify-center rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
               onClick={onClose}
               type="button"
             >
@@ -286,13 +286,13 @@ export default function AuthModal({
         ) : forgotSent ? (
           <div className="px-6 pb-8 pt-6 sm:px-8">
             <p
-              className="rounded-2xl bg-amber-500/10 px-4 py-3.5 text-sm font-medium leading-6 text-amber-700 dark:text-amber-400"
+              className="rounded-field bg-amber-500/10 px-4 py-3.5 text-sm font-medium leading-6 text-amber-700 dark:text-amber-400"
               role="status"
             >
               {t("auth_forgot_wip")}
             </p>
             <button
-              className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
               onClick={() => {
                 setForgot(false);
                 setForgotSent(false);
@@ -309,7 +309,7 @@ export default function AuthModal({
             onSubmit={handleSubmit}
           >
             {noticeKey ? (
-              <p className="mb-5 rounded-2xl bg-pine/10 px-4 py-3 text-sm font-medium text-pine">
+              <p className="mb-5 rounded-field bg-pine/10 px-4 py-3 text-sm font-medium text-pine">
                 {t(noticeKey)}
               </p>
             ) : null}
@@ -477,7 +477,7 @@ export default function AuthModal({
 
             {formError ? (
               <p
-                className="mt-5 rounded-2xl bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-600"
+                className="mt-5 rounded-field bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-600"
                 role="alert"
               >
                 {formError}
@@ -485,7 +485,7 @@ export default function AuthModal({
             ) : null}
 
             <button
-              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-chip bg-ink px-6 py-4 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={pending}
               type="submit"
             >

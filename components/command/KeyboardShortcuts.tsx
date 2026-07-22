@@ -13,7 +13,7 @@ const CHORD_WINDOW_MS = 1200;
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="inline-grid min-h-6 min-w-6 place-items-center rounded-md border border-line bg-paper px-1.5 text-[11px] font-bold text-ink/60">
+    <kbd className="inline-grid min-h-6 min-w-6 place-items-center rounded-field border border-line bg-paper px-1.5 text-[11px] font-bold text-ink/60">
       {children}
     </kbd>
   );
@@ -91,7 +91,7 @@ export default function KeyboardShortcuts() {
   return (
     <dialog
       aria-labelledby="shortcuts-title"
-      className="glass m-auto w-[min(30rem,calc(100vw-2rem))] rounded-3xl p-0 text-ink backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+      className="glass m-auto w-[min(30rem,calc(100vw-2rem))] rounded-card p-0 text-ink backdrop:bg-black/40 backdrop:backdrop-blur-sm"
       onClick={(event) => {
         if (event.target === dialogRef.current) close();
       }}

@@ -103,8 +103,8 @@ describe("FarmCard", () => {
   it("the compact list variant is a dense row with the heart in flow", () => {
     const { container } = renderCard({ variant: "list", onOpen: vi.fn() });
     const article = container.querySelector("article")!;
-    // Compact radius, not the extended grid card's rounded-[26px].
-    expect(article.className).toContain("rounded-2xl");
+    // Compact radius, not the extended grid card's rounded-card.
+    expect(article.className).toContain("rounded-field");
     const heart = within(article).getByRole("button", { name: /save/i });
     expect(heart.className).not.toContain("absolute");
   });

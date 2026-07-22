@@ -22,9 +22,9 @@ import { readCachedFarms, writeCachedFarms } from "@/lib/offline-farms";
 import type { Farm } from "@/types/farm";
 
 const chipClassName = (active: boolean) =>
-  `inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
+  `inline-flex shrink-0 items-center gap-1.5 rounded-chip border px-3.5 py-1.5 text-[13px] font-semibold transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
     active
-      ? "border-ink bg-ink text-cloud shadow-[0_8px_20px_-8px_rgba(20,22,27,0.5)]"
+      ? "border-ink bg-ink text-cloud shadow-elev-2"
       : "border-line bg-cloud text-ink/60 hover:border-ink/25 hover:text-ink"
   }`;
 
@@ -104,7 +104,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
       </Link>
 
       <header className="mt-6 flex items-center gap-3">
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-pine/10 text-pine">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-field bg-pine/10 text-pine">
           <Heart className="h-6 w-6 fill-current" />
         </span>
         <div className="min-w-0">
@@ -117,7 +117,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
         </div>
         {shownFarms.length > 0 ? (
           <button
-            className="ml-auto inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-line bg-cloud px-4 py-2 text-sm font-semibold text-ink/70 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="ml-auto inline-flex shrink-0 items-center gap-2 self-start rounded-chip border border-line bg-cloud px-4 py-2 text-sm font-semibold text-ink/70 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={exportCsv}
             type="button"
           >
@@ -175,14 +175,14 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           >
             <input
               autoFocus
-              className="w-44 rounded-full border border-line bg-paper px-3.5 py-1.5 text-[13px] text-ink outline-none placeholder:text-ink/60 focus:border-pine/50"
+              className="w-44 rounded-chip border border-line bg-paper px-3.5 py-1.5 text-[13px] text-ink outline-none placeholder:text-ink/60 focus:border-pine/50"
               onChange={(event) => setNewName(event.target.value)}
               placeholder={t("collection_name_placeholder")}
               value={newName}
             />
             <button
               aria-label={t("collection_create")}
-              className="grid h-8 w-8 place-items-center rounded-full bg-ink text-cloud disabled:opacity-40"
+              className="grid h-8 w-8 place-items-center rounded-chip bg-ink text-cloud disabled:opacity-40"
               disabled={newName.trim().length === 0}
               type="submit"
             >
@@ -190,7 +190,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
             </button>
             <button
               aria-label={t("collection_cancel")}
-              className="grid h-8 w-8 place-items-center rounded-full bg-tone text-ink/70 hover:text-ink"
+              className="grid h-8 w-8 place-items-center rounded-chip bg-tone text-ink/70 hover:text-ink"
               onClick={() => {
                 setIsCreating(false);
                 setNewName("");
@@ -202,7 +202,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           </form>
         ) : (
           <button
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-line bg-cloud px-3.5 py-1.5 text-[13px] font-semibold text-ink/60 transition hover:border-ink/30 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-chip border border-dashed border-line bg-cloud px-3.5 py-1.5 text-[13px] font-semibold text-ink/60 transition hover:border-ink/30 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={() => setIsCreating(true)}
             type="button"
           >
@@ -226,13 +226,13 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
             >
               <input
                 autoFocus
-                className="w-44 rounded-full border border-line bg-paper px-3.5 py-1.5 text-[13px] text-ink outline-none focus:border-pine/50"
+                className="w-44 rounded-chip border border-line bg-paper px-3.5 py-1.5 text-[13px] text-ink outline-none focus:border-pine/50"
                 onChange={(event) => setRenameValue(event.target.value)}
                 value={renameValue}
               />
               <button
                 aria-label={t("collection_rename")}
-                className="grid h-8 w-8 place-items-center rounded-full bg-ink text-cloud disabled:opacity-40"
+                className="grid h-8 w-8 place-items-center rounded-chip bg-ink text-cloud disabled:opacity-40"
                 disabled={renameValue.trim().length === 0}
                 type="submit"
               >
@@ -240,7 +240,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
               </button>
               <button
                 aria-label={t("collection_cancel")}
-                className="grid h-8 w-8 place-items-center rounded-full bg-tone text-ink/70 hover:text-ink"
+                className="grid h-8 w-8 place-items-center rounded-chip bg-tone text-ink/70 hover:text-ink"
                 onClick={() => setRenameValue(null)}
                 type="button"
               >
@@ -250,7 +250,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           ) : (
             <>
               <button
-                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-[13px] font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+                className="inline-flex items-center gap-1.5 rounded-chip border border-line bg-cloud px-3.5 py-1.5 text-[13px] font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
                 onClick={() => setRenameValue(activeCollection.name)}
                 type="button"
               >
@@ -258,7 +258,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
                 {t("collection_rename")}
               </button>
               <button
-                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-[13px] font-semibold text-rose-600/80 transition hover:border-rose-300 hover:text-rose-600 focus-visible:ring-2 focus-visible:ring-rose-300"
+                className="inline-flex items-center gap-1.5 rounded-chip border border-line bg-cloud px-3.5 py-1.5 text-[13px] font-semibold text-rose-600/80 transition hover:border-rose-300 hover:text-rose-600 focus-visible:ring-2 focus-visible:ring-rose-300"
                 onClick={() => {
                   deleteCollection(activeCollection.id);
                   setActiveTab("all");
@@ -288,12 +288,12 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
           ))}
         </div>
       ) : activeCollection ? (
-        <p className="mt-10 rounded-[28px] border border-dashed border-line bg-tone/40 px-6 py-16 text-center text-[15px] leading-7 text-ink/70">
+        <p className="mt-10 rounded-panel border border-dashed border-line bg-tone/40 px-6 py-16 text-center text-[15px] leading-7 text-ink/70">
           {t("collection_empty")}
         </p>
       ) : (
-        <section className="mt-10 rounded-[32px] border border-dashed border-line bg-tone/40 px-6 py-16 text-center">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-pine/10 text-pine">
+        <section className="mt-10 rounded-panel border border-dashed border-line bg-tone/40 px-6 py-16 text-center">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-field bg-pine/10 text-pine">
             <Heart className="h-7 w-7" />
           </div>
           <h2 className="mt-6 text-3xl font-bold tracking-[-0.035em] text-ink">
@@ -303,7 +303,7 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
             {t("saved_empty_body")}
           </p>
           <Link
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+            className="mt-8 inline-flex items-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
             href="/"
           >
             {t("saved_browse")}

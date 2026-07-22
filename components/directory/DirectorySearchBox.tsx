@@ -161,7 +161,7 @@ export default function DirectorySearchBox({
         {value ? (
           <button
             aria-label={t("toolbar_clearSearch")}
-            className="absolute right-2.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-ink/50 transition hover:bg-ink/[0.06] hover:text-ink"
+            className="absolute right-2.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-chip text-ink/50 transition hover:bg-ink/[0.06] hover:text-ink"
             onClick={() => {
               onChange("");
               setOpen(true);
@@ -173,7 +173,7 @@ export default function DirectorySearchBox({
         ) : (
           <kbd
             aria-hidden
-            className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-line bg-tone px-1.5 py-0.5 text-[11px] font-semibold text-ink/70 sm:block"
+            className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-field border border-line bg-tone px-1.5 py-0.5 text-[11px] font-semibold text-ink/70 sm:block"
           >
             /
           </kbd>
@@ -182,7 +182,7 @@ export default function DirectorySearchBox({
 
       {hasDropdown ? (
         <div
-          className="glass glass-chrome absolute left-0 right-0 top-[calc(100%+0.5rem)] z-40 overflow-hidden rounded-2xl p-1.5"
+          className="glass glass-chrome absolute left-0 right-0 top-[calc(100%+0.5rem)] z-40 overflow-hidden rounded-field p-1.5"
           id={listId}
           role="listbox"
         >
@@ -192,7 +192,7 @@ export default function DirectorySearchBox({
               return (
                 <button
                   aria-selected={active === index}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                  className={`flex w-full items-center gap-3 rounded-field px-3 py-2.5 text-left transition ${
                     active === index ? "bg-ink/[0.06]" : "hover:bg-ink/[0.04]"
                   }`}
                   id={`${listId}-opt-${index}`}
@@ -229,7 +229,7 @@ export default function DirectorySearchBox({
               {recent.map((term, index) => (
                 <button
                   aria-selected={active === index}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                  className={`flex w-full items-center gap-3 rounded-field px-3 py-2.5 text-left transition ${
                     active === index ? "bg-ink/[0.06]" : "hover:bg-ink/[0.04]"
                   }`}
                   id={`${listId}-opt-${index}`}

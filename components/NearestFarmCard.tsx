@@ -93,14 +93,14 @@ export default function NearestFarmCard({
   };
 
   const cardClassName =
-    "flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine-surface p-5 text-white";
+    "flex min-h-[220px] flex-col justify-between rounded-card bg-pine-surface p-5 text-white";
 
   if (status === "ready" && nearest) {
     return (
       <>
-        <div className="group flex min-h-[220px] flex-col justify-between rounded-[24px] bg-pine-surface p-5 text-white">
+        <div className="group flex min-h-[220px] flex-col justify-between rounded-card bg-pine-surface p-5 text-white">
           <div className="flex items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold">
+            <span className="inline-flex items-center gap-1.5 rounded-chip bg-white/15 px-3 py-1.5 text-xs font-bold">
               <Navigation className="h-3.5 w-3.5" />
               {compactDistance(nearest.distanceKm)}
             </span>
@@ -128,7 +128,7 @@ export default function NearestFarmCard({
             </button>
             {coords ? (
               <button
-                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-white/25 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-pine"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-chip bg-white/15 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-white/25 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-pine"
                 onClick={() => setShowNearby(true)}
                 type="button"
               >
@@ -156,7 +156,7 @@ export default function NearestFarmCard({
   return (
     <div className={cardClassName}>
       <div className="flex items-center justify-between gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-white/15">
+        <span className="grid h-10 w-10 place-items-center rounded-chip bg-white/15">
           <Navigation className="h-5 w-5" />
         </span>
         <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white">
@@ -170,7 +170,7 @@ export default function NearestFarmCard({
             : t("nearest_prompt")}
         </p>
         <button
-          className="mt-3.5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#14161b] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-pine disabled:opacity-70"
+          className="mt-3.5 inline-flex items-center gap-2 rounded-chip bg-white px-4 py-2.5 text-sm font-bold text-[#14161b] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-pine disabled:opacity-70"
           disabled={status === "locating"}
           onClick={locate}
           type="button"

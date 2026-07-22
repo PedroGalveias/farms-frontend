@@ -111,7 +111,7 @@ export default function CustomCursor() {
       style={{ opacity: visible ? 1 : 0, transition: "opacity 200ms ease" }}
     >
       <div
-        className={`fixed left-0 top-0 flex items-center justify-center rounded-full font-semibold transition-[width,height,background-color,border-color,color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`fixed left-0 top-0 flex items-center justify-center rounded-chip font-semibold transition-[width,height,background-color,border-color,color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           showLabel
             ? "h-7 border-transparent bg-ink px-3 text-[11px] text-cloud"
             : interactive
@@ -124,7 +124,7 @@ export default function CustomCursor() {
         {label}
       </div>
       <div
-        className="fixed left-0 top-0 h-1.5 w-1.5 rounded-full bg-ink transition-opacity duration-200"
+        className="fixed left-0 top-0 h-1.5 w-1.5 rounded-chip bg-ink transition-opacity duration-200"
         ref={dotRef}
         style={{ opacity: interactive || showLabel ? 0 : 1 }}
       />

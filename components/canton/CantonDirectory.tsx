@@ -80,12 +80,12 @@ export default function CantonDirectory({
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {group.cantons.map((canton) => (
                 <Link
-                  className="glass glass-card glass-interactive group flex items-center justify-between gap-3 rounded-2xl px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
+                  className="glass glass-card glass-interactive group flex items-center justify-between gap-3 rounded-field px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
                   href={`/canton/${canton.code}`}
                   key={canton.code}
                 >
                   <span className="flex items-center gap-2.5">
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-pine/10 text-pine">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-chip bg-pine/10 text-pine">
                       <MapPin className="h-4 w-4" />
                     </span>
                     <span className="font-bold tracking-[-0.02em] text-ink">

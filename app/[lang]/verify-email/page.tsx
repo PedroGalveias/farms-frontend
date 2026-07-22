@@ -92,7 +92,7 @@ export default function VerifyEmailPage() {
             {t("verify_redirect", { n: countdown })}
           </p>
           <button
-            className="mt-7 inline-flex items-center justify-center rounded-full bg-ink px-7 py-4 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+            className="mt-7 inline-flex items-center justify-center rounded-chip bg-ink px-7 py-4 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
             onClick={goToLogin}
             type="button"
           >
@@ -111,7 +111,7 @@ export default function VerifyEmailPage() {
               : t("verify_error_body")}
           </p>
           <Link
-            className="mt-7 inline-flex items-center justify-center rounded-full border border-line bg-cloud px-7 py-4 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="mt-7 inline-flex items-center justify-center rounded-chip border border-line bg-cloud px-7 py-4 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             href="/"
           >
             {t("verify_error_cta")}
@@ -129,7 +129,7 @@ export default function VerifyEmailPage() {
             {t("verify_subtitle")}
           </p>
           <button
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-ink px-7 py-4 text-sm font-bold text-cloud shadow-[0_16px_40px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-8 inline-flex items-center justify-center gap-2 rounded-chip bg-ink px-7 py-4 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={status === "pending"}
             onClick={verify}
             type="button"

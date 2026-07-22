@@ -109,7 +109,7 @@ export default function BottomSheet({
       <div
         aria-labelledby={labelledBy}
         aria-modal="true"
-        className={`glass qs-sheet relative flex max-h-[85dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-[32px] transition-transform duration-300 sm:max-h-[80dvh] sm:rounded-[32px] ${className}`}
+        className={`glass qs-sheet relative flex max-h-[85dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-panel transition-transform duration-300 sm:max-h-[80dvh] sm:rounded-panel ${className}`}
         ref={sheetRef}
         role="dialog"
       >
@@ -122,7 +122,7 @@ export default function BottomSheet({
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
         >
-          <span className="h-1.5 w-10 rounded-full bg-ink/15" />
+          <span className="h-1.5 w-10 rounded-chip bg-ink/15" />
         </div>
 
         {children}

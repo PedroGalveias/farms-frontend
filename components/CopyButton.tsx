@@ -16,7 +16,7 @@ interface CopyButtonProps {
 }
 
 const defaultClassName =
-  "relative inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-cloud px-3 py-1.5 text-xs font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20";
+  "relative inline-flex shrink-0 items-center gap-1.5 rounded-chip border border-line bg-cloud px-3 py-1.5 text-xs font-semibold text-ink/60 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20";
 
 /** Copies a string to the clipboard with a brief "Copied!" confirmation. */
 export default function CopyButton({

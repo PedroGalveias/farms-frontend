@@ -325,7 +325,7 @@ export default function CommandPalette() {
   return (
     <dialog
       aria-label={t("command_open")}
-      className="glass cmdk-dialog mx-auto mb-auto mt-[12vh] w-[min(40rem,calc(100vw-2rem))] rounded-3xl p-0 text-ink backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+      className="glass cmdk-dialog mx-auto mb-auto mt-[12vh] w-[min(40rem,calc(100vw-2rem))] rounded-card p-0 text-ink backdrop:bg-black/40 backdrop:backdrop-blur-sm"
       onClick={(event) => {
         if (event.target === dialogRef.current) close();
       }}
@@ -351,7 +351,7 @@ export default function CommandPalette() {
           type="text"
           value={query}
         />
-        <kbd className="hidden shrink-0 rounded-md border border-line px-1.5 py-0.5 text-[11px] font-semibold text-ink/60 sm:block">
+        <kbd className="hidden shrink-0 rounded-field border border-line px-1.5 py-0.5 text-[11px] font-semibold text-ink/60 sm:block">
           Esc
         </kbd>
       </div>
@@ -378,7 +378,7 @@ export default function CommandPalette() {
             return (
               <button
                 aria-selected={isActive}
-                className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition ${
+                className={`flex w-full items-center gap-3 rounded-field px-3 py-2.5 text-left transition ${
                   isActive ? "bg-pine/10 text-ink" : "text-ink/80"
                 }`}
                 data-index={index}
@@ -390,7 +390,7 @@ export default function CommandPalette() {
                 type="button"
               >
                 <span
-                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl ${
+                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-field ${
                     isActive ? "bg-pine/15 text-pine" : "bg-tone text-ink/60"
                   }`}
                 >

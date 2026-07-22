@@ -45,7 +45,7 @@ export default function TripSheet({
         </div>
         <button
           aria-label={t("trip_close")}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-chip bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
           onClick={onClose}
           type="button"
         >
@@ -62,10 +62,10 @@ export default function TripSheet({
           <ol className="flex flex-col gap-1">
             {stops.map((stop, index) => (
               <li
-                className="flex items-center gap-3 rounded-2xl px-3 py-3"
+                className="flex items-center gap-3 rounded-field px-3 py-3"
                 key={stop.id}
               >
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-pine/10 text-xs font-bold text-pine">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-chip bg-pine/10 text-xs font-bold text-pine">
                   {index + 1}
                 </span>
                 <span className="min-w-0 flex-1">
@@ -79,7 +79,7 @@ export default function TripSheet({
                 </span>
                 <button
                   aria-label={t("trip_remove")}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink/70 transition hover:bg-tone hover:text-rose-600 focus-visible:ring-2 focus-visible:ring-ink/20"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-chip text-ink/70 transition hover:bg-tone hover:text-rose-600 focus-visible:ring-2 focus-visible:ring-ink/20"
                   onClick={() => onRemove(stop.id)}
                   type="button"
                 >
@@ -94,7 +94,7 @@ export default function TripSheet({
       <div className="flex flex-wrap items-center gap-2 border-t border-line px-5 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-7">
         {routeUrl ? (
           <a
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
             href={routeUrl}
             rel="noreferrer"
             target="_blank"
@@ -104,7 +104,7 @@ export default function TripSheet({
           </a>
         ) : null}
         <button
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-cloud px-5 py-3.5 text-sm font-semibold text-ink/70 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+          className="inline-flex items-center justify-center gap-2 rounded-chip border border-line bg-cloud px-5 py-3.5 text-sm font-semibold text-ink/70 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
           onClick={onClear}
           type="button"
         >

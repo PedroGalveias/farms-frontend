@@ -90,7 +90,7 @@ export default function SiteFooter() {
           <p className="flex items-center gap-2">
             <span>© {new Date().getFullYear()} farms</span>
             <span
-              className="inline-flex items-center rounded-full bg-pine-surface px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white"
+              className="inline-flex items-center rounded-chip bg-pine-surface px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white"
               title={t("beta_title")}
             >
               {t("beta_label")}

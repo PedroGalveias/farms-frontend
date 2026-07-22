@@ -57,12 +57,12 @@ export default function MotionPrompt() {
       // Bottom-RIGHT on every size, above the mobile tab bar, and it stays put
       // until the user picks (no auto-dismiss) — the earlier build vanished too
       // fast to read. z-[60] clears chrome (rail/tab bar are z-40).
-      className="glass glass-card toast-enter cursor-zone fixed bottom-[calc(10.5rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(22rem,calc(100vw-2rem))] rounded-3xl p-4 lg:bottom-24 lg:right-6"
+      className="glass glass-card toast-enter cursor-zone fixed bottom-[calc(10.5rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(22rem,calc(100vw-2rem))] rounded-card p-4 lg:bottom-24 lg:right-6"
       role="dialog"
       aria-live="polite"
     >
       <div className="flex items-start gap-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-pine/10 text-pine">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-field bg-pine/10 text-pine">
           <Sparkles className="h-4 w-4" />
         </span>
         <div>
@@ -76,7 +76,7 @@ export default function MotionPrompt() {
       </div>
       <div className="mt-3 flex gap-2">
         <button
-          className="flex-1 rounded-full bg-ink px-4 py-2.5 text-xs font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98]"
+          className="flex-1 rounded-chip bg-ink px-4 py-2.5 text-xs font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98]"
           onClick={() => {
             setMotionForced(true);
             dismiss();
@@ -86,7 +86,7 @@ export default function MotionPrompt() {
           {t("motion_prompt_enable")}
         </button>
         <button
-          className="rounded-full border border-line bg-cloud px-4 py-2.5 text-xs font-semibold text-ink/70 transition hover:text-ink"
+          className="rounded-chip border border-line bg-cloud px-4 py-2.5 text-xs font-semibold text-ink/70 transition hover:text-ink"
           onClick={dismiss}
           type="button"
         >

@@ -124,13 +124,13 @@ export default function TripProvider({
       {/* Floating planner pill — only once at least one farm is planned. */}
       {stops.length > 0 ? (
         <button
-          className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-2 rounded-full bg-ink px-4 py-3 text-sm font-bold text-cloud shadow-[0_16px_40px_-12px_rgba(20,22,27,0.6)] transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 lg:bottom-6 lg:right-6"
+          className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-2 rounded-chip bg-ink px-4 py-3 text-sm font-bold text-cloud shadow-elev-3 transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 lg:bottom-6 lg:right-6"
           onClick={() => setOpen(true)}
           type="button"
         >
           <Route className="h-4 w-4" />
           {t("trip_open")}
-          <span className="grid h-5 min-w-5 place-items-center rounded-full bg-cloud px-1 text-[11px] font-bold text-ink">
+          <span className="grid h-5 min-w-5 place-items-center rounded-chip bg-cloud px-1 text-[11px] font-bold text-ink">
             {stops.length}
           </span>
         </button>
