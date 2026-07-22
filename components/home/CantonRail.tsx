@@ -72,7 +72,7 @@ export default function CantonRail({
       </div>
 
       <div
-        className="mt-2.5 flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mt-2.5 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         ref={railRef}
       >
         {cantons.map(([code, count]) => {
