@@ -66,14 +66,14 @@ export default function LocationStep({
       </div>
 
       {sharedCoordinates ? (
-        <div className="flex items-center justify-between gap-3 rounded-2xl border border-pine/20 bg-pine/[0.07] px-4 py-3.5">
+        <div className="flex items-center justify-between gap-3 rounded-field border border-pine/20 bg-pine/[0.07] px-4 py-3.5">
           <span className="flex items-center gap-2.5 text-sm font-bold text-pine">
             <Navigation className="h-4 w-4" />
             {t("qs_loc_using")}
           </span>
           <button
             aria-label={t("qs_loc_stop")}
-            className="rounded-full p-1.5 text-ink/60 transition hover:bg-ink/5 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="rounded-chip p-1.5 text-ink/60 transition hover:bg-ink/5 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={onClearGeolocation}
             type="button"
           >
@@ -82,7 +82,7 @@ export default function LocationStep({
         </div>
       ) : (
         <button
-          className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-pine/25 bg-pine/[0.07] px-5 py-3.5 text-sm font-bold text-pine transition duration-200 hover:bg-pine/[0.12] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-pine/30 disabled:cursor-wait disabled:opacity-70"
+          className="flex w-full items-center justify-center gap-2.5 rounded-field border border-pine/25 bg-pine/[0.07] px-5 py-3.5 text-sm font-bold text-pine transition duration-200 hover:bg-pine/[0.12] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-pine/30 disabled:cursor-wait disabled:opacity-70"
           disabled={geoState === "locating"}
           onClick={onRequestGeolocation}
           type="button"
@@ -100,7 +100,7 @@ export default function LocationStep({
 
       {geoState === "error" && geoMessage ? (
         <div
-          className="rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
+          className="rounded-field border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
           role="status"
         >
           {geoMessage}
@@ -121,7 +121,7 @@ export default function LocationStep({
           <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/30" />
           <input
             autoComplete="off"
-            className="w-full rounded-2xl border border-transparent bg-tone py-3.5 pl-12 pr-4 text-base font-medium text-ink placeholder:font-normal placeholder:text-ink/70 transition duration-300 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10"
+            className="w-full rounded-field border border-transparent bg-tone py-3.5 pl-12 pr-4 text-base font-medium text-ink placeholder:font-normal placeholder:text-ink/70 transition duration-300 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10"
             id={inputId}
             onChange={(event) => onLocationInputChange(event.target.value)}
             onKeyDown={handleInputKeyDown}
@@ -132,7 +132,7 @@ export default function LocationStep({
         </div>
 
         {typedCoordinates && !sharedCoordinates ? (
-          <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-pine/10 px-3 py-1.5 text-xs font-semibold text-pine">
+          <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-chip bg-pine/10 px-3 py-1.5 text-xs font-semibold text-pine">
             <Crosshair className="h-3.5 w-3.5" />
             {t("qs_loc_coords_detected")}
           </p>
@@ -152,9 +152,9 @@ export default function LocationStep({
               return (
                 <button
                   aria-pressed={isActive}
-                  className={`rounded-full border px-3.5 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                  className={`rounded-chip border px-3.5 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                     isActive
-                      ? "border-ink bg-ink text-cloud shadow-[0_8px_20px_-8px_rgba(20,22,27,0.5)]"
+                      ? "border-ink bg-ink text-cloud shadow-elev-2"
                       : "border-line bg-cloud text-ink/70 hover:border-ink/30 hover:text-ink"
                   }`}
                   key={code}

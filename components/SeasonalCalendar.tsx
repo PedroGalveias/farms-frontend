@@ -58,7 +58,7 @@ export default function SeasonalCalendar() {
 
           return (
             <section
-              className={`glass glass-card flex flex-col rounded-[24px] p-5 transition-colors ${
+              className={`glass glass-card flex flex-col rounded-card p-5 transition-colors ${
                 isCurrent ? "ring-1 ring-inset ring-pine/30" : ""
               }`}
               key={month}
@@ -68,7 +68,7 @@ export default function SeasonalCalendar() {
                   {monthName(month)}
                 </h2>
                 {isCurrent ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-pine-surface px-2.5 py-1 text-[11px] font-bold text-white">
+                  <span className="inline-flex items-center gap-1 rounded-chip bg-pine-surface px-2.5 py-1 text-[11px] font-bold text-white">
                     <Sprout className="h-3 w-3" />
                     {t("season_label")}
                   </span>
@@ -86,7 +86,7 @@ export default function SeasonalCalendar() {
                           : `${t("reminder_add")}: ${produceLabel(key, locale)}`
                       }
                       aria-pressed={reminded}
-                      className={`group/chip inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                      className={`group/chip inline-flex items-center gap-1.5 rounded-chip px-3 py-1.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
                         reminded
                           ? "bg-pine/10 text-pine"
                           : "glass-chip text-ink/70 hover:bg-ink/[0.06]"

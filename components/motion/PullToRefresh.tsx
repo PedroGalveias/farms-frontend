@@ -108,7 +108,7 @@ export default function PullToRefresh({
             : "transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s",
         }}
       >
-        <span className="glass grid h-10 w-10 place-items-center rounded-full text-ink/70">
+        <span className="glass grid h-10 w-10 place-items-center rounded-chip text-ink/70">
           <RefreshCw
             className={`h-4 w-4 transition-transform ${
               isRefreshing ? "animate-spin" : ""

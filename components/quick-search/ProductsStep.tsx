@@ -121,7 +121,7 @@ export default function ProductsStep({
       <div className="relative">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
         <input
-          className="w-full rounded-2xl border border-line bg-cloud py-2.5 pl-10 pr-9 text-base text-ink placeholder:text-ink/40 focus:border-pine/50 focus:outline-none focus:ring-2 focus:ring-pine/15 sm:text-sm"
+          className="w-full rounded-field border border-line bg-cloud py-2.5 pl-10 pr-9 text-base text-ink placeholder:text-ink/40 focus:border-pine/50 focus:outline-none focus:ring-2 focus:ring-pine/15 sm:text-sm"
           onChange={(event) => setFilter(event.target.value)}
           placeholder={t("qs_filter_placeholder")}
           type="search"
@@ -130,7 +130,7 @@ export default function ProductsStep({
         {isFiltering ? (
           <button
             aria-label={t("qs_filter_clear")}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-ink/50 transition hover:bg-tone hover:text-ink"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-chip p-1.5 text-ink/50 transition hover:bg-tone hover:text-ink"
             onClick={() => setFilter("")}
             type="button"
           >
@@ -150,7 +150,7 @@ export default function ProductsStep({
               return (
                 <button
                   aria-pressed={isSelected}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                  className={`inline-flex items-center gap-1.5 rounded-chip border px-3 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                     isSelected
                       ? "border-pine bg-pine/10 text-pine"
                       : "border-line bg-cloud text-ink/65 hover:border-ink/25 hover:text-ink"
@@ -171,15 +171,15 @@ export default function ProductsStep({
       <div className="flex flex-wrap items-center gap-3">
         <div
           aria-label="How selected products should match"
-          className="inline-flex rounded-full bg-tone p-1"
+          className="inline-flex rounded-chip bg-tone p-1"
           role="group"
         >
           {(["all", "any"] as const).map((mode) => (
             <button
               aria-pressed={matchMode === mode}
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
+              className={`rounded-chip px-4 py-1.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
                 matchMode === mode
-                  ? "bg-white text-ink shadow-[0_1px_3px_rgba(22,26,21,0.12)]"
+                  ? "bg-white text-ink shadow-elev-1"
                   : "text-ink/60 hover:text-ink/70"
               }`}
               key={mode}
@@ -220,13 +220,13 @@ export default function ProductsStep({
 
           return (
             <div
-              className="glass glass-card overflow-hidden rounded-2xl"
+              className="glass glass-card overflow-hidden rounded-field"
               key={group}
             >
               <div className="flex items-stretch gap-1 p-1">
                 <button
                   aria-pressed={isSelected}
-                  className={`flex flex-1 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                  className={`flex flex-1 items-center gap-2 rounded-field px-3 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                     isSelected
                       ? "bg-ink text-cloud"
                       : `text-ink/75 hover:bg-tone ${
@@ -244,7 +244,7 @@ export default function ProductsStep({
                   {categoryLabel(group, locale)}
                   {product.farmCount > 0 ? (
                     <span
-                      className={`rounded-full px-1.5 py-0.5 text-[0.65rem] font-bold leading-none ${
+                      className={`rounded-chip px-1.5 py-0.5 text-[0.65rem] font-bold leading-none ${
                         isSelected
                           ? "bg-cloud/20 text-cloud"
                           : "bg-tone text-ink/60"
@@ -254,7 +254,7 @@ export default function ProductsStep({
                     </span>
                   ) : null}
                   {!isSelected && selectedSubCount > 0 ? (
-                    <span className="rounded-full bg-pine/10 px-1.5 py-0.5 text-[0.65rem] font-bold leading-none text-pine">
+                    <span className="rounded-chip bg-pine/10 px-1.5 py-0.5 text-[0.65rem] font-bold leading-none text-pine">
                       {selectedSubCount}
                     </span>
                   ) : null}
@@ -264,7 +264,7 @@ export default function ProductsStep({
                   <button
                     aria-expanded={isOpen}
                     aria-label={t("qs_show_products")}
-                    className="grid w-10 shrink-0 place-items-center rounded-xl text-ink/60 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+                    className="grid w-10 shrink-0 place-items-center rounded-field text-ink/60 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
                     onClick={() => toggleExpanded(group)}
                     type="button"
                   >
@@ -284,7 +284,7 @@ export default function ProductsStep({
                     return (
                       <button
                         aria-pressed={isProductSelected}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                        className={`inline-flex items-center gap-1.5 rounded-chip border px-3 py-1.5 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                           isProductSelected
                             ? "border-pine bg-pine/10 text-pine"
                             : "border-line bg-cloud text-ink/65 hover:border-ink/25 hover:text-ink"
@@ -308,13 +308,13 @@ export default function ProductsStep({
       </div>
 
       {isFiltering && filtered.visible.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-line bg-tone/40 px-4 py-6 text-center text-sm leading-6 text-ink/60">
+        <p className="rounded-field border border-dashed border-line bg-tone/40 px-4 py-6 text-center text-sm leading-6 text-ink/60">
           {t("qs_filter_no_matches", { query: filter.trim() })}
         </p>
       ) : null}
 
       {matchCount === 0 && selectedCount > 0 ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-field border border-amber-300/60 bg-amber-50 px-4 py-3">
           <p className="text-sm leading-6 text-amber-900">
             {matchMode === "all" && selectedCount > 1
               ? t("qs_none_all")
@@ -322,7 +322,7 @@ export default function ProductsStep({
           </p>
           {matchMode === "all" && selectedCount > 1 ? (
             <button
-              className="rounded-full bg-amber-200/70 px-3.5 py-1.5 text-xs font-bold text-amber-900 transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="rounded-chip bg-amber-200/70 px-3.5 py-1.5 text-xs font-bold text-amber-900 transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400"
               onClick={() => onMatchModeChange("any")}
               type="button"
             >
@@ -334,7 +334,7 @@ export default function ProductsStep({
 
       {selectedCount > 0 ? (
         <button
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-ink/60 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+          className="inline-flex items-center gap-1.5 rounded-chip px-3 py-1.5 text-xs font-semibold text-ink/60 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
           onClick={onClearSelection}
           type="button"
         >

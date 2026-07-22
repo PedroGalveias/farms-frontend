@@ -117,7 +117,7 @@ export default function AccountMenu({
       {open && typeof document !== "undefined"
         ? createPortal(
             <div
-              className="glass glass-chrome z-[70] min-w-[190px] max-w-[calc(100vw-1.5rem)] rounded-2xl p-1.5"
+              className="glass glass-chrome z-[70] min-w-[190px] max-w-[calc(100vw-1.5rem)] rounded-field p-1.5"
               ref={menuRef}
               role="menu"
               style={style}
@@ -131,7 +131,7 @@ export default function AccountMenu({
                 </p>
               </div>
               <Link
-                className="mt-1 flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-ink/70 transition-colors hover:bg-tone hover:text-ink"
+                className="mt-1 flex w-full items-center gap-2.5 rounded-field px-3 py-2 text-sm font-semibold text-ink/70 transition-colors hover:bg-tone hover:text-ink"
                 href="/profile"
                 onClick={() => setOpen(false)}
                 role="menuitem"
@@ -140,7 +140,7 @@ export default function AccountMenu({
                 {t("account_profile")}
               </Link>
               <button
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-ink/70 transition-colors hover:bg-tone hover:text-ink"
+                className="flex w-full items-center gap-2.5 rounded-field px-3 py-2 text-sm font-semibold text-ink/70 transition-colors hover:bg-tone hover:text-ink"
                 onClick={() => {
                   setOpen(false);
                   void logout();

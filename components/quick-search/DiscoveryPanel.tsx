@@ -300,7 +300,7 @@ export default function DiscoveryPanel({
       {/* Name labels for the top nearest matches (HTML keeps text crisp). */}
       {labelled.map(({ farm, x, y }) => (
         <div
-          className="chip-pop absolute -translate-x-1/2 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm"
+          className="chip-pop absolute -translate-x-1/2 rounded-chip border border-white/25 bg-white/15 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm"
           key={farm.id}
           style={{
             left: `${(MAP_INSET.left + x * (1 - MAP_INSET.left - MAP_INSET.right)) * 100}%`,
@@ -320,12 +320,12 @@ export default function DiscoveryPanel({
           return (
             <div className="relative" key={node.id}>
               {isCurrent ? (
-                <span className="pulse-dot absolute -inset-1.5 rounded-full bg-white/20" />
+                <span className="pulse-dot absolute -inset-1.5 rounded-chip bg-white/20" />
               ) : null}
               <div
-                className={`relative flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-500 ${
+                className={`relative flex items-center gap-1.5 rounded-chip border px-3 py-1.5 text-xs font-bold transition-all duration-500 ${
                   reached
-                    ? "border-transparent bg-white text-pine shadow-[0_10px_24px_-8px_rgba(0,0,0,0.45)]"
+                    ? "border-transparent bg-white text-pine shadow-elev-2"
                     : "border-white/25 bg-white/10 text-white/55"
                 }`}
               >

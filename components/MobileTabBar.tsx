@@ -10,7 +10,7 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
 function tabTextClassName(isActive: boolean) {
-  return `relative z-10 flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
+  return `relative z-10 flex flex-1 items-center justify-center gap-2 rounded-chip px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
     isActive ? "text-cloud" : "text-ink/60 hover:text-ink"
   }`;
 }
@@ -53,13 +53,13 @@ export default function MobileTabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="glass glass-chrome mobile-tab-bar fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[min(92%,360px)] items-center gap-1.5 rounded-full p-1.5 [view-transition-name:tab-bar] lg:hidden"
+      className="glass glass-chrome mobile-tab-bar fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[min(92%,360px)] items-center gap-1.5 rounded-chip p-1.5 [view-transition-name:tab-bar] lg:hidden"
       ref={navRef}
     >
       {/* The sliding active pill, positioned by useSlidingIndicator. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute left-0 top-0 z-0 rounded-full bg-ink opacity-0 shadow-[0_6px_16px_-6px_rgba(20,22,27,0.5)] transition-[transform,width,height,opacity] duration-[450ms] ease-[cubic-bezier(0.34,1.3,0.5,1)]"
+        className="pointer-events-none absolute left-0 top-0 z-0 rounded-chip bg-ink opacity-0 shadow-elev-2 transition-[transform,width,height,opacity] duration-[450ms] ease-[cubic-bezier(0.34,1.3,0.5,1)]"
         ref={indicatorRef}
       />
       <Link
@@ -85,7 +85,7 @@ export default function MobileTabBar() {
       <Link
         aria-current={active === "saved" ? "page" : undefined}
         aria-label={t("saved_title")}
-        className={`relative z-10 flex shrink-0 items-center justify-center rounded-full px-4 py-3 transition-colors duration-300 ${
+        className={`relative z-10 flex shrink-0 items-center justify-center rounded-chip px-4 py-3 transition-colors duration-300 ${
           active === "saved" ? "text-cloud" : "text-ink/60 hover:text-ink"
         }`}
         href="/saved"
@@ -94,7 +94,7 @@ export default function MobileTabBar() {
       >
         <Heart className="h-4 w-4" />
         {favoritesCount > 0 ? (
-          <span className="absolute -right-0 -top-0 grid h-4 min-w-4 place-items-center rounded-full bg-pine-surface px-1 text-[10px] font-bold text-white">
+          <span className="absolute -right-0 -top-0 grid h-4 min-w-4 place-items-center rounded-chip bg-pine-surface px-1 text-[10px] font-bold text-white">
             {favoritesCount}
           </span>
         ) : null}

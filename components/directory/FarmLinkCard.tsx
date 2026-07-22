@@ -24,7 +24,7 @@ export default function FarmLinkCard({ farm }: { farm: Farm }) {
   return (
     <Link
       aria-label={`${t("nearest_view")}: ${farm.name}`}
-      className="glass glass-card card-cull glass-interactive group flex h-full flex-col rounded-[24px] p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_28px_56px_-26px_rgba(20,22,27,0.4)] active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
+      className="glass glass-card card-cull glass-interactive group flex h-full flex-col rounded-card p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-elev-3 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
       href={`/farm/${encodeURIComponent(farm.id)}`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -46,14 +46,14 @@ export default function FarmLinkCard({ farm }: { farm: Farm }) {
         <div className="mt-3 flex flex-wrap gap-1.5">
           {visible.map((category) => (
             <span
-              className="glass-chip rounded-full px-2.5 py-1 text-xs font-semibold text-ink/70"
+              className="glass-chip rounded-chip px-2.5 py-1 text-xs font-semibold text-ink/70"
               key={category}
             >
               {tagLabel(category, locale)}
             </span>
           ))}
           {hidden > 0 ? (
-            <span className="rounded-full px-2.5 py-1 text-xs font-semibold text-ink/45">
+            <span className="rounded-chip px-2.5 py-1 text-xs font-semibold text-ink/45">
               +{hidden}
             </span>
           ) : null}

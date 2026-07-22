@@ -93,9 +93,9 @@ export default function SeasonalReminderProvider({
 
       {due.length > 0 && typeof document !== "undefined"
         ? createPortal(
-            <div className="glass glass-chrome qs-sheet fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-md rounded-3xl p-4 lg:inset-x-auto lg:right-6 lg:bottom-6 lg:left-auto lg:w-[26rem]">
+            <div className="glass glass-chrome qs-sheet fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-md rounded-card p-4 lg:inset-x-auto lg:right-6 lg:bottom-6 lg:left-auto lg:w-[26rem]">
               <div className="flex items-start gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-pine/10 text-pine">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-chip bg-pine/10 text-pine">
                   <Bell className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -118,7 +118,7 @@ export default function SeasonalReminderProvider({
                 </div>
                 <button
                   aria-label={t("reminder_dismiss")}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink/70 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-chip text-ink/70 transition hover:bg-tone hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
                   onClick={dismissDue}
                   type="button"
                 >
@@ -126,7 +126,7 @@ export default function SeasonalReminderProvider({
                 </button>
               </div>
               <Link
-                className="group mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-ink px-5 py-3 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+                className="group mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-chip bg-ink px-5 py-3 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
                 href={findHref}
                 onClick={dismissDue}
               >

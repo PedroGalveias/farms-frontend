@@ -32,7 +32,7 @@ const SNAP_THRESHOLD_PX = 44;
 // Shared shape for the secondary action buttons so they're all identical in the
 // grid (border-colour/fill are added per-button for active/inactive states).
 const SECONDARY_BTN =
-  "relative inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20";
+  "relative inline-flex w-full items-center justify-center gap-2 rounded-chip border px-4 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20";
 
 interface FarmDetailSheetProps {
   farm: Farm;
@@ -174,7 +174,7 @@ export default function FarmDetailSheet({
 
         <button
           aria-label={t("detail_close")}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-chip bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
           onClick={onClose}
           ref={closeButtonRef}
           type="button"
@@ -184,7 +184,7 @@ export default function FarmDetailSheet({
       </div>
 
       <div className="mt-6 space-y-3">
-        <div className="glass-inset rounded-2xl px-4 py-3.5">
+        <div className="glass-inset rounded-field px-4 py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-ink/60">
@@ -207,14 +207,14 @@ export default function FarmDetailSheet({
           </InfoCard>
         </div>
 
-        <div className="glass-inset rounded-2xl px-4 py-3.5">
+        <div className="glass-inset rounded-field px-4 py-3.5">
           <p className="text-xs font-semibold text-ink/60">
             {t("detail_products")}
           </p>
           <div className="mt-2.5 flex flex-wrap gap-1.5">
             {farm.categories.map((category) => (
               <span
-                className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                className={`rounded-chip px-3 py-1 text-sm font-semibold ${
                   isCategoryMatched(category)
                     ? "bg-pine/10 text-pine"
                     : "bg-tone text-ink/70"
@@ -237,7 +237,7 @@ export default function FarmDetailSheet({
               collection / full page in a wrapping secondary row. */}
       <div className="mt-6 space-y-3">
         <a
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 sm:w-auto"
           href={mapsUrl}
           rel="noreferrer"
           target="_blank"
@@ -344,7 +344,7 @@ export default function FarmDetailSheet({
       <div
         aria-labelledby={titleId}
         aria-modal="true"
-        className={`glass glass-chrome relative w-full max-w-xl overflow-y-auto rounded-t-[32px] shadow-[0_-16px_60px_rgba(20,22,27,0.3)] sm:rounded-[32px] sm:shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)] ${
+        className={`glass glass-chrome relative w-full max-w-xl overflow-y-auto rounded-t-panel shadow-[0_-16px_60px_rgba(20,22,27,0.3)] sm:rounded-panel sm:shadow-elev-3 ${
           expanded ? "max-h-[92dvh]" : "max-h-[52dvh]"
         } sm:max-h-[88dvh] ${useViewTransition ? "" : "qs-sheet"} ${
           isDragging
@@ -364,7 +364,7 @@ export default function FarmDetailSheet({
           onPointerMove={handleDragMove}
           onPointerUp={handleDragEnd}
         >
-          <span className="h-1.5 w-12 rounded-full bg-ink/15" />
+          <span className="h-1.5 w-12 rounded-chip bg-ink/15" />
         </div>
 
         {body}
@@ -375,7 +375,7 @@ export default function FarmDetailSheet({
 
 function InfoCard({ children, label }: { children: ReactNode; label: string }) {
   return (
-    <div className="glass-inset rounded-2xl px-4 py-3.5">
+    <div className="glass-inset rounded-field px-4 py-3.5">
       <p className="text-xs font-semibold text-ink/60">{label}</p>
       <p className="mt-1.5 break-words text-sm leading-6 text-ink/80">
         {children}

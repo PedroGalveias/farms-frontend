@@ -49,7 +49,7 @@ export default function BackToTop() {
     <button
       aria-hidden={!visible}
       aria-label={t("back_to_top")}
-      className={`glass glass-chrome glass-interactive cursor-zone fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-4 z-30 grid h-12 w-12 place-items-center rounded-full text-ink transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-ink/25 lg:bottom-6 lg:right-6 ${
+      className={`glass glass-chrome glass-interactive cursor-zone fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-4 z-30 grid h-12 w-12 place-items-center rounded-chip text-ink transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-ink/25 lg:bottom-6 lg:right-6 ${
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-3 opacity-0"

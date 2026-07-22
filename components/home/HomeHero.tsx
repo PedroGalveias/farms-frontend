@@ -59,7 +59,7 @@ export default function HomeHero({
           style={{ ["--rise-delay" as string]: "0ms" }}
         >
           <span
-            className="inline-flex items-center gap-2 rounded-full bg-pine-surface px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-white"
+            className="inline-flex items-center gap-2 rounded-chip bg-pine-surface px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-white"
             title={t("beta_title")}
           >
             <Sparkles className="h-3.5 w-3.5" />
@@ -67,10 +67,10 @@ export default function HomeHero({
           </span>
           {serviceStatus !== "online" ? (
             <span
-              className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ${statusMeta.badgeClassName}`}
+              className={`inline-flex items-center gap-2 rounded-chip px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ${statusMeta.badgeClassName}`}
             >
               <span
-                className={`h-1.5 w-1.5 rounded-full pulse-dot ${statusMeta.dotClassName}`}
+                className={`h-1.5 w-1.5 rounded-chip pulse-dot ${statusMeta.dotClassName}`}
               />
               {t(statusMeta.labelKey)}
             </span>
@@ -100,7 +100,7 @@ export default function HomeHero({
         >
           <Magnetic>
             <Link
-              className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-4 text-sm font-bold text-cloud shadow-[0_16px_40px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:shadow-[0_20px_50px_-12px_rgba(20,22,27,0.7)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+              className="group inline-flex items-center gap-2 rounded-chip bg-ink px-7 py-4 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:shadow-elev-3 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
               href="/quick-search"
             >
               {t("cta_startQuickSearch")}
@@ -109,7 +109,7 @@ export default function HomeHero({
           </Magnetic>
 
           <button
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-6 py-4 text-sm font-semibold text-ink/70 transition-all duration-300 hover:border-ink/25 hover:text-ink active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="inline-flex items-center gap-2 rounded-chip border border-line bg-cloud px-6 py-4 text-sm font-semibold text-ink/70 transition-all duration-300 hover:border-ink/25 hover:text-ink active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={onAddFarm}
             type="button"
           >

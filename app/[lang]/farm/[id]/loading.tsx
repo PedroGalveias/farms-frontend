@@ -4,29 +4,29 @@
 export default function FarmLoading() {
   return (
     <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
-      <div className="skeleton h-4 w-32 rounded-full" />
+      <div className="skeleton h-4 w-32 rounded-chip" />
 
       <div className="mt-6 space-y-3">
-        <div className="skeleton h-3 w-24 rounded-full" />
-        <div className="skeleton h-12 w-3/4 rounded-2xl" />
-        <div className="skeleton h-4 w-2/3 rounded-full" />
+        <div className="skeleton h-3 w-24 rounded-chip" />
+        <div className="skeleton h-12 w-3/4 rounded-field" />
+        <div className="skeleton h-4 w-2/3 rounded-chip" />
       </div>
 
       <div className="mt-7 flex gap-3">
-        <div className="skeleton h-12 w-44 rounded-full" />
-        <div className="skeleton h-12 w-28 rounded-full" />
+        <div className="skeleton h-12 w-44 rounded-chip" />
+        <div className="skeleton h-12 w-28 rounded-chip" />
       </div>
 
       <div className="mt-7 space-y-3">
-        <div className="skeleton h-16 rounded-2xl" />
+        <div className="skeleton h-16 rounded-field" />
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="skeleton h-16 rounded-2xl" />
-          <div className="skeleton h-16 rounded-2xl" />
+          <div className="skeleton h-16 rounded-field" />
+          <div className="skeleton h-16 rounded-field" />
         </div>
-        <div className="skeleton h-24 rounded-2xl" />
+        <div className="skeleton h-24 rounded-field" />
       </div>
 
-      <div className="skeleton mt-7 h-[360px] rounded-[24px]" />
+      <div className="skeleton mt-7 h-[360px] rounded-card" />
     </main>
   );
 }

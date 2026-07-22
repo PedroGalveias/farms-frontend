@@ -80,7 +80,7 @@ export default function CantonRail({
           return (
             <button
               aria-pressed={isActive}
-              className={`glass-chip snap-start inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 ${
+              className={`glass-chip snap-start inline-flex shrink-0 items-center gap-1.5 rounded-chip px-4 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 ${
                 isActive
                   ? "!border-pine-surface !bg-pine-surface text-white shadow-[0_10px_24px_-10px_rgba(28,124,71,0.55)]"
                   : "text-ink/75 hover:text-ink"

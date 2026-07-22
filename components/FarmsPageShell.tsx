@@ -212,7 +212,7 @@ export default function FarmsPageShell({
 
           {loadError ? (
             <section
-              className="mt-6 rounded-3xl border border-amber-300/60 bg-amber-50 p-5"
+              className="mt-6 rounded-card border border-amber-300/60 bg-amber-50 p-5"
               role="status"
             >
               <div className="flex items-start gap-3">

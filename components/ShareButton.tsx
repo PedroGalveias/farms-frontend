@@ -14,7 +14,7 @@ interface ShareButtonProps {
 }
 
 const defaultClassName =
-  "inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20";
+  "inline-flex items-center gap-2 rounded-chip border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20";
 
 /**
  * Shares a link via the native Web Share sheet where available (mostly mobile),

@@ -184,11 +184,11 @@ export default function PwaRegister() {
       // Bottom-RIGHT, above the mobile tab bar; persists until the user
       // installs / updates / dismisses (the update banner must stay until
       // acted on). z-[60] clears the rail/tab bar (z-40).
-      className="glass glass-chrome toast-enter fixed bottom-[calc(10.5rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(24rem,calc(100vw-2rem))] rounded-3xl p-3 lg:bottom-24 lg:right-6"
+      className="glass glass-chrome toast-enter fixed bottom-[calc(10.5rem+env(safe-area-inset-bottom))] right-4 z-[60] w-[min(24rem,calc(100vw-2rem))] rounded-card p-3 lg:bottom-24 lg:right-6"
     >
       {waitingWorker ? (
         <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-pine/10 text-pine">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-field bg-pine/10 text-pine">
             <RefreshCw className="h-4 w-4" />
           </span>
           <div className="min-w-0 flex-1">
@@ -200,7 +200,7 @@ export default function PwaRegister() {
             </p>
           </div>
           <button
-            className="rounded-full bg-ink px-3.5 py-2 text-xs font-bold text-cloud"
+            className="rounded-chip bg-ink px-3.5 py-2 text-xs font-bold text-cloud"
             onClick={update}
             type="button"
           >
@@ -209,7 +209,7 @@ export default function PwaRegister() {
         </div>
       ) : (
         <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-pine/10 text-pine">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-field bg-pine/10 text-pine">
             <Download className="h-4 w-4" />
           </span>
           <div className="min-w-0 flex-1">
@@ -222,7 +222,7 @@ export default function PwaRegister() {
           </div>
           {installPrompt ? (
             <button
-              className="rounded-full bg-ink px-3.5 py-2 text-xs font-bold text-cloud"
+              className="rounded-chip bg-ink px-3.5 py-2 text-xs font-bold text-cloud"
               onClick={install}
               type="button"
             >
@@ -231,7 +231,7 @@ export default function PwaRegister() {
           ) : null}
           <button
             aria-label={t("pwa_dismiss")}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-tone text-ink/60"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-chip bg-tone text-ink/60"
             onClick={dismissInstall}
             type="button"
           >

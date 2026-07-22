@@ -84,6 +84,23 @@
      how the dark theme's chips read. */
   --glass-inset-fill: rgba(20, 22, 27, 0.045);
   --glass-inset-border: rgba(20, 22, 27, 0.12);
+
+  /* ── Elevation (light) ── one virtual light, top-down. elev-1 resting card,
+     elev-2 raised/hover, elev-3 floating chrome & modals. */
+  --elev-1:
+    0 1px 2px -1px rgba(20, 22, 27, 0.1), 0 2px 8px -3px rgba(20, 22, 27, 0.12);
+  --elev-2:
+    0 6px 16px -6px rgba(20, 22, 27, 0.22),
+    0 12px 28px -10px rgba(20, 22, 27, 0.16);
+  --elev-3:
+    0 40px 80px -24px rgba(20, 22, 27, 0.38),
+    0 12px 32px -12px rgba(20, 22, 27, 0.2);
+
+  /* ── Duration scale (§6) ── 120 tap · 220 pop · 360 move · 520 settle. */
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 360ms;
+  --dur-4: 520ms;
 }
 
 html.dark {
@@ -114,6 +131,15 @@ html.dark {
   --glass-hover-max: 0.32;
   --glass-inset-fill: rgba(255, 255, 255, 0.06);
   --glass-inset-border: rgba(255, 255, 255, 0.12);
+
+  /* ── Elevation (dark) ── deeper, black-based; the one-line theme tune the
+     tokens buy us (light shadows used ink and never flipped before). */
+  --elev-1:
+    0 1px 2px -1px rgba(0, 0, 0, 0.5), 0 2px 8px -3px rgba(0, 0, 0, 0.4);
+  --elev-2:
+    0 6px 16px -6px rgba(0, 0, 0, 0.55), 0 12px 28px -10px rgba(0, 0, 0, 0.45);
+  --elev-3:
+    0 40px 80px -24px rgba(0, 0, 0, 0.65), 0 12px 32px -12px rgba(0, 0, 0, 0.5);
 }
 
 /* Touch devices get a lighter frost: blur cost grows with the square of the
@@ -402,6 +428,20 @@ html.dark {
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Radius scale (§6) ── one 4-step system; `rounded-chip/field/card/panel`.
+     Ad-hoc 6–32px radii collapse onto these; nested surfaces step down a level. */
+  --radius-chip: 999px;
+  --radius-field: 16px;
+  --radius-card: 24px;
+  --radius-panel: 30px;
+
+  /* ── Elevation scale (§6) ── resting card → raised/hover → floating chrome.
+     Values live in :root / html.dark so dark-mode shadow tuning is one line;
+     these token refs generate `shadow-elev-1/2/3`. */
+  --shadow-elev-1: var(--elev-1);
+  --shadow-elev-2: var(--elev-2);
+  --shadow-elev-3: var(--elev-3);
 }
 
 * {
@@ -950,7 +990,7 @@ body.sheet-open .mobile-tab-bar {
 /* ---------- View transitions ---------- */
 ::view-transition-group(qs-farm) {
   animation-duration: 460ms;
-  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  animation-timing-function: var(--ease-out-expo);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1197,11 +1237,11 @@ html.dark .skeleton::after {
 }
 @media (prefers-reduced-motion: no-preference) {
   .qs-dock {
-    animation: qs-dock-in 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation: qs-dock-in 360ms var(--ease-out-expo);
   }
 }
 :root.force-motion .qs-dock {
-  animation: qs-dock-in 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: qs-dock-in 360ms var(--ease-out-expo);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1238,7 +1278,7 @@ html.dark .skeleton::after {
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation-duration: 0.26s;
-    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-timing-function: var(--ease-out-expo);
   }
   ::view-transition-old(root) {
     animation-name: vt-leave;
@@ -1250,7 +1290,7 @@ html.dark .skeleton::after {
 html.force-motion::view-transition-old(root),
 html.force-motion::view-transition-new(root) {
   animation-duration: 0.26s;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-timing-function: var(--ease-out-expo);
 }
 html.force-motion::view-transition-old(root) {
   animation-name: vt-leave;
@@ -1287,7 +1327,7 @@ html.force-motion::view-transition-new(root) {
     z-index: 0;
   }
   html.theme-vt::view-transition-new(root) {
-    animation: theme-vt-reveal 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: theme-vt-reveal 0.7s var(--ease-out-expo);
     z-index: 1;
   }
 }
@@ -1296,6 +1336,6 @@ html.force-motion.theme-vt::view-transition-old(root) {
   z-index: 0;
 }
 html.force-motion.theme-vt::view-transition-new(root) {
-  animation: theme-vt-reveal 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: theme-vt-reveal 0.7s var(--ease-out-expo);
   z-index: 1;
 }

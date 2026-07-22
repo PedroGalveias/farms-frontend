@@ -97,7 +97,7 @@ export default function LanguageMenu({
       {open && typeof document !== "undefined"
         ? createPortal(
             <div
-              className="glass glass-chrome z-[70] min-w-[180px] max-w-[calc(100vw-1.5rem)] rounded-2xl p-1.5"
+              className="glass glass-chrome z-[70] min-w-[180px] max-w-[calc(100vw-1.5rem)] rounded-field p-1.5"
               ref={menuRef}
               role="menu"
               style={style}
@@ -110,7 +110,7 @@ export default function LanguageMenu({
                 return (
                   <button
                     aria-checked={isActive}
-                    className={`flex w-full items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
+                    className={`flex w-full items-center justify-between gap-4 rounded-field px-3 py-2 text-sm font-semibold transition-colors ${
                       isActive
                         ? "bg-tone text-pine"
                         : "text-ink/70 hover:bg-tone hover:text-ink"

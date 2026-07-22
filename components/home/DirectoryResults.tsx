@@ -45,9 +45,9 @@ export default function DirectoryResults({
 
   if (visibleFarms.length === 0) {
     return (
-      <section className="mt-8 rounded-[32px] border border-dashed border-line bg-tone/40 px-6 py-16 text-center">
+      <section className="mt-8 rounded-panel border border-dashed border-line bg-tone/40 px-6 py-16 text-center">
         <div className="mx-auto max-w-xl">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-pine/10 text-pine">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-field bg-pine/10 text-pine">
             <MapPin className="h-7 w-7" />
           </div>
           <h2 className="mt-6 text-3xl font-bold tracking-[-0.035em] text-ink">
@@ -63,7 +63,7 @@ export default function DirectoryResults({
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             {totalFarmCount === 0 ? (
               <button
-                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+                className="inline-flex items-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
                 onClick={onAddFarm}
                 type="button"
               >
@@ -72,7 +72,7 @@ export default function DirectoryResults({
               </button>
             ) : (
               <button
-                className="rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+                className="rounded-chip border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
                 onClick={onResetFilters}
                 type="button"
               >
@@ -136,7 +136,7 @@ export default function DirectoryResults({
           {visibleCount < visibleFarms.length ? (
             <div className="mt-10 flex justify-center">
               <button
-                className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-7 py-3.5 text-sm font-semibold text-ink/75 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/25 hover:text-ink active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/20"
+                className="inline-flex items-center gap-2 rounded-chip border border-line bg-cloud px-7 py-3.5 text-sm font-semibold text-ink/75 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/25 hover:text-ink active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/20"
                 onClick={onLoadMore}
                 type="button"
               >

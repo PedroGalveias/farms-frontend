@@ -54,7 +54,7 @@ export default function CategoryFilterSheet({
           </h2>
           {selectedCategories.length > 0 ? (
             <button
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold text-ink/60 transition hover:bg-ink/[0.05] hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+              className="inline-flex items-center gap-1.5 rounded-chip px-3 py-1.5 text-[13px] font-semibold text-ink/60 transition hover:bg-ink/[0.05] hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
               onClick={onClearCategories}
               type="button"
             >
@@ -65,7 +65,7 @@ export default function CategoryFilterSheet({
         </div>
 
         {selectedCategories.length >= 2 ? (
-          <div className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-tone p-1">
+          <div className="mt-3 inline-flex w-fit items-center gap-1 rounded-chip bg-tone p-1">
             <button
               aria-pressed={categoryMatchMode === "all"}
               className={segmentClassName(categoryMatchMode === "all")}
@@ -93,7 +93,7 @@ export default function CategoryFilterSheet({
             return (
               <button
                 aria-pressed={isActive}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                className={`inline-flex items-center gap-1.5 rounded-chip border px-3.5 py-2 text-[13px] font-semibold transition-all duration-300 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                   isActive
                     ? "border-ink bg-ink text-cloud"
                     : isEmpty
@@ -115,7 +115,7 @@ export default function CategoryFilterSheet({
         </div>
 
         <button
-          className="mt-5 w-full rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+          className="mt-5 w-full rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
           onClick={onClose}
           type="button"
         >
@@ -127,7 +127,7 @@ export default function CategoryFilterSheet({
 }
 
 function segmentClassName(isActive: boolean) {
-  return `rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
+  return `rounded-chip px-3 py-1.5 text-[12px] font-semibold transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ink/20 ${
     isActive ? "bg-ink text-cloud" : "text-ink/60 hover:text-ink/80"
   }`;
 }

@@ -60,7 +60,7 @@ export default function NearMeSheet({
         </div>
         <button
           aria-label={t("near_me_close")}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-chip bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20"
           onClick={onClose}
           type="button"
         >
@@ -78,11 +78,11 @@ export default function NearMeSheet({
             {nearest.map(({ farm, distanceKm }) => (
               <li key={farm.id}>
                 <button
-                  className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-tone focus-visible:ring-2 focus-visible:ring-ink/20"
+                  className="flex w-full items-center gap-3 rounded-field px-3 py-3 text-left transition hover:bg-tone focus-visible:ring-2 focus-visible:ring-ink/20"
                   onClick={() => onOpenFarm(farm)}
                   type="button"
                 >
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-pine/10 px-2.5 py-1 text-[11px] font-bold text-pine">
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-chip bg-pine/10 px-2.5 py-1 text-[11px] font-bold text-pine">
                     <Navigation className="h-3 w-3" />
                     {formatDistanceShort(distanceKm)}
                   </span>

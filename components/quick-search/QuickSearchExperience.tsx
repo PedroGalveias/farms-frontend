@@ -102,10 +102,10 @@ const SERVICE_STATUS_PILLS: Record<
 };
 
 const PRIMARY_BUTTON_CLASS =
-  "group inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none";
+  "group inline-flex w-full items-center justify-center gap-2 rounded-chip bg-ink px-6 py-4 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none";
 
 const GHOST_BUTTON_CLASS =
-  "inline-flex w-full items-center justify-center gap-2 rounded-full border border-line bg-cloud px-6 py-4 text-sm font-semibold text-ink/75 transition-all duration-300 hover:border-ink/25 hover:text-ink active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/20";
+  "inline-flex w-full items-center justify-center gap-2 rounded-chip border border-line bg-cloud px-6 py-4 text-sm font-semibold text-ink/75 transition-all duration-300 hover:border-ink/25 hover:text-ink active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/20";
 
 interface QuickSearchExperienceProps {
   farms: Farm[];
@@ -515,10 +515,10 @@ export default function QuickSearchExperience({
 
   const statusBadge = (
     <span
-      className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ${statusPill.className}`}
+      className={`inline-flex items-center gap-2 rounded-chip px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ${statusPill.className}`}
     >
       <span
-        className={`h-1.5 w-1.5 rounded-full pulse-dot ${statusPill.dotClassName}`}
+        className={`h-1.5 w-1.5 rounded-chip pulse-dot ${statusPill.dotClassName}`}
       />
       {t(statusPill.labelKey)}
     </span>
@@ -530,7 +530,7 @@ export default function QuickSearchExperience({
         <div className="relative z-10 mx-auto w-full max-w-xl px-4 pb-12 pt-4 sm:px-6 sm:pt-8 lg:mx-0 lg:flex lg:h-dvh lg:w-[560px] lg:max-w-none lg:shrink-0 lg:flex-col lg:justify-center lg:px-12 lg:py-0">
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-3.5 py-1.5 text-xs font-semibold text-ink/60">
+              <span className="inline-flex items-center gap-2 rounded-chip border border-line bg-cloud px-3.5 py-1.5 text-xs font-semibold text-ink/60">
                 <Sparkles className="h-3.5 w-3.5 text-pine" />
                 {t("qs_hero_eyebrow")}
               </span>
@@ -549,7 +549,7 @@ export default function QuickSearchExperience({
 
           {resumable ? (
             <button
-              className="mt-6 inline-flex max-w-full items-center gap-2 rounded-full border border-pine/25 bg-pine/[0.07] px-4 py-2.5 text-sm font-semibold text-pine transition-all duration-300 hover:-translate-y-0.5 hover:border-pine/40 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-pine/30"
+              className="mt-6 inline-flex max-w-full items-center gap-2 rounded-chip border border-pine/25 bg-pine/[0.07] px-4 py-2.5 text-sm font-semibold text-pine transition-all duration-300 hover:-translate-y-0.5 hover:border-pine/40 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-pine/30"
               onClick={resumeLastSearch}
               type="button"
             >
@@ -570,7 +570,7 @@ export default function QuickSearchExperience({
 
           {loadError ? (
             <div
-              className="mt-6 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
+              className="mt-6 rounded-field border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900"
               role="status"
             >
               {t("qs_load_error")}
@@ -591,7 +591,7 @@ export default function QuickSearchExperience({
               return (
                 <article
                   aria-hidden={index > currentIndex}
-                  className="glass glass-chrome absolute inset-x-0 top-0 flex h-[calc(100%-112px)] origin-top flex-col overflow-hidden rounded-[32px] outline-none transition-[transform,opacity] duration-[650ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
+                  className="glass glass-chrome absolute inset-x-0 top-0 flex h-[calc(100%-112px)] origin-top flex-col overflow-hidden rounded-panel outline-none transition-[transform,opacity] duration-[650ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
                   key={meta.id}
                   ref={(node) => {
                     cardRefs.current[index] = node;
@@ -605,7 +605,7 @@ export default function QuickSearchExperience({
                       onClick={() => goToStep(meta.id)}
                       type="button"
                     >
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-pine/10 text-pine">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-field bg-pine/10 text-pine">
                         <Icon className="h-4 w-4" />
                       </span>
                       <span className="shrink-0 text-sm font-bold text-ink">
@@ -618,7 +618,7 @@ export default function QuickSearchExperience({
                     </button>
                   ) : (
                     <div className="flex h-14 shrink-0 items-center gap-3 border-b border-line px-5 sm:px-6">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-pine/10 text-pine">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-field bg-pine/10 text-pine">
                         <Icon className="h-4 w-4" />
                       </span>
                       <span className="text-sm font-bold text-ink">
@@ -668,12 +668,12 @@ export default function QuickSearchExperience({
                   }}
                 >
                   <button
-                    className="glass-inset flex h-12 w-full items-center gap-3 rounded-2xl px-5 text-left transition disabled:cursor-not-allowed sm:px-6"
+                    className="glass-inset flex h-12 w-full items-center gap-3 rounded-field px-5 text-left transition disabled:cursor-not-allowed sm:px-6"
                     disabled={!isVisible || !enabled}
                     onClick={() => goToStep(meta.id)}
                     type="button"
                   >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-tone text-ink/70">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-field bg-tone text-ink/70">
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <span

@@ -133,7 +133,7 @@ export default function FarmsMap({
 
   return (
     <div
-      className={`isolate overflow-hidden rounded-[24px] border border-line ${
+      className={`isolate overflow-hidden rounded-card border border-line ${
         theme === "dark" ? "map-dark" : ""
       }`}
       ref={containerRef}

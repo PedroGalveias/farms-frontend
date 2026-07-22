@@ -31,7 +31,7 @@ import type { Farm, StockStatus } from "@/types/farm";
 // same size (the old flex-wrap layout made "Add to collection" a small
 // odd-one-out pill).
 const SECONDARY_BTN =
-  "relative inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 focus-visible:ring-offset-2";
+  "relative inline-flex w-full items-center justify-center gap-2 rounded-chip border px-4 py-3.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 focus-visible:ring-offset-2";
 const SECONDARY_IDLE =
   "border-line bg-cloud text-ink/75 hover:border-ink/25 hover:text-ink";
 const SECONDARY_ACTIVE = "border-pine/30 bg-pine/10 text-pine";
@@ -51,7 +51,7 @@ const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
 
 function InfoCard({ children, label }: { children: string; label: string }) {
   return (
-    <div className="glass-inset rounded-2xl px-4 py-3.5">
+    <div className="glass-inset rounded-field px-4 py-3.5">
       <p className="text-xs font-semibold text-ink/60">{label}</p>
       <p className="mt-1.5 break-words text-sm leading-6 text-ink/80">
         {children}
@@ -118,7 +118,7 @@ export default function FarmDetail({
       <div className="mt-7 space-y-2.5">
         {/* Primary action, full width. */}
         <a
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-chip bg-ink px-6 py-4 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
           href={mapsUrl}
           rel="noreferrer"
           target="_blank"
@@ -185,7 +185,7 @@ export default function FarmDetail({
       </div>
 
       <div className="mt-7 space-y-3">
-        <div className="glass-inset rounded-2xl px-4 py-3.5">
+        <div className="glass-inset rounded-field px-4 py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-ink/60">
@@ -207,7 +207,7 @@ export default function FarmDetail({
           </InfoCard>
         </div>
 
-        <div className="glass-inset rounded-2xl px-4 py-3.5">
+        <div className="glass-inset rounded-field px-4 py-3.5">
           <p className="text-xs font-semibold text-ink/60">
             {t("detail_products")}
           </p>
@@ -223,7 +223,7 @@ export default function FarmDetail({
                     : (item.name_en ?? item.slug);
                   return (
                     <span
-                      className={`glass-chip inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
+                      className={`glass-chip inline-flex items-center gap-1.5 rounded-chip px-3 py-1 text-sm font-semibold ${
                         item.status === "UNAVAILABLE"
                           ? "text-ink/40"
                           : "text-ink/70"
@@ -233,7 +233,7 @@ export default function FarmDetail({
                       {name}
                       {item.status !== "AVAILABLE" && (
                         <span
-                          className={`rounded-full px-1.5 py-0.5 text-[11px] font-medium ${
+                          className={`rounded-chip px-1.5 py-0.5 text-[11px] font-medium ${
                             item.status === "SEASONAL"
                               ? "bg-pine/10 text-pine"
                               : "bg-ink/10 text-ink/50"
@@ -247,7 +247,7 @@ export default function FarmDetail({
                 })
               : farm.categories.map((category) => (
                   <span
-                    className="glass-chip rounded-full px-3 py-1 text-sm font-semibold text-ink/70"
+                    className="glass-chip rounded-chip px-3 py-1 text-sm font-semibold text-ink/70"
                     key={category}
                   >
                     {tagLabel(category, locale)}
@@ -275,7 +275,7 @@ export default function FarmDetail({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 alt=""
-                className="aspect-[4/3] w-full rounded-2xl object-cover"
+                className="aspect-[4/3] w-full rounded-field object-cover"
                 key={src}
                 loading="lazy"
                 src={src}
@@ -286,7 +286,7 @@ export default function FarmDetail({
           <div className="mt-3 grid grid-cols-3 gap-2.5">
             {[0, 1, 2].map((slot) => (
               <div
-                className="glass-inset grid aspect-[4/3] place-items-center rounded-2xl"
+                className="glass-inset grid aspect-[4/3] place-items-center rounded-field"
                 key={slot}
               >
                 {slot === 1 ? (

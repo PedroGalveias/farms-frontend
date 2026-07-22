@@ -51,7 +51,7 @@ export default function ProfileView() {
         </div>
         {user ? (
           <button
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-cloud px-5 py-2.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="inline-flex items-center gap-2 rounded-chip border border-line bg-cloud px-5 py-2.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
             onClick={() => void logout()}
             type="button"
           >
@@ -64,9 +64,9 @@ export default function ProfileView() {
       {/* Signed out: a compact sign-in invitation (the library and
           preferences below are device-local and work without an account). */}
       {!user ? (
-        <div className="glass mt-8 flex flex-wrap items-center justify-between gap-4 rounded-3xl p-6">
+        <div className="glass mt-8 flex flex-wrap items-center justify-between gap-4 rounded-card p-6">
           <div className="flex items-center gap-3.5">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-pine/10 text-pine">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-chip bg-pine/10 text-pine">
               <UserRound className="h-5 w-5" />
             </span>
             <p className="max-w-sm text-sm leading-6 text-ink/60">
@@ -75,7 +75,7 @@ export default function ProfileView() {
           </div>
           {!loading ? (
             <button
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center gap-2 rounded-chip bg-ink px-6 py-3 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
               onClick={() => openAuth("login")}
               type="button"
             >
@@ -94,7 +94,7 @@ export default function ProfileView() {
       {user ? (
         <>
           {/* Work-in-progress notice for the editable fields below. */}
-          <div className="mt-10 flex items-start gap-3 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3.5">
+          <div className="mt-10 flex items-start gap-3 rounded-field border border-amber-300/60 bg-amber-50 px-4 py-3.5">
             <Hammer className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
             <div>
               <p className="text-sm font-bold text-amber-900">
@@ -155,13 +155,13 @@ function AccountSection() {
         {t("profile_account")}
       </h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <div className="glass-inset rounded-2xl px-4 py-3.5">
+        <div className="glass-inset rounded-field px-4 py-3.5">
           <p className="text-xs font-semibold text-ink/60">
             {user.username ? t("profile_username") : t("profile_accountId")}
           </p>
           <p className="mt-1.5 truncate text-sm text-ink/80">{displayName}</p>
         </div>
-        <div className="glass-inset rounded-2xl px-4 py-3.5">
+        <div className="glass-inset rounded-field px-4 py-3.5">
           <p className="text-xs font-semibold text-ink/60">
             {t("profile_role")}
           </p>
@@ -209,7 +209,7 @@ function LibrarySection() {
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         {tiles.map((tile) => (
           <Link
-            className="glass glass-card glass-interactive group rounded-2xl px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
+            className="glass glass-card glass-interactive group rounded-field px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
             href={tile.href}
             key={tile.label}
           >
@@ -236,11 +236,11 @@ function SettingsLink() {
   return (
     <section className="mt-8">
       <Link
-        className="glass glass-card glass-interactive group flex items-center justify-between gap-4 rounded-2xl px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
+        className="glass glass-card glass-interactive group flex items-center justify-between gap-4 rounded-field px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
         href="/settings"
       >
         <span className="flex items-center gap-3.5">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-pine/10 text-pine">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-field bg-pine/10 text-pine">
             <Settings className="h-5 w-5" />
           </span>
           <span>
@@ -276,7 +276,7 @@ function ProfileSection({
         <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">
           {title}
         </h2>
-        <span className="inline-flex items-center gap-1 rounded-full bg-tone px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/60">
+        <span className="inline-flex items-center gap-1 rounded-chip bg-tone px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/60">
           {wipLabel}
         </span>
       </div>
@@ -303,7 +303,7 @@ function Field({
   type?: string;
 }) {
   return (
-    <label className="block glass-inset rounded-2xl px-4 py-3">
+    <label className="block glass-inset rounded-field px-4 py-3">
       <span className="text-xs font-semibold text-ink/60">{label}</span>
       <span className="mt-1.5 flex items-center gap-2 text-ink/60">
         {icon}

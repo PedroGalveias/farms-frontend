@@ -24,7 +24,7 @@ interface CreateFarmDialogProps {
 }
 
 const fieldClassName =
-  "mt-2 w-full rounded-2xl border border-transparent bg-tone px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:font-normal placeholder:text-ink/70 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10";
+  "mt-2 w-full rounded-field border border-transparent bg-tone px-4 py-3 text-sm font-medium text-ink transition duration-300 placeholder:font-normal placeholder:text-ink/70 focus:border-pine/50 focus:bg-cloud focus:ring-4 focus:ring-pine/10";
 
 const labelClassName =
   "text-xs font-bold uppercase tracking-[0.08em] text-ink/60";
@@ -171,7 +171,7 @@ export default function CreateFarmDialog({
       <div
         aria-labelledby="create-farm-heading"
         aria-modal="true"
-        className="glass glass-card qs-sheet max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-[32px] shadow-[0_50px_100px_-24px_rgba(20,22,27,0.45)]"
+        className="glass glass-card qs-sheet max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-panel shadow-elev-3"
         role="dialog"
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
@@ -192,7 +192,7 @@ export default function CreateFarmDialog({
 
           <button
             aria-label={t("create_close_aria")}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-chip bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isSubmitting}
             onClick={onClose}
             type="button"
@@ -324,7 +324,7 @@ export default function CreateFarmDialog({
 
                 return (
                   <div
-                    className="overflow-hidden rounded-2xl border border-line"
+                    className="overflow-hidden rounded-field border border-line"
                     key={group}
                   >
                     <button
@@ -340,7 +340,7 @@ export default function CreateFarmDialog({
                         {categoryLabel(group, locale)}
                       </span>
                       {selectedCount > 0 ? (
-                        <span className="rounded-full bg-pine/10 px-2 py-0.5 text-xs font-bold text-pine">
+                        <span className="rounded-chip bg-pine/10 px-2 py-0.5 text-xs font-bold text-pine">
                           {selectedCount}
                         </span>
                       ) : null}
@@ -358,7 +358,7 @@ export default function CreateFarmDialog({
                           return (
                             <button
                               aria-pressed={isSelected}
-                              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                              className={`rounded-chip border px-3 py-1.5 text-sm font-semibold transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ink/20 ${
                                 isSelected
                                   ? "border-ink bg-ink text-cloud"
                                   : "border-line bg-cloud text-ink/70 hover:border-ink/30 hover:text-ink"
@@ -385,14 +385,14 @@ export default function CreateFarmDialog({
           </fieldset>
 
           {serverError ? (
-            <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
+            <div className="mt-5 rounded-field border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
               {serverError}
             </div>
           ) : null}
 
           <div className="mt-7 flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:justify-end">
             <button
-              className="rounded-full border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-chip border border-line bg-cloud px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isSubmitting}
               onClick={onClose}
               type="button"
@@ -400,7 +400,7 @@ export default function CreateFarmDialog({
               {t("create_close")}
             </button>
             <button
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-bold text-cloud shadow-[0_16px_36px_-12px_rgba(20,22,27,0.55)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-chip bg-ink px-7 py-3.5 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isSubmitting}
               type="submit"
             >

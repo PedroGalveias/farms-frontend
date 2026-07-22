@@ -40,8 +40,8 @@ export default function QuickSearchCoach() {
   if (!visible) return null;
 
   return (
-    <div className="glass toast-enter mt-6 flex items-start gap-3 rounded-2xl p-4">
-      <span className="glass-inset grid h-9 w-9 shrink-0 place-items-center rounded-full text-pine">
+    <div className="glass toast-enter mt-6 flex items-start gap-3 rounded-field p-4">
+      <span className="glass-inset grid h-9 w-9 shrink-0 place-items-center rounded-chip text-pine">
         <Lightbulb className="h-4 w-4" />
       </span>
       <div className="min-w-0 flex-1">
@@ -52,7 +52,7 @@ export default function QuickSearchCoach() {
           {t("qs_coach_body")}
         </p>
         <button
-          className="mt-2.5 inline-flex items-center rounded-full bg-ink px-4 py-1.5 text-[13px] font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
+          className="mt-2.5 inline-flex items-center rounded-chip bg-ink px-4 py-1.5 text-[13px] font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
           onClick={dismiss}
           type="button"
         >
@@ -61,7 +61,7 @@ export default function QuickSearchCoach() {
       </div>
       <button
         aria-label={t("qs_coach_dismiss")}
-        className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-ink/40 transition hover:bg-ink/[0.06] hover:text-ink"
+        className="grid h-7 w-7 shrink-0 place-items-center rounded-chip text-ink/40 transition hover:bg-ink/[0.06] hover:text-ink"
         onClick={dismiss}
         type="button"
       >

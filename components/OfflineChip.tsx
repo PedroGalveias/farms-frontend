@@ -33,7 +33,7 @@ export default function OfflineChip() {
   return (
     <div
       aria-live="polite"
-      className="cursor-zone fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-line bg-ink/90 px-4 py-2 text-xs font-semibold text-cloud shadow-[0_10px_30px_-10px_rgba(20,22,27,0.5)] backdrop-blur-md lg:bottom-6"
+      className="cursor-zone fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-chip border border-line bg-ink/90 px-4 py-2 text-xs font-semibold text-cloud shadow-elev-2 backdrop-blur-md lg:bottom-6"
       role="status"
     >
       <CloudOff className="h-3.5 w-3.5" />

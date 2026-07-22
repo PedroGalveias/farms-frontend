@@ -99,7 +99,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
             >
               {toasts.map((item) => (
                 <div
-                  className={`glass glass-chrome pointer-events-auto flex items-center gap-2.5 rounded-full py-2.5 pl-3.5 pr-5 text-sm font-semibold text-ink shadow-[0_16px_40px_-16px_rgba(20,22,27,0.5)] ${
+                  className={`glass glass-chrome pointer-events-auto flex items-center gap-2.5 rounded-chip py-2.5 pl-3.5 pr-5 text-sm font-semibold text-ink shadow-elev-3 ${
                     item.leaving ? "toast-leave" : "toast-enter"
                   }`}
                   key={item.id}
