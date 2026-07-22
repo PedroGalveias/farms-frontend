@@ -17,6 +17,7 @@ import {
 import { categoryLabel } from "@/lib/categories";
 import { RADIUS_OPTIONS, type CategoryMatchMode } from "@/lib/directory";
 import { getCantonName } from "@/lib/farms";
+import { haptic } from "@/lib/haptics";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import CategoryFilterSheet from "@/components/CategoryFilterSheet";
 import DirectorySearchBox from "@/components/directory/DirectorySearchBox";
@@ -234,7 +235,10 @@ export default function DirectoryToolbar({
             aria-label={t("view_list")}
             aria-pressed={viewMode === "list"}
             className={viewToggleClassName(viewMode === "list")}
-            onClick={() => onViewModeChange("list")}
+            onClick={() => {
+              haptic();
+              onViewModeChange("list");
+            }}
             type="button"
           >
             <List className="h-4 w-4" />
@@ -243,7 +247,10 @@ export default function DirectoryToolbar({
             aria-label={t("view_grid")}
             aria-pressed={viewMode === "grid"}
             className={viewToggleClassName(viewMode === "grid")}
-            onClick={() => onViewModeChange("grid")}
+            onClick={() => {
+              haptic();
+              onViewModeChange("grid");
+            }}
             type="button"
           >
             <LayoutGrid className="h-4 w-4" />
@@ -252,7 +259,10 @@ export default function DirectoryToolbar({
             aria-label={t("view_map")}
             aria-pressed={viewMode === "map"}
             className={viewToggleClassName(viewMode === "map")}
-            onClick={() => onViewModeChange("map")}
+            onClick={() => {
+              haptic();
+              onViewModeChange("map");
+            }}
             type="button"
           >
             <MapPin className="h-4 w-4" />

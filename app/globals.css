@@ -889,6 +889,21 @@ html.dark body::before {
     opacity 360ms var(--ease-out-expo);
 }
 
+/* The tab bar animates when it slides away — for a sheet opening, or hiding on
+   scroll-down (§5). */
+.mobile-tab-bar {
+  transition:
+    transform var(--dur-3) var(--ease-out-expo),
+    opacity var(--dur-3) var(--ease-out-expo);
+}
+
+/* Hidden on scroll-down; revealed (default) on scroll-up / near the top. */
+.mobile-tab-bar[data-hidden] {
+  transform: translateY(calc(100% + 1.5rem));
+  opacity: 0;
+  pointer-events: none;
+}
+
 body.sheet-open .mobile-tab-bar {
   transform: translateY(calc(100% + 1.5rem));
   opacity: 0;
