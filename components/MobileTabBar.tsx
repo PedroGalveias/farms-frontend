@@ -80,6 +80,11 @@ export default function MobileTabBar() {
       aria-label="Primary"
       className="glass glass-chrome mobile-tab-bar fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[min(92%,360px)] items-center gap-1.5 rounded-chip p-1.5 [view-transition-name:tab-bar] lg:hidden"
       data-hidden={hidden || undefined}
+      // While hidden-on-scroll, remove the nav from the a11y tree and tab order
+      // too — CSS (opacity/translate/pointer-events) alone still leaves the
+      // links focusable for keyboard and switch-control users.
+      aria-hidden={hidden || undefined}
+      inert={hidden || undefined}
       ref={navRef}
     >
       {/* The sliding active pill, positioned by useSlidingIndicator. */}

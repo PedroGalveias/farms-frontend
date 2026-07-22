@@ -124,7 +124,12 @@ export default function ResultsStep({
   return (
     <div className="space-y-4">
       <div className="relative">
-        {showBurst ? <NearestBurst onDone={() => setShowBurst(false)} /> : null}
+        {showBurst ? (
+          // Keyed on revealKey so a second search that lands while a burst is
+          // still playing remounts it (replays) instead of being swallowed by
+          // the already-true showBurst.
+          <NearestBurst key={revealKey} onDone={() => setShowBurst(false)} />
+        ) : null}
         <h2 className="text-xl font-bold tracking-[-0.035em] text-ink sm:text-[28px]">
           {count === 0
             ? t("qs_res_none_title")

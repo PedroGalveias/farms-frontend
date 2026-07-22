@@ -96,6 +96,11 @@ export default function NearestBurst({ onDone }: { onDone: () => void }) {
     const fs = compile(gl.FRAGMENT_SHADER, FRAG);
     const prog = vs && fs ? gl.createProgram()! : null;
     if (!prog) {
+      // Release whatever compiled + the context — a per-search leak on a driver
+      // that always fails to compile would otherwise hit the context limit.
+      if (vs) gl.deleteShader(vs);
+      if (fs) gl.deleteShader(fs);
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
       finish();
       return;
     }
@@ -103,6 +108,10 @@ export default function NearestBurst({ onDone }: { onDone: () => void }) {
     gl.attachShader(prog, fs!);
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      gl.deleteProgram(prog);
+      gl.deleteShader(vs!);
+      gl.deleteShader(fs!);
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
       finish();
       return;
     }
