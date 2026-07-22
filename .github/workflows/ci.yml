@@ -229,12 +229,40 @@ jobs:
           path: playwright-report/
           if-no-files-found: ignore
 
+  # Keep the internal version in lockstep with release tags: a `vX.Y.Z` tag
+  # must match package.json's "version" exactly, or the deploy is blocked.
+  # (Bump package.json before cutting the tag.) The footer's displayed version
+  # already derives from `git describe`; this pins the package manifest too.
+  tag-version:
+    name: Tag matches package.json version
+    # Runs for tag pushes (enforces) and manual dispatches (no-op pass) — a
+    # skipped `needs` entry would otherwise skip the deploy job it gates.
+    if: >-
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify tag == v<package.json version>
+        run: |
+          case "$GITHUB_REF" in
+            refs/tags/*) ;;
+            *) echo "Not a tag push — nothing to verify."; exit 0 ;;
+          esac
+          TAG="${GITHUB_REF#refs/tags/}"
+          PKG="v$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::Tag $TAG does not match package.json ($PKG). Bump package.json before tagging."
+            exit 1
+          fi
+          echo "OK: $TAG == $PKG"
+
   # Trigger a Render deploy only after checks pass, and only for a pushed
   # version tag (or an explicit manual run). Pushes to main and pull requests
   # never deploy — cut a `v*` tag to ship.
   deploy:
     name: Deploy to Render
-    needs: [verify, e2e, windows, macos]
+    needs: [verify, e2e, windows, macos, tag-version]
     if: >-
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
       || github.event_name == 'workflow_dispatch'
