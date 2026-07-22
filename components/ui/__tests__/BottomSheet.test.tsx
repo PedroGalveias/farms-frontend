@@ -16,10 +16,18 @@ function setMobile(isMobile: boolean) {
   })) as unknown as typeof window.matchMedia;
 }
 
+// A controllable clock so drag velocity (px/ms) is deterministic: fireEvent is
+// synchronous, so without this every drag would read as an instantaneous flick.
+let now = 0;
+const setNow = (value: number) => {
+  now = value;
+};
+
 // jsdom lacks pointer capture.
 beforeAll(() => {
   Element.prototype.setPointerCapture = vi.fn();
   Element.prototype.releasePointerCapture = vi.fn();
+  vi.spyOn(performance, "now").mockImplementation(() => now);
 });
 
 afterEach(() => {
@@ -27,6 +35,7 @@ afterEach(() => {
   window.matchMedia = realMatchMedia;
   document.body.style.overflow = "";
   document.body.classList.remove("sheet-open");
+  now = 0;
 });
 
 function renderSheet(onClose = vi.fn()) {
@@ -81,19 +90,35 @@ describe("BottomSheet", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("snaps back when the flick is below the threshold", () => {
+  it("snaps back when a slow drag stays below the threshold", () => {
     setMobile(true);
     const onClose = renderSheet();
     const sheet = screen.getByRole("dialog") as HTMLElement;
     const grabber = document.querySelector(
       '[aria-hidden="true"]',
     ) as HTMLElement;
+    setNow(0);
     fireEvent.pointerDown(grabber, { clientY: 100, pointerId: 1 });
+    setNow(300); // 40px over 300ms ≈ 0.13 px/ms — a slow drag, not a flick
     fireEvent.pointerMove(grabber, { clientY: 100 + 40, pointerId: 1 }); // < 110
     fireEvent.pointerUp(grabber, { clientY: 140, pointerId: 1 });
     expect(onClose).not.toHaveBeenCalled();
     // Snapped back to rest.
     expect(sheet.style.transform).toBe("");
+  });
+
+  it("dismisses on a fast downward flick even below the distance threshold", () => {
+    setMobile(true);
+    const onClose = renderSheet();
+    const grabber = document.querySelector(
+      '[aria-hidden="true"]',
+    ) as HTMLElement;
+    setNow(0);
+    fireEvent.pointerDown(grabber, { clientY: 100, pointerId: 1 });
+    setNow(20); // 40px over 20ms = 2 px/ms — a fast flick, well past FLICK_VELOCITY
+    fireEvent.pointerMove(grabber, { clientY: 100 + 40, pointerId: 1 }); // < 110
+    fireEvent.pointerUp(grabber, { clientY: 140, pointerId: 1 });
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("ignores the drag gesture on desktop (centred modal)", () => {
