@@ -53,11 +53,15 @@ export default function CountUp({
       }
       const progress = Math.min((now - start) / durationMs, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round((from + (value - from) * eased) * factor) / factor);
+      // Track the currently-displayed value in fromRef every frame, so a prop
+      // change mid-roll restarts from the frame on screen rather than the last
+      // *completed* value (which would jump).
+      const current =
+        Math.round((from + (value - from) * eased) * factor) / factor;
+      fromRef.current = current;
+      setDisplay(current);
       if (progress < 1) {
         frame = requestAnimationFrame(tick);
-      } else {
-        fromRef.current = value;
       }
     };
 

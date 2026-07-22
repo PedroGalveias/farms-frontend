@@ -268,9 +268,14 @@ export default function AmbientBackdrop() {
     let pCurX = pTargetX;
     let pCurY = pTargetY;
     const onPointer = (e: PointerEvent) => {
-      // clientX/Y → uv (y up), x scaled by aspect to match the shader's px space.
-      pTargetX = (e.clientX / window.innerWidth) * aspect();
-      pTargetY = 1 - e.clientY / window.innerHeight;
+      // Map against the canvas's OWN box — it's vertically overdrawn (top:-22%,
+      // height:144%, mirroring body::after), so the shader's uv/px frame is
+      // taller than the viewport. Using window.innerHeight here would desync the
+      // lean from the cursor near the top/bottom edges. x scaled by aspect to
+      // match the shader's px space.
+      const rect = canvas.getBoundingClientRect();
+      pTargetX = ((e.clientX - rect.left) / rect.width) * aspect();
+      pTargetY = 1 - (e.clientY - rect.top) / rect.height;
     };
     // Scroll velocity 0..1, ramped on scroll and decayed each frame.
     let scrollVel = 0;
