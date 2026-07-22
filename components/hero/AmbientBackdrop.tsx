@@ -43,6 +43,21 @@ const resolutionScale = () =>
     : RESOLUTION_SCALE_BASE;
 const FRAME_MS = 1000 / 30;
 
+// Device tiering (§8): read the coarse capability signals ONCE. Low-end gets
+// the CSS fallback only (never mounts the shader); mid/high run it. This is the
+// static half of the safety net — the adaptive frame-time sampler in the loop
+// is the dynamic half that catches a device the static check misjudged.
+type DeviceTier = "low" | "mid" | "high";
+function deviceTier(): DeviceTier {
+  if (typeof navigator === "undefined") return "mid";
+  const cores = navigator.hardwareConcurrency ?? 8;
+  // deviceMemory is Chromium-only; treat "unknown" as adequate.
+  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+  if (cores <= 3 || (mem != null && mem <= 2)) return "low";
+  if (cores >= 8 && window.innerWidth > WIDE_VIEWPORT_PX) return "high";
+  return "mid";
+}
+
 const VERT = `
   attribute vec2 p;
   void main(){ gl_Position = vec4(p, 0.0, 1.0); }
@@ -63,6 +78,10 @@ const FRAG = `
   //   so the light "breathes" as the page moves.
   uniform vec2 u_pointer;
   uniform float u_scroll;
+  // u_quality: adaptive-quality knob 0..1 (1 = full). The frame-time sampler
+  // thins the caustics first (cheapest visual to lose) before the JS side drops
+  // resolution, so a struggling GPU degrades gracefully instead of stuttering.
+  uniform float u_quality;
 
   float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
   float noise(vec2 p){
@@ -127,6 +146,7 @@ const FRAG = `
     float fil = pow(max(c1, 0.0), 14.0) * 0.6 + pow(max(c2, 0.0), 10.0) * 0.4;
     fil *= mix(0.17, 0.06, u_dark) * (1.0 + 0.7*cs);
     fil *= 0.45 + 0.55 * smoothstep(0.02, 0.25, alpha);
+    fil *= u_quality; // adaptive: thin the caustics under GPU pressure.
     col += mix(vec3(0.55,0.95,0.68), vec3(0.75,0.92,0.5), uv.y) * fil;
     alpha += fil;
 
@@ -145,13 +165,17 @@ const FRAG = `
 export default function AmbientBackdrop() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [active, setActive] = useState(false);
+  // Bumped on webglcontextrestored to force the drawing effect to re-initialise
+  // the program on the same canvas after the GPU reclaims the context.
+  const [generation, setGeneration] = useState(0);
   const motionSignal = useMotionSignal();
 
   useEffect(() => {
     if (
       !hasFinePointer(window) ||
       prefersReducedMotion() ||
-      window.matchMedia("(prefers-reduced-transparency: reduce)").matches
+      window.matchMedia("(prefers-reduced-transparency: reduce)").matches ||
+      deviceTier() === "low"
     ) {
       return;
     }
@@ -220,9 +244,20 @@ export default function AmbientBackdrop() {
     const uDark = gl.getUniformLocation(prog, "u_dark");
     const uPointer = gl.getUniformLocation(prog, "u_pointer");
     const uScroll = gl.getUniformLocation(prog, "u_scroll");
+    const uQuality = gl.getUniformLocation(prog, "u_quality");
 
     // The CSS orbs are off while the living layer runs.
     document.documentElement.classList.add("has-ambient");
+
+    // ── Adaptive quality (§8) ────────────────────────────────────────────────
+    // Sample fps over ~1s windows. If it slips below budget, degrade gracefully:
+    // thin the caustics first (u_quality), then drop the resolution scale a
+    // notch (resMul) — never drop the whole layer, never stutter. Recover a step
+    // at a time when headroom returns. High tier starts with full quality.
+    let quality = 1; // → u_quality
+    let resMul = 1; // multiplies resolutionScale()
+    let winFrames = 0;
+    let winStart = performance.now();
 
     // ── §8 reactive state (all fed as uniforms on the existing loop) ─────────
     // Pointer target in aspect-true px space; smoothed toward each frame. Idle
@@ -252,7 +287,7 @@ export default function AmbientBackdrop() {
     window.addEventListener("scroll", onScroll, { passive: true });
 
     const resize = () => {
-      const scale = resolutionScale();
+      const scale = resolutionScale() * resMul;
       const w = Math.max(160, Math.floor(canvas.clientWidth * scale));
       const h = Math.max(160, Math.floor(canvas.clientHeight * scale));
       if (canvas.width !== w || canvas.height !== h) {
@@ -287,9 +322,28 @@ export default function AmbientBackdrop() {
       // Lerp u_dark toward the live theme — 0.12/frame ≈ 600ms cross-fade.
       darkCur += ((isDark() ? 1 : 0) - darkCur) * 0.12;
       gl.uniform1f(uDark, darkCur);
+      gl.uniform1f(uQuality, quality);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      // Adaptive-quality sampler: once per ~1s window, read effective fps and
+      // step quality down (thin caustics → drop resolution) or back up.
+      winFrames++;
+      if (now - winStart >= 1000) {
+        const fps = (winFrames * 1000) / (now - winStart);
+        if (fps < 24) {
+          if (quality > 0.4)
+            quality = 0.4; // first: thin the caustics
+          else if (resMul > 0.75) resMul = 0.75; // then: drop resolution
+        } else if (fps > 50) {
+          if (resMul < 1)
+            resMul = 1; // recover a step at a time
+          else if (quality < 1) quality = 1;
+        }
+        winFrames = 0;
+        winStart = now;
+      }
     };
 
     const play = () => {
@@ -305,19 +359,34 @@ export default function AmbientBackdrop() {
       if (document.hidden) stop();
       else play();
     };
+    // Context hygiene (§8): mobile GPUs reclaim WebGL aggressively. On loss,
+    // preventDefault (so the browser will fire a restore), halt the loop, and
+    // drop `has-ambient` so the CSS orbs paint instantly — never a blank canvas.
+    // On restore, bump `generation` to re-run this effect and rebuild on the
+    // same canvas.
+    const onLost = (e: Event) => {
+      e.preventDefault();
+      stop();
+      document.documentElement.classList.remove("has-ambient");
+    };
+    const onRestored = () => setGeneration((g) => g + 1);
+    canvas.addEventListener("webglcontextlost", onLost);
+    canvas.addEventListener("webglcontextrestored", onRestored);
     document.addEventListener("visibilitychange", onVisibility);
     raf = requestAnimationFrame(loop);
 
     return () => {
       stop();
       document.removeEventListener("visibilitychange", onVisibility);
+      canvas.removeEventListener("webglcontextlost", onLost);
+      canvas.removeEventListener("webglcontextrestored", onRestored);
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("scroll", onScroll);
       document.documentElement.classList.remove("has-ambient");
       gl.deleteProgram(prog);
       gl.deleteBuffer(buf);
     };
-  }, [active]);
+  }, [active, generation]);
 
   if (!active) return null;
 
