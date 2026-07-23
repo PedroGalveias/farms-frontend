@@ -96,11 +96,9 @@ export default function NearestBurst({ onDone }: { onDone: () => void }) {
     const fs = compile(gl.FRAGMENT_SHADER, FRAG);
     const prog = vs && fs ? gl.createProgram()! : null;
     if (!prog) {
-      // Release whatever compiled + the context — a per-search leak on a driver
-      // that always fails to compile would otherwise hit the context limit.
+      // Release whatever compiled; the canvas unmount frees the context.
       if (vs) gl.deleteShader(vs);
       if (fs) gl.deleteShader(fs);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
       finish();
       return;
     }
@@ -111,7 +109,6 @@ export default function NearestBurst({ onDone }: { onDone: () => void }) {
       gl.deleteProgram(prog);
       gl.deleteShader(vs!);
       gl.deleteShader(fs!);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
       finish();
       return;
     }
@@ -147,12 +144,14 @@ export default function NearestBurst({ onDone }: { onDone: () => void }) {
 
     let raf = 0;
     const start = performance.now();
-    // Tear the whole context down when the one shot ends — nothing persists.
+    // One shot: free the GL objects when done. The React unmount (onDone flips
+    // showBurst off) drops the canvas, which releases the context itself — no
+    // explicit loseContext(), which would log a noisy "WebGL context lost"
+    // warning on a perfectly normal teardown.
     const teardown = () => {
       cancelAnimationFrame(raf);
       gl.deleteProgram(prog);
       gl.deleteBuffer(buf);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
     const loop = (now: number) => {
       const t = (now - start) / DURATION_MS;

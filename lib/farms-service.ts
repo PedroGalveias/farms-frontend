@@ -87,13 +87,19 @@ function normalizeFarm(farm: Farm): Farm {
 
 export async function getFarms(): Promise<Farm[]> {
   const farms: Farm[] = [];
-  let after: string | undefined;
+  const seen = new Set<string>();
+  // The backend paginates by OFFSET: `next_cursor` is the next offset value to
+  // pass back as `?offset=`. (Sending it as `?after=` is silently ignored — the
+  // server re-serves page 0 forever, piling up duplicate farms and never
+  // reaching the tail.) `seen` dedupes defensively in case a page boundary ever
+  // overlaps.
+  let nextOffset: string | undefined;
 
   for (let page = 0; page < FARMS_MAX_PAGES; page++) {
     const url = new URL(`${getFarmsApiBaseUrl()}/farms`);
     url.searchParams.set("limit", String(FARMS_PAGE_LIMIT));
-    if (after) {
-      url.searchParams.set("after", after);
+    if (nextOffset) {
+      url.searchParams.set("offset", nextOffset);
     }
 
     let response: Response;
@@ -125,13 +131,18 @@ export async function getFarms(): Promise<Farm[]> {
     }
 
     const parsed = parseFarmsPage(await response.json());
-    farms.push(...parsed.farms);
+    for (const farm of parsed.farms) {
+      if (!seen.has(farm.id)) {
+        seen.add(farm.id);
+        farms.push(farm);
+      }
+    }
 
     // No cursor (or the older backend, which returns the whole list at once).
     if (!parsed.nextCursor) {
       break;
     }
-    after = parsed.nextCursor;
+    nextOffset = parsed.nextCursor;
   }
 
   return farms.map(normalizeFarm);
