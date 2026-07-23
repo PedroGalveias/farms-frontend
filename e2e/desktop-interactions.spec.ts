@@ -79,12 +79,17 @@ test.describe("desktop master–detail & directory interactions", () => {
     await bernChip.click();
 
     await expect(bernChip).toHaveAttribute("aria-pressed", "true");
-    // Toolbar select mirrors the rail selection.
-    await expect(page.locator("select").first()).toHaveValue("BE");
+    // The toolbar's canton control (a styled GlassSelect listbox, not a native
+    // <select>) mirrors the rail selection — its trigger shows the chosen label.
+    const cantonControl = page.getByRole("button", {
+      name: "Canton",
+      exact: true,
+    });
+    await expect(cantonControl).toContainText("Bern");
     // A second tap clears the filter again.
     await bernChip.click();
     await expect(bernChip).toHaveAttribute("aria-pressed", "false");
-    await expect(page.locator("select").first()).toHaveValue("all");
+    await expect(cantonControl).toContainText(/all cantons/i);
   });
 
   test("back-to-top floats mid-scroll and returns to the top", async ({
