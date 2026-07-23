@@ -81,9 +81,7 @@ describe("BottomSheet", () => {
   it("dismisses when the grabber is flicked down past the threshold (mobile)", () => {
     setMobile(true);
     const onClose = renderSheet();
-    const grabber = document.querySelector(
-      '[aria-hidden="true"]',
-    ) as HTMLElement;
+    const grabber = document.querySelector("[data-grabber]") as HTMLElement;
     fireEvent.pointerDown(grabber, { clientY: 100, pointerId: 1 });
     fireEvent.pointerMove(grabber, { clientY: 100 + 130, pointerId: 1 }); // > 110
     fireEvent.pointerUp(grabber, { clientY: 230, pointerId: 1 });
@@ -94,9 +92,7 @@ describe("BottomSheet", () => {
     setMobile(true);
     const onClose = renderSheet();
     const sheet = screen.getByRole("dialog") as HTMLElement;
-    const grabber = document.querySelector(
-      '[aria-hidden="true"]',
-    ) as HTMLElement;
+    const grabber = document.querySelector("[data-grabber]") as HTMLElement;
     setNow(0);
     fireEvent.pointerDown(grabber, { clientY: 100, pointerId: 1 });
     setNow(300); // 40px over 300ms ≈ 0.13 px/ms — a slow drag, not a flick
@@ -110,9 +106,7 @@ describe("BottomSheet", () => {
   it("dismisses on a fast downward flick even below the distance threshold", () => {
     setMobile(true);
     const onClose = renderSheet();
-    const grabber = document.querySelector(
-      '[aria-hidden="true"]',
-    ) as HTMLElement;
+    const grabber = document.querySelector("[data-grabber]") as HTMLElement;
     setNow(0);
     fireEvent.pointerDown(grabber, { clientY: 100, pointerId: 1 });
     setNow(20); // 40px over 20ms = 2 px/ms — a fast flick, well past FLICK_VELOCITY
@@ -124,12 +118,58 @@ describe("BottomSheet", () => {
   it("ignores the drag gesture on desktop (centred modal)", () => {
     setMobile(false);
     const onClose = renderSheet();
-    const grabber = document.querySelector(
-      '[aria-hidden="true"]',
-    ) as HTMLElement;
+    const grabber = document.querySelector("[data-grabber]") as HTMLElement;
     fireEvent.pointerDown(grabber, { clientY: 100, pointerId: 1 });
     fireEvent.pointerMove(grabber, { clientY: 400, pointerId: 1 });
     fireEvent.pointerUp(grabber, { clientY: 400, pointerId: 1 });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("dismisses on a left-edge swipe right past the threshold (mobile back gesture)", () => {
+    setMobile(true);
+    const onClose = renderSheet();
+    const edgeZone = document.querySelector("[data-edge-swipe]") as HTMLElement;
+    setNow(0);
+    fireEvent.pointerDown(edgeZone, { clientX: 4, pointerId: 1 });
+    setNow(300); // slow drag so only distance (not velocity) triggers it
+    fireEvent.pointerMove(edgeZone, { clientX: 4 + 100, pointerId: 1 }); // > 90
+    fireEvent.pointerUp(edgeZone, { clientX: 104, pointerId: 1 });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("snaps back when a short edge drag stays below the threshold", () => {
+    setMobile(true);
+    const onClose = renderSheet();
+    const sheet = screen.getByRole("dialog") as HTMLElement;
+    const edgeZone = document.querySelector("[data-edge-swipe]") as HTMLElement;
+    setNow(0);
+    fireEvent.pointerDown(edgeZone, { clientX: 4, pointerId: 1 });
+    setNow(300); // 40px over 300ms ≈ 0.13 px/ms — slow, not a flick
+    fireEvent.pointerMove(edgeZone, { clientX: 4 + 40, pointerId: 1 }); // < 90
+    fireEvent.pointerUp(edgeZone, { clientX: 44, pointerId: 1 });
+    expect(onClose).not.toHaveBeenCalled();
+    expect(sheet.style.transform).toBe("");
+  });
+
+  it("dismisses on a fast rightward edge flick even below the distance threshold", () => {
+    setMobile(true);
+    const onClose = renderSheet();
+    const edgeZone = document.querySelector("[data-edge-swipe]") as HTMLElement;
+    setNow(0);
+    fireEvent.pointerDown(edgeZone, { clientX: 4, pointerId: 1 });
+    setNow(20); // 40px over 20ms = 2 px/ms — well past FLICK_VELOCITY
+    fireEvent.pointerMove(edgeZone, { clientX: 4 + 40, pointerId: 1 }); // < 90
+    fireEvent.pointerUp(edgeZone, { clientX: 44, pointerId: 1 });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores the edge-swipe on desktop (centred modal)", () => {
+    setMobile(false);
+    const onClose = renderSheet();
+    const edgeZone = document.querySelector("[data-edge-swipe]") as HTMLElement;
+    fireEvent.pointerDown(edgeZone, { clientX: 4, pointerId: 1 });
+    fireEvent.pointerMove(edgeZone, { clientX: 300, pointerId: 1 });
+    fireEvent.pointerUp(edgeZone, { clientX: 300, pointerId: 1 });
     expect(onClose).not.toHaveBeenCalled();
   });
 });
