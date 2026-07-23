@@ -277,6 +277,20 @@ export default function QuickSearchExperience({
 
     setStep(nextStep);
 
+    // All three step cards stay mounted, so a card's scroller keeps its old
+    // scrollTop from the previous visit — re-entering Results used to show
+    // the first card half-clipped under the step header (design §9 bug).
+    // Reset the entering card's scroller so content starts fully visible.
+    requestAnimationFrame(() => {
+      const index = STEPS.findIndex((meta) => meta.id === nextStep);
+      const scroller = cardRefs.current[index]?.querySelector<HTMLElement>(
+        "[data-step-scroller]",
+      );
+      if (scroller) {
+        scroller.scrollTop = 0;
+      }
+    });
+
     // Below lg the hero sits above the deck and would keep the active card
     // half off-screen — bring the deck to the top so each step gets the whole
     // viewport. Desktop centres the deck in a fixed column; leave it alone.
@@ -617,7 +631,7 @@ export default function QuickSearchExperience({
                       <Pencil className="h-3.5 w-3.5 shrink-0 text-ink/30 transition group-hover:text-ink/70" />
                     </button>
                   ) : (
-                    <div className="flex h-14 shrink-0 items-center gap-3 border-b border-line px-5 sm:px-6">
+                    <div className="relative z-10 flex h-14 shrink-0 items-center gap-3 border-b border-line bg-[var(--glass-solid)] px-5 sm:px-6">
                       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-field bg-pine/10 text-pine">
                         <Icon className="h-4 w-4" />
                       </span>
@@ -635,7 +649,10 @@ export default function QuickSearchExperience({
                     className="flex min-h-0 flex-1 flex-col"
                     inert={isCurrent ? undefined : true}
                   >
-                    <div className="flex-1 overflow-y-auto px-5 pb-4 pt-5 sm:px-6">
+                    <div
+                      className="flex-1 scroll-pt-5 overflow-y-auto px-5 pb-4 pt-5 sm:px-6"
+                      data-step-scroller
+                    >
                       {renderStepBody(meta.id)}
                     </div>
                     <div className="shrink-0 border-t border-line px-5 py-4 sm:px-6">

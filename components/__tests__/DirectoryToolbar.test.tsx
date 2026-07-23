@@ -96,12 +96,9 @@ describe("DirectoryToolbar", () => {
 
   it("changing the sort fires onSortOptionChange", () => {
     const props = renderToolbar();
-    const sort = screen
-      .getAllByRole("combobox")
-      .find((el) =>
-        within(el).queryByText(/newest first/i),
-      ) as HTMLSelectElement;
-    fireEvent.change(sort, { target: { value: "name" } });
+    // GlassSelect listbox: open the trigger, click the option.
+    fireEvent.click(screen.getByRole("button", { name: "Sort by" }));
+    fireEvent.click(screen.getByRole("option", { name: /farm name/i }));
     expect(props.onSortOptionChange).toHaveBeenCalledWith("name");
   });
 
@@ -113,12 +110,8 @@ describe("DirectoryToolbar", () => {
 
   it("selecting a canton fires onSelectedCantonChange", () => {
     const props = renderToolbar();
-    const cantonSelect = screen
-      .getAllByRole("combobox")
-      .find((el) =>
-        within(el).queryByText(/all cantons/i),
-      ) as HTMLSelectElement;
-    fireEvent.change(cantonSelect, { target: { value: "BE" } });
+    fireEvent.click(screen.getByRole("button", { name: "Canton" }));
+    fireEvent.click(screen.getByRole("option", { name: /BE · Bern/i }));
     expect(props.onSelectedCantonChange).toHaveBeenCalledWith("BE");
   });
 
@@ -128,12 +121,16 @@ describe("DirectoryToolbar", () => {
         <DirectoryToolbar {...makeProps()} />
       </LanguageProvider>,
     );
+    // Options only exist while the listbox is open — check inside it.
+    fireEvent.click(screen.getByRole("button", { name: "Sort by" }));
     expect(screen.queryByRole("option", { name: /nearest/i })).toBeNull();
+    fireEvent.keyDown(screen.getByRole("listbox"), { key: "Escape" });
     rerender(
       <LanguageProvider>
         <DirectoryToolbar {...makeProps({ locationActive: true })} />
       </LanguageProvider>,
     );
+    fireEvent.click(screen.getByRole("button", { name: "Sort by" }));
     expect(
       screen.getByRole("option", { name: /nearest/i }),
     ).toBeInTheDocument();

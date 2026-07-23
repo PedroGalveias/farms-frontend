@@ -163,6 +163,14 @@ export default function FarmCard({
       : "glass glass-card";
   const t = useT();
   const { latitude, longitude } = splitCoordinates(farm.coordinates);
+  // Display at 4 decimals (~11 m — plenty for "where is this farm") so the
+  // readout is one line on every card; full precision survives only in the
+  // map link's href (design §9). Non-numeric input falls back to the raw text.
+  const formatCoord = (value: string) => {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed.toFixed(4) : value;
+  };
+  const displayCoords = `${formatCoord(latitude)}, ${formatCoord(longitude)}`;
   const mapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(
     farm.coordinates,
   )}`;
@@ -289,7 +297,9 @@ export default function FarmCard({
           rel="noreferrer"
           target="_blank"
         >
-          {latitude}, {longitude}
+          <span className="whitespace-nowrap tabular-nums">
+            {displayCoords}
+          </span>
           <ArrowUpRight className="h-3 w-3" />
         </a>
       </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Globe } from "lucide-react";
+import { Check } from "lucide-react";
 import { LOCALES } from "@/lib/i18n-core";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
@@ -91,7 +91,12 @@ export default function LanguageMenu({
         title={t("lang_title")}
         type="button"
       >
-        <Globe className="h-5 w-5" />
+        {/* The active locale code, not a globe (design §9): the control shows
+            its state — which language you're in — instead of a generic icon.
+            It opens the same menu; the code updates on switch. */}
+        <span className="text-[13px] font-extrabold uppercase tracking-[0.08em]">
+          {locale}
+        </span>
       </button>
 
       {open && typeof document !== "undefined"
