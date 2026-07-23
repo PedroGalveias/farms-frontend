@@ -53,6 +53,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Emit a self-contained server bundle (.next/standalone/server.js) so the
+  // Docker image (see Dockerfile + docker-publish.yml) ships only the traced
+  // runtime deps. `next start` on Render is unaffected — this only adds output.
+  output: "standalone",
   // Inlined into the client bundle so the footer can show the deployed version.
   env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
   async headers() {
