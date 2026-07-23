@@ -94,7 +94,8 @@ describe("getFarms — cursor pagination", () => {
     const spy = mockFetchSequence(
       jsonResponse({
         farms: [makeFarm({ id: "f1" }), makeFarm({ id: "f2" })],
-        next_cursor: "2026-01-01T00:00:00Z_f2",
+        // The backend's next_cursor is the next OFFSET to request.
+        next_cursor: "100",
       }),
       jsonResponse({ farms: [makeFarm({ id: "f3" })], next_cursor: null }),
     );
@@ -103,11 +104,27 @@ describe("getFarms — cursor pagination", () => {
 
     expect(farms.map((f) => f.id)).toEqual(["f1", "f2", "f3"]);
     expect(spy).toHaveBeenCalledTimes(2);
-    // The first page carries no cursor; the second forwards `after=`.
-    expect(String(spy.mock.calls[0][0])).not.toContain("after=");
-    expect(String(spy.mock.calls[1][0])).toContain(
-      "after=2026-01-01T00%3A00%3A00Z_f2",
+    // The first page carries no offset; the second forwards it as `offset=`
+    // (the backend paginates by offset — `after=` would be silently ignored).
+    expect(String(spy.mock.calls[0][0])).not.toContain("offset=");
+    expect(String(spy.mock.calls[1][0])).toContain("offset=100");
+  });
+
+  it("dedupes farms that repeat across pages (defensive)", async () => {
+    mockFetchSequence(
+      jsonResponse({
+        farms: [makeFarm({ id: "f1" }), makeFarm({ id: "f2" })],
+        next_cursor: "100",
+      }),
+      // f2 repeats on the page boundary; it must appear once.
+      jsonResponse({
+        farms: [makeFarm({ id: "f2" }), makeFarm({ id: "f3" })],
+        next_cursor: null,
+      }),
     );
+
+    const farms = await getFarms();
+    expect(farms.map((f) => f.id)).toEqual(["f1", "f2", "f3"]);
   });
 
   it("stops after the first page when there is no cursor", async () => {
