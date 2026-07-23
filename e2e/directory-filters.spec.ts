@@ -62,15 +62,24 @@ test.describe("directory filtering", () => {
     const chip = page.getByRole("button", { name: /^bern \d+$/i }).first();
     await chip.scrollIntoViewIfNeeded();
     await chip.click();
-    await expect(page.locator("select").first()).toHaveValue("BE");
+    // The toolbar's canton control is a styled GlassSelect listbox (not a
+    // native <select> any more); its trigger mirrors the rail selection.
+    const cantonControl = page.getByRole("button", {
+      name: "Canton",
+      exact: true,
+    });
+    await expect(cantonControl).toContainText("Bern");
     await expect
       .poll(async () =>
         Number((await heading.textContent())?.match(/\d+/)?.[0] ?? "0"),
       )
       .toBeLessThanOrEqual(initial);
 
-    // Reset via the toolbar select back to all cantons.
-    await page.locator("select").first().selectOption("all");
+    // Reset via the toolbar control back to all cantons: open the listbox and
+    // pick "All cantons".
+    await cantonControl.click();
+    await page.getByRole("option", { name: /all cantons/i }).click();
     await expect(chip).toHaveAttribute("aria-pressed", "false");
+    await expect(cantonControl).toContainText(/all cantons/i);
   });
 });
