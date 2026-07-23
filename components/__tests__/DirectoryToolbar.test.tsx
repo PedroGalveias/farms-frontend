@@ -1,12 +1,6 @@
 import { type ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import DirectoryToolbar from "@/components/DirectoryToolbar";
 import type { Farm } from "@/types/farm";
