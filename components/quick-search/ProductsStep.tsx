@@ -12,6 +12,8 @@ import type {
 
 interface ProductsStepProps {
   matchCount: number;
+  /** Live farm counts for each match mode, so the toggle shows its yield. */
+  matchCounts: { all: number; any: number };
   matchMode: QuickSearchMatchMode;
   onClearSelection: () => void;
   onMatchModeChange: (mode: QuickSearchMatchMode) => void;
@@ -23,6 +25,7 @@ interface ProductsStepProps {
 
 export default function ProductsStep({
   matchCount,
+  matchCounts,
   matchMode,
   onClearSelection,
   onMatchModeChange,
@@ -173,21 +176,41 @@ export default function ProductsStep({
           className="inline-flex rounded-chip bg-tone p-1"
           role="group"
         >
-          {(["all", "any"] as const).map((mode) => (
-            <button
-              aria-pressed={matchMode === mode}
-              className={`rounded-chip px-4 py-1.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
-                matchMode === mode
-                  ? "bg-white text-ink shadow-elev-1"
-                  : "text-ink/60 hover:text-ink/70"
-              }`}
-              key={mode}
-              onClick={() => onMatchModeChange(mode)}
-              type="button"
-            >
-              {mode === "all" ? t("qs_match_all") : t("qs_match_any")}
-            </button>
-          ))}
+          {(["all", "any"] as const).map((mode) => {
+            const count = matchCounts[mode];
+            // "Match all · 214" — the live yield of each mode (§9), shown once a
+            // product is picked. A zero count is tinted so "all" quietly zeroing
+            // out is legible before you commit to the search.
+            const showCount = selectedCount > 0;
+            return (
+              <button
+                aria-pressed={matchMode === mode}
+                className={`inline-flex items-center gap-1.5 rounded-chip px-4 py-1.5 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                  matchMode === mode
+                    ? "bg-white text-ink shadow-elev-1"
+                    : "text-ink/60 hover:text-ink/70"
+                }`}
+                key={mode}
+                onClick={() => onMatchModeChange(mode)}
+                type="button"
+              >
+                {mode === "all" ? t("qs_match_all") : t("qs_match_any")}
+                {showCount ? (
+                  <span
+                    className={`rounded-chip px-1.5 py-0.5 text-[0.7rem] font-bold leading-none tabular-nums ${
+                      count === 0
+                        ? "bg-amber-500/15 text-amber-700"
+                        : matchMode === mode
+                          ? "bg-ink/10 text-ink/70"
+                          : "bg-ink/[0.06] text-ink/50"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
         </div>
         <p className="text-xs leading-5 text-ink/60">
           {matchMode === "all"
