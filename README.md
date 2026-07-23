@@ -138,6 +138,7 @@ git tag v1.2.3 && git push origin main v1.2.3
 The footer's displayed version resolves from `git describe --tags` at build time, so tagged builds show the release tag automatically.
 
 - Health check path: `/api/health`.
+- **Runtime is [Bun](https://bun.sh).** Render and the container image install, build, and serve with Bun (`bun install --frozen-lockfile` → `bun run build` → `bun server.js`), pinned by the committed [`bun.lock`](bun.lock). Local development and CI stay on **npm + Node 22** (the test runners don't run under Bun), so both a `package-lock.json` and a `bun.lock` are committed; a [`bun-lockfile`](.github/workflows/ci.yml) CI job runs `bun install --frozen-lockfile` to catch either lockfile drifting from `package.json`. The [`Dockerfile`](Dockerfile) builds a non-root standalone image published to GHCR on a `v*` tag ([`docker-publish.yml`](.github/workflows/docker-publish.yml)).
 
 ## 🌍 Internationalization
 

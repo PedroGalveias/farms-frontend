@@ -229,6 +229,22 @@ jobs:
           path: playwright-report/
           if-no-files-found: ignore
 
+  # Keep bun.lock honest. The Render runtime and the container both install with
+  # Bun (`bun install --frozen-lockfile`); CI still runs on npm, so the two
+  # lockfiles can drift if someone adds a dependency with only one tool. Bun's
+  # --frozen-lockfile fails when package.json and bun.lock disagree, catching a
+  # stale bun.lock before it reaches a deploy. (Regenerate with `bun install`.)
+  bun-lockfile:
+    name: bun.lock in sync with package.json
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Verify bun.lock is up to date
+        run: bun install --frozen-lockfile
+
   # Keep the internal version in lockstep with release tags: a `vX.Y.Z` tag
   # must match package.json's "version" exactly, or the deploy is blocked.
   # (Bump package.json before cutting the tag.) The footer's displayed version
