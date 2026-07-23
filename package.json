@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "analyze": "ANALYZE=true next build",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0",
     "lint": "eslint --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
