@@ -78,6 +78,56 @@ describe("getFarms — response-shape tolerance", () => {
     expect(farms[0].products).toEqual(products);
   });
 
+  it("uppercases a product's stock status so the UI's checks hold", async () => {
+    // A transitional backend serialised the enum lowercase ("available"); the
+    // detail page compares `status === "AVAILABLE"`, so normalise at the boundary.
+    const products = [
+      {
+        slug: "cherries",
+        name_en: "Cherries",
+        group: "fruits",
+        status: "seasonal",
+        last_confirmed_at: null,
+      },
+      {
+        slug: "apples",
+        name_en: "Apples",
+        group: "fruits",
+        status: "unavailable",
+        last_confirmed_at: null,
+      },
+    ] as unknown as FarmProduct[];
+    mockFetchSequence(
+      jsonResponse({ farms: [makeFarm({ products })], next_cursor: null }),
+    );
+
+    const farms = await getFarms();
+
+    expect(farms[0].products?.map((p) => p.status)).toEqual([
+      "SEASONAL",
+      "UNAVAILABLE",
+    ]);
+  });
+
+  it("falls back to AVAILABLE for an unrecognised status", async () => {
+    const products = [
+      {
+        slug: "kale",
+        name_en: "Kale",
+        group: "vegetables",
+        status: "???",
+        last_confirmed_at: null,
+      },
+    ] as unknown as FarmProduct[];
+    mockFetchSequence(
+      jsonResponse({ farms: [makeFarm({ products })], next_cursor: null }),
+    );
+
+    const farms = await getFarms();
+
+    expect(farms[0].products?.[0].status).toBe("AVAILABLE");
+  });
+
   it("throws FarmsApiError on an unexpected shape", async () => {
     mockFetchSequence(jsonResponse({ nope: true }));
     await expect(getFarms()).rejects.toBeInstanceOf(FarmsApiError);

@@ -4,7 +4,28 @@ import {
   readErrorMessage,
 } from "@/lib/backend";
 import { normalizeFarmCategories } from "@/lib/categories";
-import type { CreateFarmPayload, Farm } from "@/types/farm";
+import type { CreateFarmPayload, Farm, StockStatus } from "@/types/farm";
+
+const STOCK_STATUSES: readonly StockStatus[] = [
+  "AVAILABLE",
+  "SEASONAL",
+  "UNAVAILABLE",
+];
+
+/**
+ * Canonicalise a product's stock status to the uppercase contract the UI
+ * compares against (`item.status === "AVAILABLE"`). The backend enum is
+ * SCREAMING_SNAKE_CASE, but a transitional build serialised it lowercase
+ * (`"available"`), which those checks silently never matched. Uppercasing at the
+ * boundary makes the detail page correct regardless of which backend is live.
+ * Anything unrecognised falls back to AVAILABLE — the neutral "no badge" state.
+ */
+function normalizeStockStatus(status: unknown): StockStatus {
+  const upper = typeof status === "string" ? status.toUpperCase() : "";
+  return (STOCK_STATUSES as readonly string[]).includes(upper)
+    ? (upper as StockStatus)
+    : "AVAILABLE";
+}
 
 // Re-exported so existing importers of these from farms-service keep working.
 export { FarmsApiError, getFarmsApiBaseUrl } from "@/lib/backend";
@@ -82,6 +103,16 @@ function normalizeFarm(farm: Farm): Farm {
   return {
     ...farm,
     categories: normalizeFarmCategories(farm.categories ?? []),
+    // Products otherwise pass through untouched; only the status casing is
+    // canonicalised so the UI's uppercase comparisons hold.
+    ...(farm.products
+      ? {
+          products: farm.products.map((product) => ({
+            ...product,
+            status: normalizeStockStatus(product.status),
+          })),
+        }
+      : {}),
   };
 }
 
