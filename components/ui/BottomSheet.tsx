@@ -18,8 +18,13 @@ interface BottomSheetProps {
 
 // How far the grabber must travel down before release dismisses the sheet.
 const DISMISS_THRESHOLD = 110;
-// A fast downward flick dismisses regardless of distance (px per ms) — the iOS
-// "throw it away" gesture, so a short quick flick works like a long slow drag.
+// How far a left-edge swipe must travel right before release dismisses. Lower
+// than the vertical threshold — the edge gesture is a deliberate "back" intent,
+// and the hot-zone is narrow, so there's less room to travel.
+const EDGE_DISMISS_THRESHOLD = 90;
+// A fast flick dismisses regardless of distance (px per ms) — the iOS "throw it
+// away" gesture, so a short quick flick works like a long slow drag. Shared by
+// the downward grabber flick and the rightward edge-swipe.
 const FLICK_VELOCITY = 0.55;
 // Spring the sheet back to rest / to the finger (the --ease-spring token gives
 // a subtle overshoot; a linear tween reads as cheap).
@@ -49,6 +54,17 @@ export default function BottomSheet({
   const drag = useRef({
     startY: 0,
     lastY: 0,
+    lastT: 0,
+    velocity: 0,
+    offset: 0,
+    active: false,
+  });
+  // Horizontal edge-swipe ("back") gesture — separate state so it never fights
+  // the vertical grabber drag. Only one can be active at a time (different
+  // capture targets), so they can safely share `sheetRef`'s transform.
+  const edge = useRef({
+    startX: 0,
+    lastX: 0,
     lastT: 0,
     velocity: 0,
     offset: 0,
@@ -138,6 +154,71 @@ export default function BottomSheet({
     }
   };
 
+  // ── Left-edge swipe-to-dismiss (the iOS "back" gesture) ──────────────────
+  const setOffsetX = (x: number, spring = false) => {
+    const el = sheetRef.current;
+    if (!el) return;
+    el.style.transition = edge.current.active
+      ? "none"
+      : spring
+        ? SPRING_BACK
+        : "";
+    el.style.transform = x > 0 ? `translateX(${x}px)` : "";
+  };
+
+  const onEdgePointerDown = (event: React.PointerEvent) => {
+    // Edge-swipe is a mobile gesture; on ≥sm the sheet is a centred modal.
+    if (!window.matchMedia(MOBILE_QUERY).matches) return;
+    const now = performance.now();
+    edge.current = {
+      startX: event.clientX,
+      lastX: event.clientX,
+      lastT: now,
+      velocity: 0,
+      offset: 0,
+      active: true,
+    };
+    if (sheetRef.current) sheetRef.current.style.willChange = "transform";
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const onEdgePointerMove = (event: React.PointerEvent) => {
+    if (!edge.current.active) return;
+    const now = performance.now();
+    const raw = event.clientX - edge.current.startX;
+    // Rightward (dismiss direction) tracks 1:1; dragging back left past rest
+    // rubber-bands so the edge feels elastic instead of stuck.
+    const offset = raw >= 0 ? raw : raw * 0.18;
+    const dt = now - edge.current.lastT || 1;
+    edge.current.velocity = (event.clientX - edge.current.lastX) / dt;
+    edge.current.lastX = event.clientX;
+    edge.current.lastT = now;
+    edge.current.offset = offset;
+    setOffsetX(offset);
+  };
+
+  const endEdgeDrag = (event: React.PointerEvent) => {
+    if (!edge.current.active) return;
+    const { offset, velocity } = edge.current;
+    edge.current.active = false;
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // Pointer may already be released — safe to ignore.
+    }
+    // Dismiss on enough travel OR a fast rightward flick from any distance.
+    if (offset > EDGE_DISMISS_THRESHOLD || velocity > FLICK_VELOCITY) {
+      haptic();
+      onClose();
+    } else {
+      setOffsetX(0, true);
+      const el = sheetRef.current;
+      window.setTimeout(() => {
+        if (el && !edge.current.active) el.style.willChange = "";
+      }, 380);
+    }
+  };
+
   if (typeof document === "undefined") {
     return null;
   }
@@ -158,9 +239,23 @@ export default function BottomSheet({
         ref={sheetRef}
         role="dialog"
       >
+        {/* Left-edge hot-zone — swipe right to dismiss (the iOS "back" gesture);
+            a narrow reserved strip, mobile-only, invisible. Sits over the
+            sheet's own left padding so it rarely competes with content. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-y-0 left-0 z-10 w-5 touch-none sm:hidden"
+          data-edge-swipe="true"
+          onPointerCancel={endEdgeDrag}
+          onPointerDown={onEdgePointerDown}
+          onPointerMove={onEdgePointerMove}
+          onPointerUp={endEdgeDrag}
+        />
+
         {/* Grabber — flick down to dismiss on touch; decorative on desktop. */}
         <div
           aria-hidden="true"
+          data-grabber="true"
           className="flex shrink-0 cursor-grab touch-none justify-center pt-3 pb-1 active:cursor-grabbing sm:hidden"
           onPointerCancel={endDrag}
           onPointerDown={onPointerDown}
