@@ -21,6 +21,7 @@ import { haptic } from "@/lib/haptics";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import CategoryFilterSheet from "@/components/CategoryFilterSheet";
 import DirectorySearchBox from "@/components/directory/DirectorySearchBox";
+import GlassSelect from "@/components/ui/GlassSelect";
 import type { DirectoryViewMode, Farm, FarmSortOption } from "@/types/farm";
 
 // How many categories to show inline before the rest move into the sheet.
@@ -190,45 +191,45 @@ export default function DirectoryToolbar({
           value={searchTerm}
         />
 
-        <label className="block">
-          <span className="sr-only">{t("sort_canton")}</span>
-          <select
-            className={fieldClassName}
-            onChange={(event) => onSelectedCantonChange(event.target.value)}
-            value={selectedCanton}
-          >
-            <option value="all">{t("toolbar_allCantons")}</option>
-            {cantonRegions.map((region) => (
-              <optgroup key={region.key} label={t(region.key)}>
-                {region.cantons.map((canton) => (
-                  <option key={canton} value={canton}>
-                    {canton} · {getCantonName(canton)} (
-                    {cantonCounts[canton] ?? 0})
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
+        {/* Styled listboxes (design §9): the native <select> chrome (double
+            arrows, OS focus ring) was the one non-designed control on the
+            glass toolbar. GlassSelect keeps full keyboard + type-ahead. */}
+        <GlassSelect
+          ariaLabel={t("sort_canton")}
+          onChange={onSelectedCantonChange}
+          options={[
+            { label: t("toolbar_allCantons"), value: "all" },
+            ...cantonRegions.flatMap((region) =>
+              region.cantons.map((canton) => ({
+                group: t(region.key),
+                label: `${canton} · ${getCantonName(canton)} (${
+                  cantonCounts[canton] ?? 0
+                })`,
+                value: canton,
+              })),
+            ),
+          ]}
+          triggerClassName={fieldClassName}
+          value={selectedCanton}
+        />
 
-        <label className="relative block">
-          <span className="sr-only">{t("a11y_sortBy")}</span>
-          <ArrowDownWideNarrow className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/60" />
-          <select
-            className={`${fieldClassName} pl-11`}
-            onChange={(event) =>
-              onSortOptionChange(event.target.value as FarmSortOption)
-            }
-            value={sortOption}
-          >
-            <option value="newest">{t("sort_newest")}</option>
-            {locationActive ? (
-              <option value="nearest">{t("sort_nearest")}</option>
-            ) : null}
-            <option value="name">{t("sort_name")}</option>
-            <option value="canton">{t("sort_canton")}</option>
-          </select>
-        </label>
+        <GlassSelect
+          ariaLabel={t("a11y_sortBy")}
+          icon={
+            <ArrowDownWideNarrow className="h-4 w-4 shrink-0 text-ink/60" />
+          }
+          onChange={(next) => onSortOptionChange(next as FarmSortOption)}
+          options={[
+            { label: t("sort_newest"), value: "newest" },
+            ...(locationActive
+              ? [{ label: t("sort_nearest"), value: "nearest" }]
+              : []),
+            { label: t("sort_name"), value: "name" },
+            { label: t("sort_canton"), value: "canton" },
+          ]}
+          triggerClassName={fieldClassName}
+          value={sortOption}
+        />
 
         <div className="flex items-center gap-1 rounded-field bg-tone p-1">
           <button

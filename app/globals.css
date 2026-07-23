@@ -1404,3 +1404,21 @@ html.force-motion.theme-vt::view-transition-new(root) {
   animation: theme-vt-reveal 0.7s var(--ease-out-expo);
   z-index: 1;
 }
+
+/* ── Autofill parity (design §9) ──────────────────────────────────────────
+   WebKit/Blink paint autofilled fields with a UA cream-yellow that ignores
+   the palette entirely (both auth fields went off-brand in prod). The UA
+   background can't be overridden directly — the inset box-shadow trick paints
+   our own field colour over it; -webkit-text-fill-color restores ink. The
+   long transition delay keeps the UA from re-flashing its own colour. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--cloud) inset;
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
+  transition: background-color 9999s ease-out;
+}
+/* html.dark inherits automatically: --cloud/--ink flip with the theme, and
+   the rule reads the custom properties live. Firefox's autofill highlight
+   already respects the field background; no -moz rule needed. */
