@@ -182,6 +182,23 @@ export default function QuickSearchExperience({
     [farms, location, matchMode, selectedProducts],
   );
 
+  // Live counts for BOTH match modes (§9 "smarter match toggle"): "Match all"
+  // can silently zero out at 2,500-farm scale, so surface each mode's yield on
+  // the toggle itself. Independent of the active mode (both computed once).
+  const matchCounts = useMemo(() => {
+    if (selectedProducts.length === 0) {
+      return { all: 0, any: 0 };
+    }
+    const count = (mode: QuickSearchMatchMode) =>
+      getQuickSearchResults({
+        farms,
+        location,
+        matchMode: mode,
+        selectedProducts,
+      }).length;
+    return { all: count("all"), any: count("any") };
+  }, [farms, location, selectedProducts]);
+
   const currentIndex = STEPS.findIndex((meta) => meta.id === step);
   const statusPill = SERVICE_STATUS_PILLS[serviceStatus];
 
@@ -451,6 +468,7 @@ export default function QuickSearchExperience({
       return (
         <ProductsStep
           matchCount={results.length}
+          matchCounts={matchCounts}
           starterKeys={starterKeys}
           matchMode={matchMode}
           onClearSelection={() => setSelectedProducts([])}
