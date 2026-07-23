@@ -7,6 +7,8 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
 <p>
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/codeql.yml/badge.svg"></a>
+  <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/ci.yml"><img alt="Coverage floors (CI-enforced)" src="https://img.shields.io/badge/coverage-%E2%89%A589%25%20stmts%20%C2%B7%20%E2%89%A579%25%20branches-3c873a"></a>
+  <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/audit.yml"><img alt="Security audit" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/audit.yml/badge.svg"></a>
   <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D20.19-3c873a">
   <img alt="License: GPL-2.0" src="https://img.shields.io/badge/license-GPL--2.0-blue">
 </p>
@@ -120,16 +122,20 @@ format:check → lint → typecheck → test (+coverage) → build      (verify 
 ```
 
 - Pull requests get an automatic **coverage comment**; the HTML report is uploaded as an artifact.
-- **Deploy is gated**: a Render deploy is triggered only after `verify`, `e2e`, **and** `windows` pass, and only for a pushed **`v*` version tag** (or a manual `workflow_dispatch`). Pushes to `main` and pull requests run CI but **never deploy**.
+- **Deploy is gated**: a Render deploy is triggered only after `verify`, `e2e`, `windows`, `macos`, **and** `tag-version` (tag ↔ `package.json` version match) all pass, and only for a pushed **`v*` version tag** (or a manual `workflow_dispatch`). Pushes to `main` and pull requests run CI but **never deploy**.
 - [`codeql.yml`](.github/workflows/codeql.yml) runs CodeQL security analysis; [`audit.yml`](.github/workflows/audit.yml) runs `npm audit` daily and on dependency changes (failing on high/critical advisories in production deps).
 
 ### Deployment (Render)
 
-Shipping is **tag-driven**: merge to `main` whenever — that only runs CI. To release, cut a version tag, which triggers the Render **deploy hook** after CI passes:
+Shipping is **tag-driven**: merge to `main` whenever — that only runs CI. To release, bump `package.json`'s `version` to match the tag you're about to cut (CI blocks the deploy if they differ), then push the tag, which triggers the Render **deploy hook** after CI passes:
 
 ```bash
-git tag v1.2.3 && git push origin v1.2.3
+npm version 1.2.3 --no-git-tag-version   # sync package.json first
+git commit -am "chore: v1.2.3"
+git tag v1.2.3 && git push origin main v1.2.3
 ```
+
+The footer's displayed version resolves from `git describe --tags` at build time, so tagged builds show the release tag automatically.
 
 - Health check path: `/api/health`.
 
@@ -189,13 +195,16 @@ scripts/                Icon + iOS splash generators (sharp)
 
 The frontend is built against these [`farms`](https://github.com/PedroGalveias/farms) endpoints:
 
-| Method | Path            | Purpose                         |
-| ------ | --------------- | ------------------------------- |
-| `GET`  | `/health_check` | Service health                  |
-| `GET`  | `/farms`        | List farms                      |
-| `POST` | `/farms`        | Create a farm                   |
-| `GET`  | `/me`           | Current session user            |
-| `POST` | `/auth/*`       | Login / register / verify email |
+| Method | Path                                                 | Purpose                                     |
+| ------ | ---------------------------------------------------- | ------------------------------------------- |
+| `GET`  | `/health_check`                                      | Service health                              |
+| `GET`  | `/farms`                                             | List farms (directory filters + pagination) |
+| `GET`  | `/farms/{id}`                                        | One farm                                    |
+| `POST` | `/farms`                                             | Create a farm                               |
+| `GET`  | `/me`                                                | Current session user                        |
+| `POST` | `/login` · `/logout` · `/register` · `/verify-email` | Auth lifecycle                              |
+
+`GET /farms` is parsed **shape-tolerantly**: both the taxonomy-aware `{ farms, next_cursor }` page shape (cursor pagination followed automatically) and a plain `Farm[]` array are accepted, so either backend generation works. Farms carry `products[]` (slug, names, group, stock status) and derived `categories[]` when the backend provides them.
 
 `POST /farms` expects `name`, `address`, `canton`, `coordinates`, `categories`, and an `idempotency_key`. The browser submits the farm fields to the local `app/api/farms` route handler, which adds a fresh `idempotency_key` before forwarding to the backend.
 
