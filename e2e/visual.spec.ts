@@ -29,10 +29,23 @@ test.skip(
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
+// The mock backend's farms carry FIXED created_at dates, but the directory
+// compares them against the wall clock (isRecentlyAdded → the "new this month"
+// badge). So a baseline captured while those farms were still "new" starts
+// failing the day they age out — which is exactly what happened: every branch,
+// including dependency bumps that touch no UI, began failing `directory list
+// view` by ~724px a week after the baselines were regenerated.
+//
+// Freeze the clock so every date-driven surface (recency badges, "in season
+// now", relative timestamps) renders identically forever. Baselines are only
+// ever invalidated by real UI changes now, not by the calendar.
+const FROZEN_NOW = new Date("2026-06-28T09:00:00Z");
+
 // Runtime emulation (this Playwright version has no `reducedMotion` test
 // option — the runner silently ignores unknown use() keys); the page-level
 // API works in every engine.
 test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(FROZEN_NOW);
   await page.emulateMedia({ reducedMotion: "reduce" });
 });
 
