@@ -282,7 +282,7 @@ export default async function RootLayout({
                       <SeasonalReminderProvider>
                         <SkipLink />
                         <SideRail />
-                        <div className="cursor-zone relative z-[1] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[92px]">
+                        <div className="app-shell cursor-zone relative z-[1] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[92px]">
                           <SiteHeader />
                           <div id="main-content">{children}</div>
                         </div>

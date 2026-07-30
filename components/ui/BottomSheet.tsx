@@ -219,6 +219,37 @@ export default function BottomSheet({
     }
   };
 
+  // ── Scroll-then-drag handoff ─────────────────────────────────────────────
+  // Dragging the sheet's CONTENT may only dismiss once that content is scrolled
+  // to the top; below the top the same gesture belongs to the scroller. Walk
+  // from the touched node up to the sheet looking for the scroller that owns
+  // the gesture, and arm the drag only when it's already at its top.
+  const contentDragArmed = (target: EventTarget | null) => {
+    const sheet = sheetRef.current;
+    let node = target instanceof Element ? target : null;
+    while (node && node !== sheet) {
+      const overflowY = window.getComputedStyle(node).overflowY;
+      if (
+        (overflowY === "auto" || overflowY === "scroll") &&
+        node.scrollHeight > node.clientHeight
+      ) {
+        // `<= 0`, not `=== 0`, deliberately: iOS rubber-band reports a NEGATIVE
+        // scrollTop while the user pulls past the top, which is precisely the
+        // moment the pull-down-to-dismiss gesture should arm. Exact equality
+        // would also be brittle against fractional scroll offsets.
+        return node.scrollTop <= 0;
+      }
+      node = node.parentElement;
+    }
+    // No scroller between the touch and the sheet — nothing to hand off to.
+    return true;
+  };
+
+  const onContentPointerDown = (event: React.PointerEvent) => {
+    if (!contentDragArmed(event.target)) return;
+    onPointerDown(event);
+  };
+
   if (typeof document === "undefined") {
     return null;
   }
@@ -265,7 +296,19 @@ export default function BottomSheet({
           <span className="h-1.5 w-10 rounded-chip bg-ink/15" />
         </div>
 
-        {children}
+        {/* Content drags the sheet too, but only from the top of its own
+            scroller (see contentDragArmed) — otherwise the gesture scrolls.
+            No `touch-none` here: native scrolling must stay intact. */}
+        <div
+          className="contents"
+          data-sheet-content="true"
+          onPointerCancel={endDrag}
+          onPointerDown={onContentPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+        >
+          {children}
+        </div>
       </div>
     </div>,
     document.body,
