@@ -151,6 +151,58 @@ describe("FarmDotMap", () => {
     expect(onOpenFarm).not.toHaveBeenCalled();
   });
 
+  it("drops the mini-card when the hovered farm leaves the filtered set", () => {
+    // Filters can change while the pointer rests on a dot — the card must not
+    // keep showing a farm that is no longer a result.
+    const { rerender } = render(
+      <LanguageProvider>
+        <FarmDotMap
+          allFarms={[BERGHOF, ZURIHOF]}
+          distanceByFarmId={new Map()}
+          onOpenFarm={vi.fn<OpenFarm>()}
+          visibleFarms={[BERGHOF]}
+        />
+      </LanguageProvider>,
+    );
+    const canvas = screen.getByRole("img") as HTMLCanvasElement;
+    Object.defineProperty(canvas, "clientWidth", {
+      value: W,
+      configurable: true,
+    });
+    Object.defineProperty(canvas, "clientHeight", {
+      value: H,
+      configurable: true,
+    });
+    canvas.getBoundingClientRect = () =>
+      ({
+        left: 0,
+        top: 0,
+        width: W,
+        height: H,
+        right: W,
+        bottom: H,
+        x: 0,
+        y: 0,
+      }) as DOMRect;
+
+    const dot = dotPixel(46.95, 7.45);
+    fireEvent.pointerMove(canvas, { clientX: dot.x, clientY: dot.y });
+    expect(screen.getByText("Berghof Studer")).toBeInTheDocument();
+
+    // A filter change removes it from the results.
+    rerender(
+      <LanguageProvider>
+        <FarmDotMap
+          allFarms={[BERGHOF, ZURIHOF]}
+          distanceByFarmId={new Map()}
+          onOpenFarm={vi.fn<OpenFarm>()}
+          visibleFarms={[ZURIHOF]}
+        />
+      </LanguageProvider>,
+    );
+    expect(screen.queryByText("Berghof Studer")).not.toBeInTheDocument();
+  });
+
   it("only the filtered farms are clickable (the dim field is not)", () => {
     const onOpenFarm = vi.fn<OpenFarm>();
     // Zürihof is in the field but NOT in visibleFarms → its dot is inert.
