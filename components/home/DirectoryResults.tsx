@@ -91,8 +91,17 @@ export default function DirectoryResults({
           toolbar as the list scrolls, the way native list UIs do. The offset
           tracks the toolbar's measured height (--directory-toolbar-h, published
           by DirectoryToolbar) plus its own 84px top inset. Opaque fill rather
-          than a backdrop-filter — the live-blur budget belongs to the chrome. */}
-      <div className="sticky top-[calc(84px_+_var(--directory-toolbar-h,_0px)_+_0.75rem)] z-10 -mx-2 flex flex-wrap items-baseline justify-between gap-3 rounded-field bg-paper px-2 py-2">
+          than a backdrop-filter — the live-blur budget belongs to the chrome.
+
+          Two deliberate constraints, both learned from CI:
+          - `lg:` only. Below that the toolbar wraps to ~half the screen, so a
+            second pinned band would float mid-viewport over the cards.
+          - `pointer-events-none`. A pinned opaque band otherwise swallows
+            clicks on whatever scrolls beneath it (it broke the directory
+            stress test's "Load more" and the desktop dock click). It carries
+            no controls — only the count and a status line — so letting clicks
+            pass straight through is exactly right. */}
+      <div className="pointer-events-none z-10 -mx-2 flex flex-wrap items-baseline justify-between gap-3 rounded-field bg-paper px-2 py-2 lg:sticky lg:top-[calc(84px_+_var(--directory-toolbar-h,_0px)_+_0.75rem)]">
         <h2 className="text-3xl font-bold tracking-[-0.035em] text-ink">
           {t("results_farms", { n: visibleFarms.length })}
         </h2>
