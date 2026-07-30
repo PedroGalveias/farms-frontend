@@ -390,6 +390,9 @@ export const de: Dict = {
     "Ein unerwarteter Fehler ist aufgetreten. Versuche es erneut oder navigiere über die Leiste unten.",
   error_retry: "Erneut versuchen",
   map_loading: "Karte wird geladen…",
+  map_ariaLabel: "Karte mit {n} Höfen in der ganzen Schweiz",
+  map_listHint:
+    "Dies ist eine visuelle Karte. Wechseln Sie zur Raster- oder Listenansicht, um diese Höfe mit der Tastatur zu durchsuchen.",
   view_list: "Listenansicht anzeigen",
   view_grid: "Rasteransicht anzeigen",
   view_map: "Kartenansicht anzeigen",

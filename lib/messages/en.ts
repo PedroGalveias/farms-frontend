@@ -384,6 +384,9 @@ export const en: Dict = {
     "An unexpected error occurred. You can try again, or use the bar below to keep browsing.",
   error_retry: "Try again",
   map_loading: "Loading map…",
+  map_ariaLabel: "Map of {n} farms across Switzerland",
+  map_listHint:
+    "This is a visual map. Switch to grid or list view to browse these farms with a keyboard.",
   view_list: "Show list layout",
   view_grid: "Show grid layout",
   view_map: "Show map layout",

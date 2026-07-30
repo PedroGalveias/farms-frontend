@@ -392,6 +392,9 @@ export const rm: Dict = {
     "Ina errur nunspetgada è capitada. Emprova anc ina giada u dovra la trav sutvart.",
   error_retry: "Empruvar danovamain",
   map_loading: "Chargiar la charta…",
+  map_ariaLabel: "Charta da {n} fatturias en tut la Svizra",
+  map_listHint:
+    "Quai è ina charta visuala. Midai a la vista grild u glista per sfegliar questas fatturias cun la tastatura.",
   view_list: "Mussar la vista da glista",
   view_grid: "Mussar la vista da grilliada",
   view_map: "Mussar la vista da charta",
