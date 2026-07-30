@@ -233,6 +233,10 @@ export default function BottomSheet({
         (overflowY === "auto" || overflowY === "scroll") &&
         node.scrollHeight > node.clientHeight
       ) {
+        // `<= 0`, not `=== 0`, deliberately: iOS rubber-band reports a NEGATIVE
+        // scrollTop while the user pulls past the top, which is precisely the
+        // moment the pull-down-to-dismiss gesture should arm. Exact equality
+        // would also be brittle against fractional scroll offsets.
         return node.scrollTop <= 0;
       }
       node = node.parentElement;
