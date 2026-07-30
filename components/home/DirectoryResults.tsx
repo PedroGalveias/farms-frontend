@@ -87,7 +87,12 @@ export default function DirectoryResults({
 
   return (
     <section className="mt-8">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
+      {/* Sticky section header (§5): the count pins directly under the sticky
+          toolbar as the list scrolls, the way native list UIs do. The offset
+          tracks the toolbar's measured height (--directory-toolbar-h, published
+          by DirectoryToolbar) plus its own 84px top inset. Opaque fill rather
+          than a backdrop-filter — the live-blur budget belongs to the chrome. */}
+      <div className="sticky top-[calc(84px_+_var(--directory-toolbar-h,_0px)_+_0.75rem)] z-10 -mx-2 flex flex-wrap items-baseline justify-between gap-3 rounded-field bg-paper px-2 py-2">
         <h2 className="text-3xl font-bold tracking-[-0.035em] text-ink">
           {t("results_farms", { n: visibleFarms.length })}
         </h2>

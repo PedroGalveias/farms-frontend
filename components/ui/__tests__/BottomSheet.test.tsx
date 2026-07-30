@@ -163,6 +163,60 @@ describe("BottomSheet", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  // ── Scroll-then-drag handoff (§5) ──────────────────────────────────────
+  // Dragging the sheet's content may only dismiss from the top of its own
+  // scroller; below the top the gesture belongs to the scroller.
+  function renderScrollableSheet(scrollTop: number) {
+    const onClose = vi.fn();
+    render(
+      <BottomSheet closeLabel="Close" onClose={onClose}>
+        <div data-testid="scroller" style={{ overflowY: "auto" }}>
+          <p>Long body</p>
+        </div>
+      </BottomSheet>,
+    );
+    const scroller = screen.getByTestId("scroller");
+    // jsdom reports 0 for both, so a scroller is never "scrollable" by default.
+    Object.defineProperty(scroller, "scrollHeight", {
+      value: 1000,
+      configurable: true,
+    });
+    Object.defineProperty(scroller, "clientHeight", {
+      value: 300,
+      configurable: true,
+    });
+    scroller.scrollTop = scrollTop;
+    return { onClose, scroller };
+  }
+
+  it("content drag dismisses when its scroller is at the top", () => {
+    setMobile(true);
+    const { onClose, scroller } = renderScrollableSheet(0);
+    fireEvent.pointerDown(scroller, { clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(scroller, { clientY: 240, pointerId: 1 }); // > 110
+    fireEvent.pointerUp(scroller, { clientY: 240, pointerId: 1 });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("content drag does NOT dismiss while the scroller is scrolled down", () => {
+    setMobile(true);
+    const { onClose, scroller } = renderScrollableSheet(120);
+    fireEvent.pointerDown(scroller, { clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(scroller, { clientY: 240, pointerId: 1 });
+    fireEvent.pointerUp(scroller, { clientY: 240, pointerId: 1 });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("the grabber still dismisses even when content is scrolled down", () => {
+    setMobile(true);
+    const { onClose } = renderScrollableSheet(120);
+    const grabber = document.querySelector("[data-grabber]") as HTMLElement;
+    fireEvent.pointerDown(grabber, { clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(grabber, { clientY: 240, pointerId: 1 });
+    fireEvent.pointerUp(grabber, { clientY: 240, pointerId: 1 });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("ignores the edge-swipe on desktop (centred modal)", () => {
     setMobile(false);
     const onClose = renderSheet();

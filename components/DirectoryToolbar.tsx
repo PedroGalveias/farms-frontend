@@ -165,8 +165,35 @@ export default function DirectoryToolbar({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // Publish the toolbar's live height so the results header can pin directly
+  // beneath it (§5 sticky section headers). It wraps at narrow widths and when
+  // the location/radius row appears, so measure rather than hard-code.
+  const toolbarRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = toolbarRef.current;
+    if (!el) return;
+    const write = () =>
+      document.documentElement.style.setProperty(
+        "--directory-toolbar-h",
+        `${el.offsetHeight}px`,
+      );
+    write();
+    const cleanup = () =>
+      document.documentElement.style.removeProperty("--directory-toolbar-h");
+    if (typeof ResizeObserver === "undefined") return cleanup;
+    const observer = new ResizeObserver(write);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      cleanup();
+    };
+  }, []);
+
   return (
-    <section className="glass glass-chrome sticky top-[84px] z-20 rounded-panel p-4 sm:p-5">
+    <section
+      className="glass glass-chrome sticky top-[84px] z-20 rounded-panel p-4 sm:p-5"
+      ref={toolbarRef}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
         <h2 className="text-xl font-bold tracking-[-0.03em] text-ink">
           {t("toolbar_title")}

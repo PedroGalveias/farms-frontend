@@ -962,6 +962,31 @@ body.sheet-open .mobile-tab-bar {
   pointer-events: none;
 }
 
+/* Sheet stacking (§5): the page behind an open sheet recedes — the iOS "card
+   behind a card" depth cue. The transform lands on the page WRAPPER, never on
+   the scrolling content, and sheets portal to <body> (siblings of the wrapper)
+   so they stay crisp and unscaled. Darkening is already carried by the sheet's
+   own backdrop, so no expensive filter on this subtree. Scaling from the top
+   edge keeps the recede reading as depth rather than drift. Touch only: on
+   ≥sm the sheet is a centred modal, where the cue doesn't apply. */
+.app-shell {
+  transform-origin: 50% 0;
+  transition: transform var(--dur-3) var(--ease-out-expo);
+}
+
+@media (max-width: 639px) {
+  body.sheet-open .app-shell {
+    transform: scale(0.94);
+    border-radius: var(--radius-panel);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sheet-open .app-shell {
+    transform: none;
+  }
+}
+
 /* Shimmering accent underline used on links/labels */
 @keyframes pulse-dot {
   0%,
