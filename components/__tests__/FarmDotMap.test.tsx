@@ -74,13 +74,15 @@ const ZURIHOF: Farm = {
   coordinates: "47.4,8.5",
 };
 
+type OpenFarm = (farm: Farm, sourceEl?: HTMLElement | null) => void;
+
 function renderMap(
   overrides: {
-    onOpenFarm?: ReturnType<typeof vi.fn>;
+    onOpenFarm?: ReturnType<typeof vi.fn<OpenFarm>>;
     visibleFarms?: Farm[];
   } = {},
 ) {
-  const onOpenFarm = overrides.onOpenFarm ?? vi.fn();
+  const onOpenFarm = overrides.onOpenFarm ?? vi.fn<OpenFarm>();
   render(
     <LanguageProvider>
       <FarmDotMap
@@ -135,7 +137,7 @@ describe("FarmDotMap", () => {
   });
 
   it("opens the farm when a lit dot is clicked", () => {
-    const onOpenFarm = vi.fn();
+    const onOpenFarm = vi.fn<OpenFarm>();
     const { canvas } = renderMap({ onOpenFarm });
     const dot = dotPixel(46.95, 7.45);
     fireEvent.click(canvas, { clientX: dot.x, clientY: dot.y });
@@ -143,14 +145,14 @@ describe("FarmDotMap", () => {
   });
 
   it("ignores clicks in empty space (no dot within range)", () => {
-    const onOpenFarm = vi.fn();
+    const onOpenFarm = vi.fn<OpenFarm>();
     const { canvas } = renderMap({ onOpenFarm });
     fireEvent.click(canvas, { clientX: 1, clientY: 1 });
     expect(onOpenFarm).not.toHaveBeenCalled();
   });
 
   it("only the filtered farms are clickable (the dim field is not)", () => {
-    const onOpenFarm = vi.fn();
+    const onOpenFarm = vi.fn<OpenFarm>();
     // Zürihof is in the field but NOT in visibleFarms → its dot is inert.
     const { canvas } = renderMap({ onOpenFarm, visibleFarms: [BERGHOF] });
     const zuri = dotPixel(47.4, 8.5);
