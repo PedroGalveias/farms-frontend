@@ -82,4 +82,21 @@ test.describe("directory filtering", () => {
     await expect(chip).toHaveAttribute("aria-pressed", "false");
     await expect(cantonControl).toContainText(/all cantons/i);
   });
+
+  // A shared "within 25 km" link used to empty the directory for every
+  // recipient who hadn't shared their location: without an origin each farm's
+  // distance is null, and a null distance can never satisfy a real radius. The
+  // radius control only renders while location is active, so nothing on screen
+  // explained it or offered a way back.
+  test("a shared ?radius= link still shows farms without a stored location", async ({
+    page,
+  }) => {
+    await page.goto("/?radius=25");
+    await expect(page.getByRole("article").first()).toBeVisible();
+    expect(await page.getByRole("article").count()).toBeGreaterThan(0);
+    // The inert radius is dropped from the URL rather than shared onward.
+    await expect
+      .poll(() => new URL(page.url()).searchParams.get("radius"))
+      .toBeNull();
+  });
 });

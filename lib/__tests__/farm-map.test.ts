@@ -60,3 +60,23 @@ describe("buildFarmMapPoints", () => {
     expect(points[0].x).toBeLessThan(1);
   });
 });
+
+describe("projectToSwissMap — non-finite input", () => {
+  // NaN fails every comparison, so a bounds check alone let it through and
+  // returned {x: NaN, y: NaN}: a "point" that paints nothing and breaks the
+  // documented null contract.
+  it("returns null for NaN and Infinity", () => {
+    expect(projectToSwissMap(NaN, NaN)).toBeNull();
+    expect(projectToSwissMap(46.9, NaN)).toBeNull();
+    expect(projectToSwissMap(NaN, 7.4)).toBeNull();
+    expect(projectToSwissMap(Infinity, 7.4)).toBeNull();
+    expect(projectToSwissMap(46.9, -Infinity)).toBeNull();
+  });
+
+  it("still projects a valid Swiss coordinate", () => {
+    const point = projectToSwissMap(46.95, 7.45);
+    expect(point).not.toBeNull();
+    expect(Number.isFinite(point!.x)).toBe(true);
+    expect(Number.isFinite(point!.y)).toBe(true);
+  });
+});

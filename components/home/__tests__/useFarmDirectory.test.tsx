@@ -135,4 +135,56 @@ describe("useFarmDirectory", () => {
     act(() => result.current.loadMore());
     expect(result.current.visibleCount).toBe(PAGE_SIZE * 2);
   });
+
+  // A shared "?radius=25" link used to empty the directory for anyone who
+  // hadn't shared their location: every distance was null, and a null distance
+  // can never satisfy a real radius. The radius control only renders while
+  // location is active, so there was no visible way back either.
+  describe("radius without a location", () => {
+    it("keeps every farm visible when a radius arrives from the URL with no origin", async () => {
+      window.history.replaceState(null, "", "/?radius=25");
+      const { result } = await setup();
+      await waitFor(() => expect(result.current.radiusKm).toBe(25));
+      expect(result.current.originCoords).toBeNull();
+      expect(result.current.visibleFarms).toHaveLength(FARMS.length);
+    });
+
+    it("does not propagate a radius into the URL while there is no origin", async () => {
+      const { result } = await setup();
+      act(() => result.current.setRadiusKm(25));
+      await waitFor(() => expect(result.current.radiusKm).toBe(25));
+      expect(window.location.search).not.toContain("radius=");
+    });
+  });
+
+  // "newest" is the default sort and re-runs on every filter change, so its
+  // comparator reads precomputed timestamps rather than parsing dates per
+  // comparison. Guard the ordering that optimisation has to preserve.
+  describe("newest sort", () => {
+    it("orders farms newest-first", async () => {
+      const { result } = await setup([
+        farm({ id: "old", created_at: "2026-01-01T00:00:00Z" }),
+        farm({ id: "new", created_at: "2026-06-01T00:00:00Z" }),
+        farm({ id: "mid", created_at: "2026-03-01T00:00:00Z" }),
+      ]);
+      expect(result.current.visibleFarms.map((f) => f.id)).toEqual([
+        "new",
+        "mid",
+        "old",
+      ]);
+    });
+
+    it("keeps a stable order when a created_at is unparseable", async () => {
+      const { result } = await setup([
+        farm({ id: "good", created_at: "2026-06-01T00:00:00Z" }),
+        farm({ id: "bad", created_at: "not-a-date" }),
+      ]);
+      // The broken row sorts last (treated as epoch) instead of poisoning the
+      // comparator with NaN, which would scramble the whole list.
+      expect(result.current.visibleFarms.map((f) => f.id)).toEqual([
+        "good",
+        "bad",
+      ]);
+    });
+  });
 });
