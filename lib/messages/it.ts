@@ -388,6 +388,9 @@ export const it: Dict = {
     "Si è verificato un errore imprevisto. Riprova o usa la barra qui sotto.",
   error_retry: "Riprova",
   map_loading: "Caricamento mappa…",
+  map_ariaLabel: "Mappa di {n} fattorie in tutta la Svizzera",
+  map_listHint:
+    "Questa è una mappa visiva. Passa alla vista griglia o elenco per sfogliare queste fattorie con la tastiera.",
   view_list: "Mostra vista elenco",
   view_grid: "Mostra vista griglia",
   view_map: "Mostra vista mappa",

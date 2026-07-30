@@ -230,6 +230,7 @@ export default function FarmsPageShell({
           ) : null}
 
           <DirectoryResults
+            allFarms={initialFarms}
             distanceByFarmId={directory.distanceByFarmId}
             onAddFarm={requestAddFarm}
             onLoadMore={directory.loadMore}

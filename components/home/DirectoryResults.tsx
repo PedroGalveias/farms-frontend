@@ -9,14 +9,16 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { PAGE_SIZE } from "@/components/home/useFarmDirectory";
 import type { DirectoryViewMode, Farm } from "@/types/farm";
 
-// Leaflet touches `window`/`document` at import time, so load it client-only and
-// keep it out of the initial bundle until the map view is opened.
-const FarmsMap = dynamic(() => import("@/components/FarmsMap"), {
+// The map view is the shared Swiss dot-map (2d canvas, no WebGL context). It's
+// heavy-ish and only needed once the map toggle is opened, so load it lazily —
+// and it reads `window`/devicePixelRatio, so keep it client-only.
+const FarmDotMap = dynamic(() => import("@/components/FarmDotMap"), {
   ssr: false,
   loading: () => <MapPlaceholder />,
 });
 
 interface DirectoryResultsProps {
+  allFarms: Farm[];
   visibleFarms: Farm[];
   totalFarmCount: number;
   viewMode: DirectoryViewMode;
@@ -30,6 +32,7 @@ interface DirectoryResultsProps {
 }
 
 export default function DirectoryResults({
+  allFarms,
   visibleFarms,
   totalFarmCount,
   viewMode,
@@ -103,7 +106,12 @@ export default function DirectoryResults({
 
       {viewMode === "map" ? (
         <div className="mt-6">
-          <FarmsMap farms={visibleFarms} onOpenFarm={onOpenFarm} />
+          <FarmDotMap
+            allFarms={allFarms}
+            distanceByFarmId={distanceByFarmId}
+            onOpenFarm={onOpenFarm}
+            visibleFarms={visibleFarms}
+          />
         </div>
       ) : (
         <>

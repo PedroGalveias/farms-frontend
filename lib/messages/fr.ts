@@ -392,6 +392,9 @@ export const fr: Dict = {
     "Une erreur inattendue s'est produite. Réessayez ou utilisez la barre ci-dessous.",
   error_retry: "Réessayer",
   map_loading: "Chargement de la carte…",
+  map_ariaLabel: "Carte de {n} fermes à travers la Suisse",
+  map_listHint:
+    "Ceci est une carte visuelle. Passez à la vue grille ou liste pour parcourir ces fermes au clavier.",
   view_list: "Afficher la vue liste",
   view_grid: "Afficher la vue grille",
   view_map: "Afficher la vue carte",
