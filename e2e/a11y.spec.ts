@@ -122,8 +122,74 @@ test.describe("accessibility", () => {
       });
     }).toPass({ timeout: 15_000 });
     await expect(page.getByRole("listbox")).toBeVisible();
-    const results = await scan(page).analyze();
+    // `scrollable-region-focusable` is disabled here, and only here.
+    //
+    // axe flags the options list because it scrolls (`overflow-y-auto`) while
+    // carrying `tabindex="-1"`, which is not a tab stop. For a generic scrolling
+    // div that is a real barrier. For this one it is not: the list is a managed
+    // -focus ARIA listbox — it receives focus programmatically when it opens and
+    // is driven with the arrow keys, which is exactly what `tabindex="-1"`
+    // exists for in the WAI-ARIA pattern. Making it tabbable to satisfy the
+    // rule would put the popup in the page's tab order and break the pattern.
+    //
+    // axe cannot see that the list gets focused on open, so the rule is
+    // replaced below by a test that drives the thing with a keyboard — a
+    // stronger check than the one being turned off, not a weaker one.
+    const results = await scan(page)
+      .disableRules(["scrollable-region-focusable"])
+      .analyze();
     expect(JSON.stringify(results.violations.map((v) => v.id))).toBe("[]");
+  });
+
+  // The behavioural half of the rule disabled above: prove a keyboard user can
+  // actually operate — and therefore scroll — the options list.
+  test("the canton listbox is fully operable from the keyboard", async ({
+    page,
+  }) => {
+    // Many small round trips (open, focus check, 13 arrow presses, scroll poll,
+    // Escape) against a dev server that is compiling routes for the rest of the
+    // suite in parallel. The default 30s budget is enough alone and not always
+    // enough under that load.
+    test.slow();
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const trigger = page.getByRole("button", { name: "Canton", exact: true });
+
+    // Open it the way a keyboard user does, not with a click.
+    await expect(async () => {
+      if ((await trigger.getAttribute("aria-expanded")) !== "true") {
+        await trigger.focus();
+        await page.keyboard.press("ArrowDown");
+      }
+      await expect(trigger).toHaveAttribute("aria-expanded", "true", {
+        timeout: 1000,
+      });
+    }).toPass({ timeout: 15_000 });
+
+    const list = page.getByRole("listbox");
+    await expect(list).toBeVisible();
+    // Focus really is inside the popup — this is what makes tabindex="-1" the
+    // correct choice rather than an oversight.
+    await expect(list).toBeFocused();
+
+    const activeAt = () => list.getAttribute("aria-activedescendant");
+    const first = await activeAt();
+    await page.keyboard.press("ArrowDown");
+    await expect.poll(activeAt).not.toBe(first);
+
+    // Arrowing far enough to need scrolling must keep the active option in
+    // view; if the region were truly unreachable this would sit still. The
+    // moves clamp at the last option, so pressing past the end is harmless —
+    // and polling absorbs a keystroke lost to a busy dev server without
+    // weakening the assertion.
+    for (let i = 0; i < 12; i++) await page.keyboard.press("ArrowDown");
+    await expect
+      .poll(() => list.evaluate((el) => el.scrollTop), { timeout: 5000 })
+      .toBeGreaterThan(0);
+
+    await page.keyboard.press("Escape");
+    await expect(list).toBeHidden();
+    await expect(trigger).toBeFocused();
   });
 });
 
@@ -168,6 +234,22 @@ test.describe("keyboard navigation", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
+    // Freeze transitions before measuring. The probe below blurs an element and
+    // reads its computed style on the very next line, but focus rings here ride
+    // on `transition-all duration-300` — so the "resting" read would catch the
+    // ring mid-fade, still nearly identical to the focused value, and the
+    // element would be reported as having no indicator at all. That is a
+    // measurement artifact, not a WCAG failure. Collapsing the durations to
+    // zero makes both reads settled values.
+    await page.addStyleTag({
+      content: `*, *::before, *::after {
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+      }`,
+    });
+
     // Compare the computed style BEFORE and AFTER focus and require that
     // SOMETHING changed visually.
     //
@@ -181,10 +263,53 @@ test.describe("keyboard navigation", () => {
     // signals focus. Any of outline, box-shadow, border or background changing
     // is a visible indicator; none of them changing is a real WCAG 2.4.7
     // failure.
+    // Walk the WHOLE tab sequence rather than a fixed slice: a hard-coded stop
+    // silently exempts everything past it, and the controls furthest down the
+    // page (the directory cards, the footer) are exactly the ones most likely
+    // to be missing a ring. The loop ends when Tab wraps back to the first stop
+    // it saw; MAX_TABS is only a runaway guard, and the test fails if it is
+    // ever reached so that a growing page can't quietly re-introduce a cap.
+    const MAX_TABS = 400;
     const offenders: string[] = [];
+    const seen = new Set<string>();
+    let firstStop: string | null = null;
+    let wrapped = false;
+    let visited = 0;
 
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < MAX_TABS; i++) {
       await page.keyboard.press("Tab");
+
+      // Identify the current stop well enough to notice the sequence looping.
+      const id = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null;
+        if (!el || el === document.body || el === document.documentElement) {
+          return null;
+        }
+        const path: string[] = [];
+        for (let node: Element | null = el; node; node = node.parentElement) {
+          const parent = node.parentElement;
+          path.push(
+            parent ? String(Array.from(parent.children).indexOf(node)) : "root",
+          );
+        }
+        return path.join("/");
+      });
+
+      if (id) {
+        if (firstStop === null) {
+          firstStop = id;
+        } else if (id === firstStop) {
+          wrapped = true;
+          break;
+        }
+        if (seen.has(id)) {
+          // Focus is stuck or cycling in a sub-loop; nothing new to learn.
+          wrapped = true;
+          break;
+        }
+        seen.add(id);
+        visited++;
+      }
 
       const result = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null;
@@ -224,6 +349,15 @@ test.describe("keyboard navigation", () => {
     }
 
     expect(offenders).toEqual([]);
+    // Guard the guard: if the sequence never wrapped we hit MAX_TABS and the
+    // tail of the page went unchecked, which is the exact blind spot this
+    // traversal exists to remove.
+    expect(
+      wrapped,
+      `tab sequence did not wrap within ${MAX_TABS} stops (visited ${visited})`,
+    ).toBe(true);
+    // And a page that reports two tab stops is a broken harness, not a pass.
+    expect(visited).toBeGreaterThan(20);
   });
 
   test("the login modal traps focus and Escape closes it", async ({ page }) => {

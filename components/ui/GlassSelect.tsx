@@ -84,13 +84,36 @@ export default function GlassSelect({
       });
     }
     listRef.current?.focus({ preventScroll: true });
-    // Bring the active option into view once the list has painted.
-    requestAnimationFrame(() => {
-      listRef.current
-        ?.querySelector<HTMLElement>('[data-active="true"]')
-        ?.scrollIntoView({ block: "nearest" });
-    });
   }, [open]);
+
+  // Keep the active option in view — on open, and on every arrow/Home/End/
+  // type-ahead move.
+  //
+  // This used to be a requestAnimationFrame fired from inside the key handler,
+  // which was a race: the callback could run before React committed the new
+  // `data-active`, so it scrolled to the option that was ALREADY active and did
+  // nothing. Arrowing past the visible window left the highlight off-screen
+  // with no way to see where you were. Keying the effect to `activeIndex`
+  // instead means it runs after the commit, by construction.
+  // Scroll the LIST only — never via scrollIntoView. `block: "nearest"` walks
+  // every scrollable ancestor, so once this started working it also scrolled
+  // the document whenever the fixed popover sat near a viewport edge. That page
+  // scroll then tripped the close-on-scroll listener below and dismissed the
+  // list mid-interaction. Adjusting scrollTop directly moves exactly one box.
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const active = list?.querySelector<HTMLElement>('[data-active="true"]');
+    if (!open || !list || !active) {
+      return;
+    }
+    const top = active.offsetTop;
+    const bottom = top + active.offsetHeight;
+    if (top < list.scrollTop) {
+      list.scrollTop = top;
+    } else if (bottom > list.scrollTop + list.clientHeight) {
+      list.scrollTop = bottom - list.clientHeight;
+    }
+  }, [activeIndex, open]);
 
   useEffect(() => {
     if (!open) {
@@ -105,26 +128,43 @@ export default function GlassSelect({
         setOpen(false);
       }
     };
+
     // Scrolling/resizing invalidates the fixed rect — close rather than drift.
-    const close = () => setOpen(false);
+    //
+    // But the act of opening can itself produce a scroll: activating the
+    // trigger brings it into view first, and on touch the momentum from the
+    // scroll that got the user to the toolbar is often still decaying when the
+    // finger lifts. Either one lands a scroll event a frame or two after this
+    // listener attaches, and the list would shut the instant it opened.
+    // Arming on the next frame lets that opening scroll pass.
+    //
+    // Scrolls from inside the list are excluded outright: moving through the
+    // options is not the page moving underneath them, and the fixed rect is
+    // still valid.
+    let armed = false;
+    const arm = requestAnimationFrame(() => {
+      armed = true;
+    });
+    const closeOnScroll = (event: Event) => {
+      if (!armed) return;
+      if (listRef.current?.contains(event.target as Node)) return;
+      setOpen(false);
+    };
+    const closeOnResize = () => setOpen(false);
+
     document.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("scroll", close, true);
-    window.addEventListener("resize", close);
+    window.addEventListener("scroll", closeOnScroll, true);
+    window.addEventListener("resize", closeOnResize);
     return () => {
+      cancelAnimationFrame(arm);
       document.removeEventListener("pointerdown", onPointerDown);
-      window.removeEventListener("scroll", close, true);
-      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", closeOnScroll, true);
+      window.removeEventListener("resize", closeOnResize);
     };
   }, [open]);
 
   const moveActive = (index: number) => {
-    const clamped = Math.min(Math.max(index, 0), options.length - 1);
-    setActiveIndex(clamped);
-    requestAnimationFrame(() => {
-      listRef.current
-        ?.querySelector<HTMLElement>('[data-active="true"]')
-        ?.scrollIntoView({ block: "nearest" });
-    });
+    setActiveIndex(Math.min(Math.max(index, 0), options.length - 1));
   };
 
   const handleListKeyDown = (event: React.KeyboardEvent) => {

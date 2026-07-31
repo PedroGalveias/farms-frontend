@@ -252,6 +252,86 @@ describe("BottomSheet", () => {
       expect(trigger).toHaveFocus();
       trigger.remove();
     });
+
+    // Every consumer passes an inline arrow (`onClose={() => setOpen(false)}`),
+    // so `onClose` is a new function on each parent render. If the focus
+    // lifecycle keys on its identity, a routine parent re-render tears the
+    // effect down and back up: focus is yanked out of the sheet to the trigger,
+    // the body scroll-lock is released and re-applied, and the remembered
+    // restore target is overwritten. The user loses their place mid-sheet.
+    it("keeps focus inside the sheet when the parent re-renders with a new onClose", async () => {
+      const trigger = document.createElement("button");
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      // A fresh arrow on every render, exactly as the real consumers do.
+      const Parent = ({ tick }: { tick: number }) => (
+        <BottomSheet closeLabel="Close" onClose={() => void tick}>
+          <button type="button">Inside</button>
+        </BottomSheet>
+      );
+
+      const { rerender } = render(<Parent tick={0} />);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      const inside = screen.getByRole("button", { name: "Inside" });
+      inside.focus();
+      expect(inside).toHaveFocus();
+
+      rerender(<Parent tick={1} />);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Focus must not have been dragged out of the sheet, and the scroll lock
+      // must not have flickered off.
+      expect(inside).toHaveFocus();
+      expect(document.body.style.overflow).toBe("hidden");
+      expect(document.body.classList.contains("sheet-open")).toBe(true);
+      trigger.remove();
+    });
+
+    it("still restores focus to the original trigger after a re-render", async () => {
+      const trigger = document.createElement("button");
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      const Parent = ({ tick }: { tick: number }) => (
+        <BottomSheet closeLabel="Close" onClose={() => void tick}>
+          <p>Body</p>
+        </BottomSheet>
+      );
+
+      const { rerender, unmount } = render(<Parent tick={0} />);
+      await Promise.resolve();
+      rerender(<Parent tick={1} />);
+      await Promise.resolve();
+      unmount();
+
+      // The trigger captured at mount is the one focus goes back to — a
+      // re-render must not have re-captured the sheet itself as the target.
+      expect(trigger).toHaveFocus();
+      trigger.remove();
+    });
+
+    it("Escape calls the LATEST onClose, not the one captured at mount", () => {
+      const first = vi.fn();
+      const second = vi.fn();
+      const Parent = ({ cb }: { cb: () => void }) => (
+        <BottomSheet closeLabel="Close" onClose={cb}>
+          <p>Body</p>
+        </BottomSheet>
+      );
+
+      const { rerender } = render(<Parent cb={first} />);
+      rerender(<Parent cb={second} />);
+      fireEvent.keyDown(document, { key: "Escape" });
+
+      // Decoupling the effect from `onClose` must not staleness-trap the
+      // handler: the sheet has to close through the current callback.
+      expect(second).toHaveBeenCalledTimes(1);
+      expect(first).not.toHaveBeenCalled();
+    });
   });
 
   it("ignores the edge-swipe on desktop (centred modal)", () => {

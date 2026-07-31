@@ -81,7 +81,16 @@ test.describe("search ritual", () => {
       .first()
       .click();
 
-    await page.getByPlaceholder(/try eggs, honey/i).fill("brocc");
+    // The picker renders a phone and a desktop variant of this field and hides
+    // one with CSS, so both are in the DOM and a bare placeholder match is a
+    // strict-mode violation. Which one wins the race depends on machine speed,
+    // which is why this only ever failed inside the full parallel run. Target
+    // the one that is actually visible.
+    await page
+      .getByPlaceholder(/try eggs, honey/i)
+      .filter({ visible: true })
+      .first()
+      .fill("brocc");
     const grid = page.locator(".grid").filter({ hasText: "Vegetables" });
     await expect(
       grid.getByRole("button", { name: /^Broccoli$/ }),

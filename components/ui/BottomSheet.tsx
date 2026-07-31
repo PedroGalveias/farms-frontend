@@ -75,6 +75,20 @@ export default function BottomSheet({
     active: false,
   });
 
+  // Every consumer passes an inline arrow (`onClose={() => setOpen(false)}`),
+  // so `onClose` is a different function on each parent render. Keying the
+  // lifecycle effect below on it would tear the effect down and rebuild it on
+  // every one of those renders — releasing and re-applying the scroll lock, and
+  // (once focus moved into the effect) dragging focus back out of the sheet
+  // mid-interaction. Route the callback through a ref so the Escape listener
+  // always calls the current one while the effect itself runs once.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
+  // Mount/unmount only — see the note above. The empty dependency list is the
+  // point, not an oversight.
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     // Remember where focus came from so we can hand it back on close —
@@ -97,7 +111,7 @@ export default function BottomSheet({
     queueMicrotask(() => sheetRef.current?.focus());
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKeyDown);
 
@@ -107,7 +121,7 @@ export default function BottomSheet({
       document.removeEventListener("keydown", onKeyDown);
       previouslyFocused?.focus();
     };
-  }, [onClose]);
+  }, []);
 
   // Drive the drag straight through the DOM node to avoid a re-render per move.
   // `active` follows the finger 1:1 (no transition); on release we spring.
