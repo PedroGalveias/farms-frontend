@@ -246,11 +246,13 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#f4f4ef" },
     { media: "(prefers-color-scheme: dark)", color: "#0e0f12" },
   ],
-  // maximum-scale=1 disables iOS Safari's AUTOMATIC zooms (input focus zoom,
-  // double-tap zoom) that left the page stuck zoomed-in and shifted sideways.
-  // iOS deliberately ignores the cap for the user's own pinch gesture, so
-  // accessibility zoom still works.
-  maximumScale: 1,
+  // NB: no maximumScale. It used to be capped at 1 to stop iOS Safari's
+  // automatic input-focus zoom — but iOS only auto-zooms when a field is
+  // smaller than 16px, and that floor is now enforced and asserted by
+  // e2e/stress.spec.ts ("form controls meet the 16px iOS no-zoom floor"), so
+  // the cap is redundant there. It was NOT harmless elsewhere: Android Chrome
+  // honours maximum-scale and was blocking pinch-zoom outright, failing
+  // WCAG 1.4.4 (Resize Text) for low-vision users on every route.
 };
 
 // Pre-render one tree per locale; the middleware rewrites unprefixed URLs to
