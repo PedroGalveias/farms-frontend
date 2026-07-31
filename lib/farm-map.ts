@@ -36,8 +36,9 @@ export function projectToSwissMap(
 ): { x: number; y: number } | null {
   // NaN fails every comparison, so a bounds check alone lets it through and
   // returns {x: NaN, y: NaN} — a "projected" point that silently paints
-  // nothing on the canvas and breaks the documented null contract. Check
-  // finiteness explicitly (Infinity is caught by the bounds below).
+  // nothing on the canvas and breaks the documented null contract.
+  // Number.isFinite rejects NaN and both infinities here, so the bounds check
+  // below only ever sees real numbers.
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     return null;
   }

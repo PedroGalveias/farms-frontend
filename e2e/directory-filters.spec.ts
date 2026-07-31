@@ -81,6 +81,15 @@ test.describe("directory filtering", () => {
     await page.getByRole("option", { name: /all cantons/i }).click();
     await expect(chip).toHaveAttribute("aria-pressed", "false");
     await expect(cantonControl).toContainText(/all cantons/i);
+
+    // The control reporting "All cantons" is not the same as the LIST being
+    // restored — a reset that updates the label but leaves the results filtered
+    // would sail past the assertions above. Check the count comes back.
+    await expect
+      .poll(async () =>
+        Number((await heading.textContent())?.match(/\d+/)?.[0] ?? "0"),
+      )
+      .toBe(initial);
   });
 
   // A shared "within 25 km" link used to empty the directory for every

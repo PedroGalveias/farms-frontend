@@ -77,16 +77,35 @@ export default function BottomSheet({
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
+    // Remember where focus came from so we can hand it back on close —
+    // otherwise dismissing the sheet drops focus to <body> and a keyboard user
+    // restarts from the top of the page.
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
     document.body.style.overflow = "hidden";
     document.body.classList.add("sheet-open");
+
+    // Move focus INTO the sheet. The trap alone only stops focus leaving; it
+    // does not bring it in, so without this the sheet opens with focus still on
+    // the trigger behind it — the first Tab is wasted, and a screen reader
+    // never enters the new context. Focusing the container (tabindex="-1")
+    // rather than the first control means assistive tech reads the dialog from
+    // its label down, instead of dropping the user mid-sheet.
+    queueMicrotask(() => sheetRef.current?.focus());
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKeyDown);
+
     return () => {
       document.body.style.overflow = previousOverflow;
       document.body.classList.remove("sheet-open");
       document.removeEventListener("keydown", onKeyDown);
+      previouslyFocused?.focus();
     };
   }, [onClose]);
 
@@ -273,6 +292,7 @@ export default function BottomSheet({
         className={`glass qs-sheet relative flex max-h-[85dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-panel transition-transform duration-300 sm:max-h-[80dvh] sm:rounded-panel ${className}`}
         ref={sheetRef}
         role="dialog"
+        tabIndex={-1}
       >
         {/* Left-edge hot-zone — swipe right to dismiss (the iOS "back" gesture);
             a narrow reserved strip, mobile-only, invisible. Sits over the

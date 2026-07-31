@@ -144,33 +144,85 @@ test.describe("keyboard navigation", () => {
     const skip = page.getByRole("link", { name: /skip to content/i });
     await expect(skip).toBeFocused();
     await page.keyboard.press("Enter");
-    // The skip target exists and is what the link points at.
+
+    // Asserting the target merely EXISTS proves nothing — the point of a skip
+    // link is that activating it moves focus past the chrome. Verify the next
+    // Tab lands inside #main-content, which is the behaviour a keyboard user
+    // actually depends on.
     await expect(page.locator("#main-content")).toHaveCount(1);
+    await page.keyboard.press("Tab");
+    const landedInMain = await page.evaluate(() => {
+      const main = document.querySelector("#main-content");
+      return (
+        !!main &&
+        !!document.activeElement &&
+        main.contains(document.activeElement)
+      );
+    });
+    expect(landedInMain).toBe(true);
   });
 
   test("every focused element shows a visible focus indicator", async ({
     page,
   }) => {
     await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    // Compare the computed style BEFORE and AFTER focus and require that
+    // SOMETHING changed visually.
+    //
+    // The earlier version of this test enumerated properties that "count" as a
+    // focus ring and included `borderColor !== ""` as a fallback — but
+    // getComputedStyle always resolves borderColor to a real colour, so that
+    // clause was permanently true and the test could never fail. A test that
+    // cannot fail is worse than no test: it reports safety it never checked.
+    //
+    // Diffing before/after sidesteps the whole question of WHICH property
+    // signals focus. Any of outline, box-shadow, border or background changing
+    // is a visible indicator; none of them changing is a real WCAG 2.4.7
+    // failure.
     const offenders: string[] = [];
+
     for (let i = 0; i < 25; i++) {
       await page.keyboard.press("Tab");
-      const info = await page.evaluate(() => {
+
+      const result = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null;
-        if (!el || el === document.body) return null;
-        const s = getComputedStyle(el);
-        const visible =
-          (s.outlineStyle !== "none" && parseFloat(s.outlineWidth) > 0) ||
-          s.boxShadow !== "none" ||
-          // Tailwind's focus-visible:ring renders as a box-shadow; some
-          // controls indicate focus with a background/border change instead.
-          s.borderColor !== "";
-        return visible
-          ? null
-          : `${el.tagName.toLowerCase()}.${el.className?.toString().slice(0, 60)}`;
+        if (!el || el === document.body || el === document.documentElement) {
+          return null;
+        }
+
+        const snapshot = (node: HTMLElement) => {
+          const s = getComputedStyle(node);
+          return [
+            s.outlineStyle,
+            s.outlineWidth,
+            s.outlineColor,
+            s.boxShadow,
+            s.borderColor,
+            s.borderWidth,
+            s.backgroundColor,
+          ].join("|");
+        };
+
+        const focused = snapshot(el);
+        // Blur to read the resting style, then restore focus so the Tab
+        // sequence continues from where it was.
+        el.blur();
+        const resting = snapshot(el);
+        el.focus();
+
+        if (focused !== resting) {
+          return null;
+        }
+        return `${el.tagName.toLowerCase()}.${(el.className?.toString() ?? "").slice(0, 60)}`;
       });
-      if (info) offenders.push(info);
+
+      if (result) {
+        offenders.push(result);
+      }
     }
+
     expect(offenders).toEqual([]);
   });
 

@@ -217,6 +217,43 @@ describe("BottomSheet", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  // The trap stops focus LEAVING; it does not bring focus in. Without an
+  // explicit move, the sheet opens with focus still on the trigger behind it.
+  describe("focus management", () => {
+    it("moves focus into the sheet on open", async () => {
+      const trigger = document.createElement("button");
+      document.body.appendChild(trigger);
+      trigger.focus();
+      expect(trigger).toHaveFocus();
+
+      renderSheet();
+      // The move is queued in a microtask so it lands after mount.
+      await Promise.resolve();
+      await Promise.resolve();
+
+      const dialog = screen.getByRole("dialog");
+      expect(dialog).toHaveFocus();
+      trigger.remove();
+    });
+
+    it("returns focus to the trigger on close", async () => {
+      const trigger = document.createElement("button");
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      const { unmount } = render(
+        <BottomSheet closeLabel="Close" onClose={vi.fn()}>
+          <p>Body</p>
+        </BottomSheet>,
+      );
+      await Promise.resolve();
+      unmount();
+
+      expect(trigger).toHaveFocus();
+      trigger.remove();
+    });
+  });
+
   it("ignores the edge-swipe on desktop (centred modal)", () => {
     setMobile(false);
     const onClose = renderSheet();
