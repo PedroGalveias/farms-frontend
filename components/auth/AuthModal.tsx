@@ -17,6 +17,7 @@ import {
   type AuthUser,
 } from "@/lib/auth";
 import { useT } from "@/components/i18n/LanguageProvider";
+import { useFocusTrap } from "@/components/ui/useFocusTrap";
 import LetterToFarm from "@/components/auth/LetterToFarm";
 
 export type AuthMode = "login" | "register";
@@ -62,6 +63,10 @@ export default function AuthModal({
   const [forgot, setForgot] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
+  // Keep Tab inside the dialog: aria-modal alone does not stop the browser
+  // tabbing out into the (obscured, scroll-locked) page behind it.
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef);
 
   const open = mode !== null;
 
@@ -229,6 +234,7 @@ export default function AuthModal({
         aria-labelledby="auth-heading"
         aria-modal="true"
         className="glass glass-card qs-sheet max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-panel shadow-elev-3"
+        ref={dialogRef}
         role="dialog"
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">

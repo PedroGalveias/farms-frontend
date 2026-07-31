@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { haptic } from "@/lib/haptics";
+import { useFocusTrap } from "@/components/ui/useFocusTrap";
 
 interface BottomSheetProps {
   /** Close the sheet (backdrop tap, Escape, or a downward flick on mobile). */
@@ -51,6 +52,9 @@ export default function BottomSheet({
   className = "",
 }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  // The sheet is aria-modal and scroll-locks the page, so Tab must stay inside
+  // it — otherwise focus walks into the obscured content behind.
+  useFocusTrap(sheetRef);
   const drag = useRef({
     startY: 0,
     lastY: 0,

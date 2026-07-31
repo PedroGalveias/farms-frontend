@@ -22,6 +22,7 @@ import { formatFarmDate, getCantonName } from "@/lib/farms";
 import { haptic } from "@/lib/haptics";
 import { playTick } from "@/lib/sound";
 import HapticTap from "@/components/ui/HapticTap";
+import { useFocusTrap } from "@/components/ui/useFocusTrap";
 import { farmPath } from "@/lib/share";
 import { shouldAnimateViewTransitions } from "@/lib/view-transitions";
 import type { Farm } from "@/types/farm";
@@ -63,6 +64,11 @@ export default function FarmDetailSheet({
   const planned = isInTrip(farm.id);
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  // Trap Tab in the MODAL sheet only. The dock is deliberately non-modal (the
+  // directory behind it stays scrollable and clickable), so trapping there
+  // would itself be a bug.
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(sheetRef, !isDock);
   const dragStartYRef = useRef<number | null>(null);
   const lastDeltaRef = useRef(0);
   const [dragOffset, setDragOffset] = useState(0);
@@ -344,6 +350,7 @@ export default function FarmDetailSheet({
       <div
         aria-labelledby={titleId}
         aria-modal="true"
+        ref={sheetRef}
         className={`glass glass-chrome relative w-full max-w-xl overflow-y-auto rounded-t-panel shadow-[0_-16px_60px_rgba(20,22,27,0.3)] sm:rounded-panel sm:shadow-elev-3 ${
           expanded ? "max-h-[92dvh]" : "max-h-[52dvh]"
         } sm:max-h-[88dvh] ${useViewTransition ? "" : "qs-sheet"} ${
