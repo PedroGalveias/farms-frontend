@@ -276,6 +276,7 @@ test.describe("keyboard navigation", () => {
     const seen = new Set<string>();
     let firstStop: string | null = null;
     let wrapped = false;
+    let subLoopAt: string | null = null;
     let visited = 0;
 
     for (let i = 0; i < MAX_TABS; i++) {
@@ -301,12 +302,18 @@ test.describe("keyboard navigation", () => {
         if (firstStop === null) {
           firstStop = id;
         } else if (id === firstStop) {
+          // Back where we started: the whole sequence has been walked.
           wrapped = true;
           break;
         }
         if (seen.has(id)) {
-          // Focus is stuck or cycling in a sub-loop; nothing new to learn.
-          wrapped = true;
+          // Revisiting a stop that is NOT the first one means focus is cycling
+          // inside a subset of the page — a trap. That is a finding in its own
+          // right, and it is emphatically not a completed sweep: everything
+          // after the loop stays unchecked. Recorded separately so the
+          // assertions below can tell the two apart, which an earlier version
+          // of this test could not.
+          subLoopAt = id;
           break;
         }
         seen.add(id);
@@ -351,9 +358,18 @@ test.describe("keyboard navigation", () => {
     }
 
     expect(offenders).toEqual([]);
-    // Guard the guard: if the sequence never wrapped we hit MAX_TABS and the
-    // tail of the page went unchecked, which is the exact blind spot this
-    // traversal exists to remove.
+
+    // Focus must not be cycling inside a subset of the page. Nothing here is
+    // modal, so a sub-loop is a genuine keyboard trap — and it also means the
+    // sweep stopped early with the rest of the page unchecked.
+    expect(
+      subLoopAt,
+      `focus returned to an earlier stop that was not the first, after ${visited} stops — keyboard trap at ${subLoopAt}`,
+    ).toBeNull();
+
+    // Guard the guard: reaching MAX_TABS without wrapping leaves the tail of
+    // the page unchecked, which is the exact blind spot this traversal exists
+    // to remove.
     expect(
       wrapped,
       `tab sequence did not wrap within ${MAX_TABS} stops (visited ${visited})`,

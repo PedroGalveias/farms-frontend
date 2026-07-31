@@ -42,8 +42,6 @@ function flushFrame() {
 }
 
 beforeAll(() => {
-  // jsdom implements neither; the component calls scrollIntoView on open.
-  Element.prototype.scrollIntoView = vi.fn();
   globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) =>
     frameQueue.push(cb)) as unknown as typeof requestAnimationFrame;
   globalThis.cancelAnimationFrame = ((id: number) => {
