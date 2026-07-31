@@ -34,6 +34,13 @@ export function projectToSwissMap(
   latitude: number,
   longitude: number,
 ): { x: number; y: number } | null {
+  // NaN fails every comparison, so a bounds check alone lets it through and
+  // returns {x: NaN, y: NaN} — a "projected" point that silently paints
+  // nothing on the canvas and breaks the documented null contract. Check
+  // finiteness explicitly (Infinity is caught by the bounds below).
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
   if (
     latitude < LAT_MIN ||
     latitude > LAT_MAX ||
