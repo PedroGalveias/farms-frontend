@@ -135,6 +135,63 @@ describe("GlassSelect", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  // Keyboard reachability of the whole list. This lives here rather than in
+  // Playwright because the component closes itself on page scroll by design,
+  // and a page that is still settling (lazy images, fonts) emits scroll events
+  // — so a multi-step keyboard sequence against a real browser races the
+  // component's own intended behaviour. Nothing scrolls in jsdom, so the key
+  // handling can be asserted exactly.
+  describe("keyboard reachability", () => {
+    const activeId = (list: HTMLElement) =>
+      list.getAttribute("aria-activedescendant");
+    const optionIds = (list: HTMLElement) =>
+      Array.from(list.querySelectorAll('[role="option"]')).map((o) => o.id);
+
+    it("End reaches the last option and Home returns to the first", () => {
+      open();
+      flushFrame();
+      const list = screen.getByRole("listbox");
+      const ids = optionIds(list);
+      expect(ids).toHaveLength(OPTIONS.length);
+
+      fireEvent.keyDown(list, { key: "End" });
+      expect(activeId(list)).toBe(ids[ids.length - 1]);
+
+      fireEvent.keyDown(list, { key: "Home" });
+      expect(activeId(list)).toBe(ids[0]);
+    });
+
+    it("arrows step one option at a time and clamp at both ends", () => {
+      open();
+      flushFrame();
+      const list = screen.getByRole("listbox");
+      const ids = optionIds(list);
+
+      // Already on the first option: ArrowUp must not wrap around.
+      fireEvent.keyDown(list, { key: "ArrowUp" });
+      expect(activeId(list)).toBe(ids[0]);
+
+      fireEvent.keyDown(list, { key: "ArrowDown" });
+      expect(activeId(list)).toBe(ids[1]);
+      fireEvent.keyDown(list, { key: "ArrowDown" });
+      expect(activeId(list)).toBe(ids[2]);
+
+      // At the end: ArrowDown must not wrap either.
+      fireEvent.keyDown(list, { key: "ArrowDown" });
+      expect(activeId(list)).toBe(ids[ids.length - 1]);
+    });
+
+    it("Enter commits whichever option the arrows landed on", () => {
+      const onChange = open();
+      flushFrame();
+      const list = screen.getByRole("listbox");
+
+      fireEvent.keyDown(list, { key: "End" });
+      fireEvent.keyDown(list, { key: "Enter" });
+      expect(onChange).toHaveBeenCalledWith(OPTIONS[OPTIONS.length - 1].value);
+    });
+  });
+
   // Keeping the active option in view is pure geometry, so it is tested here
   // against a stubbed layout rather than in Playwright. An e2e version of this
   // measured real rects on a shared dev server and failed about half the time
