@@ -71,6 +71,16 @@ for (const name of ["IntersectionObserver", "ResizeObserver"] as const) {
   }
 }
 
+// jsdom implements no scrolling at all, so `scrollIntoView` is simply missing
+// from Element.prototype. Any component that keeps an active item in view (the
+// GlassSelect listbox, the quick-search results) would throw on render instead
+// of failing on the behaviour under test. A no-op stub is the right shape: the
+// tests that care about scrolling assert on the calls, and the rest are
+// unaffected.
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = function scrollIntoView() {};
+}
+
 // Unmount React trees and reset jsdom between tests.
 afterEach(() => {
   cleanup();

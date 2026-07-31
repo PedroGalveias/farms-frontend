@@ -31,8 +31,15 @@ function tabbableWithin(root: HTMLElement): HTMLElement[] {
       if (Number(element.getAttribute("tabindex")) < 0) {
         return false;
       }
-      // offsetParent is null for display:none subtrees; the rect check also
-      // catches visibility:hidden and zero-size elements.
+      // A zero-size rect catches `display: none` subtrees and collapsed
+      // elements.
+      //
+      // NOTE: it does NOT catch `visibility: hidden` — such elements keep their
+      // box and report a real rect, while being untabbable. We accept that:
+      // including one is harmless (focus() on it is a no-op and the next Tab
+      // moves on), whereas a getComputedStyle call per candidate on every Tab
+      // would cost a style recalc for no practical gain. Revisit only if a
+      // surface actually hides controls that way.
       const rect = element.getBoundingClientRect();
       return rect.width > 0 || rect.height > 0;
     },
