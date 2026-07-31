@@ -127,41 +127,54 @@ test.describe("desktop master–detail & directory interactions", () => {
     // following effect, so there's a legitimate one-tick window where they
     // disagree — WAIT for the pair to settle rather than sampling once
     // (WebKit occasionally caught the gap mid-swap).
-    await page.waitForFunction(
+    //
+    // The reading is taken INSIDE the wait, not in a second evaluate after it.
+    // Waiting and then re-sampling leaves a gap in which the swap can happen
+    // again, so the assertion could run against a different moment than the one
+    // that satisfied the predicate — which is exactly how this test kept
+    // failing intermittently on CI. Returning the measurements from the
+    // predicate makes "settled" and "measured" the same instant.
+    const settled = await page.waitForFunction(
       () => {
-        const hasCanvas = !!document.querySelector("canvas.ambient-backdrop");
+        const canvas = document.querySelector<HTMLCanvasElement>(
+          "canvas.ambient-backdrop",
+        );
+        const hasCanvas = !!canvas;
         const hasClass =
           document.documentElement.classList.contains("has-ambient");
-        return hasCanvas === hasClass;
+        if (hasCanvas !== hasClass) {
+          return null; // mid-swap — keep waiting
+        }
+        return {
+          hasClass,
+          hasCanvas,
+          // Budget: the backing store must stay far below CSS size (quarter-res
+          // scale — the whole point of the "quiet" backdrop).
+          backingRatio: canvas
+            ? canvas.width / Math.max(1, canvas.clientWidth)
+            : 0,
+          // Coverage: a canvas is a replaced element, so left/right don't
+          // stretch it — it must genuinely span the viewport (it once rendered
+          // at the 300×150 default and nobody could tell from the ratio alone).
+          coversViewport: canvas
+            ? canvas.clientWidth >= window.innerWidth &&
+              canvas.clientHeight >= window.innerHeight
+            : false,
+          cssOrbsOff: canvas
+            ? getComputedStyle(document.body, "::after").content === "none"
+            : true,
+        };
       },
       undefined,
       { timeout: 5_000 },
     );
-
-    const state = await page.evaluate(() => {
-      const canvas = document.querySelector<HTMLCanvasElement>(
-        "canvas.ambient-backdrop",
-      );
-      return {
-        hasClass: document.documentElement.classList.contains("has-ambient"),
-        hasCanvas: !!canvas,
-        // Budget: the backing store must stay far below CSS size (quarter-res
-        // scale — the whole point of the "quiet" backdrop).
-        backingRatio: canvas
-          ? canvas.width / Math.max(1, canvas.clientWidth)
-          : 0,
-        // Coverage: a canvas is a replaced element, so left/right don't
-        // stretch it — it must genuinely span the viewport (it once rendered
-        // at the 300×150 default and nobody could tell from the ratio alone).
-        coversViewport: canvas
-          ? canvas.clientWidth >= window.innerWidth &&
-            canvas.clientHeight >= window.innerHeight
-          : false,
-        cssOrbsOff: canvas
-          ? getComputedStyle(document.body, "::after").content === "none"
-          : true,
-      };
-    });
+    const state = await settled.jsonValue();
+    // waitForFunction only resolves on a truthy value, so the mid-swap `null`
+    // can never reach here — this narrows the type and would fail loudly if
+    // that ever stopped being true.
+    if (!state) {
+      throw new Error("ambient state resolved while still mid-swap");
+    }
 
     // Invariant: the WebGL layer and the CSS orbs swap atomically — whichever
     // is active, exactly one ambience exists.

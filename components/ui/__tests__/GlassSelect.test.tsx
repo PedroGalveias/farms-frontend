@@ -136,4 +136,99 @@ describe("GlassSelect", () => {
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  // Keeping the active option in view is pure geometry, so it is tested here
+  // against a stubbed layout rather than in Playwright. An e2e version of this
+  // measured real rects on a shared dev server and failed about half the time
+  // under parallel load — the assertion was sound but the environment wasn't.
+  // jsdom has no layout at all, which is an advantage here: the boxes are
+  // whatever we say they are, so the arithmetic is checked exactly.
+  describe("keeping the active option in view", () => {
+    const MANY = Array.from({ length: 10 }, (_, i) => ({
+      label: `Option ${i}`,
+      value: `v${i}`,
+    }));
+    const OPTION_H = 40;
+    const VIEW_H = 100; // 2.5 options visible
+
+    /** Give the list a fake layout: 10 rows of 40px inside a 100px window. */
+    function stubLayout(list: HTMLElement) {
+      const rect = (top: number, height: number) =>
+        ({
+          top,
+          bottom: top + height,
+          height,
+          left: 0,
+          right: 0,
+          width: 0,
+          x: 0,
+          y: top,
+          toJSON() {},
+        }) as DOMRect;
+
+      Object.defineProperty(list, "clientHeight", {
+        configurable: true,
+        value: VIEW_H,
+      });
+      list.getBoundingClientRect = () => rect(0, VIEW_H);
+
+      for (const [index, option] of Array.from(
+        list.querySelectorAll<HTMLElement>('[role="option"]'),
+      ).entries()) {
+        // Rows sit at index*40 in content space; on screen they shift up by
+        // however far the list is scrolled.
+        option.getBoundingClientRect = () =>
+          rect(index * OPTION_H - list.scrollTop, OPTION_H);
+      }
+    }
+
+    function openMany() {
+      render(
+        <GlassSelect
+          ariaLabel="Canton"
+          onChange={vi.fn()}
+          options={MANY}
+          value="v0"
+        />,
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Canton" }));
+      const list = screen.getByRole("listbox");
+      stubLayout(list);
+      return list;
+    }
+
+    it("scrolls down just enough to reveal an option below the fold", () => {
+      const list = openMany();
+      expect(list.scrollTop).toBe(0);
+
+      // Option 2 spans 80..120 — 20px past the 100px window.
+      fireEvent.keyDown(list, { key: "ArrowDown" });
+      fireEvent.keyDown(list, { key: "ArrowDown" });
+      expect(list.scrollTop).toBe(20);
+    });
+
+    it("follows the active option to the end of a long list", () => {
+      const list = openMany();
+      fireEvent.keyDown(list, { key: "End" });
+      // Last option spans 360..400; showing its bottom needs 400 - 100.
+      expect(list.scrollTop).toBe(300);
+    });
+
+    it("scrolls back up when arrowing above the visible window", () => {
+      const list = openMany();
+      fireEvent.keyDown(list, { key: "End" });
+      expect(list.scrollTop).toBe(300);
+
+      fireEvent.keyDown(list, { key: "Home" });
+      // Option 0 starts at 0, so the list must return to the top.
+      expect(list.scrollTop).toBe(0);
+    });
+
+    it("leaves the scroll alone while the active option is already visible", () => {
+      const list = openMany();
+      // Option 1 spans 40..80, fully inside the 0..100 window.
+      fireEvent.keyDown(list, { key: "ArrowDown" });
+      expect(list.scrollTop).toBe(0);
+    });
+  });
 });

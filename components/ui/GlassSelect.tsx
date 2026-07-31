@@ -106,14 +106,24 @@ export default function GlassSelect({
     if (!open || !list || !active) {
       return;
     }
-    const top = active.offsetTop;
-    const bottom = top + active.offsetHeight;
-    if (top < list.scrollTop) {
-      list.scrollTop = top;
-    } else if (bottom > list.scrollTop + list.clientHeight) {
-      list.scrollTop = bottom - list.clientHeight;
+    // Measured with rects rather than offsetTop: offsetTop is relative to the
+    // nearest POSITIONED ancestor, and the popover only becomes
+    // `position: fixed` once the style effect above has committed. On the
+    // opening pass that has been called but not yet painted, so offsetTop can
+    // be measured against the wrong box. Rect deltas don't care.
+    const listBox = list.getBoundingClientRect();
+    const activeBox = active.getBoundingClientRect();
+    if (activeBox.top < listBox.top) {
+      list.scrollTop -= listBox.top - activeBox.top;
+    } else if (activeBox.bottom > listBox.bottom) {
+      list.scrollTop += activeBox.bottom - listBox.bottom;
     }
-  }, [activeIndex, open]);
+    // `style` is a dependency because the popover is only placed once the
+    // effect above commits it. On the opening pass the rects read here still
+    // describe the unpositioned box, so the correction can be wrong — and
+    // nothing else would ever re-run it, leaving the highlight stranded until
+    // the next keypress. Re-measuring when the position lands closes that.
+  }, [activeIndex, open, style]);
 
   useEffect(() => {
     if (!open) {

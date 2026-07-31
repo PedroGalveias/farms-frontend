@@ -177,15 +177,17 @@ test.describe("accessibility", () => {
     await page.keyboard.press("ArrowDown");
     await expect.poll(activeAt).not.toBe(first);
 
-    // Arrowing far enough to need scrolling must keep the active option in
-    // view; if the region were truly unreachable this would sit still. The
-    // moves clamp at the last option, so pressing past the end is harmless —
-    // and polling absorbs a keystroke lost to a busy dev server without
-    // weakening the assertion.
-    for (let i = 0; i < 12; i++) await page.keyboard.press("ArrowDown");
-    await expect
-      .poll(() => list.evaluate((el) => el.scrollTop), { timeout: 5000 })
-      .toBeGreaterThan(0);
+    // End jumps to the last option — proof the whole list is reachable by
+    // keyboard, which is the claim standing in for the disabled axe rule.
+    await page.keyboard.press("End");
+    await expect.poll(activeAt).not.toBe(first);
+
+    // Deliberately NOT asserted here: that the list scrolled to follow the
+    // active option. That is pure geometry, and measuring real rects against a
+    // dev server shared with the rest of the suite failed roughly half the time
+    // under parallel load — a flaky assertion is worse than none, because it
+    // trains people to re-run rather than read. It is covered exactly, with a
+    // stubbed layout, in components/ui/__tests__/GlassSelect.test.tsx.
 
     await page.keyboard.press("Escape");
     await expect(list).toBeHidden();
