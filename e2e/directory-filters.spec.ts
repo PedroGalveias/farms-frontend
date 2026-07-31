@@ -77,10 +77,31 @@ test.describe("directory filtering", () => {
 
     // Reset via the toolbar control back to all cantons: open the listbox and
     // pick "All cantons".
-    await cantonControl.click();
+    //
+    // The open is retried because a click that lands before hydration is simply
+    // lost, and the option would then never appear. The trigger is a TOGGLE, so
+    // only click while it reports itself closed — clicking unconditionally
+    // would shut it again on the next attempt.
+    await expect(async () => {
+      if ((await cantonControl.getAttribute("aria-expanded")) !== "true") {
+        await cantonControl.click();
+      }
+      await expect(cantonControl).toHaveAttribute("aria-expanded", "true", {
+        timeout: 1000,
+      });
+    }).toPass({ timeout: 15_000 });
     await page.getByRole("option", { name: /all cantons/i }).click();
     await expect(chip).toHaveAttribute("aria-pressed", "false");
     await expect(cantonControl).toContainText(/all cantons/i);
+
+    // The control reporting "All cantons" is not the same as the LIST being
+    // restored — a reset that updates the label but leaves the results filtered
+    // would sail past the assertions above. Check the count comes back.
+    await expect
+      .poll(async () =>
+        Number((await heading.textContent())?.match(/\d+/)?.[0] ?? "0"),
+      )
+      .toBe(initial);
   });
 
   // A shared "within 25 km" link used to empty the directory for every
