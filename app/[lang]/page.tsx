@@ -4,7 +4,7 @@ import FarmsPageShell from "@/components/FarmsPageShell";
 import HomeSkeleton from "@/components/home/HomeSkeleton";
 import { DEFAULT_LOCALE, isLocale, localeAlternates } from "@/lib/i18n";
 import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
-import { parseDirectoryParams } from "@/lib/directory-params";
+import { parseDirectoryParams, toFarmsQuery } from "@/lib/directory-params";
 import type { ServiceStatus } from "@/types/farm";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -37,11 +37,11 @@ export default async function HomePage({
   // byte-identical HTML to crawlers.
   const [{ lang }, resolvedParams] = await Promise.all([params, searchParams]);
   const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const initialParams = parseDirectoryParams(resolvedParams);
   const [healthResult, farmsResult] = await Promise.allSettled([
     getFarmsHealth(),
-    getFarms(locale),
+    getFarms(locale, toFarmsQuery(initialParams)),
   ]);
-  const initialParams = parseDirectoryParams(resolvedParams);
 
   const farms = farmsResult.status === "fulfilled" ? farmsResult.value : [];
   const loadError =

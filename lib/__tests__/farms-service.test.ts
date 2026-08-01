@@ -154,6 +154,29 @@ describe("getFarms — cursor pagination", () => {
     }
   });
 
+  it("forwards supported directory filters on every page", async () => {
+    const spy = mockFetchSequence(
+      jsonResponse({ farms: [makeFarm({ id: "f1" })], next_cursor: "100" }),
+      jsonResponse({ farms: [makeFarm({ id: "f2" })], next_cursor: null }),
+    );
+
+    await getFarms("de", {
+      canton: "BE",
+      categories: ["fruits", "vegetables"],
+      q: "  berry farm  ",
+      sort: "name",
+    });
+
+    for (const [request] of spy.mock.calls) {
+      const params = new URL(String(request)).searchParams;
+      expect(params.get("lang")).toBe("de");
+      expect(params.get("canton")).toBe("BE");
+      expect(params.get("category")).toBe("fruits,vegetables");
+      expect(params.get("q")).toBe("berry farm");
+      expect(params.get("sort")).toBe("name");
+    }
+  });
+
   it("follows next_cursor across pages and concatenates the results", async () => {
     const spy = mockFetchSequence(
       jsonResponse({

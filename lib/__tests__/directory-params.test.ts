@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_DIRECTORY_PARAMS,
   parseDirectoryParams,
+  toFarmsQuery,
 } from "@/lib/directory-params";
 
 describe("parseDirectoryParams", () => {
@@ -85,6 +86,33 @@ describe("parseDirectoryParams", () => {
     ).toEqual(["Dairy", "Fruits"]);
     expect(parseDirectoryParams({ cat: "" }).selectedCategories).toEqual([]);
     expect(parseDirectoryParams({ cat: " , " }).selectedCategories).toEqual([]);
+  });
+
+  it("maps representable filters to stable API slugs", () => {
+    expect(
+      toFarmsQuery({
+        ...DEFAULT_DIRECTORY_PARAMS,
+        searchTerm: "  berry farm  ",
+        selectedCanton: "BE",
+        selectedCategories: ["Früchte", "Gemüse"],
+        sortOption: "name",
+      }),
+    ).toEqual({
+      q: "berry farm",
+      canton: "BE",
+      categories: ["fruits", "vegetables"],
+      sort: "name",
+    });
+  });
+
+  it("keeps multi-category all matching local until the API exposes it", () => {
+    expect(
+      toFarmsQuery({
+        ...DEFAULT_DIRECTORY_PARAMS,
+        selectedCategories: ["Früchte", "Gemüse"],
+        categoryMatchMode: "all",
+      }),
+    ).toEqual({});
   });
 
   it("keeps an unknown canton verbatim so the UI can show an empty result", () => {

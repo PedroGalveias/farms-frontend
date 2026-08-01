@@ -141,8 +141,8 @@ export function useFarmDirectory(
     return () => window.removeEventListener("popstate", applyFromUrl);
   }, []);
 
-  // Mirror the active filters into the URL (shareable, Back-button friendly).
-  // replaceState keeps it client-side — no navigation or server refetch.
+  // Mirror active filters into the URL and ask the server for its matching
+  // candidate set. Local all-of and location refinements still run below.
   useEffect(() => {
     if (!hydrated) {
       return;
@@ -174,11 +174,13 @@ export function useFarmDirectory(
       params.set("view", viewMode);
     }
     const query = params.toString();
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
-    );
+    const href = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+    if (
+      `${window.location.pathname}${window.location.search}${window.location.hash}` !==
+      href
+    ) {
+      router.replace(href, { scroll: false });
+    }
   }, [
     hydrated,
     searchTerm,
@@ -189,6 +191,7 @@ export function useFarmDirectory(
     originCoords,
     radiusKm,
     viewMode,
+    router,
   ]);
 
   const cantonOptions = useMemo(

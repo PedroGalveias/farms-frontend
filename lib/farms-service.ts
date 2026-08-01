@@ -83,6 +83,31 @@ interface FarmsPage {
   nextCursor?: string;
 }
 
+/** Server-side filters supported by `GET /farms`. Product/all-category and
+ * location refinements are deliberately not represented here: the directory's
+ * current UI needs its complete local candidate set for those semantics. */
+export interface FarmsQuery {
+  canton?: string;
+  categories?: string[];
+  q?: string;
+  sort?: "newest" | "name" | "canton";
+}
+
+function appendFarmsQuery(url: URL, query: FarmsQuery) {
+  if (query.canton) {
+    url.searchParams.set("canton", query.canton);
+  }
+  if (query.categories && query.categories.length > 0) {
+    url.searchParams.set("category", query.categories.join(","));
+  }
+  if (query.q?.trim()) {
+    url.searchParams.set("q", query.q.trim());
+  }
+  if (query.sort && query.sort !== "newest") {
+    url.searchParams.set("sort", query.sort);
+  }
+}
+
 /**
  * Parse a `GET /farms` body from either backend:
  *  - taxonomy-aware backend: `{ farms: [...], next_cursor: string | null }`
@@ -194,6 +219,7 @@ function normalizeFarm(farm: Farm): Farm {
  */
 export async function getFarms(
   locale: Locale = DEFAULT_LOCALE,
+  query: FarmsQuery = {},
 ): Promise<Farm[]> {
   const farms: Farm[] = [];
   const seen = new Set<string>();
@@ -225,6 +251,7 @@ export async function getFarms(
     // the switch to the localized taxonomy contract a cache-safe no-op later.
     url.searchParams.set("lang", locale);
     url.searchParams.set("limit", String(FARMS_PAGE_LIMIT));
+    appendFarmsQuery(url, query);
     if (nextOffset) {
       url.searchParams.set("offset", nextOffset);
     }
