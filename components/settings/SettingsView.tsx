@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   AtSign,
@@ -43,15 +43,18 @@ export default function SettingsView() {
   const t = useT();
   const { locale } = useLanguage();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, logout } = useAuth();
-  const returnTo = settingsReturnTo(searchParams.get(SETTINGS_RETURN_TO_PARAM));
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
       <button
         className="inline-flex items-center gap-2 text-sm font-semibold text-ink/60 transition hover:text-ink"
         onClick={() => {
+          const returnTo = settingsReturnTo(
+            new URLSearchParams(window.location.search).get(
+              SETTINGS_RETURN_TO_PARAM,
+            ),
+          );
           router.replace(localizedPath(returnTo ?? "/", locale));
         }}
         type="button"

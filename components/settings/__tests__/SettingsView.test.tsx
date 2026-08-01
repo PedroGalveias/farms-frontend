@@ -15,7 +15,6 @@ const router = vi.hoisted(() => ({
   push: vi.fn(),
   replace: vi.fn(),
 }));
-const search = vi.hoisted(() => ({ value: "" }));
 
 vi.mock("@/components/auth/AuthProvider", () => ({
   useAuth: () => ({ ...authState, openAuth: vi.fn(), logout }),
@@ -23,7 +22,6 @@ vi.mock("@/components/auth/AuthProvider", () => ({
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/settings",
-  useSearchParams: () => new URLSearchParams(search.value),
   useRouter: () => router,
 }));
 
@@ -52,7 +50,7 @@ function setHistoryLength(length: number) {
 beforeEach(() => {
   authState.user = null;
   setHistoryLength(1);
-  search.value = "";
+  window.history.replaceState({}, "", "/settings");
   localStorage.clear();
   document.documentElement.classList.remove("dark", "force-motion");
   vi.clearAllMocks();
@@ -61,7 +59,7 @@ beforeEach(() => {
 describe("SettingsView", () => {
   it("returns to its app-owned return target, not browser-wide history", () => {
     setHistoryLength(2);
-    search.value = "returnTo=%2Fquick-search";
+    window.history.replaceState({}, "", "/settings?returnTo=%2Fquick-search");
     renderSettings();
 
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
