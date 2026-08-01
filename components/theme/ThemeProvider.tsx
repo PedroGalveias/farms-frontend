@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { flushSync } from "react-dom";
 import {
   prefersReducedMotion,
   supportsViewTransitions,
@@ -218,7 +219,13 @@ export default function ThemeProvider({
       root.style.setProperty("--theme-vt-y", `${y}%`);
       root.classList.add("theme-vt");
 
-      const transition = document.startViewTransition(() => setTheme(next));
+      // React state updates are otherwise batched until after the browser has
+      // captured the "new" snapshot, leaving the transition (and, on current
+      // Chromium, the visible theme) unchanged. Commit inside the callback so
+      // the View Transition API observes the updated document synchronously.
+      const transition = document.startViewTransition(() => {
+        flushSync(() => setTheme(next));
+      });
       transition.finished.finally(() => root.classList.remove("theme-vt"));
     },
     [setTheme],

@@ -4,7 +4,7 @@
 # GHCR on a version tag (see .github/workflows/docker-publish.yml).
 
 # ── deps: install with a clean, reproducible lockfile ────────────────────────
-FROM oven/bun:1-alpine AS deps
+FROM oven/bun:1.3.14-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
 # --frozen-lockfile fails the build if package.json and bun.lock disagree,
@@ -12,7 +12,7 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
 # ── build: compile the app, producing .next/standalone ───────────────────────
-FROM oven/bun:1-alpine AS build
+FROM oven/bun:1.3.14-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -24,7 +24,7 @@ ENV NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
 RUN bun run build
 
 # ── runner: minimal runtime, non-root, binds 0.0.0.0:$PORT ───────────────────
-FROM oven/bun:1-alpine AS runner
+FROM oven/bun:1.3.14-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \

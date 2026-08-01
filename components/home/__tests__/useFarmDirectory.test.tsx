@@ -10,10 +10,18 @@ import {
   DEFAULT_DIRECTORY_PARAMS,
   type DirectoryParams,
 } from "@/lib/directory-params";
+import { LOCATION_STORAGE_KEY } from "@/lib/geolocation";
+import { SEARCH_STATS_STORAGE_KEY } from "@/lib/search-stats";
 import type { Farm } from "@/types/farm";
 
+const router = vi.hoisted(() => ({
+  refresh: vi.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
+}));
+
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => router,
   usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
 }));
@@ -65,6 +73,8 @@ async function setup(
 afterEach(() => {
   window.localStorage.clear();
   window.history.replaceState(null, "", "/");
+  Reflect.deleteProperty(navigator, "geolocation");
+  router.refresh.mockClear();
 });
 
 describe("useFarmDirectory", () => {
@@ -139,6 +149,71 @@ describe("useFarmDirectory", () => {
     await waitFor(() => expect(window.location.search).toContain("canton=ZH"));
   });
 
+  it("reapplies every shareable filter when browser history changes", async () => {
+    const { result } = await setup();
+    window.history.replaceState(
+      null,
+      "",
+      "/?q=rossi&canton=ZH&cat=Gem%C3%BCse,Milchprodukte&match=all&sort=canton&view=list",
+    );
+
+    act(() => window.dispatchEvent(new PopStateEvent("popstate")));
+
+    await waitFor(() => {
+      expect(result.current.searchTerm).toBe("rossi");
+      expect(result.current.selectedCanton).toBe("ZH");
+      expect(result.current.selectedCategories).toEqual([
+        "Gemüse",
+        "Milchprodukte",
+      ]);
+      expect(result.current.categoryMatchMode).toBe("all");
+      expect(result.current.effectiveSort).toBe("canton");
+      expect(result.current.viewMode).toBe("list");
+    });
+  });
+
+  it("supports any/all category matching and records a selected category", async () => {
+    const farms = [
+      farm({ id: "veg", categories: ["Gemüse"] }),
+      farm({ id: "dairy", categories: ["Milchprodukte"] }),
+      farm({ id: "both", categories: ["Gemüse", "Milchprodukte"] }),
+    ];
+    const { result } = await setup(farms);
+
+    act(() => {
+      result.current.setSelectedCategories(["Gemüse", "Milchprodukte"]);
+      result.current.setCategoryMatchMode("any");
+    });
+    await waitFor(() => expect(result.current.visibleFarms).toHaveLength(3));
+
+    act(() => result.current.setCategoryMatchMode("all"));
+    await waitFor(() =>
+      expect(result.current.visibleFarms.map((entry) => entry.id)).toEqual([
+        "both",
+      ]),
+    );
+
+    act(() => result.current.toggleCategory("Früchte"));
+    await waitFor(() =>
+      expect(
+        JSON.parse(
+          window.localStorage.getItem(SEARCH_STATS_STORAGE_KEY) ?? "{}",
+        ),
+      ).toEqual({ Früchte: 1 }),
+    );
+    expect(result.current.selectedCategories).toEqual([
+      "Gemüse",
+      "Milchprodukte",
+      "Früchte",
+    ]);
+
+    act(() => result.current.toggleCategory("Früchte"));
+    expect(result.current.selectedCategories).toEqual([
+      "Gemüse",
+      "Milchprodukte",
+    ]);
+  });
+
   it("grows the visible page size via loadMore", async () => {
     const many = Array.from({ length: PAGE_SIZE * 2 }, (_, i) =>
       farm({ id: `m${i}`, canton: "BE" }),
@@ -147,6 +222,85 @@ describe("useFarmDirectory", () => {
     expect(result.current.visibleCount).toBe(PAGE_SIZE);
     act(() => result.current.loadMore());
     expect(result.current.visibleCount).toBe(PAGE_SIZE * 2);
+  });
+
+  it("refreshes through the Next router without changing directory state", async () => {
+    const { result } = await setup();
+    act(() => result.current.refreshDirectory());
+    expect(router.refresh).toHaveBeenCalledOnce();
+    expect(result.current.visibleFarms).toHaveLength(FARMS.length);
+  });
+
+  it("uses a granted location for nearest sorting and can clear it again", async () => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: (success: PositionCallback) =>
+          success({
+            coords: { latitude: 46.95, longitude: 7.45 },
+          } as GeolocationPosition),
+      },
+    });
+    const { result } = await setup([
+      farm({ id: "far", coordinates: "47.3769,8.5417" }),
+      farm({ id: "near", coordinates: "46.95,7.45" }),
+    ]);
+
+    act(() => result.current.locateMe());
+    await waitFor(() => {
+      expect(result.current.originCoords).toEqual({
+        latitude: 46.95,
+        longitude: 7.45,
+      });
+      expect(result.current.effectiveSort).toBe("nearest");
+    });
+    expect(result.current.visibleFarms.map((entry) => entry.id)).toEqual([
+      "near",
+      "far",
+    ]);
+    expect(window.localStorage.getItem(LOCATION_STORAGE_KEY)).toBe(
+      JSON.stringify({ latitude: 46.95, longitude: 7.45 }),
+    );
+
+    act(() => result.current.setRadiusKm(10));
+    await waitFor(() =>
+      expect(result.current.visibleFarms.map((entry) => entry.id)).toEqual([
+        "near",
+      ]),
+    );
+
+    act(() => result.current.clearLocation());
+    expect(result.current.originCoords).toBeNull();
+    expect(result.current.radiusKm).toBeNull();
+    expect(result.current.effectiveSort).toBe("newest");
+    expect(window.localStorage.getItem(LOCATION_STORAGE_KEY)).toBeNull();
+  });
+
+  it("surfaces a geolocation permission denial", async () => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: (
+          _success: PositionCallback,
+          failure: PositionErrorCallback,
+        ) =>
+          failure({
+            code: 1,
+            PERMISSION_DENIED: 1,
+            POSITION_UNAVAILABLE: 2,
+            TIMEOUT: 3,
+          } as GeolocationPositionError),
+      },
+    });
+    const { result } = await setup();
+
+    act(() => result.current.locateMe());
+    await waitFor(() =>
+      expect(result.current.locationError).toMatch(
+        /Location access is blocked/,
+      ),
+    );
+    expect(result.current.isLocating).toBe(false);
   });
 
   // A shared "?radius=25" link used to empty the directory for anyone who

@@ -75,10 +75,10 @@ export default defineConfig({
       ],
       // CI fails if coverage of the scoped code regresses below these floors.
       thresholds: {
-        statements: 89,
-        branches: 79,
-        functions: 88,
-        lines: 89,
+        statements: 92,
+        branches: 84,
+        functions: 92,
+        lines: 93,
       },
     },
   },

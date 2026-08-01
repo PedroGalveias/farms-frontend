@@ -27,7 +27,18 @@ test.describe("home page", () => {
     const html = page.locator("html");
     await expect(html).not.toHaveClass(/dark/);
 
-    await page.getByRole("switch", { name: /toggle dark mode/i }).click();
+    // Desktop renders both the visible side rail and the mobile-only header;
+    // scope the locator to the visible desktop chrome rather than relying on a
+    // global role query to stay unique.
+    const themeToggle = page
+      .getByRole("complementary")
+      .getByRole("switch", { name: /toggle dark mode/i });
+    // The initial document is server-rendered. Retry until React has hydrated
+    // the toggle instead of dispatching the click into inert SSR markup.
+    await expect(async () => {
+      await themeToggle.click({ timeout: 1_000 });
+      await expect(themeToggle).toHaveAttribute("aria-checked", "true");
+    }).toPass({ timeout: 15_000 });
     await expect(html).toHaveClass(/dark/);
   });
 });

@@ -35,7 +35,7 @@ vi.mock("@/lib/suncycle", async (importOriginal) => {
 let daylight = true;
 
 function Probe() {
-  const { theme, mode, setMode } = useTheme();
+  const { theme, mode, setMode, toggleTheme } = useTheme();
   return (
     <div>
       <span data-testid="theme">{theme}</span>
@@ -44,6 +44,7 @@ function Probe() {
       <button onClick={() => setMode("sun")}>sun</button>
       <button onClick={() => setMode("dark")}>dark</button>
       <button onClick={() => setMode("light")}>light</button>
+      <button onClick={() => toggleTheme({ x: 40, y: 60 })}>toggle</button>
     </div>
   );
 }
@@ -139,5 +140,29 @@ describe("ThemeProvider modes", () => {
     });
     expect(meta.getAttribute("content")).toBe("#f4f4ef");
     meta.remove();
+  });
+
+  it("commits a toggle inside the View Transition snapshot callback", async () => {
+    let sawDarkSnapshot = false;
+    const finished = Promise.resolve();
+    Object.defineProperty(document, "startViewTransition", {
+      configurable: true,
+      value: (callback: () => void) => {
+        callback();
+        sawDarkSnapshot = document.documentElement.classList.contains("dark");
+        return { finished };
+      },
+    });
+    await renderTheme();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "toggle" }).click();
+    });
+
+    expect(sawDarkSnapshot).toBe(true);
+    expect(document.documentElement).toHaveClass("dark");
+    await finished;
+    expect(document.documentElement).not.toHaveClass("theme-vt");
+    Reflect.deleteProperty(document, "startViewTransition");
   });
 });

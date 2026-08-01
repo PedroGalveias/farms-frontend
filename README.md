@@ -7,9 +7,10 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
 <p>
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/codeql.yml/badge.svg"></a>
-  <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/ci.yml"><img alt="Coverage floors (CI-enforced)" src="https://img.shields.io/badge/coverage-%E2%89%A589%25%20stmts%20%C2%B7%20%E2%89%A579%25%20branches-3c873a"></a>
+  <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/ci.yml"><img alt="Coverage floors (CI-enforced)" src="https://img.shields.io/badge/coverage-%E2%89%A592%25%20stmts%20%C2%B7%20%E2%89%A584%25%20branches-3c873a"></a>
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/audit.yml"><img alt="Security audit" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/audit.yml/badge.svg"></a>
-  <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D20.19-3c873a">
+  <img alt="Bun" src="https://img.shields.io/badge/bun-1.3.14-f9f1e1">
+  <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D26-3c873a">
   <img alt="License: GPL-2.0" src="https://img.shields.io/badge/license-GPL--2.0-blue">
 </p>
 
@@ -41,32 +42,34 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
 
 ## 🧱 Tech stack
 
-| Area                 | Choice                                                                            |
-| -------------------- | --------------------------------------------------------------------------------- |
-| Framework            | [Next.js 16](https://nextjs.org/) (App Router)                                    |
-| UI                   | [React 19](https://react.dev/)                                                    |
-| Styling              | [Tailwind CSS 4](https://tailwindcss.com/)                                        |
-| Language             | [TypeScript 6](https://www.typescriptlang.org/)                                   |
-| Icons                | [lucide-react](https://lucide.dev/) v1                                            |
-| Unit/component tests | [Vitest 4](https://vitest.dev/) + [Testing Library](https://testing-library.com/) |
-| End-to-end tests     | [Playwright](https://playwright.dev/)                                             |
-| Hosting              | [Render](https://render.com/)                                                     |
+| Area                 | Choice                                                                              |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| Runtime & packages   | [Bun 1.3](https://bun.sh/) (`bun.lock`)                                             |
+| Framework            | [Next.js 16.2](https://nextjs.org/) (App Router)                                    |
+| UI                   | [React 19.2](https://react.dev/)                                                    |
+| Styling              | [Tailwind CSS 4.3](https://tailwindcss.com/)                                        |
+| Language             | [TypeScript 6.0](https://www.typescriptlang.org/)                                   |
+| Icons                | [lucide-react](https://lucide.dev/) v1                                              |
+| Unit/component tests | [Vitest 4.1](https://vitest.dev/) + [Testing Library](https://testing-library.com/) |
+| End-to-end tests     | [Playwright 1.62](https://playwright.dev/)                                          |
+| Hosting              | [Render](https://render.com/)                                                       |
 
 ## 🚀 Getting started
 
 ### Prerequisites
 
-- **Node.js** `^20.19` or `>=22.12` (Node **22 LTS** recommended). The repo ships an [`.nvmrc`](.nvmrc):
+- **Bun** `>=1.3.14` is the primary local and production runtime. Install it from [bun.sh](https://bun.sh/) and verify it with `bun --version`.
+- **Node.js** `>=26.0.0` is required for the Node-based CI/test toolchain. The repo ships an [`.nvmrc`](.nvmrc):
   ```bash
-  nvm use      # picks up Node 22
+  nvm use      # installs/selects Node 26.5.0
   ```
-- **npm** (ships with Node).
+- **npm** `>=12.0.2` ships with the supported Node 26 runtime. Both lockfiles are intentionally committed so `npm ci` remains reproducible for Node-based tooling.
 
 ### Setup
 
 ```bash
-# 1. Install dependencies
-npm install
+# 1. Install dependencies from the committed Bun lockfile
+bun install --frozen-lockfile
 
 # 2. Create your local environment file
 cp .env.example .env
@@ -79,35 +82,37 @@ cp .env.example .env
 #    NEXT_PUBLIC_SITE_URL=https://your-domain.example
 
 # 4. Start the dev server
-npm run dev
+bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The app degrades gracefully if the backend is unavailable — the UI still renders with an empty directory and a status banner.
 
 ## 📜 Scripts
 
+Run scripts with `bun run`; the matching `npm run` commands remain available. Browser-test and static-analysis scripts explicitly launch Node 26 because Vitest 4's Rolldown backend currently needs a Node utility API that Bun 1.3.14 does not expose.
+
 | Script                  | Description                                        |
 | ----------------------- | -------------------------------------------------- |
-| `npm run dev`           | Start the dev server                               |
-| `npm run build`         | Production build                                   |
-| `npm run start`         | Serve the production build                         |
-| `npm run lint`          | ESLint (warnings fail: `--max-warnings 0`)         |
-| `npm run typecheck`     | `tsc --noEmit`                                     |
-| `npm run format`        | Format the codebase with Prettier                  |
-| `npm run format:check`  | Check formatting (used in CI)                      |
-| `npm test`              | Run unit/component tests once                      |
-| `npm run test:watch`    | Tests in watch mode                                |
-| `npm run test:coverage` | Tests with a coverage report (enforces thresholds) |
-| `npm run test:e2e`      | Playwright end-to-end smoke tests                  |
+| `bun run dev`           | Start the dev server                               |
+| `bun run build`         | Production build                                   |
+| `bun run start`         | Serve the production build                         |
+| `bun run lint`          | ESLint (warnings fail: `--max-warnings 0`)         |
+| `bun run typecheck`     | `tsc --noEmit`                                     |
+| `bun run format`        | Format the codebase with Prettier                  |
+| `bun run format:check`  | Check formatting (used in CI)                      |
+| `bun run test`          | Run unit/component tests once                      |
+| `bun run test:watch`    | Tests in watch mode                                |
+| `bun run test:coverage` | Tests with a coverage report (enforces thresholds) |
+| `bun run test:e2e`      | Playwright end-to-end smoke tests                  |
 
 ## 🧪 Testing
 
 - **Unit & component tests** ([Vitest](https://vitest.dev/) + Testing Library, jsdom) live next to the code in `__tests__/` folders. They cover the `lib/` logic (distance sorting, validation, i18n), key components, and the health API route.
-- **Coverage** is scoped to the modules under test and **enforces thresholds** (statements 89%, branches 79%, functions 88%, lines 89%) — `npm run test:coverage` fails if coverage regresses. An HTML report is written to `coverage/`.
+- **Coverage** is scoped to the modules under test and **enforces thresholds** (statements 92%, branches 84%, functions 92%, lines 93%) — `bun run test:coverage` fails if coverage regresses. An HTML report is written to `coverage/`.
 - **End-to-end tests** ([Playwright](https://playwright.dev/)) in `e2e/` build and boot the app and assert the core flows across **five projects**: Chromium, Firefox, and WebKit on desktop, plus iPhone (WebKit) and Pixel (Blink) phone profiles for the touch flows (`*.mobile.spec.ts`). First time:
   ```bash
-  npx playwright install chromium firefox webkit
-  npm run test:e2e
+  bunx playwright install chromium firefox webkit
+  bun run test:e2e
   ```
 - **Visual regression** (`e2e/visual.spec.ts`) screenshots the key pages against committed baselines — macOS baselines are generated locally (`npx playwright test visual --update-snapshots`), Linux baselines by the _Visual baselines (linux)_ workflow, and the suite gates CI once Linux baselines exist.
 
@@ -116,9 +121,10 @@ Open [http://localhost:3000](http://localhost:3000). The app degrades gracefully
 Every push to `main` and every pull request runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 
 ```
-format:check → lint → typecheck → test (+coverage) → build      (verify job)
-             Playwright e2e across all five projects             (e2e job)
-        unit tests + build + Windows-Firefox e2e (windows-latest) (windows job)
+Node 26: format:check → lint → typecheck → test (+coverage) → build (verify job)
+Linux:   Playwright across five desktop/mobile projects                 (e2e job)
+Windows: unit + build + Firefox, Chromium and WebKit cross-OS specs    (windows job)
+macOS:   unit + Firefox, Chromium and WebKit cross-OS specs             (macos job)
 ```
 
 - Pull requests get an automatic **coverage comment**; the HTML report is uploaded as an artifact.
@@ -130,7 +136,7 @@ format:check → lint → typecheck → test (+coverage) → build      (verify 
 Shipping is **tag-driven**: merge to `main` whenever — that only runs CI. To release, bump `package.json`'s `version` to match the tag you're about to cut (CI blocks the deploy if they differ), then push the tag, which triggers the Render **deploy hook** after CI passes:
 
 ```bash
-npm version 1.2.3 --no-git-tag-version   # sync package.json first
+npm version 1.2.3 --no-git-tag-version   # sync package.json and package-lock first
 git commit -am "chore: v1.2.3"
 git tag v1.2.3 && git push origin main v1.2.3
 ```
@@ -138,7 +144,7 @@ git tag v1.2.3 && git push origin main v1.2.3
 The footer's displayed version resolves from `git describe --tags` at build time, so tagged builds show the release tag automatically.
 
 - Health check path: `/api/health`.
-- **Runtime is [Bun](https://bun.sh).** Render and the container image install, build, and serve with Bun (`bun install --frozen-lockfile` → `bun run build` → `bun server.js`), pinned by the committed [`bun.lock`](bun.lock). Local development and CI stay on **npm + Node 22** (the test runners don't run under Bun), so both a `package-lock.json` and a `bun.lock` are committed; a [`bun-lockfile`](.github/workflows/ci.yml) CI job runs `bun install --frozen-lockfile` to catch either lockfile drifting from `package.json`. The [`Dockerfile`](Dockerfile) builds a non-root standalone image published to GHCR on a `v*` tag ([`docker-publish.yml`](.github/workflows/docker-publish.yml)).
+- **Runtime is [Bun](https://bun.sh).** Local development, Render, and the container image use Bun 1.3.14 (`bun install --frozen-lockfile` → `bun run build` → `bun server.js`), pinned by the committed [`bun.lock`](bun.lock). Node 26/npm 12 runs the test toolchain in CI; `package-lock.json` is committed alongside `bun.lock` so that path remains reproducible. The [`bun-lockfile`](.github/workflows/ci.yml) job verifies Bun's lock is in sync. The [`Dockerfile`](Dockerfile) builds a non-root standalone image published to GHCR on a `v*` tag ([`docker-publish.yml`](.github/workflows/docker-publish.yml)).
 
 ## 🌍 Internationalization
 
@@ -218,7 +224,7 @@ Contributions are welcome!
 1. **Branch off `main`** (PRs are squash-merged, so keep branches focused).
 2. Make your change and **run the checks locally** before pushing:
    ```bash
-   npm run format && npm run lint && npm run typecheck && npm test && npm run build
+   bun run format && bun run lint && bun run typecheck && bun run test && bun run build
    ```
 3. Use clear, **[Conventional Commits](https://www.conventionalcommits.org/)** messages (`feat:`, `fix:`, `chore:`, `test:`, `ci:`, …).
 4. Open a pull request. **CI must be green** — the same checks above plus E2E, CodeQL, and coverage thresholds run automatically.
