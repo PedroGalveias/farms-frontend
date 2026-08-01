@@ -39,7 +39,7 @@ export const de: Dict = {
     "Animationen auch abspielen, wenn dein System reduzierte Bewegung wünscht.",
   settings_title: "Einstellungen",
   settings_subtitle: "Erscheinungsbild, Sprache, Feedback und deine Daten.",
-  settings_backToProfile: "Zurück zum Profil",
+  settings_back: "Zurück",
   settings_appearance: "Erscheinungsbild",
   settings_theme_system: "System",
   settings_theme_sun: "Sonnenzyklus",

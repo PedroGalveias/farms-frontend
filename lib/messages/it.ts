@@ -39,7 +39,7 @@ export const it: Dict = {
     "Riproduci le animazioni anche se il sistema chiede meno movimento.",
   settings_title: "Impostazioni",
   settings_subtitle: "Aspetto, lingua, feedback e i tuoi dati.",
-  settings_backToProfile: "Torna al profilo",
+  settings_back: "Indietro",
   settings_appearance: "Aspetto",
   settings_theme_system: "Sistema",
   settings_theme_sun: "Ciclo solare",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "@/components/i18n/LocalizedLink";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   AtSign,
@@ -24,7 +24,7 @@ import {
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useTheme, type ThemeMode } from "@/components/theme/ThemeProvider";
-import { LOCALES } from "@/lib/i18n-core";
+import { localizedPath, LOCALES } from "@/lib/i18n-core";
 import { motionForced, setMotionForced } from "@/lib/motion";
 import { hapticsEnabled, setHapticsEnabled, haptic } from "@/lib/haptics";
 import { playTick, setSoundEnabled, soundEnabled } from "@/lib/sound";
@@ -37,17 +37,26 @@ import { COLLECTIONS_STORAGE_KEY } from "@/lib/collections";
  */
 export default function SettingsView() {
   const t = useT();
+  const { locale } = useLanguage();
+  const router = useRouter();
   const { user, logout } = useAuth();
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
-      <Link
+      <button
         className="inline-flex items-center gap-2 text-sm font-semibold text-ink/60 transition hover:text-ink"
-        href="/profile"
+        onClick={() => {
+          if (window.history.length > 1) {
+            router.back();
+          } else {
+            router.push(localizedPath("/", locale));
+          }
+        }}
+        type="button"
       >
         <ArrowLeft className="h-4 w-4" />
-        {t("settings_backToProfile")}
-      </Link>
+        {t("settings_back")}
+      </button>
 
       <header className="mt-6">
         <h1 className="text-title font-black leading-[0.95] tracking-[-0.04em] text-ink">

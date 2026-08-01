@@ -9,29 +9,64 @@ const authState: {
   loading: boolean;
 } = { user: null, loading: false };
 const logout = vi.fn();
+const router = vi.hoisted(() => ({ back: vi.fn(), push: vi.fn() }));
 
 vi.mock("@/components/auth/AuthProvider", () => ({
   useAuth: () => ({ ...authState, openAuth: vi.fn(), logout }),
 }));
 
-function renderSettings() {
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/settings",
+  useRouter: () => router,
+}));
+
+function renderSettings(
+  initialLocale: "en" | "de" | "fr" | "it" | "rm" = "en",
+) {
   return render(
     <ThemeProvider>
-      <LanguageProvider>
+      <LanguageProvider initialLocale={initialLocale}>
         <SettingsView />
       </LanguageProvider>
     </ThemeProvider>,
   );
 }
 
+function setHistoryLength(length: number) {
+  Object.defineProperty(window.history, "length", {
+    configurable: true,
+    value: length,
+  });
+}
+
 beforeEach(() => {
   authState.user = null;
+  setHistoryLength(1);
   localStorage.clear();
   document.documentElement.classList.remove("dark", "force-motion");
   vi.clearAllMocks();
 });
 
 describe("SettingsView", () => {
+  it("returns to the page the visitor was previously viewing", () => {
+    setHistoryLength(2);
+    renderSettings();
+
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(router.back).toHaveBeenCalledOnce();
+    expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the localized home page on a direct visit", () => {
+    renderSettings("de");
+
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(router.push).toHaveBeenCalledWith("/de");
+    expect(router.back).not.toHaveBeenCalled();
+  });
+
   it("offers the four appearance modes and applies a manual pick", () => {
     renderSettings();
     const radios = screen.getAllByRole("radio");

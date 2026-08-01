@@ -39,7 +39,7 @@ export const rm: Dict = {
     "Far ir las animaziuns er sche tes sistem giavischa main moviment.",
   settings_title: "Parameters",
   settings_subtitle: "Apparientscha, lingua, feedback e tias datas.",
-  settings_backToProfile: "Enavos al profil",
+  settings_back: "Enavos",
   settings_appearance: "Apparientscha",
   settings_theme_system: "Sistem",
   settings_theme_sun: "Ciclus dal sulegl",
