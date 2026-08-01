@@ -34,6 +34,12 @@ export { FarmsApiError, getFarmsApiBaseUrl } from "@/lib/backend";
 // so a hung backend fails fast (into the cached copy / error UI / a degraded
 // status banner) instead of leaving the request — and the page — hanging.
 const REQUEST_TIMEOUT_MS = 8000;
+// Ceiling on the whole pagination walk. Per-request timeouts bound each hop,
+// not the total: 32 pages at 8s each is over four minutes, and a serverless host
+// terminates the invocation long before that — turning a recoverable slow load
+// into a hard platform error. 25s leaves room for a cold start plus a healthy
+// tail while staying inside a typical function limit; a warm full load is ~5-10s.
+const TOTAL_BUDGET_MS = 25_000;
 // The first page of the directory pays for waking the backend. Free-tier Render
 // spins down when idle and can take tens of seconds to answer the first
 // request, which 8s reliably lost — every visitor arriving at a cold backend
@@ -121,6 +127,17 @@ function normalizeFarm(farm: Farm): Farm {
   };
 }
 
+/**
+ * Every farm in the directory, assembled by following the backend's offset
+ * pagination.
+ *
+ * Resilience matters more here than completeness: a page failing mid-flight
+ * returns the farms already collected instead of discarding them, and the whole
+ * walk is bounded by {@link TOTAL_BUDGET_MS} so it can never outlive the
+ * serverless invocation that called it. Throws only when nothing at all could
+ * be fetched, since an empty list would otherwise be indistinguishable from a
+ * directory with no farms in it.
+ */
 export async function getFarms(): Promise<Farm[]> {
   const farms: Farm[] = [];
   const seen = new Set<string>();
@@ -130,8 +147,22 @@ export async function getFarms(): Promise<Farm[]> {
   // reaching the tail.) `seen` dedupes defensively in case a page boundary ever
   // overlaps.
   let nextOffset: string | undefined;
+  const deadline = Date.now() + TOTAL_BUDGET_MS;
 
   for (let page = 0; page < FARMS_MAX_PAGES; page++) {
+    // Per-request timeouts bound each hop, not the walk. 32 pages at 8s each is
+    // over four minutes in the worst case — far past the point where Vercel
+    // kills the invocation, which would surface as a hard platform error rather
+    // than the partial directory this function is designed to degrade into. So
+    // the loop watches a wall-clock deadline too, and stops while it still owns
+    // the response.
+    const remaining = deadline - Date.now();
+    if (remaining <= 0 && farms.length > 0) {
+      console.warn(
+        `[farms] pagination budget spent after ${farms.length} farms (${page} pages); serving partial directory`,
+      );
+      break;
+    }
     const url = new URL(`${getFarmsApiBaseUrl()}/farms`);
     url.searchParams.set("limit", String(FARMS_PAGE_LIMIT));
     if (nextOffset) {
@@ -150,8 +181,15 @@ export async function getFarms(): Promise<Farm[]> {
         // The first request absorbs the backend's cold start (free-tier Render
         // spins down and can take tens of seconds to wake); later pages are hot
         // and keep the tighter bound.
+        // Never wait past the overall deadline, even on page 0.
         signal: AbortSignal.timeout(
-          page === 0 ? COLD_START_TIMEOUT_MS : REQUEST_TIMEOUT_MS,
+          Math.max(
+            1,
+            Math.min(
+              page === 0 ? COLD_START_TIMEOUT_MS : REQUEST_TIMEOUT_MS,
+              remaining,
+            ),
+          ),
         ),
       });
 
