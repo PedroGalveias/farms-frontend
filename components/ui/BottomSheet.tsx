@@ -108,7 +108,7 @@ export default function BottomSheet({
     // never enters the new context. Focusing the container (tabindex="-1")
     // rather than the first control means assistive tech reads the dialog from
     // its label down, instead of dropping the user mid-sheet.
-    queueMicrotask(() => sheetRef.current?.focus());
+    const focusFrame = requestAnimationFrame(() => sheetRef.current?.focus());
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onCloseRef.current();
@@ -116,10 +116,11 @@ export default function BottomSheet({
     document.addEventListener("keydown", onKeyDown);
 
     return () => {
+      cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
       document.body.classList.remove("sheet-open");
       document.removeEventListener("keydown", onKeyDown);
-      previouslyFocused?.focus();
+      queueMicrotask(() => previouslyFocused?.focus());
     };
   }, []);
 

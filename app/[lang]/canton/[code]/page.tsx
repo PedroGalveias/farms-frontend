@@ -16,6 +16,7 @@ import {
   getTopFarmCategories,
   isValidCantonCode,
 } from "@/lib/farms";
+import { serializeJsonLd } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
 
@@ -136,7 +137,7 @@ export default async function CantonPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <CantonView
         code={code.toLowerCase()}

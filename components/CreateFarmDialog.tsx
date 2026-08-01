@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+} from "react";
 import { ChevronDown, LoaderCircle, Plus, X } from "lucide-react";
 import {
   EMPTY_FARM_FORM_VALUES,
@@ -15,6 +21,7 @@ import {
 import { PRODUCTS_BY_GROUP, productLabel } from "@/lib/products";
 import { SWISS_CANTONS } from "@/lib/farms";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { useFocusTrap } from "@/components/ui/useFocusTrap";
 import type { FarmFormErrors, FarmFormValues } from "@/types/farm";
 
 interface CreateFarmDialogProps {
@@ -40,6 +47,9 @@ export default function CreateFarmDialog({
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  useFocusTrap(dialogRef, open);
 
   useEffect(() => {
     if (!open) {
@@ -47,14 +57,30 @@ export default function CreateFarmDialog({
     }
 
     const previousOverflow = document.body.style.overflow;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     document.body.style.overflow = "hidden";
     // Slide the mobile tab bar out of the way so it doesn't cover the dialog's
     // own controls (same mechanism as FarmDetailSheet).
     document.body.classList.add("sheet-open");
 
+    // WebKit ignores a focus() issued before the newly-opened dialog has
+    // painted. The next frame is late enough for Safari while remaining
+    // imperceptible in Chromium/Firefox.
+    const focusFrame = requestAnimationFrame(() =>
+      closeButtonRef.current?.focus(),
+    );
+
     return () => {
+      cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
       document.body.classList.remove("sheet-open");
+      // WebKit can discard a synchronous focus restore while the dialog's
+      // unmount is still committing. Run just after the commit so the opener
+      // is reliably focusable again across Safari and Chromium.
+      queueMicrotask(() => previouslyFocused?.focus());
     };
   }, [open]);
 
@@ -172,6 +198,7 @@ export default function CreateFarmDialog({
         aria-labelledby="create-farm-heading"
         aria-modal="true"
         className="glass glass-card qs-sheet max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-panel shadow-elev-3"
+        ref={dialogRef}
         role="dialog"
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
@@ -195,6 +222,7 @@ export default function CreateFarmDialog({
             className="grid h-10 w-10 shrink-0 place-items-center rounded-chip bg-tone text-ink/70 transition hover:bg-ink hover:text-cloud focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isSubmitting}
             onClick={onClose}
+            ref={closeButtonRef}
             type="button"
           >
             <X className="h-4 w-4" />

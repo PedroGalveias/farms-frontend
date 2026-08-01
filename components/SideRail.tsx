@@ -11,6 +11,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AccountMenu from "@/components/auth/AccountMenu";
 import { useSlidingIndicator } from "@/components/motion/useSlidingIndicator";
 import { useT } from "@/components/i18n/LanguageProvider";
+import { COMMAND_PALETTE_OPEN_EVENT } from "@/components/command/events";
 import { useModKey } from "@/components/command/useModKey";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
@@ -88,7 +89,7 @@ export default function SideRail() {
         <button
           className={`${utilityClassName} mb-1`}
           onClick={() =>
-            window.dispatchEvent(new CustomEvent("farms:command-open"))
+            window.dispatchEvent(new CustomEvent(COMMAND_PALETTE_OPEN_EVENT))
           }
           title={`${t("command_open")} (${mod === "⌘" ? "⌘K" : "Ctrl+K"})`}
           type="button"

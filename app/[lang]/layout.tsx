@@ -8,7 +8,7 @@ import PersonalizationProvider from "@/components/personalization/Personalizatio
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import CustomCursor from "@/components/motion/CustomCursor";
 import GlassLight from "@/components/motion/GlassLight";
-import AmbientBackdrop from "@/components/hero/AmbientBackdrop";
+import LazyAmbientBackdrop from "@/components/hero/LazyAmbientBackdrop";
 import MotionPrompt from "@/components/motion/MotionPrompt";
 import BackToTop from "@/components/motion/BackToTop";
 import PwaRegister from "@/components/PwaRegister";
@@ -18,7 +18,7 @@ import WebVitals from "@/components/WebVitals";
 import AuthProvider from "@/components/auth/AuthProvider";
 import TripProvider from "@/components/trip/TripProvider";
 import SeasonalReminderProvider from "@/components/seasonal/SeasonalReminderProvider";
-import CommandPalette from "@/components/command/CommandPalette";
+import LazyCommandPalette from "@/components/command/LazyCommandPalette";
 import KeyboardShortcuts from "@/components/command/KeyboardShortcuts";
 import ViewTransitions from "@/components/transitions/ViewTransitions";
 import ToastProvider from "@/components/ui/ToastProvider";
@@ -289,11 +289,11 @@ export default async function RootLayout({
                           <div id="main-content">{children}</div>
                         </div>
                         <MobileTabBar />
-                        <CommandPalette />
+                        <LazyCommandPalette />
                         <KeyboardShortcuts />
                         <CustomCursor />
                         <GlassLight />
-                        <AmbientBackdrop />
+                        <LazyAmbientBackdrop />
                         <MotionPrompt />
                         <BackToTop />
                         <PwaRegister />

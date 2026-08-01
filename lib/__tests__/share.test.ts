@@ -4,6 +4,7 @@ import {
   farmMetaDescription,
   farmPath,
   farmShareUrl,
+  serializeJsonLd,
 } from "@/lib/share";
 import type { Farm } from "@/types/farm";
 
@@ -74,5 +75,20 @@ describe("farmJsonLd", () => {
   it("omits geo when the coordinates can't be parsed", () => {
     const data = farmJsonLd(makeFarm({ coordinates: "n/a" }), "https://x.test");
     expect(data.geo).toBeUndefined();
+  });
+});
+
+describe("serializeJsonLd", () => {
+  it("keeps API-provided strings inside the JSON-LD script data", () => {
+    const serialized = serializeJsonLd({
+      name: '</script><script>window.__xss = "owned"</script>',
+      separator: "a\u2028b\u2029c",
+    });
+
+    expect(serialized).not.toContain("</script>");
+    expect(serialized).not.toContain("<script>");
+    expect(serialized).toContain("\\u003c/script\\u003e");
+    expect(serialized).toContain("\\u2028");
+    expect(serialized).toContain("\\u2029");
   });
 });

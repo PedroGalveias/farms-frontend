@@ -66,9 +66,8 @@ export default function AuthModal({
   // Keep Tab inside the dialog: aria-modal alone does not stop the browser
   // tabbing out into the (obscured, scroll-locked) page behind it.
   const dialogRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(dialogRef);
-
   const open = mode !== null;
+  useFocusTrap(dialogRef, open);
 
   // Reset everything whenever the modal closes, so it reopens clean. Deferred
   // out of the effect body (repo lint: no sync setState in effects).
@@ -108,9 +107,13 @@ export default function AuthModal({
       return undefined;
     }
     const previousOverflow = document.body.style.overflow;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     document.body.style.overflow = "hidden";
     document.body.classList.add("sheet-open");
-    queueMicrotask(() => emailRef.current?.focus());
+    const focusFrame = requestAnimationFrame(() => emailRef.current?.focus());
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !pending) {
@@ -119,9 +122,11 @@ export default function AuthModal({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
+      cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
       document.body.classList.remove("sheet-open");
       window.removeEventListener("keydown", onKeyDown);
+      queueMicrotask(() => previouslyFocused?.focus());
     };
   }, [open, pending, onClose]);
 

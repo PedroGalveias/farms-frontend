@@ -227,9 +227,10 @@ describe("BottomSheet", () => {
       expect(trigger).toHaveFocus();
 
       renderSheet();
-      // The move is queued in a microtask so it lands after mount.
-      await Promise.resolve();
-      await Promise.resolve();
+      // The move happens on the first painted frame so WebKit accepts it.
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve()),
+      );
 
       const dialog = screen.getByRole("dialog");
       expect(dialog).toHaveFocus();

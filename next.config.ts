@@ -60,9 +60,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   // Emit a self-contained server bundle (.next/standalone/server.js) so the
-  // Docker image (see Dockerfile + docker-publish.yml) ships only the traced
-  // runtime deps. `next start` on Render is unaffected — this only adds output.
-  output: "standalone",
+  // Docker image ships only the traced runtime deps. Next 16 deliberately
+  // rejects `next start` for that packaging mode, while Playwright starts the
+  // app with `next start`; omit the packaging-only output for that test build.
+  // Deployment builds keep the standalone server used by the Dockerfile.
+  output: process.env.PLAYWRIGHT_TEST === "1" ? undefined : "standalone",
   // Inlined into the client bundle so the footer can show the deployed version.
   env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
   async headers() {

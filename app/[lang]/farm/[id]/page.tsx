@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import FarmDetail from "@/components/FarmDetail";
 import { getFarms } from "@/lib/farms-service";
 import { DEFAULT_LOCALE, isLocale, localeAlternates } from "@/lib/i18n";
-import { farmJsonLd, farmMetaDescription } from "@/lib/share";
+import { farmJsonLd, farmMetaDescription, serializeJsonLd } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
 
@@ -76,7 +76,7 @@ export default async function FarmPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <FarmDetail
         backHref={backHref}

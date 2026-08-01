@@ -18,6 +18,7 @@ import {
   getProductSlugs,
   getTopCantonsForCategory,
 } from "@/lib/product-pages";
+import { serializeJsonLd } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
 
@@ -140,7 +141,7 @@ export default async function ProductPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <ProductView
         category={category}

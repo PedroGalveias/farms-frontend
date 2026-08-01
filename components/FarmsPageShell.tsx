@@ -198,7 +198,7 @@ export default function FarmsPageShell({
               onToggleCategory={directory.toggleCategory}
               onUseLocation={directory.locateMe}
               onViewModeChange={directory.setViewMode}
-              radiusKm={directory.radiusKm}
+              radiusKm={directory.activeRadiusKm}
               searchTerm={directory.searchTerm}
               selectedCanton={directory.selectedCanton}
               selectedCategories={directory.selectedCategories}

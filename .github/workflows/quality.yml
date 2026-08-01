@@ -1,0 +1,98 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-and-static:
+    name: Unit and static checks (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+  coverage:
+    name: Unit coverage (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:coverage
+
+  playwright:
+    name: Playwright (${{ matrix.label }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux owns the deterministic Chromium visual baselines.
+          - label: Linux Chromium + visual
+            os: ubuntu-latest
+            browser: chromium
+            grep: ""
+          - label: Linux Firefox
+            os: ubuntu-latest
+            browser: firefox
+            grep: --grep-invert=^visual
+          - label: Linux Android Chrome
+            os: ubuntu-latest
+            browser: chromium
+            project: mobile-chrome
+            grep: --grep-invert=^visual
+          # Playwright WebKit is the supported automated proxy for Safari.
+          - label: macOS WebKit (Safari engine)
+            os: macos-latest
+            browser: webkit
+            grep: --grep-invert=^visual
+          - label: macOS iPhone Safari
+            os: macos-latest
+            browser: webkit
+            project: mobile-safari
+            grep: --grep-invert=^visual
+          - label: macOS iPad Safari
+            os: macos-latest
+            browser: webkit
+            project: ipad-safari
+            grep: --grep-invert=^visual
+          - label: Windows Chromium
+            os: windows-latest
+            browser: chromium
+            grep: --grep-invert=^visual
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browser (Linux)
+        if: runner.os == 'Linux'
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Install Playwright browser
+        if: runner.os != 'Linux'
+        run: npx playwright install ${{ matrix.browser }}
+      - name: Run end-to-end tests
+        run: npm run test:e2e -- --project=${{ matrix.project || matrix.browser }} ${{ matrix.grep }}

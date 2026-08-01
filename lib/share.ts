@@ -18,6 +18,22 @@ export function farmShareUrl(origin: string, id: string): string {
 }
 
 /**
+ * Serialize JSON-LD for a script element without letting content from the API
+ * close that element. `JSON.stringify` leaves `<` untouched, so a farm name
+ * containing `</script><script>…` would otherwise become executable markup
+ * when inserted through `dangerouslySetInnerHTML`.
+ */
+export function serializeJsonLd(value: Record<string, unknown>): string {
+  const json = JSON.stringify(value);
+  return (json ?? "null")
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
+/**
  * A concise, factual one-line description for link previews and <meta> tags,
  * e.g. "Bauernhof Meier in Bern (BE) — Vegetables, Fruits, Eggs". Category
  * labels are localized; at most a handful are listed.

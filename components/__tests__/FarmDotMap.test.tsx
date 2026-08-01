@@ -38,7 +38,10 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver;
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  window.devicePixelRatio = 1;
+  cleanup();
+});
 
 /** The pixel centre of a farm's dot, mirroring the component's fit() maths. */
 function dotPixel(lat: number, lng: number) {
@@ -210,5 +213,16 @@ describe("FarmDotMap", () => {
     const zuri = dotPixel(47.4, 8.5);
     fireEvent.click(canvas, { clientX: zuri.x, clientY: zuri.y });
     expect(onOpenFarm).not.toHaveBeenCalled();
+  });
+
+  it("uses stable integer backing dimensions at a fractional Windows DPR", () => {
+    window.devicePixelRatio = 1.25;
+    const { canvas } = renderMap();
+    const dot = dotPixel(46.95, 7.45);
+
+    fireEvent.pointerMove(canvas, { clientX: dot.x, clientY: dot.y });
+
+    expect(canvas.width).toBe(750);
+    expect(canvas.height).toBe(500);
   });
 });

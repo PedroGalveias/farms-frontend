@@ -11,7 +11,7 @@ function Trapped({ active = true }: { active?: boolean }) {
   return (
     <>
       <button type="button">outside-before</button>
-      <div aria-modal="true" ref={ref} role="dialog">
+      <div aria-modal="true" ref={ref} role="dialog" tabIndex={-1}>
         <button type="button">first</button>
         <button type="button">middle</button>
         <button disabled type="button">
@@ -60,6 +60,15 @@ describe("useFocusTrap", () => {
     render(<Trapped />);
     sizeAll();
     screen.getByText("first").focus();
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(screen.getByText("last")).toHaveFocus();
+  });
+
+  it("wraps Shift+Tab from an initially focused dialog container", () => {
+    render(<Trapped />);
+    sizeAll();
+    const dialog = screen.getByRole("dialog");
+    dialog.focus();
     fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
     expect(screen.getByText("last")).toHaveFocus();
   });

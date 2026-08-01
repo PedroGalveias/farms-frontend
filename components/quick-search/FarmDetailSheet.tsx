@@ -8,7 +8,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import Link from "next/link";
+import Link from "@/components/i18n/LocalizedLink";
 import { ExternalLink, Heart, Maximize2, Route, X } from "lucide-react";
 import { productGroupOf, tagLabel } from "@/lib/products";
 import CopyButton from "@/components/CopyButton";
@@ -98,8 +98,10 @@ export default function FarmDetailSheet({
       // Signal the mobile tab bar to slide out so it doesn't obscure the
       // sheet's own controls (Maps / Close). It slides back in on cleanup.
       document.body.classList.add("sheet-open");
-      closeButtonRef.current?.focus();
     }
+    const focusFrame = isDock
+      ? 0
+      : requestAnimationFrame(() => closeButtonRef.current?.focus());
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -110,10 +112,11 @@ export default function FarmDetailSheet({
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      if (focusFrame) cancelAnimationFrame(focusFrame);
       if (!isDock) {
         document.body.style.overflow = previousOverflow;
         document.body.classList.remove("sheet-open");
-        previouslyFocused?.focus();
+        queueMicrotask(() => previouslyFocused?.focus());
       }
       document.removeEventListener("keydown", handleKeyDown);
     };

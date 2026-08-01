@@ -6,6 +6,7 @@ import {
   createFarm,
   getFarms,
 } from "@/lib/farms-service";
+import { isSameOrigin } from "@/lib/auth";
 import type { CreateFarmInput } from "@/types/farm";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +61,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // This route forwards the caller's session cookie to the backend. Enforce
+  // the same CSRF boundary as the auth mutators before reading an untrusted
+  // body or issuing a privileged upstream request.
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   let body: unknown;
 
   try {

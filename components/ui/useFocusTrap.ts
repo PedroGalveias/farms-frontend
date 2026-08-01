@@ -90,9 +90,11 @@ export function useFocusTrap(
       const current = document.activeElement;
 
       // Wrap at both ends, and pull focus back in if it somehow escaped
-      // (e.g. the browser restored it to <body> after a re-render).
+      // (e.g. the browser restored it to <body> after a re-render). The
+      // container itself is also a valid initial focus target for dialogs, so
+      // Shift+Tab from it must wrap to the last control rather than escape.
       if (event.shiftKey) {
-        if (current === first || !root.contains(current)) {
+        if (current === first || current === root || !root.contains(current)) {
           event.preventDefault();
           last.focus();
         }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isSameOrigin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,12 @@ function sanitizeForLog(value: string): string {
  * third-party analytics and no PII (only the metric and the pathname).
  */
 export async function POST(request: Request) {
+  // Metrics are anonymous, but accepting arbitrary cross-origin POSTs would
+  // turn this endpoint into an easy log-amplification target.
+  if (!isSameOrigin(request)) {
+    return new NextResponse(null, { status: 403 });
+  }
+
   let body: VitalPayload;
   try {
     body = (await request.json()) as VitalPayload;
@@ -31,7 +38,11 @@ export async function POST(request: Request) {
   }
 
   const name = typeof body.name === "string" ? body.name : "";
-  if (ALLOWED_METRICS.has(name) && typeof body.value === "number") {
+  if (
+    ALLOWED_METRICS.has(name) &&
+    typeof body.value === "number" &&
+    Number.isFinite(body.value)
+  ) {
     const rating =
       typeof body.rating === "string" ? sanitizeForLog(body.rating) : "";
     const path = typeof body.path === "string" ? sanitizeForLog(body.path) : "";

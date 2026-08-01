@@ -24,6 +24,7 @@ import { PRODUCTS, productLabel } from "@/lib/products";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { COMMAND_PALETTE_OPEN_EVENT } from "@/components/command/events";
 import type { Farm } from "@/types/farm";
 
 /** A command plus how to act on it (kept out of the serialisable CommandItem). */
@@ -33,7 +34,10 @@ interface ResolvedCommand extends CommandItem {
   run?: () => void;
 }
 
-const OPEN_EVENT = "farms:command-open";
+interface CommandPaletteProps {
+  /** Used by the lazy shell when the visitor opens it before its chunk arrives. */
+  initiallyOpen?: boolean;
+}
 
 /**
  * ⌘K / Ctrl+K command palette: fuzzy search across farms, products and pages
@@ -43,7 +47,9 @@ const OPEN_EVENT = "farms:command-open";
  * Chrome 37 / Firefox 98 / Safari 15.4). Also opens on "/" outside a field and
  * on a `farms:command-open` window event (the desktop rail button).
  */
-export default function CommandPalette() {
+export default function CommandPalette({
+  initiallyOpen = false,
+}: CommandPaletteProps) {
   const t = useT();
   const { locale } = useLanguage();
   const navigate = useViewTransitionNavigate();
@@ -54,7 +60,7 @@ export default function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initiallyOpen);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const [farms, setFarms] = useState<Farm[] | null>(null);
@@ -107,10 +113,10 @@ export default function CommandPalette() {
     };
     const onOpenEvent = () => setOpen(true);
     window.addEventListener("keydown", onKeyDown);
-    window.addEventListener(OPEN_EVENT, onOpenEvent);
+    window.addEventListener(COMMAND_PALETTE_OPEN_EVENT, onOpenEvent);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener(OPEN_EVENT, onOpenEvent);
+      window.removeEventListener(COMMAND_PALETTE_OPEN_EVENT, onOpenEvent);
     };
   }, []);
 

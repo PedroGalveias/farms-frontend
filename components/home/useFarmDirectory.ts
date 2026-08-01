@@ -245,6 +245,12 @@ export function useFarmDirectory(
   const effectiveSort: FarmSortOption =
     sortOption === "nearest" && !originCoords ? "newest" : sortOption;
 
+  // A radius from a shared URL is retained so it starts applying if the
+  // visitor later shares a location, but it is not an active filter until
+  // there is an origin to measure from. Keeping that distinction avoids a
+  // misleading filter badge/chip for a radius that currently changes nothing.
+  const activeRadiusKm = originCoords ? radiusKm : null;
+
   // Distance from the visitor to every farm, computed once per location change
   // and shared by the result list, the radius filter, and the facet counts.
   const distanceByFarmId = useMemo(() => {
@@ -282,9 +288,9 @@ export function useFarmDirectory(
     (farm: Farm) =>
       withinRadius(
         originCoords ? (distanceByFarmId.get(farm.id) ?? null) : null,
-        originCoords ? radiusKm : null,
+        activeRadiusKm,
       ),
-    [distanceByFarmId, originCoords, radiusKm],
+    [activeRadiusKm, distanceByFarmId, originCoords],
   );
 
   // Facet counts are *contextual*: each facet reflects the other active filters
@@ -386,7 +392,7 @@ export function useFarmDirectory(
   // state during render (React's documented pattern) avoids an effect.
   const filterKey = `${normalizedSearchTerm}|${selectedCanton}|${selectedCategories.join(
     ",",
-  )}|${categoryMatchMode}|${effectiveSort}|${radiusKm ?? "any"}|${
+  )}|${categoryMatchMode}|${effectiveSort}|${activeRadiusKm ?? "any"}|${
     originCoords ? "geo" : "none"
   }`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
@@ -399,7 +405,7 @@ export function useFarmDirectory(
     searchTerm.trim().length > 0,
     selectedCanton !== "all",
     selectedCategories.length > 0,
-    radiusKm !== null,
+    activeRadiusKm !== null,
   ].filter(Boolean).length;
 
   const refreshDirectory = useCallback(() => {
@@ -464,6 +470,7 @@ export function useFarmDirectory(
     selectedCategories,
     categoryMatchMode,
     radiusKm,
+    activeRadiusKm,
     viewMode,
     visibleCount,
     isLocating,
