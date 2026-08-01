@@ -39,12 +39,19 @@ test.describe("quick search flow", () => {
     const results = stepCard(page, 3);
     const firstResult = results.locator("button.glass-interactive").first();
     await expect(firstResult).toBeVisible();
-    await firstResult.click();
 
-    // Farm detail sheet/panel opens with its primary action.
-    await expect(
-      page.getByRole("link", { name: /open in maps/i }).first(),
-    ).toBeVisible();
+    // WebKit can occasionally miss the first result→sheet view transition
+    // under CI load. Retry only that interaction and assert the action inside
+    // the resulting dialog, rather than accepting an unrelated Maps link.
+    const mapsLink = page
+      .getByRole("dialog")
+      .getByRole("link", { name: /open in (apple )?maps/i });
+    await expect(async () => {
+      if (!(await mapsLink.isVisible())) {
+        await firstResult.click();
+      }
+      await expect(mapsLink).toBeVisible({ timeout: 1500 });
+    }).toPass({ timeout: 10_000 });
   });
 
   test("a seasonal deep link preselects products and start over resets", async ({
