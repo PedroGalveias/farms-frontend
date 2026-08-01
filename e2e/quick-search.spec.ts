@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+// These are functional journeys, not motion checks. Reduced motion lets each
+// card settle synchronously, avoiding a click against an in-flight deck slide;
+// visual coverage exercises the animated presentation separately.
+test.beforeEach(async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+});
+
 // The quick-search 3-step stacked-deck flow is a hard product requirement —
 // this walks it end to end: location → products → distance-sorted results →
 // farm detail. All three step cards stay in the DOM (the stacked deck), so
@@ -40,18 +47,14 @@ test.describe("quick search flow", () => {
     const firstResult = results.locator("button.glass-interactive").first();
     await expect(firstResult).toBeVisible();
 
-    // WebKit can occasionally miss the first result→sheet view transition
-    // under CI load. Retry only that interaction and assert the action inside
-    // the resulting dialog, rather than accepting an unrelated Maps link.
+    await firstResult.click();
+
+    // Assert the primary action inside the opened farm-detail dialog, rather
+    // than accepting an unrelated Maps link elsewhere on the page.
     const mapsLink = page
       .getByRole("dialog")
       .getByRole("link", { name: /open in (apple )?maps/i });
-    await expect(async () => {
-      if (!(await mapsLink.isVisible())) {
-        await firstResult.click();
-      }
-      await expect(mapsLink).toBeVisible({ timeout: 1500 });
-    }).toPass({ timeout: 10_000 });
+    await expect(mapsLink).toBeVisible();
   });
 
   test("a seasonal deep link preselects products and start over resets", async ({
@@ -83,26 +86,18 @@ test.describe("search ritual", () => {
     page,
   }) => {
     await page.goto("/quick-search");
-    await page
+    await stepCard(page, 1)
       .getByRole("button", { name: /choose products/i })
-      .first()
       .click();
 
-    // The picker renders a phone and a desktop variant of this field and hides
-    // one with CSS, so both are in the DOM and a bare placeholder match is a
-    // strict-mode violation. Which one wins the race depends on machine speed,
-    // which is why this only ever failed inside the full parallel run. Target
-    // the one that is actually visible.
-    await page
-      .getByPlaceholder(/try eggs, honey/i)
-      .filter({ visible: true })
-      .first()
-      .fill("brocc");
-    const grid = page.locator(".grid").filter({ hasText: "Vegetables" });
+    const products = stepCard(page, 2);
+    await products.getByPlaceholder(/try eggs, honey/i).fill("brocc");
     await expect(
-      grid.getByRole("button", { name: /^Broccoli$/ }),
+      products.getByRole("button", { name: "Broccoli", exact: true }),
     ).toBeVisible();
-    await expect(grid.getByRole("button", { name: /Fruits/ })).toHaveCount(0);
+    await expect(
+      products.getByRole("button", { name: "Fruits", exact: true }),
+    ).toHaveCount(0);
   });
 
   test("results offer hearts, a map handoff, and a resumable search", async ({
