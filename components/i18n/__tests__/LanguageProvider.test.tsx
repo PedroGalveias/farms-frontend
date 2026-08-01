@@ -7,12 +7,10 @@ import { de } from "@/lib/messages/de";
 
 const router = { push: vi.fn(), replace: vi.fn() };
 const pathname = { value: "/" };
-const search = { value: "" };
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ ...router, prefetch: vi.fn() }),
   usePathname: () => pathname.value,
-  useSearchParams: () => new URLSearchParams(search.value),
 }));
 
 function Probe() {
@@ -35,7 +33,7 @@ beforeEach(() => {
   router.push.mockClear();
   router.replace.mockClear();
   pathname.value = "/";
-  search.value = "";
+  window.history.replaceState({}, "", "/");
   document.cookie = "farms.locale=;path=/;max-age=0";
   localStorage.clear();
 });
@@ -79,7 +77,7 @@ describe("LanguageProvider (locale from the URL)", () => {
 
   it("replaces a locale-only Settings change and preserves its return target", () => {
     pathname.value = "/settings";
-    search.value = "returnTo=%2Fquick-search";
+    window.history.replaceState({}, "", "/settings?returnTo=%2Fquick-search");
     render(
       <LanguageProvider initialLocale="en">
         <Probe />

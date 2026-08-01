@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
@@ -50,7 +50,6 @@ export default function LanguageProvider({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const locale = initialLocale;
 
   // Switching language = navigating to the same page under the new locale.
@@ -66,12 +65,12 @@ export default function LanguageProvider({
         /* storage unavailable */
       }
       const target = localizedPath(unlocalizedPathname(pathname ?? "/"), next);
-      const query = searchParams.toString();
+      const query = window.location.search;
       // A locale switch is the same page in a different language, so it must
       // not consume Back or create a second Settings entry.
-      router.replace(query ? `${target}?${query}` : target);
+      router.replace(`${target}${query}`);
     },
-    [router, pathname, searchParams],
+    [router, pathname],
   );
 
   const value = useMemo<LanguageContextValue>(
