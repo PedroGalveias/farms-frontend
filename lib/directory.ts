@@ -81,10 +81,19 @@ export function getCategoryCounts(farms: Farm[]): Record<string, number> {
 }
 
 /** Number of farms in each canton (code → count). */
+/**
+ * Farms per canton code. Blank codes are skipped for the same reason
+ * `getUniqueFarmCantons` drops them: a "" key becomes a nameless entry in the
+ * canton picker and the search suggestions built from `Object.keys(...)`.
+ */
 export function getCantonCounts(farms: Farm[]): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const farm of farms) {
-    counts[farm.canton] = (counts[farm.canton] ?? 0) + 1;
+    const code = farm.canton?.trim();
+    if (!code) {
+      continue;
+    }
+    counts[code] = (counts[code] ?? 0) + 1;
   }
   return counts;
 }

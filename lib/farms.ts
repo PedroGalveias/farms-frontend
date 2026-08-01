@@ -70,10 +70,24 @@ export function groupCantonsByRegion(cantonCodes: string[]) {
   return groups;
 }
 
+/**
+ * The distinct canton codes present in `farms`.
+ *
+ * Blank codes are dropped. The live dataset carries a handful of farms with an
+ * empty `canton` (10 of 3155 at the time of writing), and letting those through
+ * produced three visible defects: the home page claimed "27 cantons covered"
+ * when Switzerland has 26, the canton pickers grew a nameless entry (a button
+ * with no accessible name, since getCantonName("") returns ""), and "" and "  "
+ * counted as two separate cantons.
+ *
+ * The farms themselves stay in the directory — only the canton *vocabulary*
+ * derived from them is cleaned, so nothing disappears from the listing.
+ */
 export function getUniqueFarmCantons(farms: Farm[]) {
-  return Array.from(new Set(farms.map((farm) => farm.canton))).sort((a, b) =>
-    a.localeCompare(b),
-  );
+  const codes = farms
+    .map((farm) => farm.canton?.trim() ?? "")
+    .filter((code) => code.length > 0);
+  return Array.from(new Set(codes)).sort((a, b) => a.localeCompare(b));
 }
 
 // A farm's distinct category groups: granular products are rolled up to their

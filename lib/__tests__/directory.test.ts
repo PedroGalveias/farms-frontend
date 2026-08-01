@@ -106,6 +106,27 @@ describe("facet counts", () => {
     ]);
     expect(counts).toEqual({ BE: 2, ZH: 1 });
   });
+
+  // A "" key here becomes a nameless canton in the toolbar's picker and in the
+  // search suggestions, which are built from Object.keys(cantonCounts).
+  it("skips farms with a blank canton instead of counting them under ''", () => {
+    const counts = getCantonCounts([
+      makeFarm({ canton: "BE" }),
+      makeFarm({ canton: "" }),
+      makeFarm({ canton: "  " }),
+    ]);
+    expect(counts).toEqual({ BE: 1 });
+    expect(Object.keys(counts)).not.toContain("");
+  });
+
+  it("folds a padded code into the same bucket", () => {
+    expect(
+      getCantonCounts([
+        makeFarm({ canton: "ZH" }),
+        makeFarm({ canton: " ZH" }),
+      ]),
+    ).toEqual({ ZH: 2 });
+  });
 });
 
 describe("farmDistanceKm", () => {
