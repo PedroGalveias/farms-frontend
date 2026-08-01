@@ -3,7 +3,14 @@
 import Link from "@/components/i18n/LocalizedLink";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
-import { Command, Heart, Keyboard, LayoutGrid, Search } from "lucide-react";
+import {
+  Command,
+  Heart,
+  Keyboard,
+  LayoutGrid,
+  Search,
+  Settings,
+} from "lucide-react";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 import Logo from "@/components/Logo";
 import LanguageMenu from "@/components/LanguageMenu";
@@ -14,6 +21,7 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { COMMAND_PALETTE_OPEN_EVENT } from "@/components/command/events";
 import { useModKey } from "@/components/command/useModKey";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
+import { unlocalizedPath } from "@/lib/i18n-core";
 
 const FRONTEND_REPO = "https://github.com/PedroGalveias/farms-frontend";
 
@@ -29,6 +37,16 @@ function railLinkClassName(isActive: boolean) {
 const utilityClassName =
   "grid h-11 w-11 place-items-center rounded-field text-ink/55 transition-colors hover:bg-ink/5 hover:text-ink";
 
+// Settings is a route, unlike its neighbours in the utility cluster, so it can
+// be the current page and has to be able to say so. It borrows the active
+// treatment of the primary nav (dark pill, light glyph) without the sliding
+// indicator, which is owned by — and positioned within — the <nav> above.
+function utilityLinkClassName(isActive: boolean) {
+  return isActive
+    ? "grid h-11 w-11 place-items-center rounded-field bg-ink text-cloud shadow-elev-2 transition-colors"
+    : utilityClassName;
+}
+
 /**
  * Persistent desktop utility rail, shown on every page (akukolabs-style):
  * logo, primary navigation, language switcher, and a source link. Fixed to
@@ -36,10 +54,17 @@ const utilityClassName =
  * below `lg`, where the floating pill header takes over.
  */
 export default function SideRail() {
-  const pathname = usePathname();
+  // `usePathname` returns the real URL, locale segment and all, so every
+  // comparison below has to be made against the unprefixed path — otherwise
+  // nothing in the rail is ever "current" outside English.
+  const pathname = unlocalizedPath(usePathname());
   const t = useT();
   const mod = useModKey();
   const { favoritesCount } = usePersonalization();
+  // Tracked separately from `active` below: that drives the sliding indicator,
+  // which is positioned inside the primary <nav>. Settings lives in the utility
+  // cluster underneath it, so it needs its own current-page state.
+  const isSettings = pathname === "/settings";
   const active =
     pathname === "/quick-search"
       ? "quick-search"
@@ -139,6 +164,21 @@ export default function SideRail() {
         <AccountMenu placement="rail" triggerClassName={utilityClassName} />
         <ThemeToggle />
         <LanguageMenu placement="rail" triggerClassName={utilityClassName} />
+        {/* Settings sits with the other preference controls rather than in the
+            primary nav, and deliberately outside any auth check: everything on
+            that page is a per-device preference (theme, motion, locale, data),
+            none of which requires an account. Until now the only route to it
+            was through /profile, which the account menu only offers once you
+            are signed in — so a signed-out visitor could not reach their own
+            theme settings without typing the URL. */}
+        <Link
+          aria-current={isSettings ? "page" : undefined}
+          className={utilityLinkClassName(isSettings)}
+          href="/settings"
+          title={t("settings_title")}
+        >
+          <Settings className="h-5 w-5" />
+        </Link>
         <a
           aria-label={t("rail_source")}
           className={utilityClassName}
