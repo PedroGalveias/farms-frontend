@@ -17,11 +17,7 @@
  * end.
  */
 export type GeolocationErrorReason =
-  | "denied"
-  | "unavailable"
-  | "timeout"
-  | "insecure"
-  | "unsupported";
+  "denied" | "unavailable" | "timeout" | "insecure" | "unsupported";
 
 export interface GeolocationCoords {
   latitude: number;

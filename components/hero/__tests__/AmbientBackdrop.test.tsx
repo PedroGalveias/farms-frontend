@@ -48,7 +48,9 @@ describe("AmbientBackdrop", () => {
 
   it("falls back to the CSS orbs when WebGL is unavailable", async () => {
     mockMedia({ [FINE]: true });
-    // jsdom has no WebGL: getContext returns null, like Brave with shields.
+    // jsdom emits a noisy "not implemented" error for canvas. Model the real
+    // fallback explicitly: WebGL blocked by a privacy setting returns null.
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
     const { container } = render(<AmbientBackdrop />);
     await act(async () => {});
     await act(async () => {});

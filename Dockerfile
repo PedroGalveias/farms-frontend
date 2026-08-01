@@ -1,18 +1,18 @@
 # Multi-stage build for the Next.js app, shipping the standalone output only.
-# Runs on Bun end to end — install, build and serve — to match the Render.com
-# runtime (which runs `bun run start`). A small runtime image is published to
-# GHCR on a version tag (see .github/workflows/docker-publish.yml).
+# Runs on the fully supported Node.js runtime end to end — install, build, and
+# serve. A small runtime image is published to GHCR on a version tag (see
+# .github/workflows/docker-publish.yml).
 
 # ── deps: install with a clean, reproducible lockfile ────────────────────────
-FROM oven/bun:1-alpine AS deps
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS deps
 WORKDIR /app
-COPY package.json bun.lock ./
-# --frozen-lockfile fails the build if package.json and bun.lock disagree,
+COPY package.json package-lock.json ./
+# npm ci fails the build if package.json and package-lock.json disagree,
 # keeping the image byte-for-byte reproducible.
-RUN bun install --frozen-lockfile
+RUN npm ci
 
 # ── build: compile the app, producing .next/standalone ───────────────────────
-FROM oven/bun:1-alpine AS build
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -21,10 +21,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # the Docker context has no .git. Falls back to "dev" when unset.
 ARG NEXT_PUBLIC_APP_VERSION
 ENV NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
-RUN bun run build
+RUN npm run build
 
 # ── runner: minimal runtime, non-root, binds 0.0.0.0:$PORT ───────────────────
-FROM oven/bun:1-alpine AS runner
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
@@ -39,6 +39,5 @@ COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 EXPOSE 3000
 # server.js honours PORT + HOSTNAME, so the container binds 0.0.0.0:$PORT —
-# the same requirement that keeps Render's port scan happy. Served with Bun to
-# mirror the Render runtime.
-CMD ["bun", "server.js"]
+# the same requirement that keeps Render's port scan happy.
+CMD ["node", "server.js"]
