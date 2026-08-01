@@ -237,12 +237,11 @@ jobs:
           path: playwright-report/
           if-no-files-found: ignore
 
-  # Keep the internal version in lockstep with release tags: a `vX.Y.Z` tag
-  # must match package.json's "version" exactly, or the deploy is blocked.
-  # (Bump package.json before cutting the tag.) The footer's displayed version
-  # already derives from `git describe`; this pins the package manifest too.
+  # A release tag must be a new, strict semantic version. package.json is a
+  # development marker for the next planned release, so a maintenance tag
+  # from an earlier commit need not equal it. The footer uses the Git tag.
   tag-version:
-    name: Tag matches package.json version
+    name: Tag is a newer release version
     # Runs for tag pushes (enforces) and manual dispatches (no-op pass) — a
     # skipped `needs` entry would otherwise skip the deploy job it gates.
     if: >-
@@ -252,20 +251,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          fetch-depth: 0
           persist-credentials: false
-      - name: Verify tag == v<package.json version>
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.18.1
+      - name: Verify release tag advances semantic version
         run: |
           case "$GITHUB_REF" in
             refs/tags/*) ;;
             *) echo "Not a tag push — nothing to verify."; exit 0 ;;
           esac
-          TAG="${GITHUB_REF#refs/tags/}"
-          PKG="v$(node -p "require('./package.json').version")"
-          if [ "$TAG" != "$PKG" ]; then
-            echo "::error::Tag $TAG does not match package.json ($PKG). Bump package.json before tagging."
-            exit 1
-          fi
-          echo "OK: $TAG == $PKG"
+          node scripts/verify-release-tag.mjs "$GITHUB_REF_NAME"
 
   # Trigger a Render deploy only after checks pass, and only for a pushed
   # version tag (or an explicit manual run). Pushes to main and pull requests
