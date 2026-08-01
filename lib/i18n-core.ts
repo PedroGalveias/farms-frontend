@@ -36,6 +36,26 @@ export function localizedPath(path: string, locale: Locale): string {
 }
 
 /**
+ * The inverse of `localizedPath`: strip a leading locale segment so a route can
+ * be compared against a plain path.
+ *
+ * Needed because `usePathname()` returns what is actually in the URL, so
+ * `pathname === "/saved"` is false for every visitor who is not reading in
+ * English — which is how the side rail ended up highlighting nothing at all on
+ * /de, /fr, /it and /rm.
+ *
+ * Only a whole first segment counts: "/dessert" is a page about desserts, not a
+ * German page about "ssert".
+ */
+export function unlocalizedPath(path: string): string {
+  const clean = path.startsWith("/") ? path : `/${path}`;
+  const [, first, ...rest] = clean.split("/");
+  if (!isLocale(first)) return clean;
+  const remainder = rest.join("/");
+  return remainder ? `/${remainder}` : "/";
+}
+
+/**
  * hreflang alternates for a page, for `metadata.alternates`: one URL per
  * locale plus x-default pointing at the unprefixed English page.
  */
