@@ -67,6 +67,39 @@ describe("getUniqueFarmCantons", () => {
     ]);
     expect(cantons).toEqual(["BE", "ZH"]);
   });
+
+  // The live dataset carries farms with an empty canton (10 of 3155). Letting
+  // those through made the home page claim "27 cantons covered" — Switzerland
+  // has 26 — and put a nameless entry in every canton picker, because
+  // getCantonName("") is "". Whitespace-only codes are the same defect wearing
+  // a disguise, and used to count as a SECOND phantom canton alongside "".
+  it("drops blank and whitespace-only cantons", () => {
+    const cantons = getUniqueFarmCantons([
+      makeFarm({ canton: "BE" }),
+      makeFarm({ canton: "" }),
+      makeFarm({ canton: "   " }),
+      makeFarm({ canton: "ZH" }),
+    ]);
+    expect(cantons).toEqual(["BE", "ZH"]);
+  });
+
+  it("trims surrounding whitespace rather than treating it as a new canton", () => {
+    expect(
+      getUniqueFarmCantons([
+        makeFarm({ canton: "BE" }),
+        makeFarm({ canton: " BE " }),
+      ]),
+    ).toEqual(["BE"]);
+  });
+
+  it("returns nothing when no farm has a usable canton", () => {
+    expect(
+      getUniqueFarmCantons([
+        makeFarm({ canton: "" }),
+        makeFarm({ canton: " " }),
+      ]),
+    ).toEqual([]);
+  });
 });
 
 describe("getUniqueFarmCategories", () => {
