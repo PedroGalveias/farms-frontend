@@ -27,9 +27,9 @@ export function generateStaticParams() {
   return SWISS_CANTONS.map((canton) => ({ code: canton.code.toLowerCase() }));
 }
 
-async function safeGetFarms(): Promise<Farm[]> {
+async function safeGetFarms(locale: typeof DEFAULT_LOCALE): Promise<Farm[]> {
   try {
-    return await getFarms();
+    return await getFarms(locale);
   } catch {
     return [];
   }
@@ -67,7 +67,7 @@ export default async function CantonPage({
 }: {
   params: Promise<{ lang: string; code: string }>;
 }) {
-  const { code } = await params;
+  const { lang, code } = await params;
   if (!isValidCantonCode(code)) {
     notFound();
   }
@@ -75,7 +75,8 @@ export default async function CantonPage({
   const upper = code.toUpperCase();
   const name = getCantonName(upper);
   const regionKey = getRegionKeyForCanton(upper);
-  const allFarms = await safeGetFarms();
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const allFarms = await safeGetFarms(locale);
 
   const farms = allFarms
     .filter((farm) => farm.canton.toUpperCase() === upper)

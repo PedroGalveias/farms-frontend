@@ -29,9 +29,9 @@ export function generateStaticParams() {
   return getProductSlugs().map((slug) => ({ slug }));
 }
 
-async function safeGetFarms(): Promise<Farm[]> {
+async function safeGetFarms(locale: typeof DEFAULT_LOCALE): Promise<Farm[]> {
   try {
-    return await getFarms();
+    return await getFarms(locale);
   } catch {
     return [];
   }
@@ -72,7 +72,8 @@ export default async function ProductPage({
     notFound();
   }
 
-  const allFarms = await safeGetFarms();
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const allFarms = await safeGetFarms(locale);
   const farms = allFarms
     .filter((farm) => matchesCategories(farm, [category], "any"))
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -104,7 +105,6 @@ export default async function ProductPage({
     .filter((sibling) => sibling.category !== category && sibling.count > 0);
 
   const siteUrl = getSiteUrl();
-  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const label = categoryLabel(category, locale);
   const jsonLd = {
     "@context": "https://schema.org",

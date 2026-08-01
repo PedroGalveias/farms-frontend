@@ -1,5 +1,6 @@
 import QuickSearchExperience from "@/components/quick-search/QuickSearchExperience";
 import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
 import type { ServiceStatus } from "@/types/farm";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -14,10 +15,16 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
-export default async function QuickSearchPage() {
+export default async function QuickSearchPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const [healthResult, farmsResult] = await Promise.allSettled([
     getFarmsHealth(),
-    getFarms(),
+    getFarms(locale),
   ]);
 
   const farms = farmsResult.status === "fulfilled" ? farmsResult.value : [];

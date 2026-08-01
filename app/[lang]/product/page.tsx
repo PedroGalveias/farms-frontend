@@ -13,9 +13,9 @@ import type { Farm } from "@/types/farm";
 
 export const revalidate = 3600;
 
-async function safeGetFarms(): Promise<Farm[]> {
+async function safeGetFarms(locale: typeof DEFAULT_LOCALE): Promise<Farm[]> {
   try {
-    return await getFarms();
+    return await getFarms(locale);
   } catch {
     return [];
   }
@@ -38,8 +38,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductHubPage() {
-  const farms = await safeGetFarms();
+export default async function ProductHubPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const farms = await safeGetFarms(locale);
 
   const counts = new Map<string, number>();
   for (const farm of farms) {

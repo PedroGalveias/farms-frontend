@@ -14,9 +14,9 @@ import type { Farm } from "@/types/farm";
 
 export const revalidate = 3600;
 
-async function safeGetFarms(): Promise<Farm[]> {
+async function safeGetFarms(locale: typeof DEFAULT_LOCALE): Promise<Farm[]> {
   try {
-    return await getFarms();
+    return await getFarms(locale);
   } catch {
     return [];
   }
@@ -55,7 +55,7 @@ export default async function CantonHubPage({
 }) {
   const { lang } = await params;
   const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
-  const farms = await safeGetFarms();
+  const farms = await safeGetFarms(locale);
   const counts = countByCanton(farms);
 
   // Every region → its cantons that have at least one farm, with counts.

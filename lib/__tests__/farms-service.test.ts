@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { FarmsApiError, getFarms } from "@/lib/farms-service";
+import { FarmsApiError, getFarmTaxonomy, getFarms } from "@/lib/farms-service";
 import type { Farm, FarmProduct } from "@/types/farm";
 
 afterEach(() => {
@@ -140,6 +140,20 @@ describe("getFarms — response-shape tolerance", () => {
 });
 
 describe("getFarms — cursor pagination", () => {
+  it("sends the active locale on every page", async () => {
+    const spy = mockFetchSequence(
+      jsonResponse({ farms: [makeFarm({ id: "f1" })], next_cursor: "100" }),
+      jsonResponse({ farms: [makeFarm({ id: "f2" })], next_cursor: null }),
+    );
+
+    await getFarms("fr");
+
+    expect(spy).toHaveBeenCalledTimes(2);
+    for (const [request] of spy.mock.calls) {
+      expect(new URL(String(request)).searchParams.get("lang")).toBe("fr");
+    }
+  });
+
   it("follows next_cursor across pages and concatenates the results", async () => {
     const spy = mockFetchSequence(
       jsonResponse({
@@ -185,6 +199,51 @@ describe("getFarms — cursor pagination", () => {
     await getFarms();
 
     expect(spy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getFarmTaxonomy", () => {
+  it("requests and validates the localized taxonomy contract", async () => {
+    const spy = mockFetchSequence(
+      jsonResponse({
+        lang: "fr",
+        categories: [{ slug: "vegetables", name: "Légumes", translated: true }],
+        products: [
+          {
+            slug: "apples",
+            name: "Apples",
+            translated: false,
+            category: "fruits",
+          },
+        ],
+      }),
+    );
+
+    const taxonomy = await getFarmTaxonomy("fr");
+
+    expect(
+      new URL(String(spy.mock.calls[0]?.[0])).searchParams.get("lang"),
+    ).toBe("fr");
+    expect(taxonomy).toEqual({
+      lang: "fr",
+      categories: [{ slug: "vegetables", name: "Légumes", translated: true }],
+      products: [
+        {
+          slug: "apples",
+          name: "Apples",
+          translated: false,
+          category: "fruits",
+        },
+      ],
+    });
+  });
+
+  it("rejects a malformed taxonomy response", async () => {
+    mockFetchSequence(
+      jsonResponse({ lang: "fr", categories: [], products: [{}] }),
+    );
+
+    await expect(getFarmTaxonomy("fr")).rejects.toBeInstanceOf(FarmsApiError);
   });
 });
 
