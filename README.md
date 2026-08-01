@@ -57,11 +57,12 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
 
 ### Prerequisites
 
-- **Node.js** `>=26.0.0` is the local, CI, and production runtime. The repo ships an [`.nvmrc`](.nvmrc):
+- **Node.js** `24.x` is the local, CI, and production runtime. The repo ships an [`.nvmrc`](.nvmrc):
   ```bash
-  nvm use      # installs/selects Node 26.5.0
+  nvm install  # installs Node 24.18.1 from .nvmrc if needed
+  nvm use      # selects Node 24.18.1
   ```
-- **npm** `>=11.17.0` ships with the supported Node 26 runtime and installs from the committed `package-lock.json`.
+- **npm** `>=11.16.0` is declared in [`package.json`](package.json); `npm ci` installs the dependency graph from the committed `package-lock.json`.
 
 ### Setup
 
@@ -119,7 +120,7 @@ Run scripts with `npm run`.
 Every push to `main` and every pull request runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 
 ```
-Node 26: format:check → lint → typecheck → test (+coverage) → build (verify job)
+Node 24: format:check → lint → typecheck → test (+coverage) → build (verify job)
 Linux:   Playwright across five desktop/mobile projects                 (e2e job)
 Windows: unit + build + Firefox, Chromium and WebKit cross-OS specs    (windows job)
 macOS:   unit + Firefox, Chromium and WebKit cross-OS specs             (macos job)
@@ -142,7 +143,7 @@ git tag v1.2.3 && git push origin main v1.2.3
 The footer's displayed version resolves from `git describe --tags` at build time, so tagged builds show the release tag automatically.
 
 - Health check path: `/api/health`.
-- **Runtime is [Node.js](https://nodejs.org/).** Local development, CI, and the container image use Node 26/npm 11 (`npm ci` → `npm run build` → `node server.js`), pinned by the committed [`package-lock.json`](package-lock.json). The [`Dockerfile`](Dockerfile) builds a non-root standalone image published to GHCR on a `v*` tag ([`docker-publish.yml`](.github/workflows/docker-publish.yml)). Before deploying this change, set an existing Render service created with the Bun runtime to **Node** in the Render dashboard and set `NODE_VERSION=26.5.0` (or let the committed [`.node-version`](.node-version) provide it).
+- **Runtime is [Node.js](https://nodejs.org/).** Local development, CI, and the container image use Node 24/npm 11 (`npm ci` → `npm run build` → `node server.js`). [`.nvmrc`](.nvmrc), [`.node-version`](.node-version), CI, and the [`Dockerfile`](Dockerfile) select Node 24.18.1; [`package.json`](package.json) declares the npm version, while the committed [`package-lock.json`](package-lock.json) pins dependency resolutions. The Dockerfile builds a non-root standalone image published to GHCR on a `v*` tag ([`docker-publish.yml`](.github/workflows/docker-publish.yml)). Before deploying this change, set an existing Render service created with the Bun runtime to **Node** in the Render dashboard and set `NODE_VERSION=24.18.1` (or let the committed [`.node-version`](.node-version) provide it).
 
 ## 🌍 Internationalization
 
