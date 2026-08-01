@@ -79,6 +79,10 @@ test.describe("directory at phone scale", () => {
     expect(offenders).toEqual([]);
 
     // …and the list stays centered: equal gutters on both sides of <main>.
+    // Wait for <main> rather than assert it exists: a null dereference inside
+    // page.evaluate surfaces as an opaque TypeError, while a wait names the
+    // element that is missing.
+    await page.locator("main").first().waitFor({ state: "attached" });
     const gutters = await page.evaluate(() => {
       const rect = document.querySelector("main")!.getBoundingClientRect();
       return {
