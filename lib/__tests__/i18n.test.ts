@@ -8,6 +8,7 @@ import {
   localeFromAcceptLanguage,
   localizedPath,
   translate,
+  unlocalizedPath,
   type Locale,
 } from "@/lib/i18n";
 
@@ -97,5 +98,40 @@ describe("locale-aware URLs", () => {
     expect(languages.rm).toBe("/rm/product/dairy");
     expect(languages["x-default"]).toBe("/product/dairy");
     expect(Object.keys(languages)).toHaveLength(LOCALE_CODES.length + 1);
+  });
+});
+
+describe("unlocalizedPath", () => {
+  it("strips a leading locale segment", () => {
+    expect(unlocalizedPath("/de/saved")).toBe("/saved");
+    expect(unlocalizedPath("/fr/canton/be")).toBe("/canton/be");
+    expect(unlocalizedPath("/rm/quick-search")).toBe("/quick-search");
+  });
+
+  it("leaves an unprefixed path alone", () => {
+    expect(unlocalizedPath("/saved")).toBe("/saved");
+    expect(unlocalizedPath("/")).toBe("/");
+  });
+
+  it("maps a bare locale root to /", () => {
+    // /de is the German home page, so it must compare equal to "/".
+    for (const code of ["de", "fr", "it", "rm", "en"]) {
+      expect(unlocalizedPath(`/${code}`)).toBe("/");
+    }
+  });
+
+  it("only strips whole segments", () => {
+    // "/dessert" is a page about desserts, not a German page about "ssert".
+    expect(unlocalizedPath("/dessert")).toBe("/dessert");
+    expect(unlocalizedPath("/italy")).toBe("/italy");
+    expect(unlocalizedPath("/french-beans")).toBe("/french-beans");
+  });
+
+  it("round-trips with localizedPath", () => {
+    for (const code of LOCALE_CODES) {
+      for (const path of ["/", "/saved", "/canton/be"]) {
+        expect(unlocalizedPath(localizedPath(path, code))).toBe(path);
+      }
+    }
   });
 });
