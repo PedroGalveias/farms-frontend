@@ -48,13 +48,13 @@ test.describe("motion & custom cursor (motion allowed)", () => {
     // 'scrollIntoView')", which reads like a broken page rather than a race.
     // An explicit wait both fixes it and makes a genuine absence report itself
     // as a missing element.
-    await page.locator(".marquee-track").waitFor({ state: "attached" });
+    const marqueeTrack = page.locator(".marquee-track").first();
+    await marqueeTrack.waitFor({ state: "attached" });
 
     // NB: no locator.scrollIntoViewIfNeeded() on perpetually-animating
     // elements — Playwright waits for a stable bounding box, and a marquee
     // never settles (times out on Firefox/WebKit). Native scrolling instead.
-    const anim = await page.evaluate(() => {
-      const el = document.querySelector(".marquee-track")!;
+    const anim = await marqueeTrack.evaluate((el) => {
       el.scrollIntoView({ block: "center" });
       const s = getComputedStyle(el);
       return { name: s.animationName, state: s.animationPlayState };
