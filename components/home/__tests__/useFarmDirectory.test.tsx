@@ -6,6 +6,10 @@ import {
   useFarmDirectory,
   PAGE_SIZE,
 } from "@/components/home/useFarmDirectory";
+import {
+  DEFAULT_DIRECTORY_PARAMS,
+  type DirectoryParams,
+} from "@/lib/directory-params";
 import type { Farm } from "@/types/farm";
 
 vi.mock("next/navigation", () => ({
@@ -41,8 +45,17 @@ function wrapper({ children }: { children: ReactNode }) {
 
 // Mount the hook and flush the on-mount URL/location hydration microtask, so
 // later state changes aren't clobbered by hydration resetting to defaults.
-async function setup(farms = FARMS) {
-  const view = renderHook(() => useFarmDirectory(farms), { wrapper });
+async function setup(
+  farms = FARMS,
+  // Filters now reach the hook the way the server supplies them — parsed from
+  // the query string and passed in — rather than being read from
+  // window.location at mount.
+  initialParams?: Partial<DirectoryParams>,
+) {
+  const params = initialParams
+    ? { ...DEFAULT_DIRECTORY_PARAMS, ...initialParams }
+    : undefined;
+  const view = renderHook(() => useFarmDirectory(farms, params), { wrapper });
   await act(async () => {
     await Promise.resolve();
   });
@@ -142,8 +155,10 @@ describe("useFarmDirectory", () => {
   // location is active, so there was no visible way back either.
   describe("radius without a location", () => {
     it("keeps every farm visible when a radius arrives from the URL with no origin", async () => {
-      window.history.replaceState(null, "", "/?radius=25");
-      const { result } = await setup();
+      // The radius now arrives already parsed, from the server, instead of
+      // being read out of window.location after mount — same shared link,
+      // same guard.
+      const { result } = await setup(FARMS, { radiusKm: 25 });
       await waitFor(() => expect(result.current.radiusKm).toBe(25));
       expect(result.current.originCoords).toBeNull();
       expect(result.current.visibleFarms).toHaveLength(FARMS.length);

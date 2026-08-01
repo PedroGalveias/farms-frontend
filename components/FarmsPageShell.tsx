@@ -21,10 +21,17 @@ import { usePersonalization } from "@/components/personalization/Personalization
 import RecentlyViewedStrip from "@/components/personalization/RecentlyViewedStrip";
 import { writeCachedFarms } from "@/lib/offline-farms";
 import { runViewTransition } from "@/lib/view-transitions";
+import type { DirectoryParams } from "@/lib/directory-params";
 import type { Farm, ServiceStatus } from "@/types/farm";
 
 interface FarmsPageShellProps {
   initialFarms: Farm[];
+  /**
+   * Filters parsed from the request's query string on the server, so the very
+   * first render is already the filtered view. Optional so existing callers and
+   * tests keep working — the hook falls back to the unfiltered defaults.
+   */
+  initialParams?: DirectoryParams;
   loadError: string | null;
   serviceStatus: ServiceStatus;
 }
@@ -38,13 +45,14 @@ function subscribeToDesktopQuery(callback: () => void) {
 
 export default function FarmsPageShell({
   initialFarms,
+  initialParams,
   loadError,
   serviceStatus,
 }: FarmsPageShellProps) {
   const t = useT();
   const { recordView } = usePersonalization();
   const { user, openAuth } = useAuth();
-  const directory = useFarmDirectory(initialFarms);
+  const directory = useFarmDirectory(initialFarms, initialParams);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);

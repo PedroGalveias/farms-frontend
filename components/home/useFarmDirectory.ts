@@ -5,7 +5,6 @@ import {
   useDeferredValue,
   useEffect,
   useMemo,
-  useRef,
   useState,
   useTransition,
 } from "react";
@@ -23,7 +22,6 @@ import {
   groupCantonsByRegion,
 } from "@/lib/farms";
 import {
-  RADIUS_OPTIONS,
   farmDistanceKm,
   getCantonCounts,
   getCategoryCounts,
@@ -41,6 +39,11 @@ import {
   writeStoredLocation,
   type GeolocationCoords,
 } from "@/lib/geolocation";
+import {
+  DEFAULT_DIRECTORY_PARAMS,
+  parseDirectoryParams,
+  type DirectoryParams,
+} from "@/lib/directory-params";
 import type { DirectoryViewMode, Farm, FarmSortOption } from "@/types/farm";
 
 // How many farm cards to render per page — keeps the DOM light when the
@@ -53,73 +56,85 @@ export const PAGE_SIZE = 24;
  * round-trip, the disjunctive facet counts, and the ranked result list. The
  * shell component consumes this and stays presentational.
  */
-export function useFarmDirectory(initialFarms: Farm[]) {
+export function useFarmDirectory(
+  initialFarms: Farm[],
+  // Parsed from the request's query string by the server component, so the
+  // first render already shows the filtered view. Defaults keep every other
+  // caller (and the tests) working unchanged.
+  initialParams: DirectoryParams = DEFAULT_DIRECTORY_PARAMS,
+) {
   const router = useRouter();
   const t = useT();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCanton, setSelectedCanton] = useState("all");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [categoryMatchMode, setCategoryMatchMode] =
-    useState<CategoryMatchMode>("any");
-  const [sortOption, setSortOption] = useState<FarmSortOption>("newest");
-  const [radiusKm, setRadiusKm] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState(initialParams.searchTerm);
+  const [selectedCanton, setSelectedCanton] = useState(
+    initialParams.selectedCanton,
+  );
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    initialParams.selectedCategories,
+  );
+  const [categoryMatchMode, setCategoryMatchMode] = useState<CategoryMatchMode>(
+    initialParams.categoryMatchMode,
+  );
+  const [sortOption, setSortOption] = useState<FarmSortOption>(
+    initialParams.sortOption,
+  );
+  const [radiusKm, setRadiusKm] = useState<number | null>(
+    initialParams.radiusKm,
+  );
   const [originCoords, setOriginCoords] = useState<GeolocationCoords | null>(
     null,
   );
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<DirectoryViewMode>("grid");
+  const [viewMode, setViewMode] = useState<DirectoryViewMode>(
+    initialParams.viewMode,
+  );
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isRefreshing, startRefreshTransition] = useTransition();
   const deferredSearchTerm = useDeferredValue(searchTerm);
-  // Gates URL writes until after we've hydrated state from the URL on mount.
-  const hydratedRef = useRef(false);
+  // Gates URL writes until the client has taken over.
+  //
+  // This is state, not a ref, on purpose. The filters now arrive already
+  // correct from the server, so nothing in the sync effect's dependency list
+  // changes after mount — with a ref, that effect would bail out once and never
+  // run again, leaving an inert "?radius=25" (a radius with no origin) sitting
+  // in the URL to be shared onward. Flipping a state value re-runs it exactly
+  // once, after mount, which is when the pruning needs to happen.
+  const [hydrated, setHydrated] = useState(false);
 
-  // Hydrate filters from the URL on mount (so a shared/bookmarked link restores
-  // the view) and keep them in sync with Back/Forward via popstate. The last
-  // shared location is restored from localStorage — never from the URL, which
-  // must not carry personal data.
+  // Keep filters in sync with Back/Forward via popstate.
+  //
+  // The mount-time read is gone: the server component now parses the same query
+  // string through parseDirectoryParams and seeds the state above, so the first
+  // render is already correct. Re-applying it here would only re-render the list
+  // with values it already has — and while this effect owned the *initial* read,
+  // the server had no idea a filter was requested, so a shared /?canton=BE link
+  // painted "3155 farms" for ~400ms before the browser corrected it to 727.
+  //
+  // The stored location still loads here on purpose: it lives in localStorage,
+  // which the server cannot see, and it must never travel in the URL.
   useEffect(() => {
     const applyFromUrl = () => {
-      const params = new URLSearchParams(window.location.search);
-      const sortParam = params.get("sort");
-      const sort: FarmSortOption =
-        sortParam === "name" ||
-        sortParam === "canton" ||
-        sortParam === "nearest"
-          ? sortParam
-          : "newest";
-      const radiusParam = Number(params.get("radius"));
-      const radius = (RADIUS_OPTIONS as readonly number[]).includes(radiusParam)
-        ? radiusParam
-        : null;
-
-      setSearchTerm(params.get("q") ?? "");
-      setSelectedCanton(params.get("canton") ?? "all");
-      setSelectedCategories(
-        (params.get("cat") ?? "")
-          .split(",")
-          .map((value) => value.trim())
-          .filter(Boolean),
+      const next = parseDirectoryParams(
+        new URLSearchParams(window.location.search),
       );
-      setCategoryMatchMode(params.get("match") === "all" ? "all" : "any");
-      setSortOption(sort);
-      setRadiusKm(radius);
-      const viewParam = params.get("view");
-      setViewMode(
-        viewParam === "map" || viewParam === "list" ? viewParam : "grid",
-      );
+      setSearchTerm(next.searchTerm);
+      setSelectedCanton(next.selectedCanton);
+      setSelectedCategories(next.selectedCategories);
+      setCategoryMatchMode(next.categoryMatchMode);
+      setSortOption(next.sortOption);
+      setRadiusKm(next.radiusKm);
+      setViewMode(next.viewMode);
     };
 
     // Defer setState out of the effect body (repo lint: no sync setState here).
     queueMicrotask(() => {
-      applyFromUrl();
       const stored = readStoredLocation();
       if (stored) {
         setOriginCoords(stored);
       }
-      hydratedRef.current = true;
+      setHydrated(true);
     });
 
     window.addEventListener("popstate", applyFromUrl);
@@ -129,7 +144,7 @@ export function useFarmDirectory(initialFarms: Farm[]) {
   // Mirror the active filters into the URL (shareable, Back-button friendly).
   // replaceState keeps it client-side — no navigation or server refetch.
   useEffect(() => {
-    if (!hydratedRef.current) {
+    if (!hydrated) {
       return;
     }
     const params = new URLSearchParams();
@@ -165,6 +180,7 @@ export function useFarmDirectory(initialFarms: Farm[]) {
       `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
     );
   }, [
+    hydrated,
     searchTerm,
     selectedCanton,
     selectedCategories,
