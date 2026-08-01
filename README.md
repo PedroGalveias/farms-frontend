@@ -127,20 +127,18 @@ macOS:   unit + Firefox, Chromium and WebKit cross-OS specs             (macos j
 ```
 
 - Pull requests get an automatic **coverage comment**; the HTML report is uploaded as an artifact.
-- **Deploy is gated**: a Render deploy is triggered only after `verify`, `e2e`, `windows`, `macos`, **and** `tag-version` (tag ↔ `package.json` version match) all pass, and only for a pushed **`v*` version tag** (or a manual `workflow_dispatch`). Pushes to `main` and pull requests run CI but **never deploy**.
+- **Deploy is gated**: a Render deploy is triggered only after `verify`, `e2e`, `windows`, `macos`, **and** `tag-version` (a strict, increasing `vX.Y.Z` release tag) all pass, and only for a pushed version tag (or a manual `workflow_dispatch`). Pushes to `main` and pull requests run CI but **never deploy**.
 - [`codeql.yml`](.github/workflows/codeql.yml) runs CodeQL security analysis; [`audit.yml`](.github/workflows/audit.yml) runs `npm audit` daily and on dependency changes (failing on high/critical advisories in production deps).
 
 ### Deployment (Render)
 
-Shipping is **tag-driven**: merge to `main` whenever — that only runs CI. To release, bump `package.json`'s `version` to match the tag you're about to cut (CI blocks the deploy if they differ), then push the tag, which triggers the Render **deploy hook** after CI passes:
+Shipping is **tag-driven**: merge to `main` whenever — that only runs CI. A release tag must be a new strict semantic version (`vX.Y.Z`) above every previous release tag; it triggers the Render **deploy hook** after CI passes. `package.json` intentionally tracks the next planned development release, so it does not need to match a maintenance tag cut from an earlier commit:
 
 ```bash
-npm version 1.2.3 --no-git-tag-version   # sync package.json and package-lock first
-git commit -am "chore: v1.2.3"
-git tag v1.2.3 && git push origin main v1.2.3
+git tag v1.2.4 && git push origin v1.2.4
 ```
 
-The footer's displayed version resolves from `git describe --tags` at build time, so tagged builds show the release tag automatically.
+The footer's displayed version resolves from `git describe --tags` at build time, so tagged builds and Docker images use the release tag automatically.
 
 - Health check path: `/api/health`.
 - **Runtime is [Node.js](https://nodejs.org/).** Local development, CI, and the container image use Node 24/npm 11 (`npm ci` → `npm run build` → `node server.js`). [`.nvmrc`](.nvmrc), [`.node-version`](.node-version), CI, and the [`Dockerfile`](Dockerfile) select Node 24.18.1; [`package.json`](package.json) declares the npm version, while the committed [`package-lock.json`](package-lock.json) pins dependency resolutions. The Dockerfile builds a non-root standalone image published to GHCR on a `v*` tag ([`docker-publish.yml`](.github/workflows/docker-publish.yml)). Before deploying this change, set an existing Render service created with the Bun runtime to **Node** in the Render dashboard and set `NODE_VERSION=24.18.1` (or let the committed [`.node-version`](.node-version) provide it).
