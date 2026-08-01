@@ -39,7 +39,7 @@ export const fr: Dict = {
     "Jouer les animations même si votre système demande moins de mouvement.",
   settings_title: "Réglages",
   settings_subtitle: "Apparence, langue, retours et vos données.",
-  settings_backToProfile: "Retour au profil",
+  settings_back: "Retour",
   settings_appearance: "Apparence",
   settings_theme_system: "Système",
   settings_theme_sun: "Cycle du soleil",

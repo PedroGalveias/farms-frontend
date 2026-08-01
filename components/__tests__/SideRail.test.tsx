@@ -57,7 +57,7 @@ describe("SideRail settings entry", () => {
     renderRail();
 
     const link = screen.getByTitle(settingsLabel);
-    expect(link.getAttribute("href")).toBe("/settings");
+    expect(link.getAttribute("href")).toBe("/settings?returnTo=%2F");
   });
 
   it("still offers settings when signed in", () => {
@@ -65,7 +65,7 @@ describe("SideRail settings entry", () => {
     renderRail();
 
     expect(screen.getByTitle(settingsLabel).getAttribute("href")).toBe(
-      "/settings",
+      "/settings?returnTo=%2F",
     );
   });
 
@@ -116,6 +116,6 @@ describe("SideRail settings entry", () => {
     renderRail("/settings");
 
     const nav = screen.getByRole("navigation", { name: "Primary" });
-    expect(nav.querySelector('a[href="/settings"]')).toBeNull();
+    expect(nav.querySelector('a[href*="/settings"]')).toBeNull();
   });
 });

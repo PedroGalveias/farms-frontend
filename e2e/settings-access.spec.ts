@@ -13,14 +13,14 @@ test.describe("settings is reachable signed out", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
 
-    const gear = page.locator('aside a[href$="/settings"]');
+    const gear = page.locator('aside a[href*="/settings"]');
     await expect(gear).toBeVisible();
     await gear.click();
 
-    await expect(page).toHaveURL(/\/settings$/);
+    await expect(page).toHaveURL(/\/settings(?:\?|$)/);
     await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
     // Once there, the rail says so.
-    await expect(page.locator('aside a[href$="/settings"]')).toHaveAttribute(
+    await expect(page.locator('aside a[href*="/settings"]')).toHaveAttribute(
       "aria-current",
       "page",
     );
@@ -30,11 +30,11 @@ test.describe("settings is reachable signed out", () => {
     await page.setViewportSize({ width: 390, height: 780 });
     await page.goto("/");
 
-    const gear = page.locator('header a[href$="/settings"]');
+    const gear = page.locator('header a[href*="/settings"]');
     await expect(gear).toBeVisible();
     await gear.click();
 
-    await expect(page).toHaveURL(/\/settings$/);
+    await expect(page).toHaveURL(/\/settings(?:\?|$)/);
     await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
   });
 
@@ -48,7 +48,7 @@ test.describe("settings is reachable signed out", () => {
       ["/fr", "Réglages"],
     ] as const) {
       await page.goto(path);
-      await expect(page.locator('aside a[href$="/settings"]')).toHaveAttribute(
+      await expect(page.locator('aside a[href*="/settings"]')).toHaveAttribute(
         "title",
         label,
       );
@@ -64,7 +64,7 @@ test.describe("settings is reachable signed out", () => {
     await page.setViewportSize({ width: 320, height: 780 });
     await page.goto("/");
 
-    const gear = page.locator('header a[href$="/settings"]');
+    const gear = page.locator('header a[href*="/settings"]');
     const pill = page.locator("header > div").first();
     const gearBox = await gear.boundingBox();
     const pillBox = await pill.boundingBox();

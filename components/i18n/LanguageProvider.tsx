@@ -65,7 +65,10 @@ export default function LanguageProvider({
         /* storage unavailable */
       }
       const target = localizedPath(unlocalizedPathname(pathname ?? "/"), next);
-      router.push(target);
+      const query = window.location.search;
+      // A locale switch is the same page in a different language, so it must
+      // not consume Back or create a second Settings entry.
+      router.replace(`${target}${query}`);
     },
     [router, pathname],
   );

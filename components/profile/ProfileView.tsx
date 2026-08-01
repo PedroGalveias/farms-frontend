@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
+import SettingsRouteLink from "@/components/settings/SettingsLink";
 import { accountDisplayName } from "@/lib/auth";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 
@@ -235,10 +236,7 @@ function SettingsLink() {
   const t = useT();
   return (
     <section className="mt-8">
-      <Link
-        className="glass glass-card glass-interactive group flex items-center justify-between gap-4 rounded-field px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
-        href="/settings"
-      >
+      <SettingsRouteLink className="glass glass-card glass-interactive group flex items-center justify-between gap-4 rounded-field px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2">
         <span className="flex items-center gap-3.5">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-field bg-pine/10 text-pine">
             <Settings className="h-5 w-5" />
@@ -253,7 +251,7 @@ function SettingsLink() {
           </span>
         </span>
         <ArrowRight className="h-4 w-4 text-ink/30 transition-transform duration-300 group-hover:translate-x-0.5" />
-      </Link>
+      </SettingsRouteLink>
     </section>
   );
 }

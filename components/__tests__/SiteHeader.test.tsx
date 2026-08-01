@@ -49,7 +49,7 @@ describe("SiteHeader settings entry", () => {
     renderHeader();
 
     expect(screen.getByLabelText(settingsLabel).getAttribute("href")).toBe(
-      "/settings",
+      "/settings?returnTo=%2F",
     );
   });
 
@@ -61,7 +61,7 @@ describe("SiteHeader settings entry", () => {
     const { container } = renderHeader();
 
     const header = container.querySelector("header");
-    expect(header?.querySelector('a[href="/settings"]')).not.toBeNull();
+    expect(header?.querySelector('a[href*="/settings"]')).not.toBeNull();
   });
 
   it("marks itself as the current page on /settings", () => {

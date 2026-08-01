@@ -18,6 +18,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AccountMenu from "@/components/auth/AccountMenu";
 import { useSlidingIndicator } from "@/components/motion/useSlidingIndicator";
 import { useT } from "@/components/i18n/LanguageProvider";
+import SettingsLink from "@/components/settings/SettingsLink";
 import { COMMAND_PALETTE_OPEN_EVENT } from "@/components/command/events";
 import { useModKey } from "@/components/command/useModKey";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
@@ -171,14 +172,13 @@ export default function SideRail() {
             was through /profile, which the account menu only offers once you
             are signed in — so a signed-out visitor could not reach their own
             theme settings without typing the URL. */}
-        <Link
+        <SettingsLink
           aria-current={isSettings ? "page" : undefined}
           className={utilityLinkClassName(isSettings)}
-          href="/settings"
           title={t("settings_title")}
         >
           <Settings className="h-5 w-5" />
-        </Link>
+        </SettingsLink>
         <a
           aria-label={t("rail_source")}
           className={utilityClassName}

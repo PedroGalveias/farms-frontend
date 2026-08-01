@@ -39,7 +39,7 @@ export const en: Dict = {
     "Play the full animations even when your system asks for reduced motion.",
   settings_title: "Settings",
   settings_subtitle: "Appearance, language, feedback, and your data.",
-  settings_backToProfile: "Back to profile",
+  settings_back: "Back",
   settings_appearance: "Appearance",
   settings_theme_system: "System",
   settings_theme_sun: "Sun cycle",
