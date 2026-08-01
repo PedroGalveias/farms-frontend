@@ -5,13 +5,14 @@ import LanguageProvider, {
 } from "@/components/i18n/LanguageProvider";
 import { de } from "@/lib/messages/de";
 
-const push = vi.fn();
+const router = { push: vi.fn(), replace: vi.fn() };
 const pathname = { value: "/" };
+const search = { value: "" };
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push, replace: vi.fn(), prefetch: vi.fn() }),
+  useRouter: () => ({ ...router, prefetch: vi.fn() }),
   usePathname: () => pathname.value,
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => new URLSearchParams(search.value),
 }));
 
 function Probe() {
@@ -31,8 +32,10 @@ function Probe() {
 }
 
 beforeEach(() => {
-  push.mockClear();
+  router.push.mockClear();
+  router.replace.mockClear();
   pathname.value = "/";
+  search.value = "";
   document.cookie = "farms.locale=;path=/;max-age=0";
   localStorage.clear();
 });
@@ -57,7 +60,8 @@ describe("LanguageProvider (locale from the URL)", () => {
       </LanguageProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "de" }));
-    expect(push).toHaveBeenCalledWith("/de/canton/be");
+    expect(router.replace).toHaveBeenCalledWith("/de/canton/be");
+    expect(router.push).not.toHaveBeenCalled();
     expect(document.cookie).toContain("farms.locale=de");
     expect(localStorage.getItem("farms.locale")).toBe("de");
   });
@@ -70,7 +74,24 @@ describe("LanguageProvider (locale from the URL)", () => {
       </LanguageProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "en" }));
-    expect(push).toHaveBeenCalledWith("/product/dairy");
+    expect(router.replace).toHaveBeenCalledWith("/product/dairy");
+  });
+
+  it("replaces a locale-only Settings change and preserves its return target", () => {
+    pathname.value = "/settings";
+    search.value = "returnTo=%2Fquick-search";
+    render(
+      <LanguageProvider initialLocale="en">
+        <Probe />
+      </LanguageProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "de" }));
+
+    expect(router.replace).toHaveBeenCalledWith(
+      "/de/settings?returnTo=%2Fquick-search",
+    );
+    expect(router.push).not.toHaveBeenCalled();
   });
 
   it("defaults to English without an initialLocale", () => {

@@ -75,7 +75,7 @@ describe("ProfileView", () => {
     renderProfile();
     const settings = screen
       .getAllByRole("link")
-      .find((link) => link.getAttribute("href") === "/settings");
+      .find((link) => link.getAttribute("href") === "/settings?returnTo=%2F");
     expect(settings).toBeDefined();
     expect(settings).toHaveTextContent("Settings");
   });

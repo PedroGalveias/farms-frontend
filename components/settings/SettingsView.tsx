@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   AtSign,
@@ -25,6 +25,10 @@ import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useTheme, type ThemeMode } from "@/components/theme/ThemeProvider";
 import { localizedPath, LOCALES } from "@/lib/i18n-core";
+import {
+  SETTINGS_RETURN_TO_PARAM,
+  settingsReturnTo,
+} from "@/lib/settings-navigation";
 import { motionForced, setMotionForced } from "@/lib/motion";
 import { hapticsEnabled, setHapticsEnabled, haptic } from "@/lib/haptics";
 import { playTick, setSoundEnabled, soundEnabled } from "@/lib/sound";
@@ -39,18 +43,16 @@ export default function SettingsView() {
   const t = useT();
   const { locale } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, logout } = useAuth();
+  const returnTo = settingsReturnTo(searchParams.get(SETTINGS_RETURN_TO_PARAM));
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
       <button
         className="inline-flex items-center gap-2 text-sm font-semibold text-ink/60 transition hover:text-ink"
         onClick={() => {
-          if (window.history.length > 1) {
-            router.back();
-          } else {
-            router.push(localizedPath("/", locale));
-          }
+          router.replace(localizedPath(returnTo ?? "/", locale));
         }}
         type="button"
       >

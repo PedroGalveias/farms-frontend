@@ -3,13 +3,19 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import SettingsView from "@/components/settings/SettingsView";
+import { de } from "@/lib/messages/de";
 
 const authState: {
   user: { user_id: string; role: string } | null;
   loading: boolean;
 } = { user: null, loading: false };
 const logout = vi.fn();
-const router = vi.hoisted(() => ({ back: vi.fn(), push: vi.fn() }));
+const router = vi.hoisted(() => ({
+  back: vi.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
+}));
+const search = vi.hoisted(() => ({ value: "" }));
 
 vi.mock("@/components/auth/AuthProvider", () => ({
   useAuth: () => ({ ...authState, openAuth: vi.fn(), logout }),
@@ -17,6 +23,7 @@ vi.mock("@/components/auth/AuthProvider", () => ({
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/settings",
+  useSearchParams: () => new URLSearchParams(search.value),
   useRouter: () => router,
 }));
 
@@ -25,7 +32,10 @@ function renderSettings(
 ) {
   return render(
     <ThemeProvider>
-      <LanguageProvider initialLocale={initialLocale}>
+      <LanguageProvider
+        initialLocale={initialLocale}
+        messages={initialLocale === "de" ? de : undefined}
+      >
         <SettingsView />
       </LanguageProvider>
     </ThemeProvider>,
@@ -42,29 +52,34 @@ function setHistoryLength(length: number) {
 beforeEach(() => {
   authState.user = null;
   setHistoryLength(1);
+  search.value = "";
   localStorage.clear();
   document.documentElement.classList.remove("dark", "force-motion");
   vi.clearAllMocks();
 });
 
 describe("SettingsView", () => {
-  it("returns to the page the visitor was previously viewing", () => {
+  it("returns to its app-owned return target, not browser-wide history", () => {
     setHistoryLength(2);
+    search.value = "returnTo=%2Fquick-search";
     renderSettings();
 
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
 
-    expect(router.back).toHaveBeenCalledOnce();
+    expect(router.replace).toHaveBeenCalledWith("/quick-search");
+    expect(router.back).not.toHaveBeenCalled();
     expect(router.push).not.toHaveBeenCalled();
   });
 
-  it("falls back to the localized home page on a direct visit", () => {
+  it("falls back to localized home even when a direct visit has browser history", () => {
+    setHistoryLength(2);
     renderSettings("de");
 
-    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    fireEvent.click(screen.getByRole("button", { name: "Zurück" }));
 
-    expect(router.push).toHaveBeenCalledWith("/de");
+    expect(router.replace).toHaveBeenCalledWith("/de");
     expect(router.back).not.toHaveBeenCalled();
+    expect(router.push).not.toHaveBeenCalled();
   });
 
   it("offers the four appearance modes and applies a manual pick", () => {

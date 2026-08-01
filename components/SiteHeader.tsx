@@ -8,6 +8,7 @@ import LanguageMenu from "@/components/LanguageMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import AccountMenu from "@/components/auth/AccountMenu";
 import { useT } from "@/components/i18n/LanguageProvider";
+import SettingsLink from "@/components/settings/SettingsLink";
 import { unlocalizedPath } from "@/lib/i18n-core";
 
 const utilityClassName =
@@ -62,15 +63,14 @@ export default function SiteHeader() {
               goes inert. An entry that disappears while you read is a worse
               bug than the one it would be fixing. Here it keeps the same three
               neighbours it has in the desktop rail. */}
-          <Link
+          <SettingsLink
             aria-current={isSettings ? "page" : undefined}
             aria-label={t("settings_title")}
             className={utilityLinkClassName(isSettings)}
-            href="/settings"
             title={t("settings_title")}
           >
             <Settings className="h-5 w-5" />
-          </Link>
+          </SettingsLink>
         </div>
       </div>
     </header>
