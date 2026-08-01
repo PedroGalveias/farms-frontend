@@ -61,6 +61,24 @@ describe("matchesSearch", () => {
     );
     expect(matchesSearch(makeFarm({ name: "Hof" }), "zürich")).toBe(false);
   });
+
+  it("matches the product names that the API also searches", () => {
+    const farm = makeFarm({
+      products: [
+        {
+          slug: "strawberries",
+          name_en: "Strawberries",
+          group: "fruits",
+          status: "AVAILABLE",
+          last_confirmed_at: null,
+        },
+      ],
+    });
+
+    expect(matchesSearch(farm, "straw")).toBe(true);
+    // The canonical key keeps the local German search working too.
+    expect(matchesSearch(farm, "erdbeer")).toBe(true);
+  });
 });
 
 describe("matchesCanton", () => {

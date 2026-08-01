@@ -157,6 +157,25 @@ export const CATEGORY_CATALOG: Record<string, CategoryMeta> = {
 
 const DEFAULT_CATEGORY_EMOJI = "🧺";
 
+// The API's stable category identities. Display labels stay German canonical
+// keys until the taxonomy-provider migration lands, but requests must never
+// send those localized labels upstream.
+const CATEGORY_SLUG_BY_KEY: Record<string, string> = {
+  Früchte: "fruits",
+  Gemüse: "vegetables",
+  Milchprodukte: "dairy",
+  "Fleisch und Geflügel": "meat-poultry",
+  "Verarbeitete und haltbare Produkte": "preserves",
+  "Honig und Süßstoffe": "honey-sweeteners",
+  Getränke: "drinks",
+  "Backwaren und Gebäck": "bakery",
+  "Blumen und Pflanzen": "flowers-plants",
+  "Nüsse, Samen und Öle": "nuts-oils",
+  "Getreide und Cerealien": "grains",
+  "Fisch und Meeresfrüchte": "fish-seafood",
+  Sonstiges: "other",
+};
+
 /** Canonical German keys of the known categories. */
 export const KNOWN_CATEGORY_KEYS = Object.keys(CATEGORY_CATALOG);
 
@@ -234,6 +253,12 @@ export const CATEGORY_ALIASES: Record<string, string> = {
 export function canonicalCategory(value: string): string {
   const trimmed = value.trim();
   return CATEGORY_ALIASES[trimmed] ?? trimmed;
+}
+
+/** Stable API slug for a known category or alias. Unknown values stay local so
+ * a stale hand-authored URL cannot turn into a backend validation error. */
+export function categorySlug(value: string): string | undefined {
+  return CATEGORY_SLUG_BY_KEY[canonicalCategory(value)];
 }
 
 /** A farm's categories, canonicalised and de-duplicated. */

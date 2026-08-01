@@ -1,4 +1,6 @@
+import { categorySlug } from "@/lib/categories";
 import { RADIUS_OPTIONS, type CategoryMatchMode } from "@/lib/directory";
+import type { FarmsQuery } from "@/lib/farms-service";
 import type { DirectoryViewMode, FarmSortOption } from "@/types/farm";
 
 /** The slice of directory state that lives in the URL. */
@@ -78,5 +80,32 @@ export function parseDirectoryParams(
     sortOption,
     radiusKm,
     viewMode,
+  };
+}
+
+/**
+ * The server-query subset of directory state. The API's category filtering is
+ * any-of only, so a multi-category all-match remains a local refinement;
+ * sending it upstream would under-fetch valid candidates. Radius and nearest
+ * also stay local because the visitor's coordinates are private and absent
+ * from shareable URLs.
+ */
+export function toFarmsQuery(params: DirectoryParams): FarmsQuery {
+  const categories =
+    params.categoryMatchMode === "all" && params.selectedCategories.length > 1
+      ? []
+      : params.selectedCategories
+          .map(categorySlug)
+          .filter((slug): slug is string => Boolean(slug));
+
+  return {
+    ...(params.searchTerm.trim() ? { q: params.searchTerm.trim() } : {}),
+    ...(params.selectedCanton !== "all"
+      ? { canton: params.selectedCanton }
+      : {}),
+    ...(categories.length > 0 ? { categories } : {}),
+    ...(params.sortOption === "name" || params.sortOption === "canton"
+      ? { sort: params.sortOption }
+      : {}),
   };
 }

@@ -84,6 +84,35 @@ interface FarmsPage {
 }
 
 /**
+ * The `GET /farms` filter subset used by the home directory. The backend also
+ * has granular-product and coordinate filters, but the home directory has no
+ * product picker and never puts a visitor's coordinates in its URL. Its
+ * multi-category all-match mode also remains local because the API's category
+ * filter is any-of only.
+ */
+export interface FarmsQuery {
+  canton?: string;
+  categories?: string[];
+  q?: string;
+  sort?: "newest" | "name" | "canton";
+}
+
+function appendFarmsQuery(url: URL, query: FarmsQuery) {
+  if (query.canton) {
+    url.searchParams.set("canton", query.canton);
+  }
+  if (query.categories && query.categories.length > 0) {
+    url.searchParams.set("category", query.categories.join(","));
+  }
+  if (query.q?.trim()) {
+    url.searchParams.set("q", query.q.trim());
+  }
+  if (query.sort && query.sort !== "newest") {
+    url.searchParams.set("sort", query.sort);
+  }
+}
+
+/**
  * Parse a `GET /farms` body from either backend:
  *  - taxonomy-aware backend: `{ farms: [...], next_cursor: string | null }`
  *  - older backend: a bare `Farm[]` with no pagination.
@@ -194,6 +223,7 @@ function normalizeFarm(farm: Farm): Farm {
  */
 export async function getFarms(
   locale: Locale = DEFAULT_LOCALE,
+  query: FarmsQuery = {},
 ): Promise<Farm[]> {
   const farms: Farm[] = [];
   const seen = new Set<string>();
@@ -225,6 +255,7 @@ export async function getFarms(
     // the switch to the localized taxonomy contract a cache-safe no-op later.
     url.searchParams.set("lang", locale);
     url.searchParams.set("limit", String(FARMS_PAGE_LIMIT));
+    appendFarmsQuery(url, query);
     if (nextOffset) {
       url.searchParams.set("offset", nextOffset);
     }

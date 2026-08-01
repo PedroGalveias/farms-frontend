@@ -75,6 +75,7 @@ afterEach(() => {
   window.history.replaceState(null, "", "/");
   Reflect.deleteProperty(navigator, "geolocation");
   router.refresh.mockClear();
+  router.replace.mockClear();
 });
 
 describe("useFarmDirectory", () => {
@@ -143,10 +144,14 @@ describe("useFarmDirectory", () => {
     ]);
   });
 
-  it("mirrors active filters into the URL query string", async () => {
+  it("navigates to the server-filtered URL for active filters", async () => {
     const { result } = await setup();
     act(() => result.current.setSelectedCanton("ZH"));
-    await waitFor(() => expect(window.location.search).toContain("canton=ZH"));
+    await waitFor(() =>
+      expect(router.replace).toHaveBeenLastCalledWith("/?canton=ZH", {
+        scroll: false,
+      }),
+    );
   });
 
   it("reapplies every shareable filter when browser history changes", async () => {
