@@ -3,6 +3,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import AuthModal from "@/components/auth/AuthModal";
 
+let appendedOpener: HTMLButtonElement | null = null;
+
 function renderModal(mode: "login" | "register" = "login") {
   const onClose = vi.fn();
   const onSwitch = vi.fn();
@@ -22,6 +24,8 @@ function renderModal(mode: "login" | "register" = "login") {
 }
 
 afterEach(() => {
+  appendedOpener?.remove();
+  appendedOpener = null;
   vi.restoreAllMocks();
   document.body.style.overflow = "";
 });
@@ -88,6 +92,7 @@ describe("AuthModal forgot-password flow", () => {
 
   it("keeps focus inside the confirmation after successful registration", async () => {
     const opener = document.createElement("button");
+    appendedOpener = opener;
     document.body.append(opener);
     opener.focus();
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
