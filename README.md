@@ -9,7 +9,6 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/codeql.yml/badge.svg"></a>
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/ci.yml"><img alt="Coverage floors (CI-enforced)" src="https://img.shields.io/badge/coverage-%E2%89%A592%25%20stmts%20%C2%B7%20%E2%89%A584%25%20branches-3c873a"></a>
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/audit.yml"><img alt="Security audit" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/audit.yml/badge.svg"></a>
-  <img alt="Bun" src="https://img.shields.io/badge/bun-1.3.14-f9f1e1">
   <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D26-3c873a">
   <img alt="License: GPL-2.0" src="https://img.shields.io/badge/license-GPL--2.0-blue">
 </p>
@@ -44,7 +43,7 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
 
 | Area                 | Choice                                                                              |
 | -------------------- | ----------------------------------------------------------------------------------- |
-| Runtime & packages   | [Bun 1.3](https://bun.sh/) (`bun.lock`)                                             |
+| Runtime & packages   | [Node.js 26](https://nodejs.org/) + npm 11 (`package-lock.json`)                    |
 | Framework            | [Next.js 16.2](https://nextjs.org/) (App Router)                                    |
 | UI                   | [React 19.2](https://react.dev/)                                                    |
 | Styling              | [Tailwind CSS 4.3](https://tailwindcss.com/)                                        |
@@ -58,18 +57,17 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
 
 ### Prerequisites
 
-- **Bun** `>=1.3.14` is the primary local and production runtime. Install it from [bun.sh](https://bun.sh/) and verify it with `bun --version`.
-- **Node.js** `>=26.0.0` is required for the Node-based CI/test toolchain. The repo ships an [`.nvmrc`](.nvmrc):
+- **Node.js** `>=26.0.0` is the local, CI, and production runtime. The repo ships an [`.nvmrc`](.nvmrc):
   ```bash
   nvm use      # installs/selects Node 26.5.0
   ```
-- **npm** `>=12.0.2` ships with the supported Node 26 runtime. Both lockfiles are intentionally committed so `npm ci` remains reproducible for Node-based tooling.
+- **npm** `>=11.17.0` ships with the supported Node 26 runtime and installs from the committed `package-lock.json`.
 
 ### Setup
 
 ```bash
-# 1. Install dependencies from the committed Bun lockfile
-bun install --frozen-lockfile
+# 1. Install dependencies from the committed lockfile
+npm ci
 
 # 2. Create your local environment file
 cp .env.example .env
@@ -82,37 +80,37 @@ cp .env.example .env
 #    NEXT_PUBLIC_SITE_URL=https://your-domain.example
 
 # 4. Start the dev server
-bun run dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The app degrades gracefully if the backend is unavailable — the UI still renders with an empty directory and a status banner.
 
 ## 📜 Scripts
 
-Run scripts with `bun run`; the matching `npm run` commands remain available. Browser-test and static-analysis scripts explicitly launch Node 26 because Vitest 4's Rolldown backend currently needs a Node utility API that Bun 1.3.14 does not expose.
+Run scripts with `npm run`.
 
 | Script                  | Description                                        |
 | ----------------------- | -------------------------------------------------- |
-| `bun run dev`           | Start the dev server                               |
-| `bun run build`         | Production build                                   |
-| `bun run start`         | Serve the production build                         |
-| `bun run lint`          | ESLint (warnings fail: `--max-warnings 0`)         |
-| `bun run typecheck`     | `tsc --noEmit`                                     |
-| `bun run format`        | Format the codebase with Prettier                  |
-| `bun run format:check`  | Check formatting (used in CI)                      |
-| `bun run test`          | Run unit/component tests once                      |
-| `bun run test:watch`    | Tests in watch mode                                |
-| `bun run test:coverage` | Tests with a coverage report (enforces thresholds) |
-| `bun run test:e2e`      | Playwright end-to-end smoke tests                  |
+| `npm run dev`           | Start the dev server                               |
+| `npm run build`         | Production build                                   |
+| `npm run start`         | Serve the production build                         |
+| `npm run lint`          | ESLint (warnings fail: `--max-warnings 0`)         |
+| `npm run typecheck`     | `tsc --noEmit`                                     |
+| `npm run format`        | Format the codebase with Prettier                  |
+| `npm run format:check`  | Check formatting (used in CI)                      |
+| `npm run test`          | Run unit/component tests once                      |
+| `npm run test:watch`    | Tests in watch mode                                |
+| `npm run test:coverage` | Tests with a coverage report (enforces thresholds) |
+| `npm run test:e2e`      | Playwright end-to-end smoke tests                  |
 
 ## 🧪 Testing
 
 - **Unit & component tests** ([Vitest](https://vitest.dev/) + Testing Library, jsdom) live next to the code in `__tests__/` folders. They cover the `lib/` logic (distance sorting, validation, i18n), key components, and the health API route.
-- **Coverage** is scoped to the modules under test and **enforces thresholds** (statements 92%, branches 84%, functions 92%, lines 93%) — `bun run test:coverage` fails if coverage regresses. An HTML report is written to `coverage/`.
+- **Coverage** is scoped to the modules under test and **enforces thresholds** (statements 92%, branches 84%, functions 92%, lines 93%) — `npm run test:coverage` fails if coverage regresses. An HTML report is written to `coverage/`.
 - **End-to-end tests** ([Playwright](https://playwright.dev/)) in `e2e/` build and boot the app and assert the core flows across **five projects**: Chromium, Firefox, and WebKit on desktop, plus iPhone (WebKit) and Pixel (Blink) phone profiles for the touch flows (`*.mobile.spec.ts`). First time:
   ```bash
-  bunx playwright install chromium firefox webkit
-  bun run test:e2e
+  npx playwright install chromium firefox webkit
+  npm run test:e2e
   ```
 - **Visual regression** (`e2e/visual.spec.ts`) screenshots the key pages against committed baselines — macOS baselines are generated locally (`npx playwright test visual --update-snapshots`), Linux baselines by the _Visual baselines (linux)_ workflow, and the suite gates CI once Linux baselines exist.
 
@@ -144,7 +142,7 @@ git tag v1.2.3 && git push origin main v1.2.3
 The footer's displayed version resolves from `git describe --tags` at build time, so tagged builds show the release tag automatically.
 
 - Health check path: `/api/health`.
-- **Runtime is [Bun](https://bun.sh).** Local development, Render, and the container image use Bun 1.3.14 (`bun install --frozen-lockfile` → `bun run build` → `bun server.js`), pinned by the committed [`bun.lock`](bun.lock). Node 26/npm 12 runs the test toolchain in CI; `package-lock.json` is committed alongside `bun.lock` so that path remains reproducible. The [`bun-lockfile`](.github/workflows/ci.yml) job verifies Bun's lock is in sync. The [`Dockerfile`](Dockerfile) builds a non-root standalone image published to GHCR on a `v*` tag ([`docker-publish.yml`](.github/workflows/docker-publish.yml)).
+- **Runtime is [Node.js](https://nodejs.org/).** Local development, CI, and the container image use Node 26/npm 11 (`npm ci` → `npm run build` → `node server.js`), pinned by the committed [`package-lock.json`](package-lock.json). The [`Dockerfile`](Dockerfile) builds a non-root standalone image published to GHCR on a `v*` tag ([`docker-publish.yml`](.github/workflows/docker-publish.yml)). Before deploying this change, set an existing Render service created with the Bun runtime to **Node** in the Render dashboard and set `NODE_VERSION=26.5.0` (or let the committed [`.node-version`](.node-version) provide it).
 
 ## 🌍 Internationalization
 
@@ -224,7 +222,7 @@ Contributions are welcome!
 1. **Branch off `main`** (PRs are squash-merged, so keep branches focused).
 2. Make your change and **run the checks locally** before pushing:
    ```bash
-   bun run format && bun run lint && bun run typecheck && bun run test && bun run build
+   npm run format && npm run lint && npm run typecheck && npm run test && npm run build
    ```
 3. Use clear, **[Conventional Commits](https://www.conventionalcommits.org/)** messages (`feat:`, `fix:`, `chore:`, `test:`, `ci:`, …).
 4. Open a pull request. **CI must be green** — the same checks above plus E2E, CodeQL, and coverage thresholds run automatically.
