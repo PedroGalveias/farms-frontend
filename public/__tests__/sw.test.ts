@@ -41,8 +41,11 @@ async function dispatchFetch(request: Request) {
   }
 
   const response = await responsePromise;
-  await Promise.all(lifetimePromises);
-  return { event, response };
+  return {
+    event,
+    response,
+    settle: () => Promise.all(lifetimePromises),
+  };
 }
 
 beforeEach(async () => {
@@ -79,25 +82,36 @@ describe("service worker asset caching", () => {
       new Response("not found", { status: 404 }),
     );
 
-    const { event, response } = await dispatchFetch(
+    const { event, response, settle } = await dispatchFetch(
       new Request("https://farms.test/_next/static/chunk.js"),
     );
 
     expect(event.waitUntil).toHaveBeenCalledTimes(1);
     expect(response.status).toBe(404);
+    await settle();
     expect(cache.put).not.toHaveBeenCalled();
   });
 
   it("returns a cached asset immediately and refreshes it in the background", async () => {
     const cached = new Response("cached");
     cachesMock.match.mockResolvedValue(cached);
-    vi.mocked(fetch).mockResolvedValue(new Response("fresh"));
+    let resolveFetch: (response: Response) => void;
+    vi.mocked(fetch).mockReturnValue(
+      new Promise<Response>((resolve) => {
+        resolveFetch = resolve;
+      }),
+    );
 
     const request = new Request("https://farms.test/_next/static/chunk.js");
-    const { event, response } = await dispatchFetch(request);
+    const { event, response, settle } = await dispatchFetch(request);
 
     expect(event.waitUntil).toHaveBeenCalledTimes(1);
     await expect(response.text()).resolves.toBe("cached");
+    expect(cache.put).not.toHaveBeenCalled();
+
+    resolveFetch!(new Response("fresh"));
+    await settle();
+
     expect(cache.put).toHaveBeenCalledWith(request, expect.any(Response));
     const cachedResponse = vi.mocked(cache.put).mock.calls[0][1];
     await expect(cachedResponse.text()).resolves.toBe("fresh");

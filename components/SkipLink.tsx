@@ -8,8 +8,11 @@ import { useT } from "@/components/i18n/LanguageProvider";
  */
 export default function SkipLink() {
   const t = useT();
+  const focusMainContent = () =>
+    document.getElementById("main-content")?.focus();
+
   return (
-    <a className="skip-link" href="#main-content">
+    <a className="skip-link" href="#main-content" onClick={focusMainContent}>
       {t("skip_to_content")}
     </a>
   );

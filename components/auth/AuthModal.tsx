@@ -63,6 +63,7 @@ export default function AuthModal({
   const [forgot, setForgot] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
+  const confirmationRef = useRef<HTMLButtonElement>(null);
   // Keep Tab inside the dialog: aria-modal alone does not stop the browser
   // tabbing out into the (obscured, scroll-locked) page behind it.
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -101,7 +102,7 @@ export default function AuthModal({
     });
   }, [mode]);
 
-  // Body scroll lock + focus the first field on open; Escape to close.
+  // Body scroll lock + focus the first field on open.
   useEffect(() => {
     if (!open) {
       return undefined;
@@ -115,20 +116,34 @@ export default function AuthModal({
     document.body.classList.add("sheet-open");
     const focusFrame = requestAnimationFrame(() => emailRef.current?.focus());
 
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      document.body.classList.remove("sheet-open");
+      queueMicrotask(() => previouslyFocused?.focus());
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !pending) {
         onClose();
       }
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => {
-      cancelAnimationFrame(focusFrame);
-      document.body.style.overflow = previousOverflow;
-      document.body.classList.remove("sheet-open");
-      window.removeEventListener("keydown", onKeyDown);
-      queueMicrotask(() => previouslyFocused?.focus());
-    };
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, pending, onClose]);
+
+  // Successful registration replaces the focused form with a confirmation.
+  // Keep focus in the open dialog instead of allowing it to fall back to body.
+  useEffect(() => {
+    if (registered) {
+      queueMicrotask(() => confirmationRef.current?.focus());
+    }
+  }, [registered]);
 
   if (!open) {
     return null;
@@ -289,6 +304,7 @@ export default function AuthModal({
             <button
               className="mt-7 inline-flex w-full items-center justify-center rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
               onClick={onClose}
+              ref={confirmationRef}
               type="button"
             >
               {t("auth_check_email_cta")}

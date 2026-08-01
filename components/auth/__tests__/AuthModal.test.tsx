@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import AuthModal from "@/components/auth/AuthModal";
 
@@ -84,5 +84,35 @@ describe("AuthModal forgot-password flow", () => {
     expect(
       screen.getByRole("heading", { name: /welcome back/i }),
     ).toBeInTheDocument();
+  });
+
+  it("keeps focus inside the confirmation after successful registration", async () => {
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(null, { status: 202 }),
+    );
+    renderModal("register");
+
+    fireEvent.change(screen.getByLabelText(/username/i), {
+      target: { value: "farmfriend" },
+    });
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "friend@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/^password$/i), {
+      target: { value: "a-long-enough-password" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), {
+      target: { value: "a-long-enough-password" },
+    });
+    fireEvent.submit(document.querySelector("form")!);
+
+    const dialog = screen.getByRole("dialog");
+    const confirmation = await screen.findByRole("button", { name: /got it/i });
+    await waitFor(() => expect(confirmation).toHaveFocus());
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+    expect(document.activeElement).not.toBe(opener);
   });
 });
