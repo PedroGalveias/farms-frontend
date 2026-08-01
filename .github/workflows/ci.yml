@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -53,9 +55,9 @@ jobs:
         run: npm run test:coverage
 
       - name: Report coverage on PR
-        # Runs even if the coverage thresholds failed, so the numbers are still
-        # surfaced on the pull request. Skipped for non-PR (push) events.
-        if: ${{ always() && github.event_name == 'pull_request' }}
+        # Still report a threshold failure, but do not try to parse coverage
+        # when an earlier step (such as formatting) never ran Vitest.
+        if: ${{ always() && github.event_name == 'pull_request' && hashFiles('coverage/coverage-summary.json') != '' }}
         uses: davelosert/vitest-coverage-report-action@v2
 
       - name: Upload coverage report
@@ -80,6 +82,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -138,6 +142,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -184,6 +190,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -243,6 +251,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Verify tag == v<package.json version>
         run: |
           case "$GITHUB_REF" in

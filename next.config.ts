@@ -1,11 +1,12 @@
 import { execSync } from "node:child_process";
 import bundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
+import packageJson from "./package.json";
 
 // Resolve the deployed build's version once, at build time, and expose it to
 // the client. Precedence: an explicit override, then the nearest git tag
-// (clean "v1.2.3" — deploys are gated on v* tags), then Render's commit SHA if
-// no tags are reachable, then a dev fallback.
+// (clean "v1.2.3" — deploys are gated on v* tags), then the package version so
+// previews never expose an opaque commit SHA, then a dev fallback.
 function resolveAppVersion(): string {
   if (process.env.NEXT_PUBLIC_APP_VERSION) {
     return process.env.NEXT_PUBLIC_APP_VERSION;
@@ -21,16 +22,7 @@ function resolveAppVersion(): string {
   } catch {
     // No tags reachable (e.g. a shallow clone) — fall through.
   }
-  // Commit-SHA fallbacks, one per host. Both shallow-clone without tags, so
-  // `git describe` above fails on a normal deploy and this is what actually
-  // runs. Only Render's was here, which is why every Vercel build shipped a
-  // footer reading "dev" — verified in the deployed HTML, not inferred.
-  const commit =
-    process.env.RENDER_GIT_COMMIT ?? process.env.VERCEL_GIT_COMMIT_SHA;
-  if (commit) {
-    return commit.slice(0, 7);
-  }
-  return "dev";
+  return packageJson.version ? `v${packageJson.version}` : "dev";
 }
 
 const APP_VERSION = resolveAppVersion();

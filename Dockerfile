@@ -4,7 +4,7 @@
 # .github/workflows/docker-publish.yml).
 
 # ── deps: install with a clean, reproducible lockfile ────────────────────────
-FROM node:24.18.1-alpine AS deps
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 # npm ci fails the build if package.json and package-lock.json disagree,
@@ -12,7 +12,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # ── build: compile the app, producing .next/standalone ───────────────────────
-FROM node:24.18.1-alpine AS build
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -24,7 +24,7 @@ ENV NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
 RUN npm run build
 
 # ── runner: minimal runtime, non-root, binds 0.0.0.0:$PORT ───────────────────
-FROM node:24.18.1-alpine AS runner
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \

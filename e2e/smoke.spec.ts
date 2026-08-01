@@ -33,12 +33,14 @@ test.describe("home page", () => {
     const themeToggle = page
       .getByRole("complementary")
       .getByRole("switch", { name: /toggle dark mode/i });
-    // The initial document is server-rendered. Retry until React has hydrated
-    // the toggle instead of dispatching the click into inert SSR markup.
-    await expect(async () => {
-      await themeToggle.click({ timeout: 1_000 });
-      await expect(themeToggle).toHaveAttribute("aria-checked", "true");
-    }).toPass({ timeout: 15_000 });
+    // The initial document is server-rendered. Wait for the provider's mount
+    // signal, then click exactly once: retrying a click can toggle back to
+    // light mode when the previous attempt already reached hydrated React.
+    await page.waitForFunction(
+      () => document.documentElement.dataset.themeHydrated === "true",
+    );
+    await themeToggle.click({ timeout: 15_000 });
+    await expect(themeToggle).toHaveAttribute("aria-checked", "true");
     await expect(html).toHaveClass(/dark/);
   });
 });

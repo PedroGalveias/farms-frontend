@@ -162,9 +162,11 @@ export default function ThemeProvider({
       setModeState(stored);
       apply(resolveTheme(stored));
       scheduleSun(stored);
+      document.documentElement.dataset.themeHydrated = "true";
     });
     return () => {
       if (sunTimer.current) clearTimeout(sunTimer.current);
+      delete document.documentElement.dataset.themeHydrated;
     };
   }, [apply, scheduleSun]);
 
