@@ -9,7 +9,7 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/codeql.yml/badge.svg"></a>
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/ci.yml"><img alt="Coverage floors (CI-enforced)" src="https://img.shields.io/badge/coverage-%E2%89%A592%25%20stmts%20%C2%B7%20%E2%89%A584%25%20branches-3c873a"></a>
   <a href="https://github.com/PedroGalveias/farms-frontend/actions/workflows/audit.yml"><img alt="Security audit" src="https://github.com/PedroGalveias/farms-frontend/actions/workflows/audit.yml/badge.svg"></a>
-  <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D26-3c873a">
+  <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D24.18.1-3c873a">
   <img alt="License: GPL-2.0" src="https://img.shields.io/badge/license-GPL--2.0-blue">
 </p>
 
@@ -43,7 +43,7 @@ This is the frontend for the [`farms`](https://github.com/PedroGalveias/farms) b
 
 | Area                 | Choice                                                                              |
 | -------------------- | ----------------------------------------------------------------------------------- |
-| Runtime & packages   | [Node.js 26](https://nodejs.org/) + npm 11 (`package-lock.json`)                    |
+| Runtime & packages   | [Node.js 24.18.1](https://nodejs.org/) + npm 11 (`package-lock.json`)               |
 | Framework            | [Next.js 16.2](https://nextjs.org/) (App Router)                                    |
 | UI                   | [React 19.2](https://react.dev/)                                                    |
 | Styling              | [Tailwind CSS 4.3](https://tailwindcss.com/)                                        |
