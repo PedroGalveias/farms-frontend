@@ -11,6 +11,24 @@ interface BeforeInstallPromptEvent extends Event {
 
 const INSTALL_DISMISSED_KEY = "farms.install.dismissed";
 
+function installWasDismissed() {
+  try {
+    return window.localStorage.getItem(INSTALL_DISMISSED_KEY) !== null;
+  } catch {
+    // Private browsing and restrictive embedded browsers can expose
+    // localStorage but throw on access. Installation remains optional.
+    return false;
+  }
+}
+
+function rememberInstallDismissal() {
+  try {
+    window.localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+  } catch {
+    // Persistence is best effort; still dismiss the current prompt.
+  }
+}
+
 function isStandalone() {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
@@ -27,11 +45,7 @@ function shouldShowIosInstallHint() {
     return false;
   }
 
-  return (
-    !window.localStorage.getItem(INSTALL_DISMISSED_KEY) &&
-    isIos() &&
-    !isStandalone()
-  );
+  return !installWasDismissed() && isIos() && !isStandalone();
 }
 
 /**
@@ -154,7 +168,7 @@ export default function PwaRegister() {
     setVisible(false);
     setShowIosHint(false);
     setInstallPrompt(null);
-    window.localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+    rememberInstallDismissal();
   };
 
   const install = async () => {
@@ -165,7 +179,7 @@ export default function PwaRegister() {
     const choice = await installPrompt.userChoice;
     setInstallPrompt(null);
     if (choice.outcome === "dismissed") {
-      window.localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+      rememberInstallDismissal();
     }
     setVisible(false);
   };

@@ -8,7 +8,7 @@ import PersonalizationProvider from "@/components/personalization/Personalizatio
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import CustomCursor from "@/components/motion/CustomCursor";
 import GlassLight from "@/components/motion/GlassLight";
-import AmbientBackdrop from "@/components/hero/AmbientBackdrop";
+import LazyAmbientBackdrop from "@/components/hero/LazyAmbientBackdrop";
 import MotionPrompt from "@/components/motion/MotionPrompt";
 import BackToTop from "@/components/motion/BackToTop";
 import PwaRegister from "@/components/PwaRegister";
@@ -18,7 +18,7 @@ import WebVitals from "@/components/WebVitals";
 import AuthProvider from "@/components/auth/AuthProvider";
 import TripProvider from "@/components/trip/TripProvider";
 import SeasonalReminderProvider from "@/components/seasonal/SeasonalReminderProvider";
-import CommandPalette from "@/components/command/CommandPalette";
+import LazyCommandPalette from "@/components/command/LazyCommandPalette";
 import KeyboardShortcuts from "@/components/command/KeyboardShortcuts";
 import ViewTransitions from "@/components/transitions/ViewTransitions";
 import ToastProvider from "@/components/ui/ToastProvider";
@@ -286,14 +286,16 @@ export default async function RootLayout({
                         <SideRail />
                         <div className="app-shell cursor-zone relative z-[1] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[92px]">
                           <SiteHeader />
-                          <div id="main-content">{children}</div>
+                          <div id="main-content" tabIndex={-1}>
+                            {children}
+                          </div>
                         </div>
                         <MobileTabBar />
-                        <CommandPalette />
+                        <LazyCommandPalette />
                         <KeyboardShortcuts />
                         <CustomCursor />
                         <GlassLight />
-                        <AmbientBackdrop />
+                        <LazyAmbientBackdrop />
                         <MotionPrompt />
                         <BackToTop />
                         <PwaRegister />

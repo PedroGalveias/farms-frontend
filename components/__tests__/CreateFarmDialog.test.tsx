@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import CreateFarmDialog from "@/components/CreateFarmDialog";
@@ -13,6 +13,16 @@ function renderDialog() {
 }
 
 describe("CreateFarmDialog category picker", () => {
+  it("moves focus into the modal when it opens", async () => {
+    renderDialog();
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Close create farm dialog" }),
+      ).toHaveFocus(),
+    );
+  });
+
   it("expands a category to reveal its subcategories (products)", async () => {
     const user = userEvent.setup();
     renderDialog();

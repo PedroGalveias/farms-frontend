@@ -98,11 +98,16 @@ export default function FarmDotMap({
       const h = canvas.clientHeight;
       if (w === 0 || h === 0) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
+      // Canvas backing dimensions are integers. Comparing them to a fractional
+      // Windows DPR (1.25/1.5) made every hover redraw reset the canvas,
+      // creating needless bitmap reallocations while moving across the map.
+      const pixelWidth = Math.round(w * dpr);
+      const pixelHeight = Math.round(h * dpr);
+      if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+        canvas.width = pixelWidth;
+        canvas.height = pixelHeight;
       }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.setTransform(pixelWidth / w, 0, 0, pixelHeight / h, 0, 0);
       ctx.clearRect(0, 0, w, h);
       const { offX, offY, mapW, mapH } = fit(w, h);
       const px = (nx: number) => offX + nx * mapW;

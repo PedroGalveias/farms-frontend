@@ -38,21 +38,24 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver;
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  window.devicePixelRatio = 1;
+  cleanup();
+});
 
 /** The pixel centre of a farm's dot, mirroring the component's fit() maths. */
-function dotPixel(lat: number, lng: number) {
+function dotPixel(lat: number, lng: number, width = W, height = H) {
   const p = projectToSwissMap(lat, lng)!;
-  const availW = W * (1 - PAD * 2);
-  const availH = H * (1 - PAD * 2);
+  const availW = width * (1 - PAD * 2);
+  const availH = height * (1 - PAD * 2);
   let mapW = availW;
   let mapH = mapW / CH_MAP_ASPECT;
   if (mapH > availH) {
     mapH = availH;
     mapW = mapH * CH_MAP_ASPECT;
   }
-  const offX = (W - mapW) / 2;
-  const offY = (H - mapH) / 2;
+  const offX = (width - mapW) / 2;
+  const offY = (height - mapH) / 2;
   return { x: offX + p.x * mapW, y: offY + p.y * mapH };
 }
 
@@ -210,5 +213,79 @@ describe("FarmDotMap", () => {
     const zuri = dotPixel(47.4, 8.5);
     fireEvent.click(canvas, { clientX: zuri.x, clientY: zuri.y });
     expect(onOpenFarm).not.toHaveBeenCalled();
+  });
+
+  it("uses stable integer backing dimensions at a fractional Windows DPR", () => {
+    const width = 601;
+    const height = 401;
+    window.devicePixelRatio = 1.25;
+    const { canvas } = renderMap();
+    Object.defineProperties(canvas, {
+      clientHeight: { configurable: true, value: height },
+      clientWidth: { configurable: true, value: width },
+    });
+    canvas.getBoundingClientRect = () =>
+      ({
+        left: 0,
+        top: 0,
+        width,
+        height,
+        right: width,
+        bottom: height,
+        x: 0,
+        y: 0,
+      }) as DOMRect;
+
+    const widthDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLCanvasElement.prototype,
+      "width",
+    );
+    const heightDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLCanvasElement.prototype,
+      "height",
+    );
+    if (
+      !widthDescriptor?.get ||
+      !widthDescriptor.set ||
+      !heightDescriptor?.get ||
+      !heightDescriptor.set
+    ) {
+      throw new Error("Canvas dimension descriptors are unavailable");
+    }
+    let widthAssignments = 0;
+    let heightAssignments = 0;
+    Object.defineProperties(canvas, {
+      height: {
+        configurable: true,
+        get: () => heightDescriptor.get?.call(canvas),
+        set: (value) => {
+          heightAssignments += 1;
+          heightDescriptor.set?.call(canvas, value);
+        },
+      },
+      width: {
+        configurable: true,
+        get: () => widthDescriptor.get?.call(canvas),
+        set: (value) => {
+          widthAssignments += 1;
+          widthDescriptor.set?.call(canvas, value);
+        },
+      },
+    });
+
+    const dot = dotPixel(46.95, 7.45, width, height);
+
+    fireEvent.pointerMove(canvas, { clientX: dot.x, clientY: dot.y });
+    expect(canvas.width).toBe(751);
+    expect(canvas.height).toBe(501);
+    expect(widthAssignments).toBe(1);
+    expect(heightAssignments).toBe(1);
+
+    fireEvent.pointerLeave(canvas);
+    fireEvent.pointerMove(canvas, { clientX: dot.x, clientY: dot.y });
+    expect(canvas.width).toBe(751);
+    expect(canvas.height).toBe(501);
+    expect(widthAssignments).toBe(1);
+    expect(heightAssignments).toBe(1);
   });
 });

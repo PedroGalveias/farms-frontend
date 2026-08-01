@@ -214,21 +214,9 @@ test.describe("keyboard navigation", () => {
     await expect(skip).toBeFocused();
     await page.keyboard.press("Enter");
 
-    // Asserting the target merely EXISTS proves nothing — the point of a skip
-    // link is that activating it moves focus past the chrome. Verify the next
-    // Tab lands inside #main-content, which is the behaviour a keyboard user
-    // actually depends on.
-    await expect(page.locator("#main-content")).toHaveCount(1);
-    await page.keyboard.press("Tab");
-    const landedInMain = await page.evaluate(() => {
-      const main = document.querySelector("#main-content");
-      return (
-        !!main &&
-        !!document.activeElement &&
-        main.contains(document.activeElement)
-      );
-    });
-    expect(landedInMain).toBe(true);
+    // The skip target itself is programmatically focusable, so activating the
+    // link moves focus past the chrome before the visitor resumes tabbing.
+    await expect(page.locator("#main-content")).toBeFocused();
   });
 
   test("every focused element shows a visible focus indicator", async ({

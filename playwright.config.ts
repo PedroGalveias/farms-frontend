@@ -85,7 +85,13 @@ export default defineConfig({
       command: "npm run build && npm run start",
       url: baseURL,
       reuseExistingServer: !process.env.CI,
-      env: { FARMS_API_BASE_URL: mockBackendUrl },
+      env: {
+        FARMS_API_BASE_URL: mockBackendUrl,
+        // Next 16's `next start` is intentionally incompatible with
+        // `output: "standalone"`; deployment still uses that packaging mode,
+        // while E2E builds the regular server output for its local test host.
+        PLAYWRIGHT_TEST: "1",
+      },
       timeout: 120_000,
     },
   ],

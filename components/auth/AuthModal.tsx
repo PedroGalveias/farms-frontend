@@ -63,12 +63,12 @@ export default function AuthModal({
   const [forgot, setForgot] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
+  const confirmationRef = useRef<HTMLButtonElement>(null);
   // Keep Tab inside the dialog: aria-modal alone does not stop the browser
   // tabbing out into the (obscured, scroll-locked) page behind it.
   const dialogRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(dialogRef);
-
   const open = mode !== null;
+  useFocusTrap(dialogRef, open);
 
   // Reset everything whenever the modal closes, so it reopens clean. Deferred
   // out of the effect body (repo lint: no sync setState in effects).
@@ -102,28 +102,48 @@ export default function AuthModal({
     });
   }, [mode]);
 
-  // Body scroll lock + focus the first field on open; Escape to close.
+  // Body scroll lock + focus the first field on open.
   useEffect(() => {
     if (!open) {
       return undefined;
     }
     const previousOverflow = document.body.style.overflow;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     document.body.style.overflow = "hidden";
     document.body.classList.add("sheet-open");
-    queueMicrotask(() => emailRef.current?.focus());
+    const focusFrame = requestAnimationFrame(() => emailRef.current?.focus());
 
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      document.body.classList.remove("sheet-open");
+      queueMicrotask(() => previouslyFocused?.focus());
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !pending) {
         onClose();
       }
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.classList.remove("sheet-open");
-      window.removeEventListener("keydown", onKeyDown);
-    };
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, pending, onClose]);
+
+  // Successful registration replaces the focused form with a confirmation.
+  // Keep focus in the open dialog instead of allowing it to fall back to body.
+  useEffect(() => {
+    if (registered) {
+      queueMicrotask(() => confirmationRef.current?.focus());
+    }
+  }, [registered]);
 
   if (!open) {
     return null;
@@ -284,6 +304,7 @@ export default function AuthModal({
             <button
               className="mt-7 inline-flex w-full items-center justify-center rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
               onClick={onClose}
+              ref={confirmationRef}
               type="button"
             >
               {t("auth_check_email_cta")}

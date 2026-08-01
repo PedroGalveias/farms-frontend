@@ -162,6 +162,8 @@ describe("useFarmDirectory", () => {
       await waitFor(() => expect(result.current.radiusKm).toBe(25));
       expect(result.current.originCoords).toBeNull();
       expect(result.current.visibleFarms).toHaveLength(FARMS.length);
+      expect(result.current.activeFiltersCount).toBe(0);
+      expect(result.current.activeRadiusKm).toBeNull();
     });
 
     it("does not propagate a radius into the URL while there is no origin", async () => {

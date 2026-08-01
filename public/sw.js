@@ -73,6 +73,20 @@ function isCacheableAsset(url) {
   );
 }
 
+// Keep cache writes alive after the response has been handed to the page.
+// Without waitUntil, a worker may be stopped before cache.put finishes — most
+// visible on a slow device as an unexpectedly empty offline cache. Never let a
+// failed best-effort cache write affect the network response.
+function cacheResponse(request, response) {
+  if (!response.ok) {
+    return Promise.resolve();
+  }
+
+  return caches
+    .open(CACHE_VERSION)
+    .then((cache) => cache.put(request, response.clone()));
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
@@ -87,60 +101,67 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
+    const network = fetch(request);
+    // Register the lifetime extension synchronously. Calling waitUntil only
+    // after fetch resolves is too late in some browsers.
+    event.waitUntil(
+      network
+        .then((response) => cacheResponse(request, response))
+        .catch(() => undefined),
+    );
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
-          return response;
-        })
-        .catch(async () => {
-          const cached = await caches.match(request);
-          return cached || caches.match(OFFLINE_URL);
-        }),
+      network.catch(async () => {
+        const cached = await caches.match(request);
+        return cached || caches.match(OFFLINE_URL);
+      }),
     );
     return;
   }
 
   if (url.pathname === FARMS_API_URL) {
+    const network = fetch(request);
+    event.waitUntil(
+      network
+        .then((response) => cacheResponse(request, response))
+        .catch(() => undefined),
+    );
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches
-              .open(CACHE_VERSION)
-              .then((cache) => cache.put(request, copy));
-          }
-          return response;
-        })
-        .catch(async () => {
-          const cached = await caches.match(request);
-          return (
-            cached ||
-            new Response(JSON.stringify({ error: "Farm data unavailable." }), {
-              headers: { "Content-Type": "application/json" },
-              status: 503,
-            })
-          );
-        }),
+      network.catch(async () => {
+        const cached = await caches.match(request);
+        return (
+          cached ||
+          new Response(JSON.stringify({ error: "Farm data unavailable." }), {
+            headers: { "Content-Type": "application/json" },
+            status: 503,
+          })
+        );
+      }),
     );
     return;
   }
 
   if (isCacheableAsset(url)) {
+    // Start revalidation immediately, even for a cache hit. Its lifetime is
+    // registered while the fetch event is still being dispatched.
+    const network = fetch(request);
+    event.waitUntil(
+      network
+        .then((response) => cacheResponse(request, response))
+        .catch(() => undefined),
+    );
     event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((response) => {
-            const copy = response.clone();
-            caches
-              .open(CACHE_VERSION)
-              .then((cache) => cache.put(request, copy));
-            return response;
-          }),
-      ),
+      caches.match(request).then((cached) => {
+        // Serve a cached asset immediately, then refresh it in the
+        // background. This keeps repeat visits fast without pinning a user
+        // to a stale hashed asset should a deployment change its contents.
+        if (cached) {
+          // The revalidation is deliberately detached from the response;
+          // failures should not turn a valid cached asset into an error.
+          return cached;
+        }
+
+        return network;
+      }),
     );
   }
 });

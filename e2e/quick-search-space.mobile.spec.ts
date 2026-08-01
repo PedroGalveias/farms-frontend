@@ -26,8 +26,12 @@ test("quick-search deck fills the phone viewport per step", async ({
   await page.waitForFunction(() => window.scrollY > 100, undefined, {
     timeout: 5_000,
   });
-  const topAfter = await deck.evaluate((el) => el.getBoundingClientRect().top);
-  expect(topAfter).toBeLessThan(140);
+  // Smooth scrolling can take longer on the tall iPad viewport than it does
+  // on a phone. Wait for the requested deck alignment to settle instead of
+  // sampling the first in-progress animation frame.
+  await expect
+    .poll(() => deck.evaluate((el) => el.getBoundingClientRect().top))
+    .toBeLessThan(140);
 
   // The products picker has a real scroll area (not a letterbox): at least
   // ~35% of the viewport regardless of device height.
