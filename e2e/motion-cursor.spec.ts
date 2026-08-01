@@ -13,6 +13,13 @@ test.describe("motion & custom cursor (motion allowed)", () => {
     await expect(page.locator("html")).toHaveClass(/has-custom-cursor/);
 
     // Native cursor hidden inside the content zone; overlay dot present.
+    // Same reasoning as the marquee below: wait for the node rather than
+    // assert it into existence, so a slow render fails as "element not found"
+    // instead of a null dereference inside page.evaluate.
+    await page
+      .locator(".cursor-zone h1, .cursor-zone p")
+      .first()
+      .waitFor({ state: "attached" });
     const zoneCursor = await page.evaluate(
       () =>
         getComputedStyle(
@@ -34,6 +41,15 @@ test.describe("motion & custom cursor (motion allowed)", () => {
 
   test("decorative animations run: reveal, marquee", async ({ page }) => {
     await page.goto("/");
+    // Wait for the track to exist before reaching into the DOM. `goto`
+    // resolves on `load`, which is not a promise that a streamed below-fold
+    // chunk has arrived — under a loaded dev server the querySelector below
+    // returned null and threw "Cannot read properties of null (reading
+    // 'scrollIntoView')", which reads like a broken page rather than a race.
+    // An explicit wait both fixes it and makes a genuine absence report itself
+    // as a missing element.
+    await page.locator(".marquee-track").waitFor({ state: "attached" });
+
     // NB: no locator.scrollIntoViewIfNeeded() on perpetually-animating
     // elements — Playwright waits for a stable bounding box, and a marquee
     // never settles (times out on Firefox/WebKit). Native scrolling instead.
