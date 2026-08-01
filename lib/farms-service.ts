@@ -34,6 +34,17 @@ export { FarmsApiError, getFarmsApiBaseUrl } from "@/lib/backend";
 // so a hung backend fails fast (into the cached copy / error UI / a degraded
 // status banner) instead of leaving the request — and the page — hanging.
 const REQUEST_TIMEOUT_MS = 8000;
+// Ceiling on the whole pagination walk. Per-request timeouts bound each hop,
+// not the total: 32 pages at 8s each is over four minutes, and a serverless host
+// terminates the invocation long before that — turning a recoverable slow load
+// into a hard platform error. 25s leaves room for a cold start plus a healthy
+// tail while staying inside a typical function limit; a warm full load is ~5-10s.
+const TOTAL_BUDGET_MS = 25_000;
+// The first page of the directory pays for waking the backend. Free-tier Render
+// spins down when idle and can take tens of seconds to answer the first
+// request, which 8s reliably lost — every visitor arriving at a cold backend
+// got an empty directory. Only page 0 gets this budget; the rest are hot.
+const COLD_START_TIMEOUT_MS = 20_000;
 const HEALTH_TIMEOUT_MS = 4000;
 
 export async function getFarmsHealth() {
@@ -116,6 +127,17 @@ function normalizeFarm(farm: Farm): Farm {
   };
 }
 
+/**
+ * Every farm in the directory, assembled by following the backend's offset
+ * pagination.
+ *
+ * Resilience matters more here than completeness: a page failing mid-flight
+ * returns the farms already collected instead of discarding them, and the whole
+ * walk is bounded by {@link TOTAL_BUDGET_MS} so it can never outlive the
+ * serverless invocation that called it. Throws only when nothing at all could
+ * be fetched, since an empty list would otherwise be indistinguishable from a
+ * directory with no farms in it.
+ */
 export async function getFarms(): Promise<Farm[]> {
   const farms: Farm[] = [];
   const seen = new Set<string>();
@@ -125,26 +147,82 @@ export async function getFarms(): Promise<Farm[]> {
   // reaching the tail.) `seen` dedupes defensively in case a page boundary ever
   // overlaps.
   let nextOffset: string | undefined;
+  const deadline = Date.now() + TOTAL_BUDGET_MS;
 
   for (let page = 0; page < FARMS_MAX_PAGES; page++) {
+    // Per-request timeouts bound each hop, not the walk. 32 pages at 8s each is
+    // over four minutes in the worst case — far past the point where Vercel
+    // kills the invocation, which would surface as a hard platform error rather
+    // than the partial directory this function is designed to degrade into. So
+    // the loop watches a wall-clock deadline too, and stops while it still owns
+    // the response.
+    const remaining = deadline - Date.now();
+    if (remaining <= 0 && farms.length > 0) {
+      console.warn(
+        `[farms] pagination budget spent after ${farms.length} farms (${page} pages); serving partial directory`,
+      );
+      break;
+    }
     const url = new URL(`${getFarmsApiBaseUrl()}/farms`);
     url.searchParams.set("limit", String(FARMS_PAGE_LIMIT));
     if (nextOffset) {
       url.searchParams.set("offset", nextOffset);
     }
 
-    let response: Response;
+    let parsed: FarmsPage;
     try {
-      response = await fetch(url, {
+      const response = await fetch(url, {
         // Serve the directory from the Next Data Cache (shared across requests
         // and routes) and refresh at most every 5 minutes, instead of hammering
         // the backend on every page view. A successful create busts the tag.
         // The signal only bounds a cache *miss* — cached hits never hit the
         // network. Each page caches under its own URL.
         next: { revalidate: 300, tags: [FARMS_CACHE_TAG] },
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        // The first request absorbs the backend's cold start (free-tier Render
+        // spins down and can take tens of seconds to wake); later pages are hot
+        // and keep the tighter bound.
+        // Never wait past the overall deadline, even on page 0.
+        signal: AbortSignal.timeout(
+          Math.max(
+            1,
+            Math.min(
+              page === 0 ? COLD_START_TIMEOUT_MS : REQUEST_TIMEOUT_MS,
+              remaining,
+            ),
+          ),
+        ),
       });
+
+      if (!response.ok) {
+        throw new FarmsApiError(
+          await readErrorMessage(response),
+          response.status,
+        );
+      }
+      parsed = parseFarmsPage(await response.json());
     } catch (error) {
+      // Serve what we already have rather than nothing.
+      //
+      // The directory is ~3,155 farms and the backend caps a page at 100, so a
+      // full load is 32 sequential requests. Treating any one of them as fatal
+      // meant a single slow page threw away the other 31 — which is exactly
+      // what production on Vercel was doing: one cold-start timeout on request
+      // #1 and the whole page rendered "Service offline" with an empty
+      // directory, while the same code on Render (warm, co-located backend)
+      // never tripped it.
+      //
+      // A directory missing its tail is worth far more to a visitor than no
+      // directory at all, so a mid-flight failure now stops paging and returns
+      // the pages that did arrive. With nothing at all we still throw, because
+      // an empty list is indistinguishable from "there are no farms" and the
+      // caller needs to show the error state.
+      if (farms.length > 0) {
+        console.warn(
+          `[farms] page ${page} failed after ${farms.length} farms; serving partial directory`,
+          error,
+        );
+        break;
+      }
       if (error instanceof DOMException && error.name === "TimeoutError") {
         throw new FarmsApiError(
           "The farms service took too long to respond.",
@@ -154,14 +232,6 @@ export async function getFarms(): Promise<Farm[]> {
       throw error;
     }
 
-    if (!response.ok) {
-      throw new FarmsApiError(
-        await readErrorMessage(response),
-        response.status,
-      );
-    }
-
-    const parsed = parseFarmsPage(await response.json());
     for (const farm of parsed.farms) {
       if (!seen.has(farm.id)) {
         seen.add(farm.id);

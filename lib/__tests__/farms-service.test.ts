@@ -187,3 +187,136 @@ describe("getFarms — cursor pagination", () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 });
+
+// Production on Vercel rendered "Service offline" with an empty directory while
+// the identical code on Render was fine. The directory is ~3,155 farms and the
+// backend caps a page at 100, so a full load is 32 sequential requests — and any
+// single failure used to discard the other 31. Vercel's cross-provider hop to a
+// free-tier backend that spins down made request #1 time out often enough to
+// matter; Render's warm, co-located backend rarely did.
+describe("getFarms — partial-failure tolerance", () => {
+  it("serves the pages that arrived when a later page fails", async () => {
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockResolvedValueOnce(
+      jsonResponse({
+        farms: [makeFarm({ id: "f1" }), makeFarm({ id: "f2" })],
+        next_cursor: "100",
+      }),
+    );
+    spy.mockRejectedValueOnce(new DOMException("timed out", "TimeoutError"));
+
+    const farms = await getFarms();
+
+    // A directory missing its tail beats no directory at all.
+    expect(farms.map((f) => f.id)).toEqual(["f1", "f2"]);
+  });
+
+  it("serves partial results when a later page returns a non-OK status", async () => {
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockResolvedValueOnce(
+      jsonResponse({ farms: [makeFarm({ id: "f1" })], next_cursor: "100" }),
+    );
+    spy.mockResolvedValueOnce(jsonResponse("upstream boom", 502));
+
+    const farms = await getFarms();
+    expect(farms.map((f) => f.id)).toEqual(["f1"]);
+  });
+
+  it("serves partial results when a later page is malformed", async () => {
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockResolvedValueOnce(
+      jsonResponse({ farms: [makeFarm({ id: "f1" })], next_cursor: "100" }),
+    );
+    spy.mockResolvedValueOnce(jsonResponse({ nope: true }));
+
+    const farms = await getFarms();
+    expect(farms.map((f) => f.id)).toEqual(["f1"]);
+  });
+
+  // With nothing at all we must still throw: an empty list is
+  // indistinguishable from "there are no farms", and the caller has to be able
+  // to show the error state rather than an innocuous empty directory.
+  it("still throws when the very first page fails", async () => {
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockRejectedValueOnce(new DOMException("timed out", "TimeoutError"));
+    await expect(getFarms()).rejects.toBeInstanceOf(FarmsApiError);
+  });
+
+  it("gives the first page a longer timeout than the rest", async () => {
+    // Page 0 pays for waking a spun-down backend; later pages are hot. Spy on
+    // AbortSignal.timeout so this asserts the actual budgets rather than just
+    // "a signal was passed", which would hold no matter what the values were.
+    const timeouts: number[] = [];
+    const real = AbortSignal.timeout.bind(AbortSignal);
+    vi.spyOn(AbortSignal, "timeout").mockImplementation((ms: number) => {
+      timeouts.push(ms);
+      return real(ms);
+    });
+
+    mockFetchSequence(
+      jsonResponse({ farms: [makeFarm({ id: "f1" })], next_cursor: "100" }),
+      jsonResponse({ farms: [makeFarm({ id: "f2" })], next_cursor: null }),
+    );
+
+    await getFarms();
+
+    expect(timeouts).toHaveLength(2);
+    expect(timeouts[0]).toBeGreaterThan(timeouts[1]);
+    expect(timeouts[0]).toBeGreaterThanOrEqual(15_000);
+  });
+});
+
+// Per-request timeouts bound each hop, not the walk. 32 pages at 8s each is
+// over four minutes — long past the point a serverless host kills the
+// invocation, which surfaces as a hard platform error instead of the partial
+// directory this function is meant to degrade into.
+describe("getFarms — total pagination budget", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("stops paging once the overall budget is spent and serves what it has", async () => {
+    vi.useFakeTimers();
+    const spy = vi.spyOn(globalThis, "fetch");
+    // A backend that always offers another page: only the budget can end this.
+    spy.mockImplementation(async () => {
+      // Each hop burns 6s of wall clock.
+      vi.advanceTimersByTime(6_000);
+      return jsonResponse({
+        farms: [makeFarm({ id: `f${spy.mock.calls.length}` })],
+        next_cursor: String(spy.mock.calls.length * 100),
+      });
+    });
+
+    const farms = await getFarms();
+
+    // Budget is 25s, so ~5 hops — nowhere near FARMS_MAX_PAGES (100).
+    expect(spy.mock.calls.length).toBeGreaterThan(1);
+    expect(spy.mock.calls.length).toBeLessThan(12);
+    expect(farms.length).toBe(spy.mock.calls.length);
+  });
+
+  it("never asks for longer than the budget has left", async () => {
+    vi.useFakeTimers();
+    const timeouts: number[] = [];
+    const real = AbortSignal.timeout.bind(AbortSignal);
+    vi.spyOn(AbortSignal, "timeout").mockImplementation((ms: number) => {
+      timeouts.push(ms);
+      return real(ms);
+    });
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockImplementation(async () => {
+      vi.advanceTimersByTime(9_000);
+      return jsonResponse({
+        farms: [makeFarm({ id: `f${spy.mock.calls.length}` })],
+        next_cursor: String(spy.mock.calls.length * 100),
+      });
+    });
+
+    await getFarms();
+
+    // The last hop must not have been granted a full 8s when under 8s remained.
+    expect(timeouts[timeouts.length - 1]).toBeLessThanOrEqual(8000);
+    expect(Math.min(...timeouts)).toBeLessThan(8000);
+  });
+});

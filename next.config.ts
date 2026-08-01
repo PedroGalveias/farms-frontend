@@ -21,8 +21,14 @@ function resolveAppVersion(): string {
   } catch {
     // No tags reachable (e.g. a shallow clone) — fall through.
   }
-  if (process.env.RENDER_GIT_COMMIT) {
-    return process.env.RENDER_GIT_COMMIT.slice(0, 7);
+  // Commit-SHA fallbacks, one per host. Both shallow-clone without tags, so
+  // `git describe` above fails on a normal deploy and this is what actually
+  // runs. Only Render's was here, which is why every Vercel build shipped a
+  // footer reading "dev" — verified in the deployed HTML, not inferred.
+  const commit =
+    process.env.RENDER_GIT_COMMIT ?? process.env.VERCEL_GIT_COMMIT_SHA;
+  if (commit) {
+    return commit.slice(0, 7);
   }
   return "dev";
 }
