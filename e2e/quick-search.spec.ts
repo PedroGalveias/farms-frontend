@@ -10,11 +10,12 @@ test.beforeEach(async ({ page }) => {
 // The quick-search 3-step stacked-deck flow is a hard product requirement —
 // this walks it end to end: location → products → distance-sorted results →
 // farm detail. All three step cards stay in the DOM (the stacked deck), so
-// each is addressed by its "Step N of 3" label; inactive cards have
-// pointer-events: none, which also guards against clicking the wrong one.
+// each is addressed by its "Step N of 3" label. Use a DOM locator rather than
+// an accessibility-role lookup: while the deck changes steps, inactive cards
+// are temporarily aria-hidden and WebKit can omit them from that lookup.
 const stepCard = (page: import("@playwright/test").Page, n: 1 | 2 | 3) =>
   page
-    .getByRole("article")
+    .locator("article")
     .filter({ hasText: `Step ${n} of 3` })
     .first();
 
@@ -71,9 +72,13 @@ test.describe("quick search flow", () => {
       .getByRole("button", { name: /show \d+ farm|view results/i })
       .click();
 
-    await stepCard(page, 3)
-      .getByRole("button", { name: /start over/i })
-      .click();
+    const results = stepCard(page, 3);
+    // The seasonal path jumps directly from step 1 to 3. On WebKit, wait for
+    // the foreground card rather than querying its footer during that change.
+    await expect(results).toHaveAttribute("aria-hidden", "false");
+    const startOver = results.getByRole("button", { name: /start over/i });
+    await expect(startOver).toBeVisible();
+    await startOver.click();
 
     await expect(
       stepCard(page, 1).getByRole("button", { name: /choose products/i }),
