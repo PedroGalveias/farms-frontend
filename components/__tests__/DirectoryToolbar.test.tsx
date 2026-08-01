@@ -179,4 +179,117 @@ describe("DirectoryToolbar", () => {
     fireEvent.click(add);
     expect(props.onCreateFarm).toHaveBeenCalled();
   });
+
+  // The ALL/ANY toggle decides whether picking two categories means "farms
+  // selling both" or "farms selling either" — the single control with the
+  // largest effect on what the directory shows. It had no coverage at all.
+  describe("category match mode", () => {
+    it("stays hidden until a second category makes the choice meaningful", () => {
+      renderToolbar({ selectedCategories: ["Gemüse"] });
+      expect(
+        screen.queryByRole("button", { name: /^match all$/i }),
+      ).not.toBeInTheDocument();
+      cleanup();
+
+      renderToolbar({ selectedCategories: ["Gemüse", "Früchte"] });
+      expect(
+        screen.getByRole("button", { name: /^match all$/i }),
+      ).toBeInTheDocument();
+    });
+
+    it("reports the current mode and switches to the other one", () => {
+      const props = renderToolbar({
+        categoryMatchMode: "any",
+        selectedCategories: ["Gemüse", "Früchte"],
+      });
+      const all = screen.getByRole("button", { name: /^match all$/i });
+      const any = screen.getByRole("button", { name: /^match any$/i });
+
+      // aria-pressed is how a screen-reader user knows which mode is live.
+      expect(any).toHaveAttribute("aria-pressed", "true");
+      expect(all).toHaveAttribute("aria-pressed", "false");
+
+      fireEvent.click(all);
+      expect(props.onCategoryMatchModeChange).toHaveBeenCalledWith("all");
+    });
+
+    it("mirrors the opposite selection when the mode is 'all'", () => {
+      const props = renderToolbar({
+        categoryMatchMode: "all",
+        selectedCategories: ["Gemüse", "Früchte"],
+      });
+      expect(
+        screen.getByRole("button", { name: /^match all$/i }),
+      ).toHaveAttribute("aria-pressed", "true");
+      fireEvent.click(screen.getByRole("button", { name: /^match any$/i }));
+      expect(props.onCategoryMatchModeChange).toHaveBeenCalledWith("any");
+    });
+  });
+
+  // The dismiss chips under the toolbar are the only way to drop one filter
+  // without resetting everything, and each had an untested handler.
+  describe("active filter chips", () => {
+    it("a search chip shows the term and clears just that", () => {
+      const props = renderToolbar({
+        activeFiltersCount: 1,
+        searchTerm: "Berghof",
+      });
+      const chip = screen.getByRole("button", { name: /Berghof/ });
+      fireEvent.click(chip);
+      expect(props.onClearSearchTerm).toHaveBeenCalled();
+      expect(props.onReset).not.toHaveBeenCalled();
+    });
+
+    it("a whitespace-only search term produces no chip", () => {
+      renderToolbar({ activeFiltersCount: 1, searchTerm: "   " });
+      // `.trim()` gates the chip — otherwise a stray space would render an
+      // empty, unlabelled dismiss button. Anchored on the "Search:" chip
+      // prefix so this doesn't also match the search input itself.
+      expect(
+        screen.queryByRole("button", { name: /^Search:/ }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("a canton chip names the canton and clears just that", () => {
+      const props = renderToolbar({
+        activeFiltersCount: 1,
+        selectedCanton: "BE",
+      });
+      const chip = screen.getByRole("button", { name: /Bern/ });
+      fireEvent.click(chip);
+      expect(props.onClearCanton).toHaveBeenCalled();
+      expect(props.onReset).not.toHaveBeenCalled();
+    });
+
+    it("shows no chips at all when nothing is filtered", () => {
+      renderToolbar({
+        activeFiltersCount: 0,
+        searchTerm: "Berghof",
+        selectedCanton: "BE",
+      });
+      // The whole chip row is gated on activeFiltersCount, so stale props
+      // must not leak dismissable chips onto an unfiltered directory.
+      expect(screen.queryByRole("button", { name: /Bern/ })).toBeNull();
+    });
+  });
+
+  describe("location states", () => {
+    it("disables the location button and says so while locating", () => {
+      renderToolbar({ isLocating: true });
+      const button = screen.getByRole("button", { name: /locating/i });
+      expect(button).toBeDisabled();
+    });
+
+    it("surfaces a location error to the user", () => {
+      renderToolbar({ locationError: "Location permission denied" });
+      expect(
+        screen.getByText("Location permission denied"),
+      ).toBeInTheDocument();
+    });
+
+    it("shows no error text when there is no error", () => {
+      renderToolbar({ locationError: null });
+      expect(screen.queryByText(/permission denied/i)).toBeNull();
+    });
+  });
 });
