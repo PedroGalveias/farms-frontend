@@ -17,13 +17,19 @@ export async function generateMetadata({
   };
 }
 
-export default async function SavedPage() {
+export default async function SavedPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   // Saved farms are stored as ids in the browser; we need the farm list to
   // resolve them. Fall back to an empty list so the page still renders its
   // (localStorage-driven) empty state if the backend is down.
   let farms: Farm[] = [];
   try {
-    farms = await getFarms();
+    farms = await getFarms(locale);
   } catch {
     farms = [];
   }

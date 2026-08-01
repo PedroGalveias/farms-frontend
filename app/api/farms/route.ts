@@ -7,6 +7,7 @@ import {
   getFarms,
 } from "@/lib/farms-service";
 import { isSameOrigin } from "@/lib/auth";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
 import type { CreateFarmInput } from "@/types/farm";
 
 export const dynamic = "force-dynamic";
@@ -48,9 +49,14 @@ function isCreateFarmInput(value: unknown): value is CreateFarmInput {
   );
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const requestedLocale = new URL(request.url).searchParams.get("lang");
+  const locale =
+    requestedLocale && isLocale(requestedLocale)
+      ? requestedLocale
+      : DEFAULT_LOCALE;
   try {
-    const farms = await getFarms();
+    const farms = await getFarms(locale);
     return NextResponse.json(farms);
   } catch (error) {
     return NextResponse.json(

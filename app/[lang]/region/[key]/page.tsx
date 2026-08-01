@@ -19,9 +19,9 @@ export function generateStaticParams() {
   return getRegionKeys().map((key) => ({ key }));
 }
 
-async function safeGetFarms(): Promise<Farm[]> {
+async function safeGetFarms(locale: typeof DEFAULT_LOCALE): Promise<Farm[]> {
   try {
-    return await getFarms();
+    return await getFarms(locale);
   } catch {
     return [];
   }
@@ -68,7 +68,7 @@ export default async function RegionPage({
   }
 
   const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
-  const farms = await safeGetFarms();
+  const farms = await safeGetFarms(locale);
   const region = translate(locale, key);
 
   const cantons = getCantonsInRegion(key)

@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { getFarms } from "@/lib/farms-service";
 import { getCantonName } from "@/lib/farms";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
 import { tagLabel } from "@/lib/products";
 
 export const size = { width: 1200, height: 630 };
@@ -13,13 +14,14 @@ export const alt = "Farm on the Swiss farm directory";
 export default async function OgImage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; lang: string }>;
 }) {
-  const { id } = await params;
+  const { id, lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
 
   let farm = null;
   try {
-    const farms = await getFarms();
+    const farms = await getFarms(locale);
     farm = farms.find((entry) => entry.id === id) ?? null;
   } catch {
     farm = null;

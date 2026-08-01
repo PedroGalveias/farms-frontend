@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import FarmsPageShell from "@/components/FarmsPageShell";
 import HomeSkeleton from "@/components/home/HomeSkeleton";
-import { localeAlternates } from "@/lib/i18n";
+import { DEFAULT_LOCALE, isLocale, localeAlternates } from "@/lib/i18n";
 import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
 import { parseDirectoryParams } from "@/lib/directory-params";
 import type { ServiceStatus } from "@/types/farm";
@@ -24,8 +24,10 @@ export function generateMetadata(): Metadata {
 }
 
 export default async function HomePage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   // Read the filters on the server so the first paint is already the filtered
@@ -33,9 +35,11 @@ export default async function HomePage({
   // corrected it after hydration — a shared /?canton=BE link showed "3155
   // farms" for ~400ms before flipping to 727, and every filtered URL served
   // byte-identical HTML to crawlers.
-  const [resolvedParams, [healthResult, farmsResult]] = await Promise.all([
-    searchParams,
-    Promise.allSettled([getFarmsHealth(), getFarms()]),
+  const [{ lang }, resolvedParams] = await Promise.all([params, searchParams]);
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const [healthResult, farmsResult] = await Promise.allSettled([
+    getFarmsHealth(),
+    getFarms(locale),
   ]);
   const initialParams = parseDirectoryParams(resolvedParams);
 

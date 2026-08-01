@@ -4,7 +4,9 @@ import {
   readErrorMessage,
 } from "@/lib/backend";
 import { normalizeFarmCategories } from "@/lib/categories";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n-core";
 import type { CreateFarmPayload, Farm, StockStatus } from "@/types/farm";
+import type { FarmTaxonomy } from "@/types/taxonomy";
 
 const STOCK_STATUSES: readonly StockStatus[] = [
   "AVAILABLE",
@@ -64,6 +66,7 @@ export async function getFarmsHealth() {
 
 /** Cache tag for the farm list — bust it with revalidateTag(FARMS_CACHE_TAG). */
 export const FARMS_CACHE_TAG = "farms";
+export const FARM_TAXONOMY_CACHE_TAG = "farm-taxonomy";
 
 // The taxonomy-aware backend paginates `GET /farms` (keyset cursor, max 100 per
 // page). Request the largest page and follow the cursor so the directory keeps
@@ -107,6 +110,57 @@ function parseFarmsPage(body: unknown): FarmsPage {
   );
 }
 
+function parseFarmTaxonomy(body: unknown): FarmTaxonomy {
+  const lang =
+    body !== null && typeof body === "object"
+      ? (body as { lang?: unknown }).lang
+      : undefined;
+  if (
+    body === null ||
+    typeof body !== "object" ||
+    Array.isArray(body) ||
+    !Array.isArray((body as { categories?: unknown }).categories) ||
+    !Array.isArray((body as { products?: unknown }).products) ||
+    typeof lang !== "string" ||
+    !isLocale(lang)
+  ) {
+    throw new FarmsApiError(
+      "The farms service returned an unexpected taxonomy response shape.",
+      502,
+    );
+  }
+
+  const taxonomy = body as FarmTaxonomy;
+  const isEntry = (
+    entry: unknown,
+    requiresCategory: boolean,
+  ): entry is {
+    name: string;
+    slug: string;
+    translated: boolean;
+    category?: string;
+  } =>
+    entry !== null &&
+    typeof entry === "object" &&
+    typeof (entry as { name?: unknown }).name === "string" &&
+    typeof (entry as { slug?: unknown }).slug === "string" &&
+    typeof (entry as { translated?: unknown }).translated === "boolean" &&
+    (!requiresCategory ||
+      typeof (entry as { category?: unknown }).category === "string");
+
+  if (
+    !taxonomy.categories.every((entry) => isEntry(entry, false)) ||
+    !taxonomy.products.every((entry) => isEntry(entry, true))
+  ) {
+    throw new FarmsApiError(
+      "The farms service returned an invalid taxonomy entry.",
+      502,
+    );
+  }
+
+  return taxonomy;
+}
+
 /** Canonicalise category variants ONCE at the boundary so every consumer
  * (facets, quick search, cards, map handoff) sees one vocabulary. Products
  * (when present) pass through untouched. */
@@ -138,7 +192,9 @@ function normalizeFarm(farm: Farm): Farm {
  * be fetched, since an empty list would otherwise be indistinguishable from a
  * directory with no farms in it.
  */
-export async function getFarms(): Promise<Farm[]> {
+export async function getFarms(
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<Farm[]> {
   const farms: Farm[] = [];
   const seen = new Set<string>();
   // The backend paginates by OFFSET: `next_cursor` is the next offset value to
@@ -164,6 +220,10 @@ export async function getFarms(): Promise<Farm[]> {
       break;
     }
     const url = new URL(`${getFarmsApiBaseUrl()}/farms`);
+    // The API validates and echoes this language, even while farm rows still
+    // carry compatibility labels. Keeping every page on the route locale makes
+    // the switch to the localized taxonomy contract a cache-safe no-op later.
+    url.searchParams.set("lang", locale);
     url.searchParams.set("limit", String(FARMS_PAGE_LIMIT));
     if (nextOffset) {
       url.searchParams.set("offset", nextOffset);
@@ -247,6 +307,30 @@ export async function getFarms(): Promise<Farm[]> {
   }
 
   return farms.map(normalizeFarm);
+}
+
+/**
+ * Fetch the API-owned category/product vocabulary for one locale. The backend
+ * advertises an hour-long public cache with stale-while-revalidate; matching
+ * that cadence in Next keeps server renders cheap while preserving a distinct
+ * cache entry per language.
+ */
+export async function getFarmTaxonomy(
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<FarmTaxonomy> {
+  const url = new URL(`${getFarmsApiBaseUrl()}/taxonomy`);
+  url.searchParams.set("lang", locale);
+
+  const response = await fetch(url, {
+    next: { revalidate: 3600, tags: [FARM_TAXONOMY_CACHE_TAG] },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
+
+  if (!response.ok) {
+    throw new FarmsApiError(await readErrorMessage(response), response.status);
+  }
+
+  return parseFarmTaxonomy(await response.json());
 }
 
 export async function createFarm(payload: CreateFarmPayload, cookie?: string) {

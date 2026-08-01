@@ -9,9 +9,12 @@ import type { Farm } from "@/types/farm";
 
 // There's no single-farm endpoint, so we fetch the list and find the farm.
 // Returns null on any failure so the page can render a clean 404.
-async function findFarm(id: string): Promise<Farm | null> {
+async function findFarm(
+  id: string,
+  locale: typeof DEFAULT_LOCALE,
+): Promise<Farm | null> {
   try {
-    const farms = await getFarms();
+    const farms = await getFarms(locale);
     return farms.find((farm) => farm.id === id) ?? null;
   } catch {
     return null;
@@ -24,14 +27,14 @@ export async function generateMetadata({
   params: Promise<{ lang: string; id: string }>;
 }): Promise<Metadata> {
   const { lang, id } = await params;
-  const farm = await findFarm(id);
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const farm = await findFarm(id, locale);
 
   if (!farm) {
     return { title: "Farm not found" };
   }
 
   // Localize the description from the URL's locale segment.
-  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const description = farmMetaDescription(farm, locale);
   return {
     title: farm.name,
@@ -55,8 +58,9 @@ export default async function FarmPage({
   params: Promise<{ lang: string; id: string }>;
   searchParams: Promise<{ from?: string; products?: string }>;
 }) {
-  const { id } = await params;
-  const farm = await findFarm(id);
+  const { lang, id } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const farm = await findFarm(id, locale);
 
   if (!farm) {
     notFound();
