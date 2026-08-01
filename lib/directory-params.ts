@@ -84,9 +84,11 @@ export function parseDirectoryParams(
 }
 
 /**
- * The server-query subset of directory state. The API has no facet totals and
- * category filtering is any-of only, so a multi-category all-match remains a
- * local refinement; sending it upstream would under-fetch valid candidates.
+ * The server-query subset of directory state. The API's category filtering is
+ * any-of only, so a multi-category all-match remains a local refinement;
+ * sending it upstream would under-fetch valid candidates. Radius and nearest
+ * also stay local because the visitor's coordinates are private and absent
+ * from shareable URLs.
  */
 export function toFarmsQuery(params: DirectoryParams): FarmsQuery {
   const categories =

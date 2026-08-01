@@ -148,8 +148,10 @@ export function useFarmDirectory(
       return;
     }
     const params = new URLSearchParams();
-    if (searchTerm.trim()) {
-      params.set("q", searchTerm.trim());
+    // Keep text filtering instant locally, but let React defer the route change
+    // so a fast typist does not start a server request for every keystroke.
+    if (deferredSearchTerm.trim()) {
+      params.set("q", deferredSearchTerm.trim());
     }
     if (selectedCanton !== "all") {
       params.set("canton", selectedCanton);
@@ -183,7 +185,7 @@ export function useFarmDirectory(
     }
   }, [
     hydrated,
-    searchTerm,
+    deferredSearchTerm,
     selectedCanton,
     selectedCategories,
     categoryMatchMode,

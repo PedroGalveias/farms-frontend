@@ -1,4 +1,5 @@
 import { getFarmGroups } from "@/lib/farms";
+import { productKeyForSlug } from "@/lib/products";
 import {
   haversineDistanceKm,
   parseQuickSearchCoordinates,
@@ -12,20 +13,33 @@ export type CategoryMatchMode = "all" | "any";
 export const RADIUS_OPTIONS = [10, 25, 50] as const;
 
 /**
- * Whether a farm matches the free-text directory search (name, address, or a raw
- * category string). `normalizedSearch` is expected pre-trimmed and lower-cased;
- * an empty string matches every farm.
+ * Whether a farm matches the free-text directory search (name, address,
+ * category, or a product name). `normalizedSearch` is expected pre-trimmed and
+ * lower-cased; an empty string matches every farm.
+ *
+ * The API applies `q` to product names too. Keep that same field in the local
+ * refinement so a server result cannot disappear after hydration merely because
+ * its matching text lives in `products[]` rather than the farm row itself.
  */
 export function matchesSearch(farm: Farm, normalizedSearch: string): boolean {
   if (normalizedSearch.length === 0) {
     return true;
   }
+  const matchesProduct =
+    farm.products?.some((product) => {
+      const canonicalKey = productKeyForSlug(product.slug);
+      return (
+        product.name_en?.toLowerCase().includes(normalizedSearch) ||
+        canonicalKey?.toLowerCase().includes(normalizedSearch)
+      );
+    }) ?? false;
   return (
     farm.name.toLowerCase().includes(normalizedSearch) ||
     farm.address.toLowerCase().includes(normalizedSearch) ||
     farm.categories.some((category) =>
       category.toLowerCase().includes(normalizedSearch),
-    )
+    ) ||
+    matchesProduct
   );
 }
 

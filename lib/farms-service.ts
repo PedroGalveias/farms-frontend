@@ -83,9 +83,13 @@ interface FarmsPage {
   nextCursor?: string;
 }
 
-/** Server-side filters supported by `GET /farms`. Product/all-category and
- * location refinements are deliberately not represented here: the directory's
- * current UI needs its complete local candidate set for those semantics. */
+/**
+ * The `GET /farms` filter subset used by the home directory. The backend also
+ * has granular-product and coordinate filters, but the home directory has no
+ * product picker and never puts a visitor's coordinates in its URL. Its
+ * multi-category all-match mode also remains local because the API's category
+ * filter is any-of only.
+ */
 export interface FarmsQuery {
   canton?: string;
   categories?: string[];
