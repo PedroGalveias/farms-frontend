@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildFarmMapPoints,
   CH_MAP_ASPECT,
+  fitSwissMap,
   projectToSwissMap,
 } from "@/lib/farm-map";
 import type { Farm } from "@/types/farm";
@@ -78,5 +79,53 @@ describe("projectToSwissMap — non-finite input", () => {
     expect(point).not.toBeNull();
     expect(Number.isFinite(point!.x)).toBe(true);
     expect(Number.isFinite(point!.y)).toBe(true);
+  });
+});
+
+describe("fitSwissMap", () => {
+  const NONE = { bottom: 0, left: 0, right: 0, top: 0 };
+
+  it("keeps the country's aspect ratio in a portrait container", () => {
+    // The iPad-landscape case: the quick-search map column is far taller than
+    // it is wide. Scaling x and y independently squashed Switzerland into an
+    // unrecognisable vertical smear; the fit must letterbox instead.
+    const fit = fitSwissMap(300, 600, NONE);
+    expect(fit.mapW / fit.mapH).toBeCloseTo(CH_MAP_ASPECT, 5);
+    expect(fit.mapW).toBeLessThanOrEqual(300);
+    expect(fit.mapH).toBeLessThanOrEqual(600);
+  });
+
+  it("keeps the aspect ratio in a landscape container too", () => {
+    const fit = fitSwissMap(1200, 300, NONE);
+    expect(fit.mapW / fit.mapH).toBeCloseTo(CH_MAP_ASPECT, 5);
+    expect(fit.mapH).toBeLessThanOrEqual(300);
+  });
+
+  it("centres the map inside the available box", () => {
+    const fit = fitSwissMap(300, 600, NONE);
+    // Width is the binding constraint here, so it fills across and centres down.
+    expect(fit.offX).toBeCloseTo(0, 5);
+    expect(fit.offY).toBeCloseTo((600 - fit.mapH) / 2, 5);
+  });
+
+  it("respects an asymmetric inset", () => {
+    // The quick-search panel biases the map upward so the headline keeps a
+    // floor; the country must still sit inside that box rather than the panel.
+    const inset = { bottom: 0.3, left: 0.08, right: 0.06, top: 0.16 };
+    const fit = fitSwissMap(1000, 800, inset);
+    expect(fit.offX).toBeGreaterThanOrEqual(1000 * inset.left);
+    expect(fit.offY).toBeGreaterThanOrEqual(800 * inset.top);
+    expect(fit.offX + fit.mapW).toBeLessThanOrEqual(1000 * (1 - inset.right) + 1e-6);
+    expect(fit.offY + fit.mapH).toBeLessThanOrEqual(800 * (1 - inset.bottom) + 1e-6);
+    expect(fit.mapW / fit.mapH).toBeCloseTo(CH_MAP_ASPECT, 5);
+  });
+
+  it("degenerates safely on a zero-sized container", () => {
+    // ResizeObserver reports 0x0 before first layout; the map must not emit
+    // NaN offsets that would silently paint nothing.
+    const fit = fitSwissMap(0, 0, NONE);
+    expect(Number.isFinite(fit.mapW)).toBe(true);
+    expect(Number.isFinite(fit.offX)).toBe(true);
+    expect(fit.mapW).toBe(0);
   });
 });

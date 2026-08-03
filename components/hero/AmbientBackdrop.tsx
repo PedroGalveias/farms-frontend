@@ -192,6 +192,13 @@ export default function AmbientBackdrop() {
       alpha: true,
       antialias: false,
       depth: false,
+      // The drawing buffer must survive being read back after a composite.
+      // With the default (false) the contents are undefined once the frame is
+      // presented, and anything that snapshots the page — a View Transition,
+      // notably the quick-search farm sheet — captures this full-width fixed
+      // canvas as a flat fill. That was the green rectangle that flashed
+      // before the sheet appeared and again as it closed.
+      preserveDrawingBuffer: true,
       stencil: false,
       premultipliedAlpha: true,
       powerPreference: "low-power",
