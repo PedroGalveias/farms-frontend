@@ -185,7 +185,10 @@ async function fetchFarmsPage(
     signal: AbortSignal.timeout(
       Math.max(
         1,
-        Math.min(isFirst ? COLD_START_TIMEOUT_MS : REQUEST_TIMEOUT_MS, remaining),
+        Math.min(
+          isFirst ? COLD_START_TIMEOUT_MS : REQUEST_TIMEOUT_MS,
+          remaining,
+        ),
       ),
     ),
   });
@@ -220,7 +223,10 @@ export async function getFarms(): Promise<Farm[]> {
     // are no farms", so the caller needs the error state rather than a page
     // that quietly claims the directory is empty.
     if (error instanceof DOMException && error.name === "TimeoutError") {
-      throw new FarmsApiError("The farms service took too long to respond.", 504);
+      throw new FarmsApiError(
+        "The farms service took too long to respond.",
+        504,
+      );
     }
     throw error;
   }

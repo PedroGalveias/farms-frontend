@@ -325,7 +325,9 @@ describe("getFarms — parallel pagination", () => {
   /** A full page, so the walk keeps going. */
   function fullPage(page: number, nextCursor: string | null) {
     return jsonResponse({
-      farms: Array.from({ length: 100 }, (_, i) => makeFarm({ id: `p${page}-${i}` })),
+      farms: Array.from({ length: 100 }, (_, i) =>
+        makeFarm({ id: `p${page}-${i}` }),
+      ),
       next_cursor: nextCursor,
     });
   }
