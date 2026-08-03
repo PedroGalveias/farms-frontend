@@ -5,6 +5,7 @@ import HomeSkeleton from "@/components/home/HomeSkeleton";
 import { localeAlternates } from "@/lib/i18n";
 import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
 import { parseDirectoryParams } from "@/lib/directory-params";
+import { toDirectoryFarm } from "@/lib/directory";
 import type { ServiceStatus } from "@/types/farm";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -39,7 +40,11 @@ export default async function HomePage({
   ]);
   const initialParams = parseDirectoryParams(resolvedParams);
 
-  const farms = farmsResult.status === "fulfilled" ? farmsResult.value : [];
+  // Only what the list renders crosses to the browser. The full farms —
+  // products included — stay on the server for anything that needs them.
+  const farms = (
+    farmsResult.status === "fulfilled" ? farmsResult.value : []
+  ).map(toDirectoryFarm);
   const loadError =
     farmsResult.status === "rejected"
       ? getErrorMessage(
