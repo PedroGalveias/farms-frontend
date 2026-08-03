@@ -103,11 +103,19 @@ export function localizeHref<T>(href: T, locale: Locale): T | string {
   if (typeof href !== "string") return href;
   if (!href.startsWith("/") || href.startsWith("//")) return href;
 
-  const [pathAndQuery, hash] = href.split("#");
-  const [path, query] = pathAndQuery.split("?");
+  // Split on the FIRST delimiter only and keep the rest verbatim. `split()`
+  // discards everything after a second "?" or "#", so "/a?q=x#b#c" lost "#c"
+  // and a query containing a literal "#" was truncated.
+  const hashAt = href.indexOf("#");
+  const beforeHash = hashAt === -1 ? href : href.slice(0, hashAt);
+  const hash = hashAt === -1 ? "" : href.slice(hashAt);
+
+  const queryAt = beforeHash.indexOf("?");
+  const path = queryAt === -1 ? beforeHash : beforeHash.slice(0, queryAt);
+  const query = queryAt === -1 ? "" : beforeHash.slice(queryAt);
+
   const [, first] = path.split("/");
   if (isLocale(first)) return href;
 
-  const localized = localizedPath(path, locale);
-  return `${localized}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
+  return `${localizedPath(path, locale)}${query}${hash}`;
 }

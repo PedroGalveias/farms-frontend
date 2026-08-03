@@ -51,7 +51,10 @@ export default function CantonDirectory({
       >
         {trail.map((crumb) => (
           <span className="flex items-center gap-1.5" key={crumb.href}>
-            <Link className="transition hover:text-ink" href={crumb.href}>
+            <Link
+              className="transition hover:text-ink"
+              href={localizeHref(crumb.href, locale)}
+            >
               {crumb.label}
             </Link>
             <ChevronRight className="h-3.5 w-3.5 text-ink/30" />
