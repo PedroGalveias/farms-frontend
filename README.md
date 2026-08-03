@@ -195,6 +195,33 @@ e2e/                    Playwright e2e (3 desktop engines + iPhone/Pixel + visua
 scripts/                Icon + iOS splash generators (sharp)
 ```
 
+## 🗄️ Optional Redis cache
+
+The farm list is already cached in the Next Data Cache (`revalidate: 300`,
+tag `farms`), so a warm instance never calls the API. That cache lives on the
+instance's filesystem, which means it dies on every deploy — and the first
+visitor afterwards pays the full pagination walk against a backend that may be
+spun down.
+
+Setting `REDIS_URL` moves that cache to Redis/Valkey, so it survives deploys
+and restarts and is shared by every instance. The practical effect is not a
+faster warm request (that gains nothing) but a better failure mode: a visitor
+arriving while the API is asleep is served the last known-good directory
+instead of an empty one.
+
+| Variable                  | Default       | Purpose                                                |
+| ------------------------- | ------------- | ------------------------------------------------------ |
+| `REDIS_URL`               | _unset_       | Enables the handler. Unset = default filesystem cache. |
+| `REDIS_CACHE_PREFIX`      | `farms:next:` | Key namespace                                          |
+| `REDIS_CACHE_TTL_SECONDS` | `86400`       | Backstop TTL; Next still decides freshness             |
+
+Use a different prefix or database index from the API's Valkey — it stores
+sessions, idempotency keys and rate-limit counters, and a `FLUSHDB` aimed at
+one must not take the other.
+
+If Redis is unreachable the handler falls back to an in-memory cache and logs
+once; the site stays up.
+
 ## 🔌 Backend contract
 
 The frontend is built against these [`farms`](https://github.com/PedroGalveias/farms) endpoints:
