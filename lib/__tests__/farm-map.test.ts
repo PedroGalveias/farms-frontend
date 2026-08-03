@@ -115,8 +115,12 @@ describe("fitSwissMap", () => {
     const fit = fitSwissMap(1000, 800, inset);
     expect(fit.offX).toBeGreaterThanOrEqual(1000 * inset.left);
     expect(fit.offY).toBeGreaterThanOrEqual(800 * inset.top);
-    expect(fit.offX + fit.mapW).toBeLessThanOrEqual(1000 * (1 - inset.right) + 1e-6);
-    expect(fit.offY + fit.mapH).toBeLessThanOrEqual(800 * (1 - inset.bottom) + 1e-6);
+    expect(fit.offX + fit.mapW).toBeLessThanOrEqual(
+      1000 * (1 - inset.right) + 1e-6,
+    );
+    expect(fit.offY + fit.mapH).toBeLessThanOrEqual(
+      800 * (1 - inset.bottom) + 1e-6,
+    );
     expect(fit.mapW / fit.mapH).toBeCloseTo(CH_MAP_ASPECT, 5);
   });
 
