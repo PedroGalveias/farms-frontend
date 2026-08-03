@@ -161,8 +161,15 @@ export function isRecentlyAdded(
  *
  * The detail view and quick search both need `products` and both fetch their
  * own data, so nothing that reads products loses it.
+ *
+ * The return type is `DirectoryFarm`, not `Farm`, so the projection is checked
+ * rather than merely intended: returning `Farm` left `products` a valid
+ * property on every projected record, and a component could read it and get
+ * `undefined` at runtime with no compile error.
  */
-export function toDirectoryFarm(farm: Farm): Farm {
+export type DirectoryFarm = Omit<Farm, "products" | "photos">;
+
+export function toDirectoryFarm(farm: Farm): DirectoryFarm {
   // Rebuilt field by field rather than `delete farm.products`: an added field
   // should have to be considered here, not silently inflate every payload.
   return {

@@ -449,7 +449,11 @@ describe("toDirectoryFarm", () => {
 
     const lite = toDirectoryFarm(withProducts);
 
-    expect(lite.products).toBeUndefined();
+    // Asserted on the serialised form: `DirectoryFarm` no longer *has* a
+    // `products` property, so reading one is a compile error — which is the
+    // guarantee this projection is supposed to provide.
+    expect(Object.keys(lite)).not.toContain("products");
+    expect(JSON.parse(JSON.stringify(lite)).products).toBeUndefined();
     // Everything the cards and filters do read survives.
     expect(lite).toMatchObject({
       id: withProducts.id,
