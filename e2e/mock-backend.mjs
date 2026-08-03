@@ -119,6 +119,22 @@ const server = createServer((req, res) => {
   if (req.method === "GET" && pathname === "/farms") {
     return send(res, 200, FARMS);
   }
+  // GET /farms/{id} — the single-farm endpoint. The farm page and its OG image
+  // read this instead of downloading the directory and running `.find()`.
+  // Mirrors the real backend: the farm is flattened into the body with `lang`
+  // alongside it, and an unknown id is a 404 (which the app turns into
+  // `notFound()`), NOT an empty 200.
+  const farmMatch = /^\/farms\/([^/]+)$/.exec(pathname);
+  if (req.method === "GET" && farmMatch) {
+    const id = decodeURIComponent(farmMatch[1]);
+    const list = Array.isArray(FARMS) ? FARMS : FARMS.farms;
+    const farm = list.find((entry) => entry.id === id);
+    if (!farm) {
+      return send(res, 404, { error: "not found" });
+    }
+    return send(res, 200, { ...farm, lang: "en" });
+  }
+
   if (req.method === "POST" && pathname === "/farms") {
     // The create-farm flow only needs a success; the directory is re-fetched.
     return send(res, 201, { ok: true });
