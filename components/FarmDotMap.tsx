@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildFarmMapPoints, CH_MAP_ASPECT } from "@/lib/farm-map";
+import { buildFarmMapPoints, fitSwissMap } from "@/lib/farm-map";
 import { formatDistanceShort } from "@/lib/directory";
 import { getCantonName } from "@/lib/farms";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -77,17 +77,11 @@ export default function FarmDotMap({
   const activeHover = hover && visibleById.has(hover.farm.id) ? hover : null;
 
   // Fit the country's aspect ratio inside the container (letterboxed, centred).
-  const fit = useCallback((w: number, h: number) => {
-    const availW = w * (1 - PAD * 2);
-    const availH = h * (1 - PAD * 2);
-    let mapW = availW;
-    let mapH = mapW / CH_MAP_ASPECT;
-    if (mapH > availH) {
-      mapH = availH;
-      mapW = mapH * CH_MAP_ASPECT;
-    }
-    return { offX: (w - mapW) / 2, offY: (h - mapH) / 2, mapW, mapH };
-  }, []);
+  const fit = useCallback(
+    (w: number, h: number) =>
+      fitSwissMap(w, h, { bottom: PAD, left: PAD, right: PAD, top: PAD }),
+    [],
+  );
 
   const draw = useCallback(
     (hovered: string | null) => {

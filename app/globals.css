@@ -1077,6 +1077,26 @@ body.sheet-open .mobile-tab-bar {
   cursor: auto;
 }
 
+/* While a View Transition runs, what you see is the ::view-transition tree in
+   the top layer, which is not a descendant of .cursor-zone — so the rules
+   above stop applying for the length of every route change and the system
+   arrow reappears. Hide it there too. */
+.has-custom-cursor::view-transition,
+.has-custom-cursor::view-transition-group(*),
+.has-custom-cursor::view-transition-image-pair(*),
+.has-custom-cursor::view-transition-old(*),
+.has-custom-cursor::view-transition-new(*) {
+  cursor: none;
+}
+
+/* The ambient WebGL layer sits out the root cross-fade: it is a fixed,
+   full-viewport decorative surface, so cross-fading it against itself costs a
+   full-screen snapshot per transition and buys nothing. Giving it its own name
+   keeps it steady while the content behind it transitions. */
+.ambient-backdrop {
+  view-transition-name: ambient-backdrop;
+}
+
 /* ---------- View transitions ---------- */
 ::view-transition-group(qs-farm) {
   animation-duration: 460ms;
