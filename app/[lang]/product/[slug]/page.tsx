@@ -144,7 +144,7 @@ export default async function ProductPage({
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <ProductView
-      locale={locale}
+        locale={locale}
         category={category}
         farms={shownFarms}
         siblings={siblings}

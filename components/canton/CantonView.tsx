@@ -93,7 +93,10 @@ export default function CantonView({
             {topCategories.map((category) => (
               <Link
                 className="glass-chip rounded-chip px-3 py-1.5 text-[13px] font-semibold text-ink/70 transition hover:text-ink"
-                href={localizeHref(`/?canton=${code}&cat=${encodeURIComponent(category)}`, locale)}
+                href={localizeHref(
+                  `/?canton=${code}&cat=${encodeURIComponent(category)}`,
+                  locale,
+                )}
                 key={category}
               >
                 {categoryLabel(category, locale)}

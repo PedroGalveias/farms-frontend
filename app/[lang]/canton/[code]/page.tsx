@@ -141,7 +141,7 @@ export default async function CantonPage({
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <CantonView
-      locale={locale}
+        locale={locale}
         code={code.toLowerCase()}
         farms={shownFarms}
         name={name}
