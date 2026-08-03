@@ -320,3 +320,169 @@ describe("getFarms — total pagination budget", () => {
     expect(Math.min(...timeouts)).toBeLessThan(8000);
   });
 });
+
+describe("getFarms — parallel pagination", () => {
+  /** A full page, so the walk keeps going. */
+  function fullPage(page: number, nextCursor: string | null) {
+    return jsonResponse({
+      farms: Array.from({ length: 100 }, (_, i) =>
+        makeFarm({ id: `p${page}-${i}` }),
+      ),
+      next_cursor: nextCursor,
+    });
+  }
+
+  it("requests later pages concurrently instead of one at a time", async () => {
+    // 8 pages. Sequentially that is 8 round trips nose-to-tail; the ramp
+    // (1 → 2 → 4) should overlap them into far fewer waves.
+    let inFlight = 0;
+    let peakInFlight = 0;
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockImplementation(async (input) => {
+      inFlight += 1;
+      peakInFlight = Math.max(peakInFlight, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      inFlight -= 1;
+      const offset = Number(
+        new URL(input as URL | string).searchParams.get("offset") ?? "0",
+      );
+      const page = offset / 100;
+      return fullPage(page, page < 7 ? String((page + 1) * 100) : null);
+    });
+
+    const farms = await getFarms();
+
+    expect(farms).toHaveLength(800);
+    // The whole point: more than one request was in the air at once.
+    expect(peakInFlight).toBeGreaterThan(1);
+    expect(spy).toHaveBeenCalledTimes(8);
+  });
+
+  it("does not overshoot on a directory that fits in two pages", async () => {
+    // Speculation has to be paid for by the backend. A small directory must
+    // still cost exactly the requests it needs — this is why the wave ramps
+    // from one rather than opening at full width.
+    const spy = mockFetchSequence(fullPage(0, "100"), fullPage(1, null));
+
+    const farms = await getFarms();
+
+    expect(farms).toHaveLength(200);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps farms in page order however the requests resolve", async () => {
+    // Wave members race. If the results were collected in completion order the
+    // directory would reshuffle between loads for no reason a visitor could
+    // perceive.
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockImplementation(async (input) => {
+      const offset = Number(
+        new URL(input as URL | string).searchParams.get("offset") ?? "0",
+      );
+      const page = offset / 100;
+      // Later pages resolve *sooner*, inverting completion order.
+      await new Promise((resolve) => setTimeout(resolve, (4 - page) * 5));
+      return jsonResponse({
+        farms: [makeFarm({ id: `page-${page}` })],
+        next_cursor: page < 3 ? String((page + 1) * 100) : null,
+      });
+    });
+
+    const farms = await getFarms();
+
+    expect(farms.map((f) => f.id)).toEqual([
+      "page-0",
+      "page-1",
+      "page-2",
+      "page-3",
+    ]);
+  });
+
+  it("falls back to following the cursor when offsets are not arithmetic", async () => {
+    // If the backend ever stops paginating by a plain page-sized offset,
+    // computing offsets ourselves would silently skip or duplicate farms.
+    // Serving a slower-but-correct directory is the only acceptable answer.
+    const spy = mockFetchSequence(
+      jsonResponse({ farms: [makeFarm({ id: "a" })], next_cursor: "opaque-1" }),
+      jsonResponse({ farms: [makeFarm({ id: "b" })], next_cursor: null }),
+    );
+
+    const farms = await getFarms();
+
+    expect(farms.map((f) => f.id)).toEqual(["a", "b"]);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  it("serves the pages that did arrive when one in a wave fails", async () => {
+    // A directory missing its tail beats no directory at all.
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockImplementation(async (input) => {
+      const offset = Number(
+        new URL(input as URL | string).searchParams.get("offset") ?? "0",
+      );
+      if (offset >= 200) {
+        throw new Error("upstream exploded");
+      }
+      return fullPage(offset / 100, String(offset + 100));
+    });
+
+    const farms = await getFarms();
+
+    expect(farms).toHaveLength(200);
+  });
+});
+
+describe("toDirectoryFarm", () => {
+  it("drops products, which the directory never reads", async () => {
+    const { toDirectoryFarm } = await import("@/lib/directory");
+    const withProducts = makeFarm({
+      products: [
+        {
+          slug: "apples",
+          name_en: "Apples",
+          group: "fruits",
+          status: "AVAILABLE",
+          last_confirmed_at: null,
+        } satisfies FarmProduct,
+      ],
+    });
+
+    const lite = toDirectoryFarm(withProducts);
+
+    // Asserted on the serialised form: `DirectoryFarm` no longer *has* a
+    // `products` property, so reading one is a compile error — which is the
+    // guarantee this projection is supposed to provide.
+    expect(Object.keys(lite)).not.toContain("products");
+    expect(JSON.parse(JSON.stringify(lite)).products).toBeUndefined();
+    // Everything the cards and filters do read survives.
+    expect(lite).toMatchObject({
+      id: withProducts.id,
+      name: withProducts.name,
+      canton: withProducts.canton,
+      coordinates: withProducts.coordinates,
+      categories: withProducts.categories,
+      created_at: withProducts.created_at,
+      address: withProducts.address,
+    });
+  });
+
+  it("is dramatically smaller on a realistic farm", async () => {
+    const { toDirectoryFarm } = await import("@/lib/directory");
+    const farm = makeFarm({
+      products: Array.from({ length: 12 }, (_, i) => ({
+        slug: `product-${i}`,
+        name_en: `Product ${i}`,
+        group: "vegetables",
+        status: "AVAILABLE" as const,
+        last_confirmed_at: "2026-07-14T10:00:00Z",
+      })),
+    });
+
+    const before = JSON.stringify(farm).length;
+    const after = JSON.stringify(toDirectoryFarm(farm)).length;
+
+    // The payload is serialised into the page and JSON-parsed on the main
+    // thread before hydration finishes, so this ratio is felt directly.
+    expect(after * 4).toBeLessThan(before);
+  });
+});
