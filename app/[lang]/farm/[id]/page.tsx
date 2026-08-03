@@ -1,18 +1,23 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FarmDetail from "@/components/FarmDetail";
-import { getFarms } from "@/lib/farms-service";
+import { getFarmById } from "@/lib/farms-service";
 import { DEFAULT_LOCALE, isLocale, localeAlternates } from "@/lib/i18n";
 import { farmJsonLd, farmMetaDescription, serializeJsonLd } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
 
-// There's no single-farm endpoint, so we fetch the list and find the farm.
-// Returns null on any failure so the page can render a clean 404.
+// One request for one farm. This used to fetch the whole directory and
+// `.find()` through it — ~3,155 farms over 32 paginated requests to render a
+// single record — on the strength of a comment claiming no single-farm
+// endpoint existed. `GET /farms/{id}` has been there since the taxonomy work.
+//
+// Returns null on any failure so the page can render a clean 404: a missing
+// farm and an unreachable service look the same to a visitor following a
+// stale link, and neither should be a stack trace.
 async function findFarm(id: string): Promise<Farm | null> {
   try {
-    const farms = await getFarms();
-    return farms.find((farm) => farm.id === id) ?? null;
+    return await getFarmById(id);
   } catch {
     return null;
   }
