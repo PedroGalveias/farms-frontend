@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
+import BackToTop from "@/components/motion/BackToTop";
+import MotionPrompt from "@/components/motion/MotionPrompt";
+import DeferredChrome from "@/components/DeferredChrome";
 import SideRail from "@/components/SideRail";
 import SiteHeader from "@/components/SiteHeader";
 import MobileTabBar from "@/components/MobileTabBar";
@@ -7,19 +10,12 @@ import LanguageProvider from "@/components/i18n/LanguageProvider";
 import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import CustomCursor from "@/components/motion/CustomCursor";
-import GlassLight from "@/components/motion/GlassLight";
 import LazyAmbientBackdrop from "@/components/hero/LazyAmbientBackdrop";
-import MotionPrompt from "@/components/motion/MotionPrompt";
-import BackToTop from "@/components/motion/BackToTop";
-import PwaRegister from "@/components/PwaRegister";
-import OfflineChip from "@/components/OfflineChip";
 import SkipLink from "@/components/SkipLink";
-import WebVitals from "@/components/WebVitals";
 import AuthProvider from "@/components/auth/AuthProvider";
 import TripProvider from "@/components/trip/TripProvider";
 import SeasonalReminderProvider from "@/components/seasonal/SeasonalReminderProvider";
 import LazyCommandPalette from "@/components/command/LazyCommandPalette";
-import KeyboardShortcuts from "@/components/command/KeyboardShortcuts";
 import ViewTransitions from "@/components/transitions/ViewTransitions";
 import ToastProvider from "@/components/ui/ToastProvider";
 import { LOCALE_CODES, MESSAGES, isLocale, type Locale } from "@/lib/i18n";
@@ -292,15 +288,11 @@ export default async function RootLayout({
                         </div>
                         <MobileTabBar />
                         <LazyCommandPalette />
-                        <KeyboardShortcuts />
                         <CustomCursor />
-                        <GlassLight />
                         <LazyAmbientBackdrop />
                         <MotionPrompt />
                         <BackToTop />
-                        <PwaRegister />
-                        <OfflineChip />
-                        <WebVitals />
+                        <DeferredChrome />
                       </SeasonalReminderProvider>
                     </TripProvider>
                   </PersonalizationProvider>
