@@ -249,6 +249,64 @@ export async function getFarms(): Promise<Farm[]> {
   return farms.map(normalizeFarm);
 }
 
+/**
+ * One farm by id.
+ *
+ * The backend has exposed `GET /farms/{id}` since the taxonomy work landed;
+ * the frontend never used it. Every caller that needed a single farm — the
+ * farm page and its OG image — fetched the *entire* directory and ran
+ * `.find()`: ~3,155 farms and 32 paginated requests to render one record.
+ *
+ * Returns `null` for a 404 rather than throwing, because "no such farm" is a
+ * routing outcome (`notFound()`), not a service failure. Anything else throws,
+ * so a real outage still surfaces as an error page rather than a silent 404.
+ */
+export async function getFarmById(
+  id: string,
+  locale?: string,
+): Promise<Farm | null> {
+  const url = new URL(
+    `${getFarmsApiBaseUrl()}/farms/${encodeURIComponent(id)}`,
+  );
+  if (locale) {
+    url.searchParams.set("lang", locale);
+  }
+
+  const response = await fetch(url, {
+    // Same cache tag as the list, so creating or editing a farm busts both.
+    next: { revalidate: 300, tags: [FARMS_CACHE_TAG] },
+    signal: AbortSignal.timeout(COLD_START_TIMEOUT_MS),
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    throw new FarmsApiError(await readErrorMessage(response), response.status);
+  }
+
+  const body = (await response.json()) as unknown;
+  if (body === null || typeof body !== "object" || Array.isArray(body)) {
+    throw new FarmsApiError(
+      "The farms service returned an unexpected response shape.",
+      502,
+    );
+  }
+  // The detail endpoint flattens the farm and adds `lang` alongside it, so the
+  // body *is* the farm. Guard on `id` rather than assuming: a future envelope
+  // ({ farm: {...} }) must fail loudly here, not surface as a farm with
+  // undefined fields rendered into the page.
+  const farm = body as Partial<Farm>;
+  if (typeof farm.id !== "string") {
+    throw new FarmsApiError(
+      "The farms service returned a farm without an id.",
+      502,
+    );
+  }
+
+  return normalizeFarm(farm as Farm);
+}
+
 export async function createFarm(payload: CreateFarmPayload, cookie?: string) {
   const response = await fetch(`${getFarmsApiBaseUrl()}/farms`, {
     body: JSON.stringify(payload),

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getFarms } from "@/lib/farms-service";
+import { getFarmById } from "@/lib/farms-service";
 import { getCantonName } from "@/lib/farms";
 import { tagLabel } from "@/lib/products";
 
@@ -17,10 +17,12 @@ export default async function OgImage({
 }) {
   const { id } = await params;
 
+  // One farm, one request. Social crawlers hit this route for every shared
+  // link, so fetching the entire directory here meant a full pagination walk
+  // per preview.
   let farm = null;
   try {
-    const farms = await getFarms();
-    farm = farms.find((entry) => entry.id === id) ?? null;
+    farm = await getFarmById(id);
   } catch {
     farm = null;
   }

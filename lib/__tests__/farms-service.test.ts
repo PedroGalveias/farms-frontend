@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { FarmsApiError, getFarms } from "@/lib/farms-service";
+import { FarmsApiError, getFarmById, getFarms } from "@/lib/farms-service";
 import type { Farm, FarmProduct } from "@/types/farm";
 
 afterEach(() => {
@@ -318,5 +318,78 @@ describe("getFarms — total pagination budget", () => {
     // The last hop must not have been granted a full 8s when under 8s remained.
     expect(timeouts[timeouts.length - 1]).toBeLessThanOrEqual(8000);
     expect(Math.min(...timeouts)).toBeLessThan(8000);
+  });
+});
+
+describe("getFarmById", () => {
+  it("asks the single-farm endpoint, not the list", async () => {
+    const spy = mockFetchSequence(jsonResponse({ ...makeFarm(), lang: "en" }));
+
+    const farm = await getFarmById("f1");
+
+    expect(farm?.id).toBe("f1");
+    expect(spy).toHaveBeenCalledTimes(1);
+    const url = new URL(String(spy.mock.calls[0][0]));
+    expect(url.pathname).toMatch(/\/farms\/f1$/);
+  });
+
+  it("passes the locale through so labels come back translated", async () => {
+    const spy = mockFetchSequence(jsonResponse({ ...makeFarm(), lang: "de" }));
+    await getFarmById("f1", "de");
+    expect(new URL(String(spy.mock.calls[0][0])).searchParams.get("lang")).toBe(
+      "de",
+    );
+  });
+
+  it("encodes the id rather than splicing it into the path", async () => {
+    // Ids come from the URL. One with a slash or a query character must not be
+    // able to reshape the request.
+    const spy = mockFetchSequence(jsonResponse({ ...makeFarm({ id: "a/b" }) }));
+    await getFarmById("a/b");
+    expect(String(spy.mock.calls[0][0])).toContain("a%2Fb");
+  });
+
+  it("returns null for 404 instead of throwing", async () => {
+    // A missing farm is a routing outcome, not a service failure.
+    mockFetchSequence(new Response(null, { status: 404 }));
+    await expect(getFarmById("nope")).resolves.toBeNull();
+  });
+
+  it("throws on a real failure so an outage is not shown as a 404", async () => {
+    mockFetchSequence(jsonResponse({ message: "boom" }, 500));
+    await expect(getFarmById("f1")).rejects.toBeInstanceOf(FarmsApiError);
+  });
+
+  it("rejects a response that is not a farm", async () => {
+    // The detail endpoint flattens the farm into the body. If that ever became
+    // an envelope, every field would read as undefined and render blank — this
+    // must fail loudly instead.
+    mockFetchSequence(jsonResponse({ farm: makeFarm() }));
+    await expect(getFarmById("f1")).rejects.toBeInstanceOf(FarmsApiError);
+  });
+
+  it("normalises categories and stock status like the list does", async () => {
+    // The backend returns English group slugs; the boundary folds them to the
+    // German catalog keys the UI indexes by, so a farm fetched by id and the
+    // same farm from the list are described identically.
+    const raw = {
+      ...makeFarm({ categories: ["fruits", "dairy"] }),
+      products: [
+        {
+          slug: "apples",
+          name_en: "Apples",
+          group: "fruits",
+          status: "available",
+          last_confirmed_at: null,
+        },
+      ],
+      lang: "en",
+    };
+    mockFetchSequence(jsonResponse(raw));
+
+    const farm = await getFarmById("f1");
+
+    expect(farm?.products?.[0].status).toBe("AVAILABLE");
+    expect(farm?.categories).toEqual(["Früchte", "Milchprodukte"]);
   });
 });
