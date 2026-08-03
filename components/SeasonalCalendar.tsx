@@ -8,8 +8,8 @@ import {
   SEASONAL_BY_MONTH,
   produceEmoji,
   produceLabel,
-  seasonalProductsForMonth,
 } from "@/lib/seasonal";
+import { seasonalProductsForMonth } from "@/lib/seasonal-quick-search";
 import type { Locale } from "@/lib/i18n-core";
 
 const INTL_LOCALE: Record<Locale, string> = {

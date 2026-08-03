@@ -1,4 +1,4 @@
-import { parseQuickSearchCoordinates } from "@/lib/quick-search";
+import { parseQuickSearchCoordinates } from "@/lib/coordinates";
 import type { Farm } from "@/types/farm";
 
 export interface FarmPoint {

@@ -14,7 +14,14 @@ import { MAX_TRIP_STOPS, readTrip, writeTrip, type TripStop } from "@/lib/trip";
 import { haptic } from "@/lib/haptics";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useT } from "@/components/i18n/LanguageProvider";
-import TripSheet from "@/components/trip/TripSheet";
+import dynamic from "next/dynamic";
+
+// The sheet is already only rendered while `open` — but a static import puts it
+// (and, through lib/farms, the 183-product catalogue) in the JavaScript every
+// route downloads. It opens on an explicit user action, so it can load then.
+const TripSheet = dynamic(() => import("@/components/trip/TripSheet"), {
+  ssr: false,
+});
 
 interface TripContextValue {
   stops: TripStop[];
