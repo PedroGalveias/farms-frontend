@@ -1,10 +1,9 @@
-"use client";
-
-import Link from "@/components/i18n/LocalizedLink";
+import { translate } from "@/lib/i18n";
+import { localizeHref, type Locale } from "@/lib/i18n-core";
+import Link from "next/link";
 import { ArrowRight, ChevronRight, MapPin, Search } from "lucide-react";
 import FarmLinkCard from "@/components/directory/FarmLinkCard";
 import { categoryLabel } from "@/lib/categories";
-import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import type { Farm } from "@/types/farm";
 
 export interface CantonSibling {
@@ -33,9 +32,10 @@ export default function CantonView({
   totalCount,
   topCategories,
   siblings,
-}: CantonViewProps) {
-  const t = useT();
-  const { locale } = useLanguage();
+  locale,
+}: CantonViewProps & { locale: Locale }) {
+  const t = (key: string, vars?: Record<string, string | number>) =>
+    translate(locale, key, vars);
 
   const summaryKey =
     totalCount === 0
@@ -52,12 +52,13 @@ export default function CantonView({
           { href: "/canton", label: t("canton_breadcrumb") },
         ]}
         current={name}
+        locale={locale}
       />
 
       <header className="rise-in mt-6">
         <Link
           className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-pine transition hover:text-ink"
-          href={`/region/${regionKey}`}
+          href={localizeHref(`/region/${regionKey}`, locale)}
         >
           {t(regionKey)}
         </Link>
@@ -71,14 +72,14 @@ export default function CantonView({
         <div className="mt-7 flex flex-wrap gap-3">
           <Link
             className="inline-flex items-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
-            href={`/?canton=${code}`}
+            href={localizeHref(`/?canton=${code}`, locale)}
           >
             <MapPin className="h-4 w-4" />
             {t("canton_openDirectory")}
           </Link>
           <Link
             className="glass glass-interactive inline-flex items-center gap-2 rounded-chip px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
-            href="/quick-search"
+            href={localizeHref("/quick-search", locale)}
           >
             <Search className="h-4 w-4" />
             {t("cta_startQuickSearch")}
@@ -93,7 +94,10 @@ export default function CantonView({
             {topCategories.map((category) => (
               <Link
                 className="glass-chip rounded-chip px-3 py-1.5 text-[13px] font-semibold text-ink/70 transition hover:text-ink"
-                href={`/?canton=${code}&cat=${encodeURIComponent(category)}`}
+                href={localizeHref(
+                  `/?canton=${code}&cat=${encodeURIComponent(category)}`,
+                  locale,
+                )}
                 key={category}
               >
                 {categoryLabel(category, locale)}
@@ -110,14 +114,14 @@ export default function CantonView({
             style={{ ["--rise-delay" as string]: "120ms" }}
           >
             {farms.map((farm) => (
-              <FarmLinkCard farm={farm} key={farm.id} />
+              <FarmLinkCard farm={farm} key={farm.id} locale={locale} />
             ))}
           </section>
           {totalCount > farms.length ? (
             <div className="mt-8 flex justify-center">
               <Link
                 className="group inline-flex items-center gap-2 rounded-chip bg-ink px-7 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
-                href={`/?canton=${code}`}
+                href={localizeHref(`/?canton=${code}`, locale)}
               >
                 {t("canton_seeAll", { n: totalCount })}
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -132,7 +136,7 @@ export default function CantonView({
           </p>
           <Link
             className="mt-6 inline-flex items-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98]"
-            href="/"
+            href={localizeHref("/", locale)}
           >
             {t("canton_empty_cta")}
             <ArrowRight className="h-4 w-4" />
@@ -149,7 +153,7 @@ export default function CantonView({
             {siblings.map((sibling) => (
               <Link
                 className="glass glass-interactive inline-flex items-center gap-2 rounded-chip px-4 py-2.5 text-sm font-semibold text-ink/75 transition hover:text-ink"
-                href={`/canton/${sibling.code}`}
+                href={localizeHref(`/canton/${sibling.code}`, locale)}
                 key={sibling.code}
               >
                 {sibling.name}
@@ -159,7 +163,7 @@ export default function CantonView({
           </div>
           <Link
             className="group mt-6 inline-flex items-center gap-1.5 text-[13px] font-bold text-pine transition hover:text-ink"
-            href="/canton"
+            href={localizeHref("/canton", locale)}
           >
             {t("canton_allCantons")}
             <ChevronRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
@@ -173,9 +177,11 @@ export default function CantonView({
 function Breadcrumb({
   trail,
   current,
+  locale,
 }: {
   trail: { href: string; label: string }[];
   current: string;
+  locale: Locale;
 }) {
   return (
     <nav
@@ -184,7 +190,10 @@ function Breadcrumb({
     >
       {trail.map((crumb) => (
         <span className="flex items-center gap-1.5" key={crumb.href}>
-          <Link className="transition hover:text-ink" href={crumb.href}>
+          <Link
+            className="transition hover:text-ink"
+            href={localizeHref(crumb.href, locale)}
+          >
             {crumb.label}
           </Link>
           <ChevronRight className="h-3.5 w-3.5 text-ink/30" />

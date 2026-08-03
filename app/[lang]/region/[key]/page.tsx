@@ -84,6 +84,7 @@ export default async function RegionPage({
 
   return (
     <CantonDirectory
+      locale={locale}
       current={region}
       groups={groups}
       showRegionHeadings={false}

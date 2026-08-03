@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapPin, ShoppingBasket, Sprout, type LucideIcon } from "lucide-react";
-import { buildFarmMapPoints, projectToSwissMap } from "@/lib/farm-map";
+import {
+  buildFarmMapPoints,
+  fitSwissMap,
+  projectToSwissMap,
+} from "@/lib/farm-map";
 import { getNearestFarms } from "@/lib/quick-search";
 import { prefersReducedMotion } from "@/lib/motion";
 import { useMotionSignal } from "@/components/motion/useMotionSignal";
@@ -144,13 +148,13 @@ export default function DiscoveryPanel({
       sctx.fillRect(0, 0, SPRITE, SPRITE);
     }
 
+    // Letterboxed, never stretched. Scaling nx/ny independently to the panel
+    // squashes the country into whatever shape the column happens to be — on
+    // an iPad in landscape this map column is roughly 0.5:1 against
+    // Switzerland's 1.6:1, which rendered as an unrecognisable vertical smear.
     const toPx = (nx: number, ny: number, w: number, h: number) => {
-      const innerW = w * (1 - MAP_INSET.left - MAP_INSET.right);
-      const innerH = h * (1 - MAP_INSET.top - MAP_INSET.bottom);
-      return {
-        x: w * MAP_INSET.left + nx * innerW,
-        y: h * MAP_INSET.top + ny * innerH,
-      };
+      const { mapH, mapW, offX, offY } = fitSwissMap(w, h, MAP_INSET);
+      return { x: offX + nx * mapW, y: offY + ny * mapH };
     };
 
     const draw = (now: number) => {
@@ -286,10 +290,29 @@ export default function DiscoveryPanel({
 
   const labelled = nearestProjected.slice(0, LABELLED_RESULTS);
 
+  // Labels are HTML overlays, so they need the same letterbox the canvas uses
+  // — percentages of the raw panel would drift away from the dots they name
+  // the moment the panel is not the country's aspect ratio. Measured from the
+  // element rather than assumed, and kept current on resize.
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [panelSize, setPanelSize] = useState({ height: 0, width: 0 });
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { height, width } = entry.contentRect;
+      setPanelSize({ height, width });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  const labelFit = fitSwissMap(panelSize.width, panelSize.height, MAP_INSET);
+
   return (
     <div
       aria-hidden="true"
       className="relative hidden flex-1 overflow-hidden lg:block"
+      ref={panelRef}
       style={{
         background:
           "linear-gradient(155deg, #1f8a4e 0%, #16713f 46%, #0c4a2a 100%)",
@@ -298,13 +321,13 @@ export default function DiscoveryPanel({
       <canvas className="absolute inset-0 h-full w-full" ref={canvasRef} />
 
       {/* Name labels for the top nearest matches (HTML keeps text crisp). */}
-      {labelled.map(({ farm, x, y }) => (
+      {labelled.map(({ farm, x, y }, labelIndex) => (
         <div
           className="chip-pop absolute -translate-x-1/2 rounded-chip border border-white/25 bg-white/15 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm"
           key={farm.id}
           style={{
-            left: `${(MAP_INSET.left + x * (1 - MAP_INSET.left - MAP_INSET.right)) * 100}%`,
-            top: `calc(${(MAP_INSET.top + y * (1 - MAP_INSET.top - MAP_INSET.bottom)) * 100}% + ${10 + labelled.indexOf(labelled.find((l) => l.farm.id === farm.id)!) * 26}px)`,
+            left: `${labelFit.offX + x * labelFit.mapW}px`,
+            top: `${labelFit.offY + y * labelFit.mapH + 10 + labelIndex * 26}px`,
           }}
         >
           {farm.name}

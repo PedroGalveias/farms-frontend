@@ -38,8 +38,13 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductHubPage() {
-  const farms = await safeGetFarms();
+export default async function ProductHubPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const [{ lang }, farms] = await Promise.all([params, safeGetFarms()]);
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
 
   const counts = new Map<string, number>();
   for (const farm of farms) {
@@ -53,5 +58,5 @@ export default async function ProductHubPage() {
     return { slug, category, count: counts.get(category) ?? 0 };
   });
 
-  return <ProductHub entries={entries} />;
+  return <ProductHub entries={entries} locale={locale} />;
 }

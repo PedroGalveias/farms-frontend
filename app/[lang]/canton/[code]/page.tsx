@@ -67,7 +67,8 @@ export default async function CantonPage({
 }: {
   params: Promise<{ lang: string; code: string }>;
 }) {
-  const { code } = await params;
+  const { code, lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   if (!isValidCantonCode(code)) {
     notFound();
   }
@@ -140,6 +141,7 @@ export default async function CantonPage({
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <CantonView
+        locale={locale}
         code={code.toLowerCase()}
         farms={shownFarms}
         name={name}

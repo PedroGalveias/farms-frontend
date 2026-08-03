@@ -1,10 +1,9 @@
-"use client";
-
-import Link from "@/components/i18n/LocalizedLink";
+import Link from "next/link";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import { tagLabel } from "@/lib/products";
 import { getCantonName } from "@/lib/farms";
-import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { translate } from "@/lib/i18n";
+import { localizeHref, type Locale } from "@/lib/i18n-core";
 import type { Farm } from "@/types/farm";
 
 const MAX_CHIPS = 4;
@@ -14,10 +13,20 @@ const MAX_CHIPS = 4;
  * canton/region landing pages where the whole card should be an <a> (good for
  * SEO and simpler than the interactive directory card). Glass-styled to match
  * the rest of the app.
+ *
+ * A server component: it is a link and some text, with no state and no
+ * handlers. It took `locale` from context before, which forced it — and
+ * `lib/products`, the 832-line label catalogue it reads — into the client
+ * bundle for pages that are otherwise entirely static.
  */
-export default function FarmLinkCard({ farm }: { farm: Farm }) {
-  const t = useT();
-  const { locale } = useLanguage();
+export default function FarmLinkCard({
+  farm,
+  locale,
+}: {
+  farm: Farm;
+  locale: Locale;
+}) {
+  const t = (key: string) => translate(locale, key);
   const visible = farm.categories.slice(0, MAX_CHIPS);
   const hidden = farm.categories.length - visible.length;
 
@@ -25,7 +34,7 @@ export default function FarmLinkCard({ farm }: { farm: Farm }) {
     <Link
       aria-label={`${t("nearest_view")}: ${farm.name}`}
       className="glass glass-card card-cull glass-interactive group flex h-full flex-col rounded-card p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-elev-3 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
-      href={`/farm/${encodeURIComponent(farm.id)}`}
+      href={localizeHref(`/farm/${encodeURIComponent(farm.id)}`, locale)}
     >
       <div className="flex items-start justify-between gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink/60">

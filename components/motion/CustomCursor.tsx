@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { hasFinePointer } from "@/lib/platform";
 import { prefersReducedMotion } from "@/lib/motion";
 import { useMotionSignal } from "@/components/motion/useMotionSignal";
@@ -39,12 +39,25 @@ export default function CustomCursor() {
     return () => window.removeEventListener("resize", check);
   }, [motionSignal]);
 
+  // `cursor: none` hangs off this class, so it must never be absent in a
+  // painted frame. A plain effect runs *after* paint: on any remount — which a
+  // route change causes — the cleanup stripped the class, the browser painted
+  // one frame with the system arrow showing, and the re-mount put it back.
+  // That one frame is the pointer "appearing and then disappearing" on click.
+  // A layout effect runs before paint, so the remove/add pair is never visible.
+  useLayoutEffect(() => {
+    if (!active) {
+      return;
+    }
+    const root = document.documentElement;
+    root.classList.add("has-custom-cursor");
+    return () => root.classList.remove("has-custom-cursor");
+  }, [active]);
+
   useEffect(() => {
     if (!active) {
       return;
     }
-
-    document.documentElement.classList.add("has-custom-cursor");
 
     const target = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     const ring = { ...target };
@@ -94,7 +107,6 @@ export default function CustomCursor() {
       window.removeEventListener("pointerdown", onMove);
       document.removeEventListener("mouseleave", hide);
       window.removeEventListener("blur", hide);
-      document.documentElement.classList.remove("has-custom-cursor");
     };
   }, [active]);
 
