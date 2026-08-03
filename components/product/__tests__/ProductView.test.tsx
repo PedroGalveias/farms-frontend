@@ -26,6 +26,7 @@ function renderView(
     <LanguageProvider>
       <ProductView
         category="Milchprodukte"
+        locale="en"
         farms={FARMS}
         siblings={[{ slug: "fruits", category: "Früchte", count: 3 }]}
         topCantons={[

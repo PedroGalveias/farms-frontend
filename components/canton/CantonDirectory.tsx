@@ -1,8 +1,7 @@
-"use client";
-
-import Link from "@/components/i18n/LocalizedLink";
+import { translate } from "@/lib/i18n";
+import { localizeHref, type Locale } from "@/lib/i18n-core";
+import Link from "next/link";
 import { ChevronRight, MapPin } from "lucide-react";
-import { useT } from "@/components/i18n/LanguageProvider";
 
 export interface CantonEntry {
   code: string;
@@ -39,8 +38,10 @@ export default function CantonDirectory({
   current,
   groups,
   showRegionHeadings = true,
-}: CantonDirectoryProps) {
-  const t = useT();
+  locale,
+}: CantonDirectoryProps & { locale: Locale }) {
+  const t = (key: string, vars?: Record<string, string | number>) =>
+    translate(locale, key, vars);
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
@@ -81,7 +82,7 @@ export default function CantonDirectory({
               {group.cantons.map((canton) => (
                 <Link
                   className="glass glass-card glass-interactive group flex items-center justify-between gap-3 rounded-field px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
-                  href={`/canton/${canton.code}`}
+                  href={localizeHref(`/canton/${canton.code}`, locale)}
                   key={canton.code}
                 >
                   <span className="flex items-center gap-2.5">

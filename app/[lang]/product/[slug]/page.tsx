@@ -43,11 +43,11 @@ export async function generateMetadata({
   params: Promise<{ lang: string; slug: string }>;
 }): Promise<Metadata> {
   const { lang, slug } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const category = categoryForSlug(slug);
   if (!category) {
     return { title: "Product not found" };
   }
-  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const label = categoryLabel(category, locale);
   const title = translate(locale, "product_title", { product: label });
   const description = translate(locale, "product_meta", { product: label });
@@ -67,6 +67,7 @@ export default async function ProductPage({
   params: Promise<{ lang: string; slug: string }>;
 }) {
   const { lang, slug } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const category = categoryForSlug(slug);
   if (!category) {
     notFound();
@@ -104,7 +105,6 @@ export default async function ProductPage({
     .filter((sibling) => sibling.category !== category && sibling.count > 0);
 
   const siteUrl = getSiteUrl();
-  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const label = categoryLabel(category, locale);
   const jsonLd = {
     "@context": "https://schema.org",
@@ -144,6 +144,7 @@ export default async function ProductPage({
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <ProductView
+      locale={locale}
         category={category}
         farms={shownFarms}
         siblings={siblings}

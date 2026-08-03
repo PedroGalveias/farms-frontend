@@ -72,6 +72,7 @@ export default async function CantonHubPage({
 
   return (
     <CantonDirectory
+      locale={locale}
       current={translate(locale, "canton_breadcrumb")}
       groups={groups}
       subtitle={translate(locale, "canton_hub_subtitle")}

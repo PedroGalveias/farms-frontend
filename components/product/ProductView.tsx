@@ -1,10 +1,9 @@
-"use client";
-
-import Link from "@/components/i18n/LocalizedLink";
+import { translate } from "@/lib/i18n";
+import { localizeHref, type Locale } from "@/lib/i18n-core";
+import Link from "next/link";
 import { ArrowRight, ChevronRight, MapPin, Search } from "lucide-react";
 import FarmLinkCard from "@/components/directory/FarmLinkCard";
 import { categoryEmoji, categoryLabel } from "@/lib/categories";
-import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { getCantonName } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
@@ -38,9 +37,10 @@ export default function ProductView({
   totalCount,
   topCantons,
   siblings,
-}: ProductViewProps) {
-  const t = useT();
-  const { locale } = useLanguage();
+  locale,
+}: ProductViewProps & { locale: Locale }) {
+  const t = (key: string, vars?: Record<string, string | number>) =>
+    translate(locale, key, vars);
   const label = categoryLabel(category, locale);
   const directoryHref = `/?cat=${encodeURIComponent(category)}`;
 
@@ -75,14 +75,14 @@ export default function ProductView({
         <div className="mt-7 flex flex-wrap gap-3">
           <Link
             className="inline-flex items-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud shadow-elev-3 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
-            href={directoryHref}
+            href={localizeHref(directoryHref, locale)}
           >
             <MapPin className="h-4 w-4" />
             {t("product_openDirectory")}
           </Link>
           <Link
             className="glass glass-interactive inline-flex items-center gap-2 rounded-chip px-6 py-3.5 text-sm font-semibold text-ink/75 transition hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
-            href="/quick-search"
+            href={localizeHref("/quick-search", locale)}
           >
             <Search className="h-4 w-4" />
             {t("cta_startQuickSearch")}
@@ -97,7 +97,7 @@ export default function ProductView({
             {topCantons.map(([code, count]) => (
               <Link
                 className="glass-chip rounded-chip px-3 py-1.5 text-[13px] font-semibold text-ink/70 transition hover:text-ink"
-                href={`/canton/${code.toLowerCase()}`}
+                href={localizeHref(`/canton/${code.toLowerCase()}`, locale)}
                 key={code}
               >
                 {getCantonName(code)}
@@ -115,14 +115,14 @@ export default function ProductView({
             style={{ ["--rise-delay" as string]: "120ms" }}
           >
             {farms.map((farm) => (
-              <FarmLinkCard farm={farm} key={farm.id} />
+              <FarmLinkCard farm={farm} key={farm.id} locale={locale} />
             ))}
           </section>
           {totalCount > farms.length ? (
             <div className="mt-8 flex justify-center">
               <Link
                 className="group inline-flex items-center gap-2 rounded-chip bg-ink px-7 py-3.5 text-sm font-bold text-cloud transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
-                href={directoryHref}
+                href={localizeHref(directoryHref, locale)}
               >
                 {t("product_seeAll", { n: totalCount })}
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -137,7 +137,7 @@ export default function ProductView({
           </p>
           <Link
             className="mt-6 inline-flex items-center gap-2 rounded-chip bg-ink px-6 py-3.5 text-sm font-bold text-cloud transition hover:-translate-y-0.5 active:scale-[0.98]"
-            href="/"
+            href={localizeHref("/", locale)}
           >
             {t("product_empty_cta")}
             <ArrowRight className="h-4 w-4" />
@@ -154,7 +154,7 @@ export default function ProductView({
             {siblings.map((sibling) => (
               <Link
                 className="glass glass-interactive inline-flex items-center gap-2 rounded-chip px-4 py-2.5 text-sm font-semibold text-ink/75 transition hover:text-ink"
-                href={`/product/${sibling.slug}`}
+                href={localizeHref(`/product/${sibling.slug}`, locale)}
                 key={sibling.slug}
               >
                 <span aria-hidden>{categoryEmoji(sibling.category)}</span>
@@ -165,7 +165,7 @@ export default function ProductView({
           </div>
           <Link
             className="group mt-6 inline-flex items-center gap-1.5 text-[13px] font-bold text-pine transition hover:text-ink"
-            href="/product"
+            href={localizeHref("/product", locale)}
           >
             {t("product_allProducts")}
             <ChevronRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />

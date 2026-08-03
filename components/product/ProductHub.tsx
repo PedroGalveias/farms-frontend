@@ -1,9 +1,8 @@
-"use client";
-
-import Link from "@/components/i18n/LocalizedLink";
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { categoryEmoji, categoryLabel } from "@/lib/categories";
-import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { translate } from "@/lib/i18n";
+import { localizeHref, type Locale } from "@/lib/i18n-core";
 
 export interface ProductEntry {
   slug: string;
@@ -15,10 +14,22 @@ export interface ProductEntry {
  * "Browse by product" hub — the category twin of the canton hub: a grid of
  * crawlable product links with farm counts, the second axis of the
  * internal-link web (home → product → farm).
+ *
+ * A server component. It renders text and links and nothing else, so the only
+ * reason it ever shipped to the browser was `useT()`/`useLanguage()` — and the
+ * locale is already known on the server from the `[lang]` route segment. Taking
+ * it as a prop keeps this whole subtree, and the category tables it reads, out
+ * of the client bundle.
  */
-export default function ProductHub({ entries }: { entries: ProductEntry[] }) {
-  const t = useT();
-  const { locale } = useLanguage();
+export default function ProductHub({
+  entries,
+  locale,
+}: {
+  entries: ProductEntry[];
+  locale: Locale;
+}) {
+  const t = (key: string, vars?: Record<string, string | number>) =>
+    translate(locale, key, vars);
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
@@ -27,7 +38,10 @@ export default function ProductHub({ entries }: { entries: ProductEntry[] }) {
         className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-ink/50"
       >
         <span className="flex items-center gap-1.5">
-          <Link className="transition hover:text-ink" href="/">
+          <Link
+            className="transition hover:text-ink"
+            href={localizeHref("/", locale)}
+          >
             {t("breadcrumb_home")}
           </Link>
           <ChevronRight className="h-3.5 w-3.5 text-ink/30" />
@@ -51,7 +65,7 @@ export default function ProductHub({ entries }: { entries: ProductEntry[] }) {
         {entries.map((entry) => (
           <Link
             className="glass glass-card glass-interactive group flex items-center justify-between gap-3 rounded-field px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
-            href={`/product/${entry.slug}`}
+            href={localizeHref(`/product/${entry.slug}`, locale)}
             key={entry.slug}
           >
             <span className="flex items-center gap-3">

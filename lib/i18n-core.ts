@@ -86,3 +86,28 @@ export function interpolate(
 
 /** A single locale's key → string table. */
 export type Dict = Record<string, string>;
+
+/**
+ * Prefix an app-absolute href with `locale`, leaving everything else alone.
+ *
+ * Extracted from `LocalizedLink` so a *server* component can build the same
+ * href without pulling the language context — and therefore itself — into the
+ * client bundle. `LocalizedLink` now calls this too: one implementation, so a
+ * server-rendered link and a client-rendered one can never disagree about
+ * where they point.
+ *
+ * Untouched: external URLs, protocol-relative, hashes, mailto/tel, query-only
+ * or object hrefs, and paths that already carry a locale segment.
+ */
+export function localizeHref<T>(href: T, locale: Locale): T | string {
+  if (typeof href !== "string") return href;
+  if (!href.startsWith("/") || href.startsWith("//")) return href;
+
+  const [pathAndQuery, hash] = href.split("#");
+  const [path, query] = pathAndQuery.split("?");
+  const [, first] = path.split("/");
+  if (isLocale(first)) return href;
+
+  const localized = localizedPath(path, locale);
+  return `${localized}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
+}
