@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { createRequire } from "node:module";
 import bundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 import packageJson from "./package.json";
@@ -50,7 +51,18 @@ const securityHeaders = [
   },
 ];
 
+// Share the Next data/route cache through Redis when one is configured.
+//
+// Opt-in by design: with no REDIS_URL the module is never referenced and the
+// default filesystem cache is used, so local dev and CI are untouched. The
+// wins this buys are survival across deploys and across a sleeping backend —
+// see cache-handler.mjs for the reasoning.
+const cacheHandler = process.env.REDIS_URL
+  ? createRequire(import.meta.url).resolve("./cache-handler.mjs")
+  : undefined;
+
 const nextConfig: NextConfig = {
+  ...(cacheHandler ? { cacheHandler } : {}),
   // Emit a self-contained server bundle (.next/standalone/server.js) so the
   // Docker image ships only the traced runtime deps. Next 16 deliberately
   // rejects `next start` for that packaging mode, while Playwright starts the
