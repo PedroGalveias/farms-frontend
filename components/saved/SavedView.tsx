@@ -18,7 +18,11 @@ import AddToCollectionMenu from "@/components/saved/AddToCollectionMenu";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { farmsToCsv } from "@/lib/export";
-import { readCachedFarms, writeCachedFarms } from "@/lib/offline-farms";
+import {
+  SAVED_FARM_CACHE_STORAGE_KEY,
+  readCachedFarms,
+  writeCachedFarms,
+} from "@/lib/offline-farms";
 import type { Farm } from "@/types/farm";
 
 const chipClassName = (active: boolean) =>
@@ -28,7 +32,23 @@ const chipClassName = (active: boolean) =>
       : "border-line bg-cloud text-ink/60 hover:border-ink/25 hover:text-ink"
   }`;
 
-export default function SavedView({ farms }: { farms: Farm[] }) {
+/**
+ * Which farms this page needs: everything favourited, plus everything filed
+ * into a collection. Nothing else — this page never shows the directory.
+ */
+function neededFarmIds(
+  favorites: string[],
+  collections: { farmIds: string[] }[],
+): string[] {
+  return [
+    ...new Set([
+      ...favorites,
+      ...collections.flatMap((collection) => collection.farmIds),
+    ]),
+  ];
+}
+
+export default function SavedView() {
   const t = useT();
   const {
     favorites,
@@ -44,14 +64,65 @@ export default function SavedView({ farms }: { farms: Farm[] }) {
   const [newName, setNewName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [renameValue, setRenameValue] = useState<string | null>(null);
-  const [offlineFarms] = useState(readCachedFarms);
+  // Last known copy of just these farms, so the list paints instantly on a
+  // repeat visit and still works with no network.
+  const [cachedFarms] = useState(() =>
+    readCachedFarms(SAVED_FARM_CACHE_STORAGE_KEY),
+  );
+  const [fetchedFarms, setFetchedFarms] = useState<Farm[] | null>(null);
 
+  const wantedIds = useMemo(
+    () => neededFarmIds(favorites, collections),
+    [favorites, collections],
+  );
+  const wantedKey = useMemo(() => [...wantedIds].sort().join(","), [wantedIds]);
+
+  // Favourites are ids in this browser, so only the client knows what to ask
+  // for. Fetching exactly those replaces embedding the whole directory in the
+  // HTML on the chance one of them was wanted.
   useEffect(() => {
-    writeCachedFarms(farms);
-  }, [farms]);
+    // Nothing saved: there is nothing to ask for, and the empty state is
+    // derived below rather than written into state here.
+    if (wantedKey.length === 0) {
+      return;
+    }
 
-  const resolvedFarms = farms.length > 0 ? farms : offlineFarms;
-  const usingOfflineCache = farms.length === 0 && offlineFarms.length > 0;
+    const controller = new AbortController();
+    fetch(`/api/farms?ids=${encodeURIComponent(wantedKey)}`, {
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: Farm[] | null) => {
+        if (!Array.isArray(data)) {
+          return;
+        }
+        setFetchedFarms(data);
+        // Its own key — never the directory's. See offline-farms.ts.
+        writeCachedFarms(data, SAVED_FARM_CACHE_STORAGE_KEY);
+      })
+      .catch(() => {
+        // Offline or a failed request: the cached copy below still renders.
+      });
+
+    return () => controller.abort();
+  }, [wantedKey]);
+
+  // With nothing saved there is nothing to resolve, and the stale cache must
+  // not resurrect farms the visitor has just un-saved.
+  const savedNothing = wantedIds.length === 0;
+  const resolvedFarms = useMemo(
+    () =>
+      savedNothing
+        ? []
+        : fetchedFarms && fetchedFarms.length > 0
+          ? fetchedFarms
+          : cachedFarms,
+    [savedNothing, fetchedFarms, cachedFarms],
+  );
+  const usingOfflineCache =
+    !savedNothing &&
+    (fetchedFarms === null || fetchedFarms.length === 0) &&
+    cachedFarms.length > 0;
 
   const byId = useMemo(
     () => new Map(resolvedFarms.map((farm) => [farm.id, farm])),
