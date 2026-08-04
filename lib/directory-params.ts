@@ -1,4 +1,6 @@
+import { categorySlug } from "@/lib/categories";
 import { RADIUS_OPTIONS, type CategoryMatchMode } from "@/lib/directory";
+import type { FarmsQuery } from "@/lib/farms-service";
 import type { DirectoryViewMode, FarmSortOption } from "@/types/farm";
 
 /** The slice of directory state that lives in the URL. */
@@ -79,4 +81,53 @@ export function parseDirectoryParams(
     radiusKm,
     viewMode,
   };
+}
+
+/**
+ * The server-queryable subset of directory state.
+ *
+ * Everything sent here is ALSO re-applied locally after hydration, so only
+ * filters the client can reproduce exactly may be included — otherwise rows
+ * appear and then vanish. What stays local, and why:
+ *
+ *  - **free text** — the API matches product names, and the directory payload
+ *    has no products, so a server-matched farm would be filtered straight back
+ *    out on the client.
+ *  - **radius and nearest** — the visitor's coordinates are private and never
+ *    in the URL.
+ *  - **a multi-category ALL match** — the API's category filter is any-of.
+ *    Sending an all-match would under-fetch: the server would return the union
+ *    where the visitor asked for the intersection, and farms that should be
+ *    filtered out locally would never arrive to be counted.
+ *
+ * Categories are sent only when EVERY selected one has an API slug. A partial
+ * list is worse than none: the server would drop the categories it was not
+ * told about, and the missing farms would look like an empty result rather
+ * than a filter that could not be expressed.
+ */
+export function toFarmsQuery(params: DirectoryParams): FarmsQuery {
+  const slugs = params.selectedCategories.map(categorySlug);
+  const canSendCategories =
+    params.selectedCategories.length > 0 &&
+    slugs.every((slug): slug is string => Boolean(slug)) &&
+    !(
+      params.categoryMatchMode === "all" && params.selectedCategories.length > 1
+    );
+
+  return {
+    ...(params.selectedCanton !== "all"
+      ? { canton: params.selectedCanton }
+      : {}),
+    ...(canSendCategories ? { categories: slugs as string[] } : {}),
+    ...(params.sortOption === "name" || params.sortOption === "canton"
+      ? { sort: params.sortOption }
+      : {}),
+  };
+}
+
+/** Whether a query would actually narrow the directory. */
+export function narrowsTheDirectory(query: FarmsQuery): boolean {
+  return Boolean(
+    query.canton || (query.categories && query.categories.length > 0),
+  );
 }

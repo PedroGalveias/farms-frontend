@@ -2,14 +2,18 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import FarmsPageShell from "@/components/FarmsPageShell";
 import HomeSkeleton from "@/components/home/HomeSkeleton";
-import { localeAlternates } from "@/lib/i18n";
+import { DEFAULT_LOCALE, isLocale, localeAlternates } from "@/lib/i18n";
 import {
   FarmsApiError,
   getFarmFacets,
   getFarms,
   getFarmsHealth,
 } from "@/lib/farms-service";
-import { parseDirectoryParams } from "@/lib/directory-params";
+import {
+  narrowsTheDirectory,
+  parseDirectoryParams,
+  toFarmsQuery,
+} from "@/lib/directory-params";
 import { toDirectoryFarm } from "@/lib/directory";
 import { facetsFromApi } from "@/lib/directory-facets";
 import type { ServiceStatus } from "@/types/farm";
@@ -46,20 +50,24 @@ export function generateMetadata(): Metadata {
  * directory replaces the skeleton when it arrives.
  */
 export default function HomePage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
     <Suspense fallback={<HomeSkeleton />}>
-      <HomeDirectory searchParams={searchParams} />
+      <HomeDirectory params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
 async function HomeDirectory({
+  params,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   // Read the filters on the server so the first paint is already the filtered
@@ -67,26 +75,41 @@ async function HomeDirectory({
   // corrected it after hydration — a shared /?canton=BE link showed "3155
   // farms" for ~400ms before flipping to 727, and every filtered URL served
   // byte-identical HTML to crawlers.
-  const [resolvedParams, [healthResult, farmsResult, facetsResult]] =
-    await Promise.all([
-      searchParams,
-      // Facets ride alongside rather than after: they describe the same data,
-      // and serialising them would add a round trip to a route that already
-      // waits on the directory walk. `getFarmFacets` resolves to null rather
-      // than rejecting, so a backend without the endpoint costs nothing.
-      Promise.allSettled([getFarmsHealth(), getFarms(), getFarmFacets()]),
-    ]);
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+
+  const [resolvedParams, apiFacets] = await Promise.all([
+    searchParams,
+    // Facets come FIRST, and the farm fetch depends on them. That ordering is
+    // the whole safety mechanism: the picker's options and counts have to
+    // describe the entire directory, and if they were derived from a filtered
+    // farm list instead, filtering to Bern would leave the canton dropdown
+    // offering only Bern and the visitor could not get back out.
+    //
+    // `getFarmFacets` resolves to null rather than rejecting, so a backend
+    // without the endpoint — which is every backend until /facets deploys —
+    // simply falls through to fetching everything, exactly as before.
+    getFarmFacets(locale),
+  ]);
   const initialParams = parseDirectoryParams(resolvedParams);
+  const initialFacets = apiFacets ? facetsFromApi(apiFacets) : undefined;
+
+  // Narrow the fetch ONLY when the counts come from somewhere that always sees
+  // the whole directory. Without API facets this stays empty and the directory
+  // fetches everything, which is slower but never wrong.
+  const query = initialFacets ? toFarmsQuery(initialParams) : {};
+  const isNarrowed = narrowsTheDirectory(query);
+
+  const [healthResult, farmsResult] = await Promise.allSettled([
+    getFarmsHealth(),
+    getFarms(locale, query),
+  ]);
 
   // Only what the list renders crosses to the browser. The full farms —
   // products included — stay on the server for anything that needs them.
   const farms = (
     farmsResult.status === "fulfilled" ? farmsResult.value : []
   ).map(toDirectoryFarm);
-  const apiFacets =
-    facetsResult.status === "fulfilled" ? facetsResult.value : null;
-  const initialFacets = apiFacets ? facetsFromApi(apiFacets) : undefined;
-
   const loadError =
     farmsResult.status === "rejected"
       ? getErrorMessage(
@@ -108,6 +131,7 @@ async function HomeDirectory({
       initialFarms={farms}
       initialFacets={initialFacets}
       initialParams={initialParams}
+      isNarrowed={isNarrowed}
       loadError={loadError}
       serviceStatus={serviceStatus}
     />

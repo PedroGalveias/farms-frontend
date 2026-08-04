@@ -39,6 +39,12 @@ interface FarmsPageShellProps {
    * `initialFarms` exactly as before.
    */
   initialFacets?: DirectoryFacets;
+  /**
+   * Whether `initialFarms` is a server-FILTERED subset rather than the whole
+   * directory. Only the server knows this — after `toDirectoryFarm` the list
+   * looks the same either way.
+   */
+  isNarrowed?: boolean;
   loadError: string | null;
   serviceStatus: ServiceStatus;
 }
@@ -54,6 +60,7 @@ export default function FarmsPageShell({
   initialFarms,
   initialParams,
   initialFacets,
+  isNarrowed = false,
   loadError,
   serviceStatus,
 }: FarmsPageShellProps) {
@@ -83,8 +90,15 @@ export default function FarmsPageShell({
   );
 
   useEffect(() => {
+    // Never cache a filtered list under the "every farm there is" key. The
+    // offline directory is read when the backend is unreachable, and writing a
+    // canton-filtered subset here would shrink it to whatever the visitor last
+    // filtered by — the same corruption /saved had before #191 split its key.
+    if (isNarrowed) {
+      return;
+    }
     writeCachedFarms(initialFarms);
-  }, [initialFarms]);
+  }, [initialFarms, isNarrowed]);
 
   // Adding a farm requires an account: open the create dialog when signed in,
   // otherwise prompt login with a contextual notice.
