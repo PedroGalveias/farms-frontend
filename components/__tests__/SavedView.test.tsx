@@ -44,17 +44,39 @@ function seedCollections(
   );
 }
 
+/**
+ * SavedView asks `/api/farms?ids=…` for exactly the farms it needs, so the
+ * stub answers the way the route does: only the requested ids, in the order
+ * the fixture defines them.
+ */
+function stubFarmsApi() {
+  return vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+    const url = new URL(String(input), "http://localhost");
+    const ids = new Set(
+      (url.searchParams.get("ids") ?? "").split(",").filter(Boolean),
+    );
+    return Promise.resolve(
+      new Response(JSON.stringify(FARMS.filter((farm) => ids.has(farm.id))), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }),
+    );
+  });
+}
+
 function renderView() {
+  stubFarmsApi();
   render(
     <LanguageProvider>
       <PersonalizationProvider>
-        <SavedView farms={FARMS} />
+        <SavedView />
       </PersonalizationProvider>
     </LanguageProvider>,
   );
 }
 
 afterEach(() => {
+  vi.restoreAllMocks();
   window.localStorage.clear();
 });
 

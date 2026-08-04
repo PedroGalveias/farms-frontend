@@ -7,6 +7,7 @@ import {
   getFarms,
 } from "@/lib/farms-service";
 import { isSameOrigin } from "@/lib/auth";
+import { toDirectoryFarm } from "@/lib/directory";
 import type { CreateFarmInput } from "@/types/farm";
 
 export const dynamic = "force-dynamic";
@@ -48,10 +49,48 @@ function isCreateFarmInput(value: unknown): value is CreateFarmInput {
   );
 }
 
-export async function GET() {
+/**
+ * A cap on `?ids=`, so a hand-written URL cannot ask for a projection of the
+ * entire directory. Comfortably above any plausible number of favourites.
+ */
+const MAX_IDS = 200;
+
+/**
+ * `GET /api/farms` — the whole directory.
+ *
+ * `GET /api/farms?ids=a,b,c` — only those farms, projected to what a card
+ * renders. `/saved` uses this: favourites live in the browser, so the server
+ * cannot know which farms a visitor wants until the client asks. It used to
+ * side-step that by embedding the entire directory in the page (949 KB of HTML
+ * against 311 KB for the next largest route) purely so the client could pick a
+ * handful of ids out of it.
+ *
+ * This filters the same cached walk rather than fetching each id separately:
+ * `getFarms()` is already shared and revalidated across every route, so
+ * selecting from it costs nothing extra upstream, while N calls to
+ * `getFarmById` would be N real requests against a free-tier backend.
+ */
+export async function GET(request: Request) {
+  const idsParam = new URL(request.url).searchParams.get("ids");
+
   try {
     const farms = await getFarms();
-    return NextResponse.json(farms);
+
+    if (idsParam === null) {
+      return NextResponse.json(farms);
+    }
+
+    const wanted = new Set(
+      idsParam
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean)
+        .slice(0, MAX_IDS),
+    );
+
+    return NextResponse.json(
+      farms.filter((farm) => wanted.has(farm.id)).map(toDirectoryFarm),
+    );
   } catch (error) {
     return NextResponse.json(
       { error: getErrorMessage(error, "Unable to load the farm data.") },
