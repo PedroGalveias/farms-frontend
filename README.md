@@ -86,6 +86,43 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). The app degrades gracefully if the backend is unavailable — the UI still renders with an empty directory and a status banner.
 
+### Core Web Vitals → OpenTelemetry
+
+The browser beacons LCP, INP, CLS, FCP and TTFB to `/api/vitals`. Each accepted
+beacon is logged and recorded into an OTLP histogram, so a **p75** exists per
+metric rather than every sample being logged and thrown away.
+
+**Off unless configured.** With no endpoint set, the OTel SDK is never loaded and
+the route behaves exactly as before — log the beacon, return 204. That is the
+default for local development and CI.
+
+```bash
+# Where to send metrics. Either variable works; the metrics-specific one wins.
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.example:4318
+# OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://otlp.example:4318
+
+# Optional — defaults to "farms-frontend".
+OTEL_SERVICE_NAME=farms-frontend
+```
+
+Instruments are `web_vitals.lcp`, `.inp`, `.cls`, `.fcp`, `.ttfb`, with explicit
+bucket bounds straddling each metric's good/poor thresholds so a p75 lands
+somewhere useful. Every sample carries three low-cardinality attributes:
+
+| attribute | values                                                          |
+| --------- | --------------------------------------------------------------- |
+| `route`   | the route **template** (`/canton/[code]`), never a raw pathname |
+| `device`  | `mobile` or `desktop`                                           |
+| `rating`  | `good`, `needs-improvement`, `poor` — recomputed server-side    |
+
+The route template matters: `/canton/be` and 25 siblings are one page, and kept
+apart they would be 26 series each holding a twenty-sixth of the traffic — too
+few samples for any of them to have a meaningful p75. Anything unrecognised
+collapses to `other`, so a hand-written URL cannot mint new series.
+
+No PII: a metric name, a number, a route template and a coarse device class. No
+query strings, no user-agent string, no address.
+
 ## 📜 Scripts
 
 Run scripts with `npm run`.
