@@ -110,6 +110,15 @@ function send(res, status, body, contentType = "application/json") {
   res.end(typeof body === "string" ? body : JSON.stringify(body));
 }
 
+// Category synonyms this fixture uses that fold onto another display group,
+// mirroring `productGroupOf` in lib/products for exactly these values. Anything
+// absent is already its own group. If the fixture gains a new synonym, the
+// visual suite catches the drift — that is how this table was found.
+const GROUP_OF = {
+  Käse: "Milchprodukte",
+  Honig: "Honig und Süßstoffe",
+};
+
 const server = createServer((req, res) => {
   const { pathname } = new URL(req.url, `http://localhost:${PORT}`);
 
@@ -118,6 +127,47 @@ const server = createServer((req, res) => {
   }
   if (req.method === "GET" && pathname === "/farms") {
     return send(res, 200, FARMS);
+  }
+  // GET /facets — filter options and their counts across the whole directory.
+  // The directory reads these instead of deriving its picker from the farms it
+  // was handed, which is what lets it ever show a filtered subset.
+  //
+  // Derived from FARMS rather than hard-coded, so the counts can never drift
+  // from the farms this mock serves — a facet count that disagrees with the
+  // list beside it is exactly the bug worth catching here.
+  //
+  // Real backend emits category SLUGS (`fruits`); this emits the same German
+  // strings its farms carry. `canonicalCategory` folds both to one key, so the
+  // app sees identical results either way.
+  if (req.method === "GET" && pathname === "/facets") {
+    const cantons = new Map();
+    const categories = new Map();
+    for (const farm of FARMS) {
+      cantons.set(farm.canton, (cantons.get(farm.canton) ?? 0) + 1);
+      // Fold to the display group and dedupe PER FARM before counting, which
+      // is what `getFarmGroups` does app-side. A farm carrying both
+      // "Milchprodukte" and "Käse" is one dairy farm, not two — counting the
+      // raw strings and letting the client fold them afterwards double-counts
+      // it, and the directory's chip counts stop matching its list.
+      const groups = new Set(
+        (farm.categories ?? []).map((c) => GROUP_OF[c] ?? c),
+      );
+      for (const group of groups) {
+        categories.set(group, (categories.get(group) ?? 0) + 1);
+      }
+    }
+    return send(res, 200, {
+      lang: "en",
+      total: FARMS.length,
+      cantons: [...cantons]
+        .map(([code, count]) => ({ code, count }))
+        .sort((a, b) => a.code.localeCompare(b.code)),
+      categories: [...categories].map(([slug, count]) => ({
+        slug,
+        name: slug,
+        count,
+      })),
+    });
   }
   // GET /farms/{id} — the single-farm endpoint. The farm page and its OG image
   // read this instead of downloading the directory and running `.find()`.

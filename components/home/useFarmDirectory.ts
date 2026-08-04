@@ -15,12 +15,8 @@ import {
   readSearchCounts,
   trackSearch,
 } from "@/lib/search-stats";
-import {
-  getTopFarmCategories,
-  getUniqueFarmCantons,
-  getUniqueFarmCategories,
-  groupCantonsByRegion,
-} from "@/lib/farms";
+import { groupCantonsByRegion } from "@/lib/farms";
+import { facetsFromFarms, type DirectoryFacets } from "@/lib/directory-facets";
 import {
   farmDistanceKm,
   getCantonCounts,
@@ -62,6 +58,11 @@ export function useFarmDirectory(
   // first render already shows the filtered view. Defaults keep every other
   // caller (and the tests) working unchanged.
   initialParams: DirectoryParams = DEFAULT_DIRECTORY_PARAMS,
+  // Filter options and their counts, measured across the WHOLE directory rather
+  // than derived from `initialFarms`. Omitted, they are derived from the farms
+  // — correct only while the directory holds every farm, which is exactly the
+  // constraint that has kept it fetching all of them. See lib/directory-facets.
+  initialFacets?: DirectoryFacets,
 ) {
   const router = useRouter();
   const t = useT();
@@ -191,17 +192,23 @@ export function useFarmDirectory(
     viewMode,
   ]);
 
-  const cantonOptions = useMemo(
-    () => getUniqueFarmCantons(initialFarms),
-    [initialFarms],
+  const facets = useMemo(
+    () => initialFacets ?? facetsFromFarms(initialFarms),
+    [initialFacets, initialFarms],
   );
-  const categoryOptions = useMemo(
-    () => getUniqueFarmCategories(initialFarms),
-    [initialFarms],
-  );
+
+  const cantonOptions = facets.cantons;
+  const categoryOptions = facets.categories;
   const quickCategories = useMemo(
-    () => getTopFarmCategories(initialFarms, 3),
-    [initialFarms],
+    () =>
+      [...facets.categories]
+        .sort(
+          (left, right) =>
+            (facets.categoryCounts[right] ?? 0) -
+              (facets.categoryCounts[left] ?? 0) || left.localeCompare(right),
+        )
+        .slice(0, 3),
+    [facets],
   );
 
   // "Most wanted" = this device's most-searched products/categories, blended
@@ -229,14 +236,15 @@ export function useFarmDirectory(
   // Stable display order for the category chips: by overall popularity, computed
   // once from the full dataset so chips keep their place as the (contextual)
   // counts below change.
-  const orderedCategoryOptions = useMemo(() => {
-    const overall = getCategoryCounts(initialFarms);
-    return [...categoryOptions].sort(
-      (left, right) =>
-        (overall[right] ?? 0) - (overall[left] ?? 0) ||
-        left.localeCompare(right),
-    );
-  }, [initialFarms, categoryOptions]);
+  const orderedCategoryOptions = useMemo(
+    () =>
+      [...categoryOptions].sort(
+        (left, right) =>
+          (facets.categoryCounts[right] ?? 0) -
+            (facets.categoryCounts[left] ?? 0) || left.localeCompare(right),
+      ),
+    [categoryOptions, facets],
+  );
 
   const normalizedSearchTerm = deferredSearchTerm.trim().toLowerCase();
 
