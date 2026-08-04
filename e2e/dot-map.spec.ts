@@ -81,7 +81,10 @@ test.describe("quick-search dot map", () => {
       { timeout: 15_000 },
     );
 
-    const { lit, w, h } = await stats.jsonValue();
+    // `waitForFunction` only resolves once the predicate returns something
+    // truthy, so this is never null at runtime — but its type still carries the
+    // null the polling function returns while it waits.
+    const { lit, w, h } = (await stats.jsonValue())!;
 
     // ~3,000 farms are drawn as ~1.4px dots. A few hundred lit pixels is the
     // floor below which the canvas is blank, which is exactly the state the
@@ -144,7 +147,7 @@ test.describe("quick-search dot map", () => {
       { timeout: 15_000 },
     );
 
-    const { w, h } = await shape.jsonValue();
+    const { w, h } = (await shape.jsonValue())!;
     // Wider than tall, always. A vertical smear is the regression.
     expect(w).toBeGreaterThan(h);
   });
