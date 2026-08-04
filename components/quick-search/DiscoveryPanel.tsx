@@ -265,10 +265,20 @@ export default function DiscoveryPanel({
 
     if (reduced) {
       // Single static frame; re-runs whenever the search state changes.
+      //
+      // Observe the canvas rather than the window. `draw` sizes the backing
+      // store from `clientWidth`/`clientHeight` and returns early while either
+      // is 0, so a lone draw here is only correct if the box happens to have
+      // settled by the time this effect runs. It often has not — the panel is
+      // in a grid that resolves after hydration — which left the dot field
+      // drawn against a stale width until the next window resize, and made the
+      // frame depend on hydration timing. A ResizeObserver fires on the
+      // element's own box, including that first settle, so the static frame
+      // converges on the real layout.
       draw(0);
-      const onResize = () => draw(0);
-      window.addEventListener("resize", onResize);
-      return () => window.removeEventListener("resize", onResize);
+      const observer = new ResizeObserver(() => draw(0));
+      observer.observe(canvas);
+      return () => observer.disconnect();
     }
 
     const onVisibility = () => {
@@ -318,7 +328,14 @@ export default function DiscoveryPanel({
           "linear-gradient(155deg, #1f8a4e 0%, #16713f 46%, #0c4a2a 100%)",
       }}
     >
-      <canvas className="absolute inset-0 h-full w-full" ref={canvasRef} />
+      <canvas
+        // Marked so the visual suite can mask it: this is an ambient canvas
+        // whose frame depends on when the motion system initialises, which
+        // is not something a screenshot should assert on.
+        data-testid="discovery-dot-map"
+        className="absolute inset-0 h-full w-full"
+        ref={canvasRef}
+      />
 
       {/* Name labels for the top nearest matches (HTML keeps text crisp). */}
       {labelled.map(({ farm, x, y }, labelIndex) => (

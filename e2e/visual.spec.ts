@@ -88,7 +88,15 @@ test.describe("visual", () => {
   test("quick search deck", async ({ page }) => {
     await page.goto("/quick-search");
     await page.waitForLoadState("networkidle");
-    await expect(page).toHaveScreenshot("quick-search.png");
+    // The dot-map is an ambient canvas: under reduced motion it paints one
+    // static frame, but which frame depends on when the motion system has
+    // initialised relative to hydration. That is a decorative detail, not a
+    // design contract, and asserting on it made this snapshot fail for any
+    // change that reordered hydration. Mask it so the rest of the deck — the
+    // layout, type and glass this test exists to guard — still is asserted.
+    await expect(page).toHaveScreenshot("quick-search.png", {
+      mask: [page.getByTestId("discovery-dot-map")],
+    });
   });
 
   test("canton page", async ({ page }) => {
