@@ -166,19 +166,27 @@ test.describe("accessibility", () => {
       });
     }).toPass({ timeout: 15_000 });
 
+    // `test.slow()` triples the TEST budget but leaves each assertion on the
+    // default 5s, which is the gap this test kept falling through: it failed
+    // twice under a full parallel run and never once in isolation (5/5), which
+    // is the signature of a timeout rather than a real defect. The steps below
+    // each wait on the popup's own open/close transition finishing while the
+    // dev server compiles routes for the rest of the suite.
+    const settle = { timeout: 15_000 };
+
     const list = page.getByRole("listbox");
-    await expect(list).toBeVisible();
+    await expect(list).toBeVisible(settle);
     // Focus really is inside the popup — this is what makes tabindex="-1" the
     // correct choice rather than an oversight.
-    await expect(list).toBeFocused();
+    await expect(list).toBeFocused(settle);
 
     // It is wired for activedescendant navigation, which is what makes the
     // list operable without being a tab stop.
-    await expect(list).toHaveAttribute("aria-activedescendant", /.+/);
+    await expect(list).toHaveAttribute("aria-activedescendant", /.+/, settle);
 
     await page.keyboard.press("Escape");
-    await expect(list).toBeHidden();
-    await expect(trigger).toBeFocused();
+    await expect(list).toBeHidden(settle);
+    await expect(trigger).toBeFocused(settle);
 
     // Scope note. What this test asserts is the part only a real browser can
     // answer: that focus genuinely lands inside a portalled, position-fixed
