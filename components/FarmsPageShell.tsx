@@ -20,6 +20,7 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import RecentlyViewedStrip from "@/components/personalization/RecentlyViewedStrip";
 import { writeCachedFarms } from "@/lib/offline-farms";
+import type { DirectoryFacets } from "@/lib/directory-facets";
 import { runViewTransition } from "@/lib/view-transitions";
 import type { DirectoryParams } from "@/lib/directory-params";
 import type { Farm, ServiceStatus } from "@/types/farm";
@@ -32,6 +33,12 @@ interface FarmsPageShellProps {
    * tests keep working — the hook falls back to the unfiltered defaults.
    */
   initialParams?: DirectoryParams;
+  /**
+   * Filter options and counts for the whole directory, from `GET /facets`.
+   * Absent (backend too old, or the call failed), the hook derives them from
+   * `initialFarms` exactly as before.
+   */
+  initialFacets?: DirectoryFacets;
   loadError: string | null;
   serviceStatus: ServiceStatus;
 }
@@ -46,13 +53,18 @@ function subscribeToDesktopQuery(callback: () => void) {
 export default function FarmsPageShell({
   initialFarms,
   initialParams,
+  initialFacets,
   loadError,
   serviceStatus,
 }: FarmsPageShellProps) {
   const t = useT();
   const { recordView } = usePersonalization();
   const { user, openAuth } = useAuth();
-  const directory = useFarmDirectory(initialFarms, initialParams);
+  const directory = useFarmDirectory(
+    initialFarms,
+    initialParams,
+    initialFacets,
+  );
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeFarm, setActiveFarm] = useState<Farm | null>(null);

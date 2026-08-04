@@ -3,9 +3,15 @@ import type { Metadata } from "next";
 import FarmsPageShell from "@/components/FarmsPageShell";
 import HomeSkeleton from "@/components/home/HomeSkeleton";
 import { localeAlternates } from "@/lib/i18n";
-import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
+import {
+  FarmsApiError,
+  getFarmFacets,
+  getFarms,
+  getFarmsHealth,
+} from "@/lib/farms-service";
 import { parseDirectoryParams } from "@/lib/directory-params";
 import { toDirectoryFarm } from "@/lib/directory";
+import { facetsFromApi } from "@/lib/directory-facets";
 import type { ServiceStatus } from "@/types/farm";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -61,10 +67,15 @@ async function HomeDirectory({
   // corrected it after hydration — a shared /?canton=BE link showed "3155
   // farms" for ~400ms before flipping to 727, and every filtered URL served
   // byte-identical HTML to crawlers.
-  const [resolvedParams, [healthResult, farmsResult]] = await Promise.all([
-    searchParams,
-    Promise.allSettled([getFarmsHealth(), getFarms()]),
-  ]);
+  const [resolvedParams, [healthResult, farmsResult, facetsResult]] =
+    await Promise.all([
+      searchParams,
+      // Facets ride alongside rather than after: they describe the same data,
+      // and serialising them would add a round trip to a route that already
+      // waits on the directory walk. `getFarmFacets` resolves to null rather
+      // than rejecting, so a backend without the endpoint costs nothing.
+      Promise.allSettled([getFarmsHealth(), getFarms(), getFarmFacets()]),
+    ]);
   const initialParams = parseDirectoryParams(resolvedParams);
 
   // Only what the list renders crosses to the browser. The full farms —
@@ -72,6 +83,10 @@ async function HomeDirectory({
   const farms = (
     farmsResult.status === "fulfilled" ? farmsResult.value : []
   ).map(toDirectoryFarm);
+  const apiFacets =
+    facetsResult.status === "fulfilled" ? facetsResult.value : null;
+  const initialFacets = apiFacets ? facetsFromApi(apiFacets) : undefined;
+
   const loadError =
     farmsResult.status === "rejected"
       ? getErrorMessage(
@@ -91,6 +106,7 @@ async function HomeDirectory({
   return (
     <FarmsPageShell
       initialFarms={farms}
+      initialFacets={initialFacets}
       initialParams={initialParams}
       loadError={loadError}
       serviceStatus={serviceStatus}

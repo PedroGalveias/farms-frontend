@@ -4,6 +4,8 @@ import {
   readErrorMessage,
 } from "@/lib/backend";
 import { normalizeFarmCategories } from "@/lib/categories";
+import { parseApiFacets, type ApiFacets } from "@/lib/directory-facets";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n-core";
 import type { CreateFarmPayload, Farm, StockStatus } from "@/types/farm";
 
 const STOCK_STATUSES: readonly StockStatus[] = [
@@ -365,6 +367,41 @@ async function walkSequentially(
  * routing outcome (`notFound()`), not a service failure. Anything else throws,
  * so a real outage still surfaces as an error page rather than a silent 404.
  */
+/** Cache tag for the facet counts — see {@link getFarmFacets}. */
+export const FACETS_CACHE_TAG = "farm-facets";
+
+/**
+ * How many farms sit behind each filter option, across the whole directory.
+ *
+ * Returns `null` rather than throwing when the endpoint is missing, slow or
+ * malformed. That is the point of it: facets are an optimisation, and a
+ * directory that falls back to counting the farms it already has is strictly
+ * better than one that errors. The backend deploys separately, so a frontend
+ * release must not require the endpoint to exist yet.
+ *
+ * Tagged with the farm list as well, because creating a farm changes both — a
+ * new farm that did not move its canton's count would be a visible lie.
+ */
+export async function getFarmFacets(
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<ApiFacets | null> {
+  const url = new URL(`${getFarmsApiBaseUrl()}/facets`);
+  url.searchParams.set("lang", locale);
+
+  try {
+    const response = await fetch(url, {
+      next: { revalidate: 300, tags: [FARMS_CACHE_TAG, FACETS_CACHE_TAG] },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return parseApiFacets(await response.json());
+  } catch {
+    return null;
+  }
+}
+
 export async function getFarmById(
   id: string,
   locale?: string,
