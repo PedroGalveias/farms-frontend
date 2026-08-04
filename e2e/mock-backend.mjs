@@ -114,19 +114,58 @@ function send(res, status, body, contentType = "application/json") {
 // mirroring `productGroupOf` in lib/products for exactly these values. Anything
 // absent is already its own group. If the fixture gains a new synonym, the
 // visual suite catches the drift — that is how this table was found.
+// Display group -> API slug, mirroring lib/categories' CATEGORY_ALIASES for the
+// groups this fixture produces. Only what ?category= needs.
+const SLUG_OF = {
+  Gemüse: "vegetables",
+  Früchte: "fruits",
+  Milchprodukte: "dairy",
+  Fleisch: "meat-poultry",
+  Wein: "drinks",
+  Eier: "other",
+  "Honig und Süßstoffe": "honey-sweeteners",
+};
+
 const GROUP_OF = {
   Käse: "Milchprodukte",
   Honig: "Honig und Süßstoffe",
 };
 
 const server = createServer((req, res) => {
-  const { pathname } = new URL(req.url, `http://localhost:${PORT}`);
+  const { pathname, searchParams } = new URL(
+    req.url,
+    `http://localhost:${PORT}`,
+  );
 
   if (req.method === "GET" && pathname === "/health_check") {
     return send(res, 200, { status: "ok" });
   }
   if (req.method === "GET" && pathname === "/farms") {
-    return send(res, 200, FARMS);
+    // Honour ?canton= and ?category= the way the real API does, so the e2e run
+    // actually exercises server-side filtering. A mock that ignored them would
+    // return everything, the client would filter locally, and every test would
+    // pass while the feature was completely broken in production.
+    const canton = searchParams.get("canton");
+    const categories = (searchParams.get("category") ?? "")
+      .split(",")
+      .filter(Boolean);
+
+    let matched = FARMS;
+    if (canton) {
+      matched = matched.filter((farm) => farm.canton === canton);
+    }
+    if (categories.length > 0) {
+      // Any-of, matching the real backend. The fixture carries German names
+      // where the API carries slugs, so fold through the same small table
+      // /facets uses.
+      const wanted = new Set(categories);
+      matched = matched.filter((farm) =>
+        (farm.categories ?? []).some((c) =>
+          wanted.has(SLUG_OF[GROUP_OF[c] ?? c] ?? ""),
+        ),
+      );
+    }
+    return send(res, 200, matched);
   }
   // GET /facets — filter options and their counts across the whole directory.
   // The directory reads these instead of deriving its picker from the farms it

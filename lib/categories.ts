@@ -236,6 +236,29 @@ export function canonicalCategory(value: string): string {
   return CATEGORY_ALIASES[trimmed] ?? trimmed;
 }
 
+/**
+ * Stable API slug for a category, or `undefined` if it has none.
+ *
+ * The inverse of the slug entries in CATEGORY_ALIASES, derived from them rather
+ * than hand-written so the two can never drift. Display keys stay canonical
+ * German; a request must send the slug, because the API validates against its
+ * own vocabulary and would reject a localized label.
+ *
+ * Unknown values return nothing, so a stale hand-authored URL degrades to local
+ * filtering instead of a backend validation error.
+ */
+const CATEGORY_SLUG_BY_KEY: Record<string, string> = Object.fromEntries(
+  Object.entries(CATEGORY_ALIASES)
+    // Only the backend-slug entries invert cleanly: a slug is lowercase ASCII
+    // with hyphens, where the German synonyms are not.
+    .filter(([alias]) => /^[a-z][a-z-]*$/.test(alias))
+    .map(([slug, key]) => [key, slug]),
+);
+
+export function categorySlug(value: string): string | undefined {
+  return CATEGORY_SLUG_BY_KEY[canonicalCategory(value)];
+}
+
 /** A farm's categories, canonicalised and de-duplicated. */
 export function normalizeFarmCategories(categories: string[]): string[] {
   return [...new Set(categories.map(canonicalCategory))];

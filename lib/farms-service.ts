@@ -93,6 +93,43 @@ const FARMS_MAX_PAGES = 100;
 // pages still makes exactly two requests.
 const FARMS_PAGE_CONCURRENCY = 6;
 
+/**
+ * The `GET /farms` filter subset the directory sends.
+ *
+ * Only filters the client can reproduce EXACTLY belong here, because the
+ * directory re-applies every filter locally after hydration. A server-side
+ * filter the client cannot replicate makes rows appear and then vanish.
+ *
+ * Deliberately absent:
+ *  - **`q`** — the API applies free text to product names, and the directory
+ *    payload has no products (`toDirectoryFarm` strips them). The server would
+ *    return a farm matched on "strawberries" and the client would filter it
+ *    straight back out, so the list would visibly shrink after hydration.
+ *  - **granular product, `lat`/`lng`/`radius`** — the directory has no product
+ *    picker and never puts a visitor's coordinates in a shareable URL.
+ *  - **a multi-category ALL match** — the API's category filter is any-of, so
+ *    sending it would under-fetch valid candidates. See `toFarmsQuery`.
+ */
+export interface FarmsQuery {
+  canton?: string;
+  categories?: string[];
+  sort?: "newest" | "name" | "canton";
+}
+
+function appendFarmsQuery(url: URL, query: FarmsQuery) {
+  if (query.canton) {
+    url.searchParams.set("canton", query.canton);
+  }
+  if (query.categories && query.categories.length > 0) {
+    url.searchParams.set("category", query.categories.join(","));
+  }
+  // `newest` is the backend's own default; omitting it keeps the default view
+  // on one cache key instead of two identical ones.
+  if (query.sort && query.sort !== "newest") {
+    url.searchParams.set("sort", query.sort);
+  }
+}
+
 /** One page of the list endpoint, tolerant of both backend response shapes. */
 interface FarmsPage {
   farms: Farm[];
@@ -165,11 +202,26 @@ function normalizeFarm(farm: Farm): Farm {
  */
 async function fetchFarmsPage(
   offset: number | undefined,
-  { deadline, isFirst }: { deadline: number; isFirst: boolean },
+  {
+    deadline,
+    isFirst,
+    locale,
+    query,
+  }: {
+    deadline: number;
+    isFirst: boolean;
+    locale: Locale;
+    query: FarmsQuery;
+  },
 ): Promise<FarmsPage> {
   const remaining = deadline - Date.now();
   const url = new URL(`${getFarmsApiBaseUrl()}/farms`);
+  // Every page of one walk must carry the same language and filters, or the
+  // pages would describe different result sets and the offsets would not line
+  // up with each other.
+  url.searchParams.set("lang", locale);
   url.searchParams.set("limit", String(FARMS_PAGE_LIMIT));
+  appendFarmsQuery(url, query);
   if (offset !== undefined && offset > 0) {
     url.searchParams.set("offset", String(offset));
   }
@@ -201,7 +253,10 @@ async function fetchFarmsPage(
   return parseFarmsPage(await response.json());
 }
 
-export async function getFarms(): Promise<Farm[]> {
+export async function getFarms(
+  locale: Locale = DEFAULT_LOCALE,
+  query: FarmsQuery = {},
+): Promise<Farm[]> {
   const farms: Farm[] = [];
   const seen = new Set<string>();
   const deadline = Date.now() + TOTAL_BUDGET_MS;
@@ -219,7 +274,12 @@ export async function getFarms(): Promise<Farm[]> {
   // whether offsets are predictable enough to parallelise the rest.
   let first: FarmsPage;
   try {
-    first = await fetchFarmsPage(0, { deadline, isFirst: true });
+    first = await fetchFarmsPage(0, {
+      deadline,
+      isFirst: true,
+      locale,
+      query,
+    });
   } catch (error) {
     // Nothing at all arrived. An empty list is indistinguishable from "there
     // are no farms", so the caller needs the error state rather than a page
@@ -246,7 +306,14 @@ export async function getFarms(): Promise<Farm[]> {
   // silently skip or duplicate farms — so fall back to following the cursor
   // one page at a time, which is always correct if slower.
   if (first.nextCursor !== String(FARMS_PAGE_LIMIT)) {
-    return walkSequentially(farms, seen, first.nextCursor, deadline);
+    return walkSequentially(
+      farms,
+      seen,
+      first.nextCursor,
+      deadline,
+      locale,
+      query,
+    );
   }
 
   let page = 1;
@@ -266,7 +333,12 @@ export async function getFarms(): Promise<Farm[]> {
     );
     const results = await Promise.allSettled(
       wave.map((n) =>
-        fetchFarmsPage(n * FARMS_PAGE_LIMIT, { deadline, isFirst: false }),
+        fetchFarmsPage(n * FARMS_PAGE_LIMIT, {
+          deadline,
+          isFirst: false,
+          locale,
+          query,
+        }),
       ),
     );
 
@@ -320,6 +392,8 @@ async function walkSequentially(
   seen: Set<string>,
   startOffset: string,
   deadline: number,
+  locale: Locale,
+  query: FarmsQuery,
 ): Promise<Farm[]> {
   let nextOffset: string | undefined = startOffset;
 
@@ -335,6 +409,8 @@ async function walkSequentially(
       parsed = await fetchFarmsPage(Number(nextOffset), {
         deadline,
         isFirst: false,
+        locale,
+        query,
       });
     } catch (error) {
       console.warn(
