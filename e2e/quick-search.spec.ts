@@ -21,7 +21,19 @@ const stepCard = (page: import("@playwright/test").Page, n: 1 | 2 | 3) =>
 
 test.describe("quick search flow", () => {
   test("location → products → results → farm detail", async ({ page }) => {
+    // Five sequential clicks through a three-card deck, each waiting on the
+    // next card to settle, against a dev server compiling routes for the rest
+    // of the suite in parallel. The default 30s budget is enough alone and not
+    // always enough under that load: this failed once on Firefox during a full
+    // run and passed 3/3 in isolation. Same treatment, and same reason, as the
+    // canton-listbox test in a11y.spec.ts.
+    test.slow();
     await page.goto("/quick-search");
+    // A click that lands before hydration is silently lost — the element is
+    // actionable but no handler is attached — and the failure then surfaces
+    // several steps later. Waiting for the network to go quiet makes that
+    // window much smaller.
+    await page.waitForLoadState("networkidle");
 
     // Step 1 — location: pick a canton chip instead of geolocation.
     const location = stepCard(page, 1);
