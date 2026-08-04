@@ -90,12 +90,24 @@ const GEN_CATEGORIES = [
 ];
 for (let i = 0; i < GENERATED_COUNT; i++) {
   const [canton, lat, lng] = GEN_CANTONS[i % GEN_CANTONS.length];
+  // Spread each canton's farms over a plausible area instead of stacking them
+  // on one point. The old form appended digits to the 4th decimal, a spread of
+  // ~1km, so all 235 generated farms collapsed into 8 dots — which is why the
+  // quick-search dot map rendered as a near-blank canvas and its screenshot
+  // could never have caught a broken projection (issue #183).
+  //
+  // Deterministic, not random: a golden-angle walk gives an even, repeatable
+  // scatter, so baselines and distance assertions stay stable run to run.
+  const spread = (n, step, amplitude) =>
+    (((n * step) % 1000) / 1000 - 0.5) * amplitude;
+  const farmLat = (Number(lat) + spread(i + 1, 381, 0.6)).toFixed(4);
+  const farmLng = (Number(lng) + spread(i + 1, 673, 0.9)).toFixed(4);
   FARMS.push({
     id: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`,
     name: `Testhof ${canton} ${i + 1}`,
     address: `Feldweg ${i + 1}, 3000 Testdorf`,
     canton,
-    coordinates: `${lat}${String((i % 90) + 10)},${lng}${String((i % 90) + 10)}`,
+    coordinates: `${farmLat},${farmLng}`,
     categories: GEN_CATEGORIES[i % GEN_CATEGORIES.length],
     created_at: `2026-05-${String((i % 28) + 1).padStart(2, "0")}T08:00:00Z`,
     updated_at: null,
