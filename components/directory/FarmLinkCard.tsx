@@ -35,6 +35,20 @@ export default function FarmLinkCard({
       aria-label={`${t("nearest_view")}: ${farm.name}`}
       className="glass glass-card card-cull glass-interactive group flex h-full flex-col rounded-card p-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-elev-3 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 focus-visible:ring-offset-2"
       href={localizeHref(`/farm/${encodeURIComponent(farm.id)}`, locale)}
+      // A card grid is the one place Next's default prefetch is bad economics.
+      // Every <Link> prefetches as it scrolls into view, and a canton page
+      // renders up to 48 of these — measured at 94 RSC requests for a single
+      // page view, of which these cards were the bulk. A visitor opens one
+      // farm, so the other 47 are speculative work paid by everybody, on every
+      // canton, region and product page.
+      //
+      // Navigation the visitor is actually likely to take — the chrome, canton
+      // chips, breadcrumbs, "see all" — keeps the default. Those are few and
+      // deliberate, which is exactly when prefetching pays.
+      //
+      // Note this is invisible in `next dev`: prefetching is production-only,
+      // which is how it survived two audits.
+      prefetch={false}
     >
       <div className="flex items-start justify-between gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink/60">
