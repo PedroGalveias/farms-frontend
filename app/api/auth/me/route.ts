@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { fetchCurrentUser } from "@/lib/auth-service";
 
-export const dynamic = "force-dynamic";
 
 // Lets the client AuthProvider re-check the session after login/logout. Returns
 // { user } (null when unauthenticated) — never leaks the session cookie value.

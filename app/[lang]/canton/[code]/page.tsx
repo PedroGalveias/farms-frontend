@@ -21,7 +21,6 @@ import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
 
 // Pre-render every canton at build time; the list changes rarely.
-export const revalidate = 3600;
 
 export function generateStaticParams() {
   return SWISS_CANTONS.map((canton) => ({ code: canton.code.toLowerCase() }));

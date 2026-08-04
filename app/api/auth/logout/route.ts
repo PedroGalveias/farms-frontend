@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getFarmsApiBaseUrl } from "@/lib/backend";
 import { SESSION_COOKIE_NAME, isSameOrigin } from "@/lib/auth";
 
-export const dynamic = "force-dynamic";
 
 const TIMEOUT_MS = 8000;
 

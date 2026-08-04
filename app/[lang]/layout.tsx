@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import BackToTop from "@/components/motion/BackToTop";
@@ -287,12 +288,21 @@ export default async function RootLayout({
                           </div>
                         </div>
                         <MobileTabBar />
-                        <LazyCommandPalette />
                         <CustomCursor />
-                        <LazyAmbientBackdrop />
                         <MotionPrompt />
                         <BackToTop />
-                        <DeferredChrome />
+                        {/* Everything loaded with `next/dynamic` + `ssr: false`
+                            has to sit under a Suspense boundary once Cache
+                            Components is on: a client-only component cannot be
+                            prerendered, so the prerender needs somewhere to
+                            stop. One boundary covers all of them — none renders
+                            anything at rest, so there is nothing to fall back
+                            to and `null` is the honest fallback. */}
+                        <Suspense fallback={null}>
+                          <LazyCommandPalette />
+                          <LazyAmbientBackdrop />
+                          <DeferredChrome />
+                        </Suspense>
                       </SeasonalReminderProvider>
                     </TripProvider>
                   </PersonalizationProvider>

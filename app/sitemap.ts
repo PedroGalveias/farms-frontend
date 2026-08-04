@@ -16,7 +16,6 @@ function languagesFor(siteUrl: string, path: string) {
 
 // Refresh the sitemap hourly rather than per-request; the farm list changes
 // rarely and crawlers don't need second-level freshness.
-export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();

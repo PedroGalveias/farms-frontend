@@ -13,7 +13,6 @@ import {
 import { getCantonName, getCantonsInRegion, getRegionKeys } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
-export const revalidate = 3600;
 
 export function generateStaticParams() {
   return getRegionKeys().map((key) => ({ key }));

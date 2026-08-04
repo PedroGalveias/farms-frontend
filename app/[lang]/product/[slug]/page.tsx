@@ -23,7 +23,6 @@ import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
 
 // Pre-render every product page at build time; the catalog changes rarely.
-export const revalidate = 3600;
 
 export function generateStaticParams() {
   return getProductSlugs().map((slug) => ({ slug }));

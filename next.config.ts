@@ -51,6 +51,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Partial Prerendering. Under the previous model a request-time API —
+  // `searchParams` on the home route — opted the ENTIRE route into dynamic
+  // rendering, which is why the most-visited page was the only one of 278 not
+  // prerendered. With Cache Components that access is contained by its
+  // <Suspense> boundary: the shell prerenders and only the filtered list
+  // streams.
+  cacheComponents: true,
+
   // Emit a self-contained server bundle (.next/standalone/server.js) so the
   // Docker image ships only the traced runtime deps. Next 16 deliberately
   // rejects `next start` for that packaging mode, while Playwright starts the
