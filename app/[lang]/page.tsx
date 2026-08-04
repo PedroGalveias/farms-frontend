@@ -24,7 +24,34 @@ export function generateMetadata(): Metadata {
   return { alternates: localeAlternates("/") };
 }
 
-export default async function HomePage({
+/**
+ * The page itself does no awaiting, so it renders — and the response starts
+ * flushing — immediately.
+ *
+ * This route is dynamic (it reads `searchParams`) and its data is the whole
+ * directory: a walk bounded by a 25s budget that pays a cold backend's wake-up
+ * on page 0. Awaiting that in the page body meant the component suspended
+ * before returning anything, so the browser received no markup at all until
+ * the walk finished — the layout chrome and the skeleton included, even though
+ * neither depends on a single farm.
+ *
+ * Moving the awaits into a child *inside* the boundary is what makes the
+ * `<Suspense>` do its job: the shell and skeleton stream at once, and the
+ * directory replaces the skeleton when it arrives.
+ */
+export default function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  return (
+    <Suspense fallback={<HomeSkeleton />}>
+      <HomeDirectory searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function HomeDirectory({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -62,13 +89,11 @@ export default async function HomePage({
   }
 
   return (
-    <Suspense fallback={<HomeSkeleton />}>
-      <FarmsPageShell
-        initialFarms={farms}
-        initialParams={initialParams}
-        loadError={loadError}
-        serviceStatus={serviceStatus}
-      />
-    </Suspense>
+    <FarmsPageShell
+      initialFarms={farms}
+      initialParams={initialParams}
+      loadError={loadError}
+      serviceStatus={serviceStatus}
+    />
   );
 }
