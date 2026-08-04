@@ -3,7 +3,7 @@
 // snapshots (not just ids) so the planner works without re-fetching the farm
 // list. Mirrors the personalization storage helpers.
 
-import { parseQuickSearchCoordinates } from "@/lib/quick-search";
+import { parseQuickSearchCoordinates } from "@/lib/coordinates";
 
 export const TRIP_STORAGE_KEY = "farms.trip";
 

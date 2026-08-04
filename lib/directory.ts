@@ -3,7 +3,7 @@ import {
   haversineDistanceKm,
   parseQuickSearchCoordinates,
   type QuickSearchCoordinates,
-} from "@/lib/quick-search";
+} from "@/lib/coordinates";
 import type { Farm } from "@/types/farm";
 
 export type CategoryMatchMode = "all" | "any";

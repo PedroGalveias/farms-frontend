@@ -4,12 +4,8 @@ import Link from "@/components/i18n/LocalizedLink";
 import { ArrowLeft, ArrowRight, Bell, Sprout } from "lucide-react";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useSeasonalReminders } from "@/components/seasonal/SeasonalReminderProvider";
-import {
-  SEASONAL_BY_MONTH,
-  produceEmoji,
-  produceLabel,
-  seasonalProductsForMonth,
-} from "@/lib/seasonal";
+import { SEASONAL_BY_MONTH, produceEmoji, produceLabel } from "@/lib/seasonal";
+import { seasonalProductsForMonth } from "@/lib/seasonal-quick-search";
 import type { Locale } from "@/lib/i18n-core";
 
 const INTL_LOCALE: Record<Locale, string> = {

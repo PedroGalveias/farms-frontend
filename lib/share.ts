@@ -1,6 +1,6 @@
 import { getCantonName } from "@/lib/farms";
 import { tagLabel } from "@/lib/products";
-import { parseQuickSearchCoordinates } from "@/lib/quick-search";
+import { parseQuickSearchCoordinates } from "@/lib/coordinates";
 import type { Locale } from "@/lib/i18n";
 import type { Farm } from "@/types/farm";
 

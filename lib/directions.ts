@@ -1,4 +1,4 @@
-import { parseQuickSearchCoordinates } from "@/lib/quick-search";
+import { parseQuickSearchCoordinates } from "@/lib/coordinates";
 
 export type DirectionsPlatform = "ios" | "android" | "web";
 

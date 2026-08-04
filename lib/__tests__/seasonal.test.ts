@@ -5,8 +5,8 @@ import {
   produceEmoji,
   produceLabel,
   seasonalGroupsForMonth,
-  seasonalProductsForMonth,
 } from "@/lib/seasonal";
+import { seasonalProductsForMonth } from "@/lib/seasonal-quick-search";
 import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
 import { PRODUCTS } from "@/lib/products";
 import { LOCALES, type Locale } from "@/lib/i18n";

@@ -1,4 +1,3 @@
-import { PRODUCTS } from "@/lib/products";
 import type { Locale } from "@/lib/i18n";
 
 /**
@@ -561,7 +560,7 @@ export const SEASONAL_BY_MONTH: string[][] = Array.from(
       .map(([key]) => key),
 );
 
-const PRODUCE_GROUP: Record<string, string> = Object.fromEntries(
+export const PRODUCE_GROUP: Record<string, string> = Object.fromEntries(
   Object.entries(SEASONAL_PRODUCE).map(([key, produce]) => [
     key,
     produce.group,
@@ -574,31 +573,6 @@ export function seasonalGroupsForMonth(monthIndex: number): string[] {
   return Array.from(
     new Set(items.map((key) => PRODUCE_GROUP[key]).filter(Boolean)),
   );
-}
-
-/**
- * The specific quick-search keys in season for a month: each item's canonical
- * product key (its German name, when it exists in the product taxonomy) so
- * "find these near you" pre-selects the actual products, falling back to the
- * parent group for anything without a product entry. (index 0 = January)
- */
-export function seasonalProductsForMonth(monthIndex: number): string[] {
-  return produceToQuickSearchKeys(SEASONAL_BY_MONTH[monthIndex] ?? []);
-}
-
-/**
- * Map produce keys to the quick-search keys that select them: each item's
- * canonical product key (its German name, when present in the product taxonomy)
- * or the parent group as a fallback. De-duplicated.
- */
-export function produceToQuickSearchKeys(produceKeys: string[]): string[] {
-  const keys = produceKeys
-    .filter((key) => key in SEASONAL_PRODUCE)
-    .map((key) => {
-      const germanName = SEASONAL_PRODUCE[key].labels.de;
-      return germanName in PRODUCTS ? germanName : PRODUCE_GROUP[key];
-    });
-  return Array.from(new Set(keys));
 }
 
 export function produceEmoji(key: string): string {

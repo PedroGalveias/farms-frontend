@@ -1,4 +1,4 @@
-import { parseQuickSearchCoordinates } from "@/lib/quick-search";
+import { parseQuickSearchCoordinates } from "@/lib/coordinates";
 import type { Farm } from "@/types/farm";
 
 // Switzerland's bounding box (generous, covers Basel to Chiasso and Geneva to
