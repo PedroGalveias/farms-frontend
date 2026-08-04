@@ -5,6 +5,7 @@ import {
 } from "@/lib/backend";
 import { normalizeFarmCategories } from "@/lib/categories";
 import { parseApiFacets, type ApiFacets } from "@/lib/directory-facets";
+import { cacheLife, cacheTag } from "next/cache";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n-core";
 import type { CreateFarmPayload, Farm, StockStatus } from "@/types/farm";
 
@@ -214,7 +215,7 @@ async function fetchFarmsPage(
     query: FarmsQuery;
   },
 ): Promise<FarmsPage> {
-  const remaining = deadline - Date.now();
+  const remaining = deadline - performance.now();
   const url = new URL(`${getFarmsApiBaseUrl()}/farms`);
   // Every page of one walk must carry the same language and filters, or the
   // pages would describe different result sets and the offsets would not line
@@ -227,12 +228,9 @@ async function fetchFarmsPage(
   }
 
   const response = await fetch(url, {
-    // Serve the directory from the Next Data Cache (shared across requests and
-    // routes) and refresh at most every 5 minutes, instead of hammering the
-    // backend on every page view. A successful create busts the tag. The
-    // signal only bounds a cache *miss* — cached hits never hit the network.
-    // Each page caches under its own URL.
-    next: { revalidate: 300, tags: [FARMS_CACHE_TAG] },
+    // Lifetime and tagging live on `getFarms` itself now (`use cache` +
+    // cacheLife + cacheTag), so the whole walk is one cache entry rather than
+    // 32 independently-expiring pages. The signal below still bounds a miss.
     // The first request absorbs the backend's cold start (free-tier Render
     // spins down and can take tens of seconds to wake); later pages are hot and
     // keep the tighter bound. Never wait past the overall deadline.
@@ -257,9 +255,16 @@ export async function getFarms(
   locale: Locale = DEFAULT_LOCALE,
   query: FarmsQuery = {},
 ): Promise<Farm[]> {
+  "use cache";
+  // Five minutes, as before. `locale` and `query` are arguments, so they become
+  // part of the cache key automatically — each filter combination gets its own
+  // entry rather than one of them poisoning the others.
+  cacheLife({ revalidate: 300, expire: 3600, stale: 300 });
+  cacheTag(FARMS_CACHE_TAG);
+
   const farms: Farm[] = [];
   const seen = new Set<string>();
-  const deadline = Date.now() + TOTAL_BUDGET_MS;
+  const deadline = performance.now() + TOTAL_BUDGET_MS;
 
   const collect = (page: FarmsPage) => {
     for (const farm of page.farms) {
@@ -320,7 +325,7 @@ export async function getFarms(
   let waveSize = 1;
 
   while (page < FARMS_MAX_PAGES) {
-    if (Date.now() >= deadline) {
+    if (performance.now() >= deadline) {
       console.warn(
         `[farms] pagination budget spent after ${farms.length} farms; serving partial directory`,
       );
@@ -398,7 +403,7 @@ async function walkSequentially(
   let nextOffset: string | undefined = startOffset;
 
   for (let page = 1; page < FARMS_MAX_PAGES && nextOffset; page++) {
-    if (Date.now() >= deadline) {
+    if (performance.now() >= deadline) {
       console.warn(
         `[farms] pagination budget spent after ${farms.length} farms; serving partial directory`,
       );
@@ -461,12 +466,17 @@ export const FACETS_CACHE_TAG = "farm-facets";
 export async function getFarmFacets(
   locale: Locale = DEFAULT_LOCALE,
 ): Promise<ApiFacets | null> {
+  "use cache";
+  cacheLife({ revalidate: 300, expire: 3600, stale: 300 });
+  // Tagged with the farm list as well: a new farm changes both, and a count
+  // that disagreed with the list beside it would be a visible lie.
+  cacheTag(FARMS_CACHE_TAG, FACETS_CACHE_TAG);
+
   const url = new URL(`${getFarmsApiBaseUrl()}/facets`);
   url.searchParams.set("lang", locale);
 
   try {
     const response = await fetch(url, {
-      next: { revalidate: 300, tags: [FARMS_CACHE_TAG, FACETS_CACHE_TAG] },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!response.ok) {
@@ -482,6 +492,11 @@ export async function getFarmById(
   id: string,
   locale?: string,
 ): Promise<Farm | null> {
+  "use cache";
+  cacheLife({ revalidate: 300, expire: 3600, stale: 300 });
+  // Same tag as the list, so creating or editing a farm busts both.
+  cacheTag(FARMS_CACHE_TAG);
+
   const url = new URL(
     `${getFarmsApiBaseUrl()}/farms/${encodeURIComponent(id)}`,
   );
@@ -490,8 +505,6 @@ export async function getFarmById(
   }
 
   const response = await fetch(url, {
-    // Same cache tag as the list, so creating or editing a farm busts both.
-    next: { revalidate: 300, tags: [FARMS_CACHE_TAG] },
     signal: AbortSignal.timeout(COLD_START_TIMEOUT_MS),
   });
 

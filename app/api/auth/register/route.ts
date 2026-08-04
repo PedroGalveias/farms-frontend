@@ -2,8 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getFarmsApiBaseUrl } from "@/lib/backend";
 import { isSameOrigin } from "@/lib/auth";
 
-export const dynamic = "force-dynamic";
-
 const TIMEOUT_MS = 8000;
 
 // Pure passthrough: relay {email, password} to the backend and return its status

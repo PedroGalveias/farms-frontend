@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Suspense,
   createContext,
   useCallback,
   useContext,
@@ -143,14 +144,19 @@ export default function TripProvider({
         </button>
       ) : null}
 
-      {open ? (
-        <TripSheet
-          onClear={clearTrip}
-          onClose={() => setOpen(false)}
-          onRemove={removeStop}
-          stops={stops}
-        />
-      ) : null}
+      {/* `ssr: false` cannot be prerendered, so Cache Components needs a
+          boundary to stop at. It renders nothing here anyway, so `null` is the
+          honest fallback. */}
+      <Suspense fallback={null}>
+        {open ? (
+          <TripSheet
+            onClear={clearTrip}
+            onClose={() => setOpen(false)}
+            onRemove={removeStop}
+            stops={stops}
+          />
+        ) : null}
+      </Suspense>
     </TripContext.Provider>
   );
 }

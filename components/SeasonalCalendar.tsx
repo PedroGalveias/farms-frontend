@@ -16,12 +16,26 @@ const INTL_LOCALE: Record<Locale, string> = {
   rm: "rm-CH",
 };
 
-/** Full-year view of Switzerland's in-season produce, one card per month. */
-export default function SeasonalCalendar() {
+/**
+ * Full-year view of Switzerland's in-season produce, one card per month.
+ *
+ * `currentMonth` comes from the server rather than `new Date()` here. Two
+ * reasons: Cache Components will not let a prerender capture the current time,
+ * and the calendar describes SWISS seasons — reading the clock in the browser
+ * meant a visitor in another timezone could see the wrong month highlighted.
+ *
+ * `null` means "not known yet", which is the state during prerender: the whole
+ * calendar still renders, just with nothing marked as the current month. That
+ * makes the calendar itself usable as its own Suspense fallback.
+ */
+export default function SeasonalCalendar({
+  currentMonth,
+}: {
+  currentMonth: number | null;
+}) {
   const { locale } = useLanguage();
   const t = useT();
   const { isReminded, toggleReminder } = useSeasonalReminders();
-  const currentMonth = new Date().getMonth();
 
   const monthName = (index: number) =>
     new Date(2024, index, 1).toLocaleDateString([INTL_LOCALE[locale], "en"], {

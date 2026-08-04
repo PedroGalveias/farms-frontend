@@ -9,8 +9,6 @@ import {
   type VitalMetric,
 } from "@/lib/vitals-metrics";
 
-export const dynamic = "force-dynamic";
-
 interface VitalPayload {
   name?: unknown;
   value?: unknown;

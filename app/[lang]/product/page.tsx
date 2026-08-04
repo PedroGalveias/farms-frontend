@@ -11,8 +11,6 @@ import { getFarmGroups } from "@/lib/farms";
 import { categoryForSlug, getProductSlugs } from "@/lib/product-pages";
 import type { Farm } from "@/types/farm";
 
-export const revalidate = 3600;
-
 async function safeGetFarms(): Promise<Farm[]> {
   try {
     return await getFarms();

@@ -12,8 +12,6 @@ import {
 import { SWISS_REGIONS, getCantonName, getCantonsInRegion } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
-export const revalidate = 3600;
-
 async function safeGetFarms(): Promise<Farm[]> {
   try {
     return await getFarms();

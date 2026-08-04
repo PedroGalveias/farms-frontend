@@ -1,12 +1,15 @@
-import { NextResponse } from "next/server";
-
-export const dynamic = "force-dynamic";
+import { NextResponse, connection } from "next/server";
 
 const HEALTH_CHECK_HEADERS = {
   "Cache-Control": "no-store, max-age=0",
 };
 
 export async function GET() {
+  // `checkedAt` is the current time, so this cannot be prerendered — a health
+  // check that reports build time would be worse than useless. `connection()`
+  // is how Cache Components spells "resolve this per request".
+  await connection();
+
   return NextResponse.json(
     {
       ok: true,

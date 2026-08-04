@@ -22,7 +22,7 @@ function setHistoryLength(length: number) {
 function renderButton() {
   render(
     <LanguageProvider>
-      <GoBackButton />
+      <GoBackButton label="Go back" />
     </LanguageProvider>,
   );
 }

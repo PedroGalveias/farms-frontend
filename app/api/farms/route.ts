@@ -10,8 +10,6 @@ import { isSameOrigin } from "@/lib/auth";
 import { toDirectoryFarm } from "@/lib/directory";
 import type { CreateFarmInput } from "@/types/farm";
 
-export const dynamic = "force-dynamic";
-
 function getErrorMessage(error: unknown, fallback: string) {
   if (error instanceof FarmsApiError) {
     return error.message;

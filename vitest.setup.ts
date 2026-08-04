@@ -22,6 +22,28 @@ vi.mock("next/navigation", async (importOriginal) => {
   };
 });
 
+// Cache Components' request-scope APIs only work inside a Next render. Vitest
+// imports modules directly, so `cacheLife()` throws "only available with the
+// cacheComponents config" and `connection()` throws "called outside a request
+// scope" — neither is a failure of the code under test.
+//
+// The `"use cache"` directives themselves are inert here: they are compiler
+// instructions, and nothing in vitest runs Next's transform. So a cached
+// function under test simply executes its body, which is exactly what these
+// tests assert on — the fetch it makes, the shape it adapts, the error it
+// maps. Whether the result is actually cached is a build-time fact, visible in
+// the route table (every route ◐) and exercised end to end.
+vi.mock("next/cache", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/cache")>()),
+  cacheLife: () => {},
+  cacheTag: () => {},
+}));
+
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  connection: async () => {},
+}));
+
 // Production runs over HTTPS (a secure context); mirror that in jsdom so
 // geolocation code under test isn't short-circuited as "insecure".
 Object.defineProperty(window, "isSecureContext", {

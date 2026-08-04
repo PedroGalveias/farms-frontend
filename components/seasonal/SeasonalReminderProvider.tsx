@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Suspense,
   createContext,
   useCallback,
   useContext,
@@ -86,7 +87,12 @@ export default function SeasonalReminderProvider({
     <SeasonalReminderContext.Provider value={value}>
       {children}
 
-      <SeasonalReminderNudge due={due} onDismiss={dismissDue} />
+      {/* `ssr: false` cannot be prerendered, so Cache Components needs a
+          boundary to stop at. It renders nothing here anyway, so `null` is the
+          honest fallback. */}
+      <Suspense fallback={null}>
+        <SeasonalReminderNudge due={due} onDismiss={dismissDue} />
+      </Suspense>
     </SeasonalReminderContext.Provider>
   );
 }
