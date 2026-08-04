@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { lang as rootLang } from "next/root-params";
 import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import BackToTop from "@/components/motion/BackToTop";
@@ -260,13 +261,16 @@ export function generateStaticParams() {
 
 export default async function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ lang: string }>;
 }>) {
-  const { lang } = await params;
-  const locale: Locale = isLocale(lang) ? lang : "en";
+  // `next/root-params` instead of `await params`. Both give the locale, but
+  // only this one is readable while prerendering a route whose DEEPER params
+  // are unknown — /farm/[id], the 404 catch-all. Awaiting the layout's own
+  // `params` there has nothing to resolve against, which blocked the whole
+  // shell and is what stalled the Cache Components migration.
+  const lang = await rootLang();
+  const locale: Locale = isLocale(lang ?? "") ? (lang as Locale) : "en";
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={archivo.variable}>
