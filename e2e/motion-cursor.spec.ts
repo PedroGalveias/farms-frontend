@@ -54,13 +54,27 @@ test.describe("motion & custom cursor (motion allowed)", () => {
     // NB: no locator.scrollIntoViewIfNeeded() on perpetually-animating
     // elements — Playwright waits for a stable bounding box, and a marquee
     // never settles (times out on Firefox/WebKit). Native scrolling instead.
-    const anim = await marqueeTrack.evaluate((el) => {
-      el.scrollIntoView({ block: "center" });
-      const s = getComputedStyle(el);
-      return { name: s.animationName, state: s.animationPlayState };
-    });
-    expect(anim.name).toContain("marquee");
-    expect(anim.state).toBe("running");
+    //
+    // Retried, because a single sample can land mid-re-render. The ticker sits
+    // inside <Reveal> under FarmsPageShell, which sets state as the directory
+    // hydrates (location restore, most-wanted, deferred filters); a re-render
+    // that replaces this node detaches the handle Playwright just resolved.
+    //
+    // `getComputedStyle` on a DETACHED element returns "" for every property —
+    // measured: attached "marquee"/length 601, detached ""/length 0, and an
+    // attached element with no animation reports "none", never "". So the CI
+    // failure ("Expected substring: marquee, Received: \"\"") was a detached
+    // node, NOT a disabled animation. Re-resolving is the fix; asserting
+    // harder is not.
+    await expect(async () => {
+      const anim = await marqueeTrack.evaluate((el) => {
+        el.scrollIntoView({ block: "center" });
+        const s = getComputedStyle(el);
+        return { name: s.animationName, state: s.animationPlayState };
+      });
+      expect(anim.name).toContain("marquee");
+      expect(anim.state).toBe("running");
+    }).toPass({ timeout: 10_000 });
 
     // Scroll reveal: below-fold content fades in on approach. Sweep the whole
     // page in viewport steps so every IntersectionObserver fires, then assert
