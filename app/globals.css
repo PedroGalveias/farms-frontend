@@ -798,26 +798,6 @@ html.dark body::before {
   animation-delay: var(--rise-delay, 0ms);
 }
 
-@keyframes blur-in {
-  from {
-    opacity: 0;
-    filter: blur(14px);
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    filter: blur(0);
-    transform: translateY(0);
-  }
-}
-
-.blur-in {
-  opacity: 0;
-  animation: blur-in 1.1s var(--ease-out-expo) forwards;
-  animation-delay: var(--rise-delay, 0ms);
-}
-
 /* Marquee */
 @keyframes marquee {
   from {
@@ -835,22 +815,6 @@ html.dark body::before {
 
 .marquee:hover .marquee-track {
   animation-play-state: paused;
-}
-
-/* Soft floating accents */
-@keyframes qs-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-16px);
-  }
-}
-
-.qs-float {
-  animation: qs-float 9s ease-in-out infinite;
 }
 
 /* Quick-search + dialog choreography */
@@ -1055,16 +1019,6 @@ body.sheet-open .mobile-tab-bar {
   animation: drift var(--drift-dur, 12s) ease-in-out infinite;
 }
 
-@keyframes route-dash {
-  to {
-    stroke-dashoffset: -200;
-  }
-}
-
-.route-dash {
-  animation: route-dash 6s linear infinite;
-}
-
 /* ---------- Custom cursor ---------- */
 .has-custom-cursor .cursor-zone,
 .has-custom-cursor .cursor-zone * {
@@ -1106,8 +1060,7 @@ body.sheet-open .mobile-tab-bar {
 @media (prefers-reduced-motion: reduce) {
   :root:not(.force-motion) .check-pop,
   :root:not(.force-motion) .chip-pop,
-  :root:not(.force-motion) .drift,
-  :root:not(.force-motion) .route-dash {
+  :root:not(.force-motion) .drift {
     animation: none !important;
   }
 }
@@ -1121,8 +1074,6 @@ body.sheet-open .mobile-tab-bar {
     :is(
       .reveal,
       .rise-in,
-      .blur-in,
-      .qs-float,
       .qs-fade-up,
       .qs-sheet,
       .qs-backdrop,
