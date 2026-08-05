@@ -23,6 +23,21 @@ async function findFarm(id: string): Promise<Farm | null> {
   }
 }
 
+/**
+ * No farm is prerendered — there are ~3,155 of them and the build would have to
+ * walk the whole directory. This exists purely so Cache Components can validate
+ * the route's shell at build time; returning an empty list says "no known ids",
+ * and every farm is then served as an App Shell and filled in at request time.
+ */
+export function generateStaticParams() {
+  // One sample, not a real farm. Cache Components requires at least one value
+  // so it can validate at build time that the route's shell has no unguarded
+  // dynamic access; it refuses an empty list outright. This id resolves to
+  // nothing, so the sample render exercises the notFound() path, and every
+  // real farm is served as an App Shell filled in at request time.
+  return [{ id: "00000000-0000-4000-8000-000000000000" }];
+}
+
 export async function generateMetadata({
   params,
 }: {

@@ -2,16 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useT } from "@/components/i18n/LanguageProvider";
 
 /**
  * Returns the visitor to wherever they came from. Falls back to the home page
  * when there's no in-app history (e.g. a cold landing on a 404). Primary nav
  * lives in the floating bar, so this is the only control the 404 needs.
+ *
+ * The label is a prop rather than a `useT()` lookup because this also renders
+ * on app/global-not-found.tsx, which is served for URLs matching no route and
+ * therefore renders outside the [lang] layout, with no LanguageProvider above
+ * it. Callers inside the layout pass a translated string.
  */
-export default function GoBackButton() {
+export default function GoBackButton({ label }: { label: string }) {
   const router = useRouter();
-  const t = useT();
 
   return (
     <button
@@ -26,7 +29,7 @@ export default function GoBackButton() {
       type="button"
     >
       <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-      {t("not_found_back")}
+      {label}
     </button>
   );
 }

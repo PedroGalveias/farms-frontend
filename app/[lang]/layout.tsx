@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { lang as rootLang } from "next/root-params";
 import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import BackToTop from "@/components/motion/BackToTop";
@@ -18,18 +20,9 @@ import SeasonalReminderProvider from "@/components/seasonal/SeasonalReminderProv
 import LazyCommandPalette from "@/components/command/LazyCommandPalette";
 import ViewTransitions from "@/components/transitions/ViewTransitions";
 import ToastProvider from "@/components/ui/ToastProvider";
+import { THEME_SCRIPT } from "@/lib/theme-script";
 import { LOCALE_CODES, MESSAGES, isLocale, type Locale } from "@/lib/i18n";
 import "../globals.css";
-
-// Set the theme class before paint to avoid a flash of the wrong theme, and
-// the force-motion class (the user's "always animate" override of the OS
-// reduced-motion setting — see lib/motion.ts) so animations don't flash-freeze.
-// Applies the theme before paint. Modes: light/dark are explicit; system asks
-// the media query; sun replays the LAST RESOLVED theme ("farms.theme", kept
-// fresh by ThemeProvider) and the provider re-resolves right after mount --
-// worst case is a brief stale theme after a sunrise/sunset passed while away,
-// never a flash.
-const themeScript = `(function(){try{var m=localStorage.getItem("farms.themeMode");var t=localStorage.getItem("farms.theme");var dark;if(m==="dark"){dark=true}else if(m==="light"){dark=false}else if(m==="system"){dark=window.matchMedia("(prefers-color-scheme: dark)").matches}else if(m==="sun"){dark=t==="dark"}else{dark=t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)}if(dark){document.documentElement.classList.add("dark")}if(localStorage.getItem("farms.motion")==="on"){document.documentElement.classList.add("force-motion")}}catch(e){}})();`;
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -259,17 +252,20 @@ export function generateStaticParams() {
 
 export default async function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ lang: string }>;
 }>) {
-  const { lang } = await params;
-  const locale: Locale = isLocale(lang) ? lang : "en";
+  // `next/root-params` instead of `await params`. Both give the locale, but
+  // only this one is readable while prerendering a route whose DEEPER params
+  // are unknown — /farm/[id], the 404 catch-all. Awaiting the layout's own
+  // `params` there has nothing to resolve against, which blocked the whole
+  // shell and is what stalled the Cache Components migration.
+  const lang = await rootLang();
+  const locale: Locale = isLocale(lang ?? "") ? (lang as Locale) : "en";
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={archivo.variable}>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <ThemeProvider>
           <LanguageProvider initialLocale={locale} messages={MESSAGES[locale]}>
             <ViewTransitions>
@@ -287,12 +283,21 @@ export default async function RootLayout({
                           </div>
                         </div>
                         <MobileTabBar />
-                        <LazyCommandPalette />
                         <CustomCursor />
-                        <LazyAmbientBackdrop />
                         <MotionPrompt />
                         <BackToTop />
-                        <DeferredChrome />
+                        {/* Everything loaded with `next/dynamic` + `ssr: false`
+                            has to sit under a Suspense boundary once Cache
+                            Components is on: a client-only component cannot be
+                            prerendered, so the prerender needs somewhere to
+                            stop. One boundary covers all of them — none renders
+                            anything at rest, so there is nothing to fall back
+                            to and `null` is the honest fallback. */}
+                        <Suspense fallback={null}>
+                          <LazyCommandPalette />
+                          <LazyAmbientBackdrop />
+                          <DeferredChrome />
+                        </Suspense>
                       </SeasonalReminderProvider>
                     </TripProvider>
                   </PersonalizationProvider>

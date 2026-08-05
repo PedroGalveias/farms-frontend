@@ -1,7 +1,14 @@
+import { lang as rootLang } from "next/root-params";
 import GoBackButton from "@/components/GoBackButton";
 import SiteFooter from "@/components/SiteFooter";
+import { MESSAGES, isLocale, type Locale } from "@/lib/i18n";
 
-export default function NotFoundPage() {
+export default async function NotFoundPage() {
+  // Same resolution as the layout: this boundary renders inside it, so the
+  // root param is available and is the locale the visitor is actually on.
+  const lang = await rootLang();
+  const locale: Locale = isLocale(lang ?? "") ? (lang as Locale) : "en";
+
   return (
     <div className="relative overflow-clip">
       <main className="mx-auto max-w-5xl px-5 pt-16 sm:px-8 sm:pt-24">
@@ -27,7 +34,7 @@ export default function NotFoundPage() {
           className="rise-in mt-9"
           style={{ ["--rise-delay" as string]: "260ms" }}
         >
-          <GoBackButton />
+          <GoBackButton label={MESSAGES[locale].not_found_back} />
         </div>
       </main>
 

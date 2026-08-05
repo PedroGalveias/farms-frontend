@@ -5,6 +5,7 @@ import {
 } from "@/lib/backend";
 import { normalizeFarmCategories } from "@/lib/categories";
 import { parseApiFacets, type ApiFacets } from "@/lib/directory-facets";
+import { cacheLife, cacheTag } from "next/cache";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n-core";
 import type { CreateFarmPayload, Farm, StockStatus } from "@/types/farm";
 
@@ -66,6 +67,18 @@ export async function getFarmsHealth() {
 
 /** Cache tag for the farm list — bust it with revalidateTag(FARMS_CACHE_TAG). */
 export const FARMS_CACHE_TAG = "farms";
+
+/** Five minutes, as the fetch options used before Cache Components. */
+const FULL_CACHE_LIFE = { revalidate: 300, expire: 3600, stale: 300 } as const;
+/**
+ * For an answer the backend could not fully supply.
+ *
+ * Short enough that one blip costs seconds rather than the five minutes a
+ * partial directory or a missing facet set would otherwise be served for, and
+ * long enough to still absorb a burst rather than hammering a struggling
+ * backend once per request.
+ */
+const DEGRADED_CACHE_LIFE = { revalidate: 10, expire: 60, stale: 10 } as const;
 
 // The taxonomy-aware backend paginates `GET /farms` (keyset cursor, max 100 per
 // page). Request the largest page and follow the cursor so the directory keeps
@@ -214,7 +227,7 @@ async function fetchFarmsPage(
     query: FarmsQuery;
   },
 ): Promise<FarmsPage> {
-  const remaining = deadline - Date.now();
+  const remaining = deadline - performance.now();
   const url = new URL(`${getFarmsApiBaseUrl()}/farms`);
   // Every page of one walk must carry the same language and filters, or the
   // pages would describe different result sets and the offsets would not line
@@ -227,21 +240,28 @@ async function fetchFarmsPage(
   }
 
   const response = await fetch(url, {
-    // Serve the directory from the Next Data Cache (shared across requests and
-    // routes) and refresh at most every 5 minutes, instead of hammering the
-    // backend on every page view. A successful create busts the tag. The
-    // signal only bounds a cache *miss* — cached hits never hit the network.
-    // Each page caches under its own URL.
-    next: { revalidate: 300, tags: [FARMS_CACHE_TAG] },
+    // Lifetime and tagging live on `getFarms` itself now (`use cache` +
+    // cacheLife + cacheTag), so the whole walk is one cache entry rather than
+    // 32 independently-expiring pages. The signal below still bounds a miss.
     // The first request absorbs the backend's cold start (free-tier Render
     // spins down and can take tens of seconds to wake); later pages are hot and
     // keep the tighter bound. Never wait past the overall deadline.
+    // Rounded, because `remaining` is a performance.now() delta and therefore
+    // fractional. AbortSignal.timeout() rejects a non-integer delay with a
+    // RangeError, so the moment the deadline came within one request timeout
+    // this threw instead of setting a shorter one — turning "little time left,
+    // try quickly" into a page that failed outright and truncated the
+    // directory. Caught in a build log against a slow backend:
+    // `The value of "delay" is out of range. It must be an integer. Received
+    // 7757.074666999997`.
     signal: AbortSignal.timeout(
       Math.max(
         1,
-        Math.min(
-          isFirst ? COLD_START_TIMEOUT_MS : REQUEST_TIMEOUT_MS,
-          remaining,
+        Math.floor(
+          Math.min(
+            isFirst ? COLD_START_TIMEOUT_MS : REQUEST_TIMEOUT_MS,
+            remaining,
+          ),
         ),
       ),
     ),
@@ -257,9 +277,23 @@ export async function getFarms(
   locale: Locale = DEFAULT_LOCALE,
   query: FarmsQuery = {},
 ): Promise<Farm[]> {
+  "use cache";
+  // `locale` and `query` are arguments, so they become part of the cache key
+  // automatically — each filter combination gets its own entry rather than one
+  // of them poisoning the others.
+  //
+  // The lifetime is NOT set here. `use cache` stores the return value, and a
+  // walk that ends early still returns the farms it collected — a directory
+  // missing its tail is worth far more to a visitor than no directory at all.
+  // Caching that partial list for the full five minutes would serve it to
+  // everyone, where the old per-fetch options simply never cached the page that
+  // failed. So each exit picks its own lifetime: `FULL_CACHE_LIFE` once the
+  // walk is known to have finished, `DEGRADED_CACHE_LIFE` when it did not.
+  cacheTag(FARMS_CACHE_TAG);
+
   const farms: Farm[] = [];
   const seen = new Set<string>();
-  const deadline = Date.now() + TOTAL_BUDGET_MS;
+  const deadline = performance.now() + TOTAL_BUDGET_MS;
 
   const collect = (page: FarmsPage) => {
     for (const farm of page.farms) {
@@ -296,6 +330,7 @@ export async function getFarms(
 
   // The older backend returns everything at once and sets no cursor.
   if (!first.nextCursor) {
+    cacheLife(FULL_CACHE_LIFE);
     return farms.map(normalizeFarm);
   }
 
@@ -320,11 +355,12 @@ export async function getFarms(
   let waveSize = 1;
 
   while (page < FARMS_MAX_PAGES) {
-    if (Date.now() >= deadline) {
+    if (performance.now() >= deadline) {
       console.warn(
         `[farms] pagination budget spent after ${farms.length} farms; serving partial directory`,
       );
-      break;
+      cacheLife(DEGRADED_CACHE_LIFE);
+      return farms.map(normalizeFarm);
     }
 
     const wave = Array.from(
@@ -355,8 +391,8 @@ export async function getFarms(
           `[farms] page ${wave[index]} failed after ${farms.length} farms; serving partial directory`,
           result.reason,
         );
-        reachedEnd = true;
-        break;
+        cacheLife(DEGRADED_CACHE_LIFE);
+        return farms.map(normalizeFarm);
       }
       collect(result.value);
       // The cursor is the backend's own statement about whether more exists,
@@ -370,12 +406,21 @@ export async function getFarms(
       }
     }
     if (reachedEnd) {
-      break;
+      cacheLife(FULL_CACHE_LIFE);
+      return farms.map(normalizeFarm);
     }
     page += wave.length;
     waveSize = Math.min(waveSize * 2, FARMS_PAGE_CONCURRENCY);
   }
 
+  // Falling out of the loop means FARMS_MAX_PAGES was reached while the backend
+  // was still offering a cursor. That is the safety valve doing its job, but the
+  // directory it produced is truncated — only `reachedEnd` above, where the
+  // backend itself said there is no more, is a complete walk.
+  console.warn(
+    `[farms] page cap reached after ${farms.length} farms; serving partial directory`,
+  );
+  cacheLife(DEGRADED_CACHE_LIFE);
   return farms.map(normalizeFarm);
 }
 
@@ -398,11 +443,12 @@ async function walkSequentially(
   let nextOffset: string | undefined = startOffset;
 
   for (let page = 1; page < FARMS_MAX_PAGES && nextOffset; page++) {
-    if (Date.now() >= deadline) {
+    if (performance.now() >= deadline) {
       console.warn(
         `[farms] pagination budget spent after ${farms.length} farms; serving partial directory`,
       );
-      break;
+      cacheLife(DEGRADED_CACHE_LIFE);
+      return farms.map(normalizeFarm);
     }
     let parsed: FarmsPage;
     try {
@@ -417,7 +463,8 @@ async function walkSequentially(
         `[farms] page ${page} failed after ${farms.length} farms; serving partial directory`,
         error,
       );
-      break;
+      cacheLife(DEGRADED_CACHE_LIFE);
+      return farms.map(normalizeFarm);
     }
     for (const farm of parsed.farms) {
       if (!seen.has(farm.id)) {
@@ -428,6 +475,16 @@ async function walkSequentially(
     nextOffset = parsed.nextCursor;
   }
 
+  // A cursor still in hand means the loop stopped at FARMS_MAX_PAGES rather
+  // than at the end of the directory, so what it collected is truncated.
+  if (nextOffset) {
+    console.warn(
+      `[farms] page cap reached after ${farms.length} farms; serving partial directory`,
+    );
+    cacheLife(DEGRADED_CACHE_LIFE);
+  } else {
+    cacheLife(FULL_CACHE_LIFE);
+  }
   return farms.map(normalizeFarm);
 }
 
@@ -461,27 +518,50 @@ export const FACETS_CACHE_TAG = "farm-facets";
 export async function getFarmFacets(
   locale: Locale = DEFAULT_LOCALE,
 ): Promise<ApiFacets | null> {
+  "use cache";
+  // A SUCCESSFUL answer gets the normal five minutes. A failure must not:
+  // `null` is the signal that the backend has no /facets yet, and the home page
+  // reads it as "do not filter server-side", so a `null` cached for five
+  // minutes would disable server-side filtering for every visitor and make a
+  // shared /?canton=BE link serve the whole directory for that window.
+  //
+  // The lifetime is therefore chosen AFTER the fetch, in each branch. Throwing
+  // instead would keep the failure out of the cache entirely, but an error
+  // raised inside a cached function fails the prerender even when the caller
+  // catches it — which is what a build against a backend with no /facets does.
+  cacheTag(FARMS_CACHE_TAG, FACETS_CACHE_TAG);
+
   const url = new URL(`${getFarmsApiBaseUrl()}/facets`);
   url.searchParams.set("lang", locale);
 
   try {
     const response = await fetch(url, {
-      next: { revalidate: 300, tags: [FARMS_CACHE_TAG, FACETS_CACHE_TAG] },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-    if (!response.ok) {
-      return null;
+    if (response.ok) {
+      const facets = parseApiFacets(await response.json());
+      if (facets) {
+        cacheLife({ revalidate: 300, expire: 3600, stale: 300 });
+        return facets;
+      }
     }
-    return parseApiFacets(await response.json());
   } catch {
-    return null;
+    // Fall through to the degraded lifetime below.
   }
+
+  cacheLife(DEGRADED_CACHE_LIFE);
+  return null;
 }
 
 export async function getFarmById(
   id: string,
   locale?: string,
 ): Promise<Farm | null> {
+  "use cache";
+  cacheLife({ revalidate: 300, expire: 3600, stale: 300 });
+  // Same tag as the list, so creating or editing a farm busts both.
+  cacheTag(FARMS_CACHE_TAG);
+
   const url = new URL(
     `${getFarmsApiBaseUrl()}/farms/${encodeURIComponent(id)}`,
   );
@@ -490,8 +570,6 @@ export async function getFarmById(
   }
 
   const response = await fetch(url, {
-    // Same cache tag as the list, so creating or editing a farm busts both.
-    next: { revalidate: 300, tags: [FARMS_CACHE_TAG] },
     signal: AbortSignal.timeout(COLD_START_TIMEOUT_MS),
   });
 
