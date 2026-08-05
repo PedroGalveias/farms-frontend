@@ -54,9 +54,18 @@ afterAll(() => {
   globalThis.cancelAnimationFrame = realCancelRaf;
 });
 
+// The component decides whether a scroll matters by comparing the trigger's
+// rect against where it was when the popover was anchored — a scroll that did
+// not move the trigger cannot have invalidated the popover's fixed position.
+// jsdom gives every element a zero rect, so "the page scrolled" has to be
+// simulated by moving that rect.
+const TRIGGER_HEIGHT = 40;
+let triggerTop = 100;
+
 afterEach(() => {
   cleanup();
   frameQueue = [];
+  triggerTop = 100;
 });
 
 function open() {
@@ -69,8 +78,34 @@ function open() {
       value="all"
     />,
   );
-  fireEvent.click(screen.getByRole("button", { name: "Canton" }));
+  const trigger = screen.getByRole("button", { name: "Canton" });
+  vi.spyOn(trigger, "getBoundingClientRect").mockImplementation(
+    () =>
+      ({
+        bottom: triggerTop + TRIGGER_HEIGHT,
+        height: TRIGGER_HEIGHT,
+        left: 0,
+        right: 200,
+        top: triggerTop,
+        width: 200,
+        x: 0,
+        y: triggerTop,
+        toJSON: () => ({}),
+      }) as DOMRect,
+  );
+  fireEvent.click(trigger);
   return onChange;
+}
+
+/** The page scrolls, carrying the trigger with it. */
+function scrollPageBy(px: number) {
+  triggerTop -= px;
+  fireEvent.scroll(document, {});
+}
+
+/** A scroll that leaves the trigger exactly where it was. */
+function scrollWithoutMovingTrigger() {
+  fireEvent.scroll(document, {});
 }
 
 describe("GlassSelect", () => {
@@ -88,16 +123,35 @@ describe("GlassSelect", () => {
   // reproducibly on a phone.
   it("survives a scroll that arrives before the first frame", () => {
     open();
-    // Deliberately no flushFrame() — this is the opening frame.
-    fireEvent.scroll(document, {});
+    // Deliberately no flushFrame() — this is the opening frame. And the
+    // trigger genuinely moves, so it is the ARMING delay under test here, not
+    // the did-it-move check.
+    scrollPageBy(120);
     expect(screen.getByRole("listbox")).toBeInTheDocument();
   });
 
   it("closes on a genuine page scroll once armed", () => {
     open();
     flushFrame();
-    fireEvent.scroll(document, {});
+    scrollPageBy(120);
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+  });
+
+  // The regression that made this listener a liability rather than a
+  // safeguard. It used to close on ANY scroll event from anywhere, whether or
+  // not the trigger had budged — and the home route is partially prerendered,
+  // so the directory streams in below the toolbar after the shell has painted
+  // and the reflow that lands with it fires a scroll. The canton dropdown shut
+  // by itself under whoever had just opened it.
+  //
+  // The listener exists because the popover is `position: fixed` and a page
+  // scroll leaves its rect stale. A scroll that did not move the trigger
+  // leaves nothing stale.
+  it("stays open when a scroll left the trigger where it was", () => {
+    open();
+    flushFrame();
+    scrollWithoutMovingTrigger();
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
   });
 
   // Scrolling the options is not the page moving underneath them: the trigger's
@@ -136,11 +190,13 @@ describe("GlassSelect", () => {
   });
 
   // Keyboard reachability of the whole list. This lives here rather than in
-  // Playwright because the component closes itself on page scroll by design,
-  // and a page that is still settling (lazy images, fonts) emits scroll events
-  // — so a multi-step keyboard sequence against a real browser races the
-  // component's own intended behaviour. Nothing scrolls in jsdom, so the key
+  // Playwright because a multi-step keyboard sequence against a real browser
+  // is slow and easy to make racy, and nothing scrolls in jsdom, so the key
   // handling can be asserted exactly.
+  //
+  // It used to say the component "closes itself on page scroll by design", so
+  // a settling page raced it. That is no longer true: a scroll only closes the
+  // list if it actually moved the trigger.
   describe("keyboard reachability", () => {
     const activeId = (list: HTMLElement) =>
       list.getAttribute("aria-activedescendant");
