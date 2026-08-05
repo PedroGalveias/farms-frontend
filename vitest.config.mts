@@ -11,8 +11,23 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: ["**/*.{test,spec}.{ts,tsx}"],
+    // Setting `exclude` REPLACES Vitest's defaults, so every pattern this needs
+    // has to be spelled out — and as globs. A bare "node_modules" matches only
+    // the top-level directory, which let every NESTED one through: the moment a
+    // background task created a worktree under .claude/worktrees/ (each with its
+    // own node_modules), `npm test` picked up that worktree's copy of the suite
+    // AND its dependencies' own tests. 4,196 tests instead of 753, 102 of them
+    // failing, none of them this repo's. CI never saw it because a fresh
+    // checkout has neither.
+    //
     // e2e/ is Playwright's territory — keep Vitest out of it.
-    exclude: ["node_modules", ".next", "dist", "e2e/**"],
+    exclude: [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "e2e/**",
+      ".claude/**",
+    ],
     coverage: {
       provider: "v8",
       // text/text-summary for the CI log; json + json-summary feed the PR

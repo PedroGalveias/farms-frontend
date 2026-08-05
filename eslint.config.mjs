@@ -14,6 +14,10 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Generated test-coverage output.
     "coverage/**",
+    // Worktrees the agent harness creates for background tasks. Each is a full
+    // checkout of this repo, so linting it means linting a second (and third)
+    // copy of every file — 226 problems from code that is not on this branch.
+    ".claude/**",
   ]),
 ]);
 
