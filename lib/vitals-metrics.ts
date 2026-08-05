@@ -126,6 +126,71 @@ function currentRecorder(): Recorder | null {
   return (globalThis as RecorderHolder)[RECORDER_KEY] ?? null;
 }
 
+type Flusher = () => Promise<void>;
+
+/**
+ * How the recorded metrics actually leave the process.
+ *
+ * The reader exports on a 60s timer, which is right for a long-lived server
+ * (Render runs a Node container: the timer fires, and SIGTERM flushes the last
+ * minute on deploy). It delivers NOTHING on a serverless host. Vercel freezes
+ * the sandbox once the response is sent — `setInterval` does not fire in a
+ * frozen sandbox, there is no SIGTERM, and the instance is eventually discarded.
+ * Beacons would be recorded into histograms that are never exported, and the
+ * failure is invisible: `/api/vitals` still returns 204, the log line still
+ * appears, and Grafana simply stays empty.
+ *
+ * So the route also asks for a flush after each beacon, via `after()` so it
+ * happens once the response is out. Throttled, because a flush is an HTTP
+ * request to the collector and one per beacon would mean five per page view.
+ *
+ * On a long-lived server this changes little — the periodic reader usually gets
+ * there first, and a flush with nothing pending is cheap.
+ */
+const FLUSHER_KEY = Symbol.for("farms.vitals.flusher");
+const LAST_FLUSH_KEY = Symbol.for("farms.vitals.lastFlush");
+
+type FlusherHolder = {
+  [FLUSHER_KEY]?: Flusher | null;
+  [LAST_FLUSH_KEY]?: number;
+};
+
+/** At most one export per this many ms, however many beacons arrive. */
+export const FLUSH_THROTTLE_MS = 10_000;
+
+/** Called once from instrumentation, alongside `setVitalRecorder`. */
+export function setVitalFlusher(next: Flusher | null): void {
+  (globalThis as FlusherHolder)[FLUSHER_KEY] = next;
+}
+
+/**
+ * Export whatever has been recorded, at most once per FLUSH_THROTTLE_MS.
+ *
+ * Never throws: a beacon is fire-and-forget, and a collector that is down must
+ * not turn into a visitor-facing error. Resolves to whether a flush actually
+ * ran, which is what the tests assert on.
+ */
+export async function flushVitals(now = Date.now()): Promise<boolean> {
+  const holder = globalThis as FlusherHolder;
+  const flush = holder[FLUSHER_KEY];
+  if (!flush) {
+    return false;
+  }
+  const last = holder[LAST_FLUSH_KEY] ?? 0;
+  if (now - last < FLUSH_THROTTLE_MS) {
+    return false;
+  }
+  // Stamped BEFORE awaiting, so concurrent invocations on the same warm
+  // instance do not all decide they are the one to flush.
+  holder[LAST_FLUSH_KEY] = now;
+  try {
+    await flush();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Record one beacon. A no-op when metrics are switched off.
  *

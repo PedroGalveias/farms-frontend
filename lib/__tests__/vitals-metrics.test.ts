@@ -2,17 +2,26 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   VITAL_BUCKETS,
   VITAL_METRICS,
+  FLUSH_THROTTLE_MS,
   deviceClassFrom,
+  flushVitals,
   instrumentNameFor,
   otlpEndpoint,
   ratingFor,
   recordVital,
+  setVitalFlusher,
   setVitalRecorder,
   unitFor,
 } from "@/lib/vitals-metrics";
 
 afterEach(() => {
   setVitalRecorder(null);
+  setVitalFlusher(null);
+  // The throttle stamp lives on globalThis and would otherwise leak between
+  // tests, making whichever ran second look throttled.
+  (globalThis as Record<symbol, unknown>)[
+    Symbol.for("farms.vitals.lastFlush")
+  ] = 0;
   vi.unstubAllEnvs();
 });
 
@@ -166,5 +175,66 @@ describe("recorder sharing across bundles", () => {
 
     setVitalRecorder(null);
     expect((globalThis as Record<symbol, unknown>)[key]).toBeNull();
+  });
+});
+
+describe("flushVitals", () => {
+  // The reader exports on a 60s timer, which delivers nothing on a serverless
+  // host: a frozen sandbox runs no timers and gets no SIGTERM. So /api/vitals
+  // asks for a flush after each beacon. These pin the parts that make that
+  // affordable and safe.
+
+  it("does nothing when metrics are switched off", async () => {
+    await expect(flushVitals()).resolves.toBe(false);
+  });
+
+  it("exports once, then throttles until the window passes", async () => {
+    const flush = vi.fn().mockResolvedValue(undefined);
+    setVitalFlusher(flush);
+
+    const t0 = 1_000_000;
+    await expect(flushVitals(t0)).resolves.toBe(true);
+
+    // A page view sends five beacons. It must not cost five exports.
+    await expect(flushVitals(t0 + 1)).resolves.toBe(false);
+    await expect(flushVitals(t0 + FLUSH_THROTTLE_MS - 1)).resolves.toBe(false);
+    expect(flush).toHaveBeenCalledTimes(1);
+
+    await expect(flushVitals(t0 + FLUSH_THROTTLE_MS)).resolves.toBe(true);
+    expect(flush).toHaveBeenCalledTimes(2);
+  });
+
+  it("stamps the clock before awaiting, so concurrent beacons do not all flush", async () => {
+    let release: () => void = () => {};
+    const flush = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        }),
+    );
+    setVitalFlusher(flush);
+
+    const first = flushVitals(2_000_000);
+    // Same warm instance, same millisecond, second request in flight.
+    await expect(flushVitals(2_000_000)).resolves.toBe(false);
+    expect(flush).toHaveBeenCalledTimes(1);
+
+    release();
+    await expect(first).resolves.toBe(true);
+  });
+
+  it("swallows a collector failure — a beacon is fire-and-forget", async () => {
+    setVitalFlusher(() => Promise.reject(new Error("collector down")));
+
+    await expect(flushVitals(3_000_000)).resolves.toBe(false);
+  });
+
+  it("keeps the flusher on globalThis, not in module scope", () => {
+    const flush = vi.fn();
+    setVitalFlusher(flush);
+
+    // Same reason as the recorder: instrumentation.ts is its own bundle.
+    const key = Symbol.for("farms.vitals.flusher");
+    expect((globalThis as Record<symbol, unknown>)[key]).toBe(flush);
   });
 });

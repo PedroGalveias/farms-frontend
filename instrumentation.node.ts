@@ -15,6 +15,7 @@ import {
   instrumentNameFor,
   otlpEndpoint,
   recorderFor,
+  setVitalFlusher,
   setVitalRecorder,
   unitFor,
   type VitalHistograms,
@@ -82,10 +83,17 @@ export function startVitalsMetrics(): void {
 
   setVitalRecorder(recorderFor(histograms));
 
+  // The 60s reader above is enough on a long-lived server. It delivers nothing
+  // on a serverless host — a frozen sandbox runs no timers and gets no SIGTERM
+  // — so `/api/vitals` also asks for a flush after each beacon, throttled. See
+  // `flushVitals` for why that is not a per-beacon export.
+  setVitalFlusher(() => provider.forceFlush());
+
   // Flush on the way out. Without this the final interval's samples — which is
   // every sample since the last export — are lost on every deploy.
   const shutdown = () => {
     setVitalRecorder(null);
+    setVitalFlusher(null);
     void provider.shutdown().catch(() => {
       // Already shutting down; nothing useful to do with the failure.
     });

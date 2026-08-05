@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { isSameOrigin } from "@/lib/auth";
 import { routeGroupFor } from "@/lib/route-group";
 import {
   VITAL_METRICS,
   deviceClassFrom,
+  flushVitals,
   ratingFor,
   recordVital,
   type VitalMetric,
@@ -82,6 +83,18 @@ export async function POST(request: Request) {
     console.info(
       `[web-vitals] ${name}=${Math.round(body.value)} ${rating} ${route} ${device}`,
     );
+
+    // Export AFTER the response, not before it — a beacon must not wait on the
+    // collector. `flushVitals` throttles, so a page view sending five beacons
+    // still costs at most one export.
+    //
+    // Without this, nothing is exported at all on a serverless host: the
+    // reader's 60s timer never fires in a frozen sandbox and there is no
+    // SIGTERM to flush on. The endpoint would keep answering 204 and Grafana
+    // would keep showing nothing.
+    after(async () => {
+      await flushVitals();
+    });
   }
 
   // Beacons don't read the response; keep it empty and cheap.
