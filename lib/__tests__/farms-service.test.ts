@@ -413,7 +413,11 @@ describe("getFarms — total pagination budget", () => {
     });
     const spy = vi.spyOn(globalThis, "fetch");
     spy.mockImplementation(async () => {
-      vi.advanceTimersByTime(9_000);
+      // Fractional on purpose. In production `remaining` is a
+      // performance.now() delta and is never a whole number; advancing by whole
+      // milliseconds here would make the shortened budgets integers by
+      // accident and hide the RangeError below.
+      vi.advanceTimersByTime(9_000.4);
       return jsonResponse({
         farms: [makeFarm({ id: `f${spy.mock.calls.length}` })],
         next_cursor: String(spy.mock.calls.length * 100),
@@ -425,6 +429,14 @@ describe("getFarms — total pagination budget", () => {
     // The last hop must not have been granted a full 8s when under 8s remained.
     expect(timeouts[timeouts.length - 1]).toBeLessThanOrEqual(8000);
     expect(Math.min(...timeouts)).toBeLessThan(8000);
+
+    // And every one of them has to be an integer. `remaining` is a
+    // performance.now() delta, so the shortened budgets are fractional, and
+    // AbortSignal.timeout() throws a RangeError on a non-integer delay — which
+    // failed the page outright instead of giving it less time.
+    for (const ms of timeouts) {
+      expect(Number.isInteger(ms)).toBe(true);
+    }
   });
 });
 

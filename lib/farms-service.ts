@@ -246,12 +246,22 @@ async function fetchFarmsPage(
     // The first request absorbs the backend's cold start (free-tier Render
     // spins down and can take tens of seconds to wake); later pages are hot and
     // keep the tighter bound. Never wait past the overall deadline.
+    // Rounded, because `remaining` is a performance.now() delta and therefore
+    // fractional. AbortSignal.timeout() rejects a non-integer delay with a
+    // RangeError, so the moment the deadline came within one request timeout
+    // this threw instead of setting a shorter one — turning "little time left,
+    // try quickly" into a page that failed outright and truncated the
+    // directory. Caught in a build log against a slow backend:
+    // `The value of "delay" is out of range. It must be an integer. Received
+    // 7757.074666999997`.
     signal: AbortSignal.timeout(
       Math.max(
         1,
-        Math.min(
-          isFirst ? COLD_START_TIMEOUT_MS : REQUEST_TIMEOUT_MS,
-          remaining,
+        Math.floor(
+          Math.min(
+            isFirst ? COLD_START_TIMEOUT_MS : REQUEST_TIMEOUT_MS,
+            remaining,
+          ),
         ),
       ),
     ),
