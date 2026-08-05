@@ -64,6 +64,32 @@ const nextConfig: NextConfig = {
   // prerendered under Cache Components — see the file's own note.
   experimental: {
     globalNotFound: true,
+
+    // `prefetchInlining` is NOT enabled — measured, and it is a trade rather
+    // than a win.
+    //
+    // It serves a route's static shell to a prefetch instead of a partial
+    // payload. Audit #3 listed it as the follow-up to Cache Components (under
+    // the name `partialPrefetching`, which is 16.3's spelling — this version
+    // calls it `prefetchInlining`), reasoning that its value arrives once
+    // routes have a real App Shell. They do now, so it was measured over the
+    // wire against a production build:
+    //
+    //                  requests           over the wire
+    //   /canton/be     34 -> 20  (-41%)   55.0 -> 82.3 KB  (+50%)
+    //   /              29 -> 14  (-52%)   50.8 -> 85.7 KB  (+69%)
+    //
+    // Roughly 45% fewer requests for roughly 60% more bytes. Audit #3's case
+    // for cutting prefetches was connection overhead, and it held BECAUSE each
+    // payload was ~1.2 KB; a shell is 13-21 KB, which turns the same change
+    // into ~+30 KB of speculative download per page view on a phone.
+    //
+    // Which side of that trade is right depends on whether real visitors are
+    // hurt more by requests or by bytes, and there is no field data to say yet
+    // — #194 shipped the vitals pipeline but it stays inert until
+    // OTEL_EXPORTER_OTLP_ENDPOINT is set. Revisit then; it is one line.
+    //
+    // prefetchInlining: true,
   },
 
   // Emit a self-contained server bundle (.next/standalone/server.js) so the
