@@ -45,6 +45,20 @@ vi.mock("next/cache", async (importOriginal) => ({
 vi.mock("next/server", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/server")>()),
   connection: async () => {},
+  // `after` schedules work for once the response is sent, so it needs a request
+  // scope and throws without one. The stub RUNS the callback rather than
+  // dropping it: what a route defers is behaviour worth covering, and a no-op
+  // would silently stop testing it. Failures are swallowed for the same reason
+  // the real thing does not surface them to the response.
+  after: (task: (() => unknown) | Promise<unknown>) => {
+    try {
+      void Promise.resolve(typeof task === "function" ? task() : task).catch(
+        () => {},
+      );
+    } catch {
+      // A synchronous throw in deferred work must not fail the request either.
+    }
+  },
 }));
 
 // Production runs over HTTPS (a secure context); mirror that in jsdom so
