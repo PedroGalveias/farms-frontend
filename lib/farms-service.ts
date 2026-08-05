@@ -396,13 +396,21 @@ export async function getFarms(
       }
     }
     if (reachedEnd) {
-      break;
+      cacheLife(FULL_CACHE_LIFE);
+      return farms.map(normalizeFarm);
     }
     page += wave.length;
     waveSize = Math.min(waveSize * 2, FARMS_PAGE_CONCURRENCY);
   }
 
-  cacheLife(FULL_CACHE_LIFE);
+  // Falling out of the loop means FARMS_MAX_PAGES was reached while the backend
+  // was still offering a cursor. That is the safety valve doing its job, but the
+  // directory it produced is truncated — only `reachedEnd` above, where the
+  // backend itself said there is no more, is a complete walk.
+  console.warn(
+    `[farms] page cap reached after ${farms.length} farms; serving partial directory`,
+  );
+  cacheLife(DEGRADED_CACHE_LIFE);
   return farms.map(normalizeFarm);
 }
 
@@ -457,7 +465,16 @@ async function walkSequentially(
     nextOffset = parsed.nextCursor;
   }
 
-  cacheLife(FULL_CACHE_LIFE);
+  // A cursor still in hand means the loop stopped at FARMS_MAX_PAGES rather
+  // than at the end of the directory, so what it collected is truncated.
+  if (nextOffset) {
+    console.warn(
+      `[farms] page cap reached after ${farms.length} farms; serving partial directory`,
+    );
+    cacheLife(DEGRADED_CACHE_LIFE);
+  } else {
+    cacheLife(FULL_CACHE_LIFE);
+  }
   return farms.map(normalizeFarm);
 }
 

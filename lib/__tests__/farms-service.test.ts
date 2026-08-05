@@ -1,9 +1,38 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { FarmsApiError, getFarmById, getFarms } from "@/lib/farms-service";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cacheLife } from "next/cache";
+import {
+  FarmsApiError,
+  getFarmById,
+  getFarmFacets,
+  getFarms,
+} from "@/lib/farms-service";
 import type { Farm, FarmProduct } from "@/types/farm";
 
 afterEach(() => {
   vi.restoreAllMocks();
+});
+
+/**
+ * The lifetime a cached function picked, as `revalidate` seconds.
+ *
+ * `use cache` stores the RETURN VALUE, so a degraded answer — a truncated
+ * directory, a facet set the backend could not supply — must not inherit the
+ * lifetime of a good one. `cacheLife` is stubbed as a spy in vitest.setup.ts
+ * precisely so that decision is assertable here.
+ */
+function chosenRevalidate(): number | undefined {
+  const calls = vi.mocked(cacheLife).mock.calls;
+  const last = calls.at(-1)?.[0];
+  return typeof last === "object" && last !== null && "revalidate" in last
+    ? (last as { revalidate?: number }).revalidate
+    : undefined;
+}
+
+const FULL_REVALIDATE = 300;
+const DEGRADED_REVALIDATE = 10;
+
+beforeEach(() => {
+  vi.mocked(cacheLife).mockClear();
 });
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -194,6 +223,84 @@ describe("getFarms — cursor pagination", () => {
 // single failure used to discard the other 31. Vercel's cross-provider hop to a
 // free-tier backend that spins down made request #1 time out often enough to
 // matter; Render's warm, co-located backend rarely did.
+describe("getFarms — a degraded answer gets a degraded lifetime", () => {
+  // The regression this pins: under the fetch options that `use cache`
+  // replaced, only a SUCCESSFUL page response was ever cached, so a failed page
+  // was retried on the next request. Caching the return value instead means a
+  // truncated directory would be served to everyone for the full lifetime
+  // unless each exit path chooses for itself.
+
+  it("gives a complete walk the full lifetime", async () => {
+    mockFetchSequence(
+      jsonResponse({ farms: [makeFarm({ id: "f1" })], next_cursor: null }),
+    );
+
+    await getFarms();
+
+    expect(chosenRevalidate()).toBe(FULL_REVALIDATE);
+  });
+
+  it("gives a walk cut short by a failing page the degraded lifetime", async () => {
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockResolvedValueOnce(
+      jsonResponse({ farms: [makeFarm({ id: "f1" })], next_cursor: "100" }),
+    );
+    spy.mockRejectedValueOnce(new DOMException("timed out", "TimeoutError"));
+
+    await getFarms();
+
+    expect(chosenRevalidate()).toBe(DEGRADED_REVALIDATE);
+  });
+
+  it("gives a walk stopped by the page cap the degraded lifetime", async () => {
+    // A backend that offers another page forever: only FARMS_MAX_PAGES can end
+    // this walk, and what it collected is missing everything past the cap.
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+      jsonResponse({
+        farms: [makeFarm({ id: `f${Math.random()}` })],
+        next_cursor: "100",
+      }),
+    );
+
+    await getFarms();
+
+    expect(chosenRevalidate()).toBe(DEGRADED_REVALIDATE);
+  });
+});
+
+describe("getFarmFacets — a failure must not disable filtering for everyone", () => {
+  // `null` is read by app/[lang]/page.tsx as "do not filter server-side", so a
+  // `null` cached for the full lifetime would make a shared /?canton=BE link
+  // serve the entire directory until it expired.
+
+  it("gives real facets the full lifetime", async () => {
+    mockFetchSequence(
+      jsonResponse({
+        total: 1,
+        cantons: [{ code: "BE", count: 1 }],
+        categories: [{ slug: "fruit", count: 1 }],
+      }),
+    );
+
+    await expect(getFarmFacets()).resolves.not.toBeNull();
+    expect(chosenRevalidate()).toBe(FULL_REVALIDATE);
+  });
+
+  it("gives a failed lookup the degraded lifetime", async () => {
+    mockFetchSequence(jsonResponse("nope", 500));
+
+    await expect(getFarmFacets()).resolves.toBeNull();
+    expect(chosenRevalidate()).toBe(DEGRADED_REVALIDATE);
+  });
+
+  it("gives an unparseable body the degraded lifetime", async () => {
+    mockFetchSequence(jsonResponse({ unexpected: true }));
+
+    await expect(getFarmFacets()).resolves.toBeNull();
+    expect(chosenRevalidate()).toBe(DEGRADED_REVALIDATE);
+  });
+});
+
 describe("getFarms — partial-failure tolerance", () => {
   it("serves the pages that arrived when a later page fails", async () => {
     const spy = vi.spyOn(globalThis, "fetch");
