@@ -273,15 +273,70 @@ async function fetchFarmsPage(
   return parseFarmsPage(await response.json());
 }
 
+/**
+ * A failure carried as a VALUE rather than thrown.
+ *
+ * `use cache` functions must not throw. An error raised inside one fails the
+ * prerender even when the caller catches it — `app/[lang]/farm/[id]` wraps
+ * `getFarmById` in a try/catch and `app/[lang]/product/[slug]` wraps `getFarms`
+ * in `safeGetFarms`, and neither helped: a backend that was merely slow during
+ * `next build` took the whole build down with it, which is how CI went red on a
+ * PR that touched three unrelated files.
+ *
+ * So the cached layer returns the failure and the exported wrapper rethrows it
+ * OUTSIDE the cache. Callers see exactly the same contract as before.
+ */
+type FarmsResult<T> =
+  { value: T } | { failure: { message: string; status: number } };
+
+function asFailure(error: unknown): { message: string; status: number } {
+  if (error instanceof FarmsApiError) {
+    return { message: error.message, status: error.status };
+  }
+  return {
+    message:
+      error instanceof Error
+        ? error.message
+        : "The farms service could not be reached.",
+    status: 502,
+  };
+}
+
 export async function getFarms(
   locale: Locale = DEFAULT_LOCALE,
   query: FarmsQuery = {},
 ): Promise<Farm[]> {
+  const result = await cachedFarms(locale, query);
+  if ("failure" in result) {
+    throw new FarmsApiError(result.failure.message, result.failure.status);
+  }
+  return result.value;
+}
+
+async function cachedFarms(
+  locale: Locale,
+  query: FarmsQuery,
+): Promise<FarmsResult<Farm[]>> {
   "use cache";
   // `locale` and `query` are arguments, so they become part of the cache key
   // automatically — each filter combination gets its own entry rather than one
   // of them poisoning the others.
-  //
+  cacheTag(FARMS_CACHE_TAG);
+
+  try {
+    return { value: await walkDirectory(locale, query) };
+  } catch (error) {
+    // A failure is short-lived by definition; do not serve it for the full
+    // lifetime the way a good answer gets.
+    cacheLife(DEGRADED_CACHE_LIFE);
+    return { failure: asFailure(error) };
+  }
+}
+
+async function walkDirectory(
+  locale: Locale,
+  query: FarmsQuery,
+): Promise<Farm[]> {
   // The lifetime is NOT set here. `use cache` stores the return value, and a
   // walk that ends early still returns the farms it collected — a directory
   // missing its tail is worth far more to a visitor than no directory at all.
@@ -289,7 +344,6 @@ export async function getFarms(
   // everyone, where the old per-fetch options simply never cached the page that
   // failed. So each exit picks its own lifetime: `FULL_CACHE_LIFE` once the
   // walk is known to have finished, `DEGRADED_CACHE_LIFE` when it did not.
-  cacheTag(FARMS_CACHE_TAG);
 
   const farms: Farm[] = [];
   const seen = new Set<string>();
@@ -575,11 +629,38 @@ export async function getFarmById(
   id: string,
   locale?: string,
 ): Promise<Farm | null> {
+  const result = await cachedFarmById(id, locale);
+  if ("failure" in result) {
+    throw new FarmsApiError(result.failure.message, result.failure.status);
+  }
+  return result.value;
+}
+
+async function cachedFarmById(
+  id: string,
+  locale?: string,
+): Promise<FarmsResult<Farm | null>> {
   "use cache";
-  cacheLife({ revalidate: 300, expire: 3600, stale: 300 });
   // Same tag as the list, so creating or editing a farm busts both.
   cacheTag(FARMS_CACHE_TAG);
 
+  try {
+    const farm = await fetchFarmById(id, locale);
+    cacheLife(FULL_CACHE_LIFE);
+    return { value: farm };
+  } catch (error) {
+    // Not thrown out of here — see FarmsResult. A slow backend during
+    // `next build` used to take the build down through this exact path, even
+    // though app/[lang]/farm/[id] catches.
+    cacheLife(DEGRADED_CACHE_LIFE);
+    return { failure: asFailure(error) };
+  }
+}
+
+async function fetchFarmById(
+  id: string,
+  locale?: string,
+): Promise<Farm | null> {
   const url = new URL(
     `${getFarmsApiBaseUrl()}/farms/${encodeURIComponent(id)}`,
   );
