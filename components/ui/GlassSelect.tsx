@@ -50,6 +50,10 @@ export default function GlassSelect({
     at: 0,
   });
   const [style, setStyle] = useState<React.CSSProperties>({});
+  // Where the trigger sat when the popover was positioned. The popover is
+  // `position: fixed`, so that rect is what its placement depends on — and it
+  // is the only thing a scroll can invalidate. See `closeOnScroll`.
+  const anchorRef = useRef<{ top: number; left: number } | null>(null);
   const id = useId();
 
   const selected = options.find((option) => option.value === value);
@@ -71,10 +75,12 @@ export default function GlassSelect({
 
   useLayoutEffect(() => {
     if (!open) {
+      anchorRef.current = null;
       return;
     }
     const rect = triggerRef.current?.getBoundingClientRect();
     if (rect) {
+      anchorRef.current = { top: rect.top, left: rect.left };
       setStyle({
         position: "fixed",
         top: rect.bottom + 6,
@@ -158,6 +164,27 @@ export default function GlassSelect({
     const closeOnScroll = (event: Event) => {
       if (!armed) return;
       if (listRef.current?.contains(event.target as Node)) return;
+
+      // Only a scroll that actually MOVED the trigger invalidates anything.
+      // This listener exists because the popover is `position: fixed` and a
+      // page scroll leaves its rect stale — but it used to close on ANY scroll
+      // event from anywhere, whether or not the trigger had budged.
+      //
+      // That is a real dismissal, not a theoretical one. The home route is
+      // partially prerendered, so the directory streams in below the toolbar
+      // after the shell has painted; the reflow that lands with it fires a
+      // scroll, and the canton dropdown shut by itself under whoever had just
+      // opened it. (The same listener had already been worked around once —
+      // see the scrollTop note above, where `scrollIntoView` was dropped
+      // because it scrolled the document and tripped this.)
+      const anchor = anchorRef.current;
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (anchor && rect) {
+        const moved =
+          Math.abs(rect.top - anchor.top) >= 1 ||
+          Math.abs(rect.left - anchor.left) >= 1;
+        if (!moved) return;
+      }
       setOpen(false);
     };
     const closeOnResize = () => setOpen(false);

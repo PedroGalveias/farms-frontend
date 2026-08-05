@@ -155,34 +155,35 @@ test.describe("accessibility", () => {
     await page.waitForLoadState("networkidle");
     const trigger = page.getByRole("button", { name: "Canton", exact: true });
 
-    // Open it the way a keyboard user does, not with a click.
+    const settle = { timeout: 15_000 };
+    const list = page.getByRole("listbox");
+
+    // Opening AND the assertions about the opened list go in one retry block.
+    //
+    // They used to be separate: `toPass` opened the list, then the assertions
+    // ran outside it with no retry of their own. Anything that closed the list
+    // between the two — and the page is still settling, which used to be enough
+    // (see GlassSelect's close-on-scroll) — failed with `listbox` not found and
+    // nothing to recover it. Retrying the whole interaction reopens.
     await expect(async () => {
       if ((await trigger.getAttribute("aria-expanded")) !== "true") {
+        // Open it the way a keyboard user does, not with a click.
         await trigger.focus();
         await page.keyboard.press("ArrowDown");
       }
       await expect(trigger).toHaveAttribute("aria-expanded", "true", {
         timeout: 1000,
       });
-    }).toPass({ timeout: 15_000 });
-
-    // `test.slow()` triples the TEST budget but leaves each assertion on the
-    // default 5s, which is the gap this test kept falling through: it failed
-    // twice under a full parallel run and never once in isolation (5/5), which
-    // is the signature of a timeout rather than a real defect. The steps below
-    // each wait on the popup's own open/close transition finishing while the
-    // dev server compiles routes for the rest of the suite.
-    const settle = { timeout: 15_000 };
-
-    const list = page.getByRole("listbox");
-    await expect(list).toBeVisible(settle);
-    // Focus really is inside the popup — this is what makes tabindex="-1" the
-    // correct choice rather than an oversight.
-    await expect(list).toBeFocused(settle);
-
-    // It is wired for activedescendant navigation, which is what makes the
-    // list operable without being a tab stop.
-    await expect(list).toHaveAttribute("aria-activedescendant", /.+/, settle);
+      await expect(list).toBeVisible({ timeout: 2000 });
+      // Focus really is inside the popup — this is what makes tabindex="-1" the
+      // correct choice rather than an oversight.
+      await expect(list).toBeFocused({ timeout: 2000 });
+      // It is wired for activedescendant navigation, which is what makes the
+      // list operable without being a tab stop.
+      await expect(list).toHaveAttribute("aria-activedescendant", /.+/, {
+        timeout: 2000,
+      });
+    }).toPass({ timeout: 20_000 });
 
     await page.keyboard.press("Escape");
     await expect(list).toBeHidden(settle);
