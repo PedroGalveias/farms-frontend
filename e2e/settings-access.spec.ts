@@ -64,27 +64,36 @@ test.describe("settings is reachable signed out", () => {
     await page.setViewportSize({ width: 320, height: 780 });
     await page.goto("/");
 
-    const gear = page.locator('header a[href*="/settings"]');
-    const pill = page.locator("header > div").first();
-    const gearBox = await gear.boundingBox();
-    const pillBox = await pill.boundingBox();
+    // Measured once the page has settled, not on whatever is on screen the
+    // instant `goto` resolves. The route is partially prerendered: the header
+    // arrives in the static shell and the directory streams in behind its
+    // Suspense boundary, so a single read can land mid-stream on a layout that
+    // is not the one being asserted about. It settles correctly every time —
+    // it just is not settled yet the moment the document lands, and under a
+    // full parallel run that gap is wide enough to catch.
+    await expect(async () => {
+      const gear = page.locator('header a[href*="/settings"]');
+      const pill = page.locator("header > div").first();
+      const gearBox = await gear.boundingBox();
+      const pillBox = await pill.boundingBox();
 
-    expect(gearBox).not.toBeNull();
-    expect(pillBox).not.toBeNull();
-    expect(gearBox!.x + gearBox!.width).toBeLessThanOrEqual(
-      pillBox!.x + pillBox!.width + 1,
-    );
+      expect(gearBox).not.toBeNull();
+      expect(pillBox).not.toBeNull();
+      expect(gearBox!.x + gearBox!.width).toBeLessThanOrEqual(
+        pillBox!.x + pillBox!.width + 1,
+      );
 
-    // A control small enough to fit is no good if it cannot be tapped.
-    expect(gearBox!.width).toBeGreaterThanOrEqual(40);
-    expect(gearBox!.height).toBeGreaterThanOrEqual(40);
+      // A control small enough to fit is no good if it cannot be tapped.
+      expect(gearBox!.width).toBeGreaterThanOrEqual(40);
+      expect(gearBox!.height).toBeGreaterThanOrEqual(40);
 
-    const overflows = await page.evaluate(
-      () =>
-        document.documentElement.scrollWidth >
-        document.documentElement.clientWidth,
-    );
-    expect(overflows).toBe(false);
+      const overflows = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth,
+      );
+      expect(overflows).toBe(false);
+    }).toPass({ timeout: 15_000 });
   });
 
   test("the bottom tab bar is left alone", async ({ page }) => {

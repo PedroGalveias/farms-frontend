@@ -293,6 +293,26 @@ describe("getFarmFacets — a failure must not disable filtering for everyone", 
     expect(chosenRevalidate()).toBe(DEGRADED_REVALIDATE);
   });
 
+  it("gives a 404 the FULL lifetime — the endpoint is missing, not flaky", async () => {
+    // Production is in this state right now: the backend answers
+    // /health_check with 200 and /facets with 404. "This backend has no
+    // /facets" stays true until a deploy, and the deploy busts the tag — so
+    // re-asking every few seconds only burns a free-tier instance.
+    mockFetchSequence(jsonResponse("not found", 404));
+
+    await expect(getFarmFacets()).resolves.toBeNull();
+    expect(chosenRevalidate()).toBe(FULL_REVALIDATE);
+  });
+
+  it("gives a timeout the degraded lifetime", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(
+      new DOMException("timed out", "TimeoutError"),
+    );
+
+    await expect(getFarmFacets()).resolves.toBeNull();
+    expect(chosenRevalidate()).toBe(DEGRADED_REVALIDATE);
+  });
+
   it("gives an unparseable body the degraded lifetime", async () => {
     mockFetchSequence(jsonResponse({ unexpected: true }));
 
