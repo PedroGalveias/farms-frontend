@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 /**
  * The directory now asks the API for a filtered subset instead of downloading
@@ -10,6 +10,34 @@ import { expect, test } from "@playwright/test";
  * canton dropdown offered only Bern — and a visitor could not get back out.
  * Counts now come from `GET /facets`, which always sees the whole directory.
  */
+
+/**
+ * The rendered card count is capped by pagination, so it is the same on every
+ * URL and proves nothing. The reported total is what moves.
+ *
+ * Polled rather than read once. The route is partially prerendered: the shell
+ * arrives as static HTML and the directory — the total with it — streams in
+ * behind its Suspense boundary. `networkidle` says the network went quiet, not
+ * that React has committed the streamed content, so a single innerText can
+ * catch a placeholder. Waiting for a number greater than zero waits for the
+ * real value; every caller here asserts on a positive total anyway.
+ */
+async function reportedTotal(page: Page, url: string): Promise<number> {
+  await page.goto(url);
+
+  let total = 0;
+  await expect(async () => {
+    const text = await page
+      .getByText(/\d+\s+farms/i)
+      .first()
+      .innerText();
+    total = Number(text.match(/\d+/)?.[0] ?? 0);
+    expect(total).toBeGreaterThan(0);
+  }).toPass({ timeout: 15_000 });
+
+  return total;
+}
+
 test.describe("server-side directory filtering", () => {
   test("a canton-filtered URL still offers every other canton", async ({
     page,
@@ -45,40 +73,16 @@ test.describe("server-side directory filtering", () => {
   test("a filtered URL reports fewer farms than the unfiltered one", async ({
     page,
   }) => {
-    // The rendered card count is capped by pagination, so it is the same on
-    // both URLs and proves nothing. The reported total is what moves.
-    const reportedTotal = async (url: string) => {
-      await page.goto(url);
-      await page.waitForLoadState("networkidle");
-      const text = await page
-        .getByText(/\d+\s+farms/i)
-        .first()
-        .innerText();
-      return Number(text.match(/\d+/)?.[0] ?? 0);
-    };
-
-    const all = await reportedTotal("/");
-    const bern = await reportedTotal("/?canton=BE");
+    const all = await reportedTotal(page, "/");
+    const bern = await reportedTotal(page, "/?canton=BE");
 
     // Proves the filter reached the server AND that the client did not undo it.
-    expect(all).toBeGreaterThan(0);
-    expect(bern).toBeGreaterThan(0);
     expect(bern).toBeLessThan(all);
   });
 
   test("clearing the filter restores the full directory", async ({ page }) => {
-    const reportedTotal = async (url: string) => {
-      await page.goto(url);
-      await page.waitForLoadState("networkidle");
-      const text = await page
-        .getByText(/\d+\s+farms/i)
-        .first()
-        .innerText();
-      return Number(text.match(/\d+/)?.[0] ?? 0);
-    };
-
-    const bern = await reportedTotal("/?canton=BE");
-    const all = await reportedTotal("/");
+    const bern = await reportedTotal(page, "/?canton=BE");
+    const all = await reportedTotal(page, "/");
 
     // The round trip out of a filter is what a broken picker would make
     // impossible.
