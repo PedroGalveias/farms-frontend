@@ -519,16 +519,28 @@ export async function getFarmFacets(
   locale: Locale = DEFAULT_LOCALE,
 ): Promise<ApiFacets | null> {
   "use cache";
-  // A SUCCESSFUL answer gets the normal five minutes. A failure must not:
-  // `null` is the signal that the backend has no /facets yet, and the home page
-  // reads it as "do not filter server-side", so a `null` cached for five
-  // minutes would disable server-side filtering for every visitor and make a
-  // shared /?canton=BE link serve the whole directory for that window.
+  // Three outcomes, three lifetimes, chosen AFTER the fetch rather than up
+  // front. `null` is read by app/[lang]/page.tsx as "do not filter
+  // server-side", so how long each `null` lives is a real decision:
   //
-  // The lifetime is therefore chosen AFTER the fetch, in each branch. Throwing
-  // instead would keep the failure out of the cache entirely, but an error
-  // raised inside a cached function fails the prerender even when the caller
-  // catches it — which is what a build against a backend with no /facets does.
+  //   facets parsed   FULL     — the normal five minutes.
+  //   404             FULL     — this backend has no /facets endpoint. That is
+  //                              a durable fact, not a blip: it stays true
+  //                              until a deploy, and a deploy busts the tag.
+  //                              Production is in exactly this state today, so
+  //                              a short lifetime here would mean re-asking a
+  //                              free-tier instance for a route it does not
+  //                              have, six times a minute, indefinitely.
+  //   anything else   DEGRADED — a timeout or a 5xx is transient, and one of
+  //                              them must not disable server-side filtering
+  //                              for everyone for five minutes. A shared
+  //                              /?canton=BE link would serve the entire
+  //                              directory for that window.
+  //
+  // Throwing to keep failures out of the cache entirely would be stricter, but
+  // an error raised inside a cached function fails the prerender even when the
+  // caller catches it — which is what a build against a backend with no
+  // /facets does.
   cacheTag(FARMS_CACHE_TAG, FACETS_CACHE_TAG);
 
   const url = new URL(`${getFarmsApiBaseUrl()}/facets`);
@@ -538,19 +550,25 @@ export async function getFarmFacets(
     const response = await fetch(url, {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
+
     if (response.ok) {
       const facets = parseApiFacets(await response.json());
       if (facets) {
-        cacheLife({ revalidate: 300, expire: 3600, stale: 300 });
+        cacheLife(FULL_CACHE_LIFE);
         return facets;
       }
+      // A 200 whose body does not parse is a broken backend, not a missing
+      // endpoint — treat it as transient.
+      cacheLife(DEGRADED_CACHE_LIFE);
+      return null;
     }
-  } catch {
-    // Fall through to the degraded lifetime below.
-  }
 
-  cacheLife(DEGRADED_CACHE_LIFE);
-  return null;
+    cacheLife(response.status === 404 ? FULL_CACHE_LIFE : DEGRADED_CACHE_LIFE);
+    return null;
+  } catch {
+    cacheLife(DEGRADED_CACHE_LIFE);
+    return null;
+  }
 }
 
 export async function getFarmById(
