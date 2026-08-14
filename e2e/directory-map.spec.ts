@@ -15,7 +15,7 @@ test.describe("directory OpenStreetMap view", () => {
     await expect(map).toBeVisible();
     await expect(map.locator(".leaflet-tile").first()).toHaveAttribute(
       "src",
-      /tile\.openstreetmap\.org/,
+      /^https?:\/\/tile\.openstreetmap\.org(?::\d+)?\//i,
     );
     await expect(map.getByText("OpenStreetMap")).toBeVisible();
     await expect
