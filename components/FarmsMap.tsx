@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
 import "leaflet.markercluster";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
+import { useT } from "@/components/i18n/LanguageProvider";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { SWITZERLAND_BOUNDS, toFarmPoints } from "@/lib/map";
 import type { Farm } from "@/types/farm";
 
 interface FarmsMapProps {
   farms: Farm[];
-  onOpenFarm: (farm: Farm) => void;
+  onOpenFarm: (farm: Farm, sourceEl?: HTMLElement | null) => void;
   /** CSS height for the map container (default: the directory's tall view). */
   heightStyle?: string;
 }
@@ -19,9 +20,9 @@ interface FarmsMapProps {
 // On-brand pin (no external image — avoids Leaflet's broken default-icon paths).
 const pinIcon = L.divIcon({
   className: "farm-pin",
-  html: '<span class="farm-pin__dot"></span>',
-  iconSize: [18, 18],
-  iconAnchor: [9, 9],
+  html: '<span class="farm-pin__marker"><span class="farm-pin__dot"></span></span>',
+  iconSize: [28, 34],
+  iconAnchor: [14, 32],
 });
 
 function clusterIcon(cluster: L.MarkerCluster) {
@@ -44,7 +45,9 @@ export default function FarmsMap({
   onOpenFarm,
   heightStyle = "min(70vh, 640px)",
 }: FarmsMapProps) {
+  const t = useT();
   const { theme } = useTheme();
+  const points = useMemo(() => toFarmPoints(farms), [farms]);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
@@ -105,7 +108,6 @@ export default function FarmsMap({
       return;
     }
     cluster.clearLayers();
-    const points = toFarmPoints(farms);
     // Build the markers up front and add them in one bulk call — far cheaper
     // than addLayer-per-marker, which re-clusters on every insert.
     const markers = points.map((point) => {
@@ -113,7 +115,9 @@ export default function FarmsMap({
         icon: pinIcon,
         title: point.farm.name,
       });
-      marker.on("click", () => onOpenRef.current(point.farm));
+      marker.on("click", () =>
+        onOpenRef.current(point.farm, marker.getElement()),
+      );
       return marker;
     });
     cluster.addLayers(markers);
@@ -128,15 +132,22 @@ export default function FarmsMap({
         points.map((point) => [point.latitude, point.longitude]),
       );
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+    } else {
+      map.fitBounds([
+        [SWITZERLAND_BOUNDS.south, SWITZERLAND_BOUNDS.west],
+        [SWITZERLAND_BOUNDS.north, SWITZERLAND_BOUNDS.east],
+      ]);
     }
-  }, [farms]);
+  }, [points]);
 
   return (
     <div
+      aria-label={t("map_ariaLabel", { n: points.length })}
       className={`isolate overflow-hidden rounded-card border border-line ${
         theme === "dark" ? "map-dark" : ""
       }`}
       ref={containerRef}
+      role="region"
       style={{ height: heightStyle }}
     />
   );
