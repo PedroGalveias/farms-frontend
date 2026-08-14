@@ -29,11 +29,12 @@ describe("toFarmPoints", () => {
     });
   });
 
-  it("drops farms with missing or malformed coordinates", () => {
+  it("drops farms with missing, malformed, or non-Swiss coordinates", () => {
     const points = toFarmPoints([
       makeFarm({ id: "a", coordinates: "" }),
       makeFarm({ id: "b", coordinates: "not-a-coordinate" }),
       makeFarm({ id: "c", coordinates: "46.0,8.0" }),
+      makeFarm({ id: "d", coordinates: "51.5072,-0.1276" }),
     ]);
 
     expect(points.map((point) => point.farm.id)).toEqual(["c"]);

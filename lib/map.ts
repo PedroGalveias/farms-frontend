@@ -17,14 +17,22 @@ export const SWITZERLAND_BOUNDS = {
 };
 
 /**
- * Farms that can be placed on the map: those whose coordinates parse to a valid
- * lat/lng. Farms with missing or malformed coordinates are dropped.
+ * Farms that can be placed on the Swiss map: those whose coordinates parse to
+ * a valid lat/lng inside the country's generous framing bounds. Out-of-country
+ * geocodes are dropped so one bad record cannot zoom the directory out to a
+ * world map.
  */
 export function toFarmPoints(farms: Farm[]): FarmPoint[] {
   const points: FarmPoint[] = [];
   for (const farm of farms) {
     const coords = parseQuickSearchCoordinates(farm.coordinates);
-    if (coords) {
+    if (
+      coords &&
+      coords.latitude >= SWITZERLAND_BOUNDS.south &&
+      coords.latitude <= SWITZERLAND_BOUNDS.north &&
+      coords.longitude >= SWITZERLAND_BOUNDS.west &&
+      coords.longitude <= SWITZERLAND_BOUNDS.east
+    ) {
       points.push({
         farm,
         latitude: coords.latitude,

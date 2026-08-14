@@ -1094,15 +1094,33 @@ body.sheet-open .mobile-tab-bar {
   font: inherit;
 }
 
-/* On-brand farm pin (custom divIcon — no external image). */
+/* On-brand farm pin (custom divIcon — no external image). The teardrop's tip
+   is the exact coordinate; the white centre stays legible over busy tiles. */
+.leaflet-marker-icon.farm-pin {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+
+.farm-pin__marker {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  transform: rotate(-45deg);
+  border: 2px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: var(--color-pine);
+  box-shadow: 0 3px 9px rgba(20, 22, 27, 0.45);
+}
+
 .farm-pin__dot {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
   border-radius: 999px;
-  background: var(--color-pine);
-  border: 2px solid #fff;
-  box-shadow: 0 1px 4px rgba(20, 22, 27, 0.45);
+  background: #fff;
 }
 
 /* Scoped with `.leaflet-marker-icon` so it out-specifies Leaflet's own
