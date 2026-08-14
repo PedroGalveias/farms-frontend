@@ -47,9 +47,7 @@ export function parseFarmTaxonomy(body: unknown): FarmTaxonomy | null {
     candidate.categories.map((category) => category.slug),
   );
   if (
-    !candidate.products.every((product) =>
-      categorySlugs.has(product.category),
-    )
+    !candidate.products.every((product) => categorySlugs.has(product.category))
   ) {
     return null;
   }

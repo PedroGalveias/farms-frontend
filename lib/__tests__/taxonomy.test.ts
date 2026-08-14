@@ -34,9 +34,7 @@ describe("farm taxonomy", () => {
     expect(
       parseFarmTaxonomy({
         lang: "fr",
-        categories: [
-          { slug: "vegetables", name: "Légumes", translated: true },
-        ],
+        categories: [{ slug: "vegetables", name: "Légumes", translated: true }],
         products: [
           {
             slug: "strawberries",
