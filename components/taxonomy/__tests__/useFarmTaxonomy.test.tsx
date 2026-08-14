@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useFarmTaxonomy } from "@/components/taxonomy/useFarmTaxonomy";
+import type { Locale } from "@/lib/i18n-core";
+import type { FarmTaxonomy } from "@/types/taxonomy";
 
-const TAXONOMY = {
+const TAXONOMY: FarmTaxonomy = {
   lang: "fr",
   categories: [{ slug: "vegetables", name: "Légumes", translated: true }],
   products: [
@@ -20,6 +22,18 @@ afterEach(() => {
 });
 
 describe("useFarmTaxonomy", () => {
+  it("hides taxonomy from the previous locale during a locale change", () => {
+    const { result, rerender } = renderHook(
+      ({ locale }: { locale: Locale }) =>
+        useFarmTaxonomy({ enabled: false, initial: TAXONOMY, locale }),
+      { initialProps: { locale: "fr" as Locale } },
+    );
+
+    expect(result.current?.lang).toBe("fr");
+    rerender({ locale: "de" });
+    expect(result.current).toBeNull();
+  });
+
   it("retries after a transient request failure", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")

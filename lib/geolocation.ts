@@ -111,7 +111,8 @@ export function readStoredLocation(): GeolocationCoords | null {
     Number.isFinite(parsed.latitude) &&
     Number.isFinite(parsed.longitude) &&
     Math.abs(parsed.latitude) <= 90 &&
-    Math.abs(parsed.longitude) <= 180
+    Math.abs(parsed.longitude) <= 180 &&
+    !(parsed.latitude === 0 && parsed.longitude === 0)
   ) {
     return { latitude: parsed.latitude, longitude: parsed.longitude };
   }

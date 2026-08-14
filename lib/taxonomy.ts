@@ -43,6 +43,16 @@ export function parseFarmTaxonomy(body: unknown): FarmTaxonomy | null {
   ) {
     return null;
   }
+  const categorySlugs = new Set(
+    candidate.categories.map((category) => category.slug),
+  );
+  if (
+    !candidate.products.every((product) =>
+      categorySlugs.has(product.category),
+    )
+  ) {
+    return null;
+  }
   return {
     lang: candidate.lang as Locale,
     categories: candidate.categories,

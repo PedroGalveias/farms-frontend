@@ -85,7 +85,10 @@ export function parseApiFacets(body: unknown): ApiFacets | null {
   }
   return {
     total: candidate.total,
-    cantons: candidate.cantons,
+    cantons: candidate.cantons.map((entry) => ({
+      ...entry,
+      code: entry.code.trim().toUpperCase(),
+    })),
     categories: candidate.categories,
   };
 }
@@ -124,7 +127,7 @@ export function facetsFromApi(api: ApiFacets): DirectoryFacets {
   }
 
   for (const entry of api.cantons) {
-    const code = entry.code.trim();
+    const code = entry.code.trim().toUpperCase();
     if (entry.count > 0 && code.length > 0) {
       cantonCounts[code] = (cantonCounts[code] ?? 0) + entry.count;
     }

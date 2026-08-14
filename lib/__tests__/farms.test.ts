@@ -83,11 +83,11 @@ describe("getUniqueFarmCantons", () => {
     expect(cantons).toEqual(["BE", "ZH"]);
   });
 
-  it("trims surrounding whitespace rather than treating it as a new canton", () => {
+  it("normalizes surrounding whitespace and casing", () => {
     expect(
       getUniqueFarmCantons([
         makeFarm({ canton: "BE" }),
-        makeFarm({ canton: " BE " }),
+        makeFarm({ canton: " be " }),
       ]),
     ).toEqual(["BE"]);
   });

@@ -89,7 +89,7 @@ export function getCategoryCounts(farms: Farm[]): Record<string, number> {
 export function getCantonCounts(farms: Farm[]): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const farm of farms) {
-    const code = farm.canton?.trim();
+    const code = farm.canton?.trim().toUpperCase();
     if (!code) {
       continue;
     }

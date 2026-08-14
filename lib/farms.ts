@@ -85,7 +85,7 @@ export function groupCantonsByRegion(cantonCodes: string[]) {
  */
 export function getUniqueFarmCantons(farms: Array<Pick<Farm, "canton">>) {
   const codes = farms
-    .map((farm) => farm.canton?.trim() ?? "")
+    .map((farm) => farm.canton?.trim().toUpperCase() ?? "")
     .filter((code) => code.length > 0);
   return Array.from(new Set(codes)).sort((a, b) => a.localeCompare(b));
 }

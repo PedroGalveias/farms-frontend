@@ -45,8 +45,20 @@ export function writeStorage(key: string, value: string): StorageWriteResult {
   }
 }
 
-export function writeStorageJson(key: string, value: unknown) {
-  return writeStorage(key, JSON.stringify(value));
+export function writeStorageJson(
+  key: string,
+  value: unknown,
+): StorageWriteResult {
+  let serialized: string | undefined;
+  try {
+    serialized = JSON.stringify(value);
+  } catch {
+    return { ok: false, reason: "unavailable" };
+  }
+  if (serialized === undefined) {
+    return { ok: false, reason: "unavailable" };
+  }
+  return writeStorage(key, serialized);
 }
 
 export function removeStorage(key: string): boolean {

@@ -57,5 +57,5 @@ export function useFarmTaxonomy({
     };
   }, [enabled, initial, locale]);
 
-  return taxonomy;
+  return taxonomy?.lang === locale ? taxonomy : null;
 }

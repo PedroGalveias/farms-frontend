@@ -29,6 +29,16 @@ describe("parseApiFacets", () => {
     ).not.toBeNull();
   });
 
+  it("normalizes validated canton codes", () => {
+    expect(
+      parseApiFacets({
+        total: 1,
+        cantons: [{ code: " be ", count: 1 }],
+        categories: [],
+      })?.cantons,
+    ).toEqual([{ code: "BE", count: 1 }]);
+  });
+
   it.each([
     ["not an object", 42],
     ["null", null],
@@ -112,6 +122,20 @@ describe("facetsFromApi", () => {
 
     expect(facets.cantons).toEqual(["BE"]);
     expect(facets.cantonCounts).toEqual({ BE: 1 });
+  });
+
+  it("normalizes and combines canton count keys", () => {
+    const facets = facetsFromApi({
+      total: 3,
+      cantons: [
+        { code: " be ", count: 1 },
+        { code: "BE", count: 2 },
+      ],
+      categories: [],
+    });
+
+    expect(facets.cantons).toEqual(["BE"]);
+    expect(facets.cantonCounts).toEqual({ BE: 3 });
   });
 });
 

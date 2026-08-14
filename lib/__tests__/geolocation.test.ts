@@ -98,6 +98,14 @@ describe("remembered location", () => {
     expect(readStoredLocation()).toBeNull();
   });
 
+  it("returns null for the Null Island sentinel", () => {
+    window.localStorage.setItem(
+      LOCATION_STORAGE_KEY,
+      JSON.stringify({ latitude: 0, longitude: 0 }),
+    );
+    expect(readStoredLocation()).toBeNull();
+  });
+
   it("clears a remembered location", () => {
     writeStoredLocation({ latitude: 46.95, longitude: 7.45 });
     clearStoredLocation();

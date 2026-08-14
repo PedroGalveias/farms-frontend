@@ -8,7 +8,10 @@ import {
 
 const taxonomy = parseFarmTaxonomy({
   lang: "fr",
-  categories: [{ slug: "vegetables", name: "Légumes", translated: true }],
+  categories: [
+    { slug: "vegetables", name: "Légumes", translated: true },
+    { slug: "fruits", name: "Fruits", translated: true },
+  ],
   products: [
     {
       slug: "strawberries",
@@ -24,6 +27,25 @@ describe("farm taxonomy", () => {
     expect(taxonomy?.lang).toBe("fr");
     expect(
       parseFarmTaxonomy({ lang: "fr", categories: [], products: [{}] }),
+    ).toBeNull();
+  });
+
+  it("rejects products whose category is absent", () => {
+    expect(
+      parseFarmTaxonomy({
+        lang: "fr",
+        categories: [
+          { slug: "vegetables", name: "Légumes", translated: true },
+        ],
+        products: [
+          {
+            slug: "strawberries",
+            name: "Fraises",
+            translated: true,
+            category: "fruits",
+          },
+        ],
+      }),
     ).toBeNull();
   });
 

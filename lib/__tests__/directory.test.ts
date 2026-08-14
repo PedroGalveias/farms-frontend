@@ -121,11 +121,11 @@ describe("facet counts", () => {
     expect(Object.keys(counts)).not.toContain("");
   });
 
-  it("folds a padded code into the same bucket", () => {
+  it("folds padded and lowercase codes into the same bucket", () => {
     expect(
       getCantonCounts([
         makeFarm({ canton: "ZH" }),
-        makeFarm({ canton: " ZH" }),
+        makeFarm({ canton: " zh " }),
       ]),
     ).toEqual({ ZH: 2 });
   });
