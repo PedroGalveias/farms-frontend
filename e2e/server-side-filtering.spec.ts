@@ -25,6 +25,10 @@ import { expect, test, type Page } from "@playwright/test";
 async function reportedTotal(page: Page, url: string): Promise<number> {
   await page.goto(url);
 
+  return currentReportedTotal(page);
+}
+
+async function currentReportedTotal(page: Page): Promise<number> {
   let total = 0;
   await expect(async () => {
     const text = await page
@@ -80,12 +84,40 @@ test.describe("server-side directory filtering", () => {
     expect(bern).toBeLessThan(all);
   });
 
-  test("clearing the filter restores the full directory", async ({ page }) => {
-    const bern = await reportedTotal(page, "/?canton=BE");
-    const all = await reportedTotal(page, "/");
+  test("switching canton after landing on a filtered URL fetches the new canton", async ({
+    page,
+  }) => {
+    await reportedTotal(page, "/?canton=BE");
+    const trigger = page.getByRole("button", { name: "Canton", exact: true });
+    await expect(async () => {
+      if ((await trigger.getAttribute("aria-expanded")) !== "true") {
+        await trigger.click();
+      }
+      await expect(trigger).toHaveAttribute("aria-expanded", "true", {
+        timeout: 1000,
+      });
+    }).toPass({ timeout: 15_000 });
+    const listbox = page.getByRole("listbox");
+    await expect(listbox).toBeVisible();
+    await listbox.focus();
+    await expect(listbox).toBeFocused();
+    // Use the select's keyboard typeahead. Firefox scrolls a distant option
+    // into view before Playwright dispatches click; the page-level scroll
+    // listener correctly closes the floating menu, detaching that option.
+    await listbox.press("v");
+    await listbox.press("Enter");
 
-    // The round trip out of a filter is what a broken picker would make
-    // impossible.
+    await expect(page).toHaveURL(/canton=VD/);
+    expect(await currentReportedTotal(page)).toBeGreaterThan(0);
+  });
+
+  test("clearing the filter restores the full directory", async ({ page }) => {
+    const all = await reportedTotal(page, "/");
+    const bern = await reportedTotal(page, "/?canton=BE");
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
+
     expect(all).toBeGreaterThan(bern);
+    await expect(page).not.toHaveURL(/canton=/);
+    await expect.poll(() => currentReportedTotal(page)).toBe(all);
   });
 });

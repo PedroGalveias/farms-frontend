@@ -1,3 +1,9 @@
+import {
+  readStorageJson,
+  removeStorage,
+  writeStorageJson,
+} from "@/lib/safe-storage";
+
 /**
  * One place for browser geolocation, hardened for mobile Safari.
  *
@@ -96,51 +102,29 @@ export const LOCATION_STORAGE_KEY = "farms.location";
 
 /** Read the remembered location, or null if none/invalid/unavailable. */
 export function readStoredLocation(): GeolocationCoords | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  try {
-    const raw = window.localStorage.getItem(LOCATION_STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-    const parsed = JSON.parse(raw) as Partial<GeolocationCoords>;
-    if (
-      typeof parsed?.latitude === "number" &&
-      typeof parsed?.longitude === "number" &&
-      Number.isFinite(parsed.latitude) &&
-      Number.isFinite(parsed.longitude) &&
-      Math.abs(parsed.latitude) <= 90 &&
-      Math.abs(parsed.longitude) <= 180
-    ) {
-      return { latitude: parsed.latitude, longitude: parsed.longitude };
-    }
-  } catch {
-    // Corrupt JSON or storage disabled — treat as no remembered location.
+  const parsed = readStorageJson(
+    LOCATION_STORAGE_KEY,
+  ) as Partial<GeolocationCoords> | null;
+  if (
+    typeof parsed?.latitude === "number" &&
+    typeof parsed?.longitude === "number" &&
+    Number.isFinite(parsed.latitude) &&
+    Number.isFinite(parsed.longitude) &&
+    Math.abs(parsed.latitude) <= 90 &&
+    Math.abs(parsed.longitude) <= 180 &&
+    !(parsed.latitude === 0 && parsed.longitude === 0)
+  ) {
+    return { latitude: parsed.latitude, longitude: parsed.longitude };
   }
   return null;
 }
 
 /** Remember a location the visitor just shared. Best-effort. */
 export function writeStoredLocation(coords: GeolocationCoords): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  try {
-    window.localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(coords));
-  } catch {
-    // Storage full or disabled — distance sorting still works this session.
-  }
+  writeStorageJson(LOCATION_STORAGE_KEY, coords);
 }
 
 /** Forget the remembered location. */
 export function clearStoredLocation(): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  try {
-    window.localStorage.removeItem(LOCATION_STORAGE_KEY);
-  } catch {
-    // Ignore — nothing actionable.
-  }
+  removeStorage(LOCATION_STORAGE_KEY);
 }

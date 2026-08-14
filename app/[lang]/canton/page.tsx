@@ -1,20 +1,24 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import CantonDirectory, {
   type CantonGroup,
 } from "@/components/canton/CantonDirectory";
-import { getFarms } from "@/lib/farms-service";
+import RouteDataSkeleton from "@/components/RouteDataSkeleton";
+import { getFarmFacets, getFarms } from "@/lib/farms-service";
+import { facetsFromApi } from "@/lib/directory-facets";
 import {
   DEFAULT_LOCALE,
   isLocale,
   translate,
   localeAlternates,
+  type Locale,
 } from "@/lib/i18n";
 import { SWISS_REGIONS, getCantonName, getCantonsInRegion } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
-async function safeGetFarms(): Promise<Farm[]> {
+async function safeGetFarms(locale: Locale): Promise<Farm[]> {
   try {
-    return await getFarms();
+    return await getFarms(locale);
   } catch {
     return [];
   }
@@ -46,15 +50,29 @@ function countByCanton(farms: Farm[]) {
   return counts;
 }
 
-export default async function CantonHubPage({
+export default function CantonHubPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  return (
+    <Suspense fallback={<RouteDataSkeleton />}>
+      <CantonHubContent params={params} />
+    </Suspense>
+  );
+}
+
+async function CantonHubContent({
   params,
 }: {
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
   const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
-  const farms = await safeGetFarms();
-  const counts = countByCanton(farms);
+  const apiFacets = await getFarmFacets(locale);
+  const counts = apiFacets
+    ? new Map(Object.entries(facetsFromApi(apiFacets).cantonCounts))
+    : countByCanton(await safeGetFarms(locale));
 
   // Every region → its cantons that have at least one farm, with counts.
   const groups: CantonGroup[] = SWISS_REGIONS.map((region) => ({

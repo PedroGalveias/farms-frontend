@@ -28,7 +28,12 @@ const FARMS = [
 function renderPanel(onOpenFarm = vi.fn()) {
   render(
     <LanguageProvider>
-      <HeroLivePanel cantonCount={9} farms={FARMS} onOpenFarm={onOpenFarm} />
+      <HeroLivePanel
+        cantonCount={9}
+        farmCount={3210}
+        farms={FARMS}
+        onOpenFarm={onOpenFarm}
+      />
     </LanguageProvider>,
   );
   return onOpenFarm;
@@ -71,6 +76,7 @@ describe("HeroLivePanel", () => {
 
   it("shows the coverage numbers", () => {
     renderPanel();
+    expect(screen.getByText("3210")).toBeInTheDocument();
     expect(screen.getByText("farms listed")).toBeInTheDocument();
     expect(screen.getByText("cantons covered")).toBeInTheDocument();
   });

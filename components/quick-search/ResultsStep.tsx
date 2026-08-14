@@ -15,7 +15,7 @@ import {
   type QuickSearchMatchMode,
   type QuickSearchResult,
 } from "@/lib/quick-search";
-import type { Farm } from "@/types/farm";
+import type { QuickSearchFarm } from "@/types/farm";
 
 function AnimatedDistance({ km }: { km: number }) {
   const t = useT();
@@ -44,7 +44,7 @@ interface ResultsStepProps {
   matchMode: QuickSearchMatchMode;
   onEditProducts: () => void;
   onMatchModeChange: (mode: QuickSearchMatchMode) => void;
-  onOpenFarm: (farm: Farm, sourceEl?: HTMLElement | null) => void;
+  onOpenFarm: (farm: QuickSearchFarm, sourceEl?: HTMLElement | null) => void;
   results: QuickSearchResult[];
   revealKey: number;
   selectedProducts: string[];
@@ -210,7 +210,7 @@ function ResultRow({
   selectedProducts,
 }: {
   index: number;
-  onOpen: (farm: Farm, sourceEl?: HTMLElement | null) => void;
+  onOpen: (farm: QuickSearchFarm, sourceEl?: HTMLElement | null) => void;
   result: QuickSearchResult;
   selectedProducts: string[];
 }) {

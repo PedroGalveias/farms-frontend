@@ -9,6 +9,7 @@ import type { Farm } from "@/types/farm";
 
 interface HeroLivePanelProps {
   farms: Farm[];
+  farmCount: number;
   cantonCount: number;
   onOpenFarm: (farm: Farm) => void;
 }
@@ -24,6 +25,7 @@ const NEWEST_LIMIT = 3;
  */
 export default function HeroLivePanel({
   farms,
+  farmCount,
   cantonCount,
   onOpenFarm,
 }: HeroLivePanelProps) {
@@ -114,7 +116,7 @@ export default function HeroLivePanel({
       <div className="flex items-end gap-6 border-t border-line/70 pt-4">
         <p className="flex flex-col">
           <span className="text-3xl font-black tabular-nums tracking-[-0.04em] text-ink">
-            <CountUp value={farms.length} />
+            <CountUp value={farmCount} />
           </span>
           <span className="text-xs font-semibold text-ink/60">
             {t("bento_farmsListed")}

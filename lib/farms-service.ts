@@ -5,9 +5,11 @@ import {
 } from "@/lib/backend";
 import { normalizeFarmCategories } from "@/lib/categories";
 import { parseApiFacets, type ApiFacets } from "@/lib/directory-facets";
+import { parseFarmTaxonomy } from "@/lib/taxonomy";
 import { cacheLife, cacheTag } from "next/cache";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n-core";
 import type { CreateFarmPayload, Farm, StockStatus } from "@/types/farm";
+import type { FarmTaxonomy } from "@/types/taxonomy";
 
 const STOCK_STATUSES: readonly StockStatus[] = [
   "AVAILABLE",
@@ -127,6 +129,26 @@ export interface FarmsQuery {
   canton?: string;
   categories?: string[];
   sort?: "newest" | "name" | "canton";
+}
+
+/** Stable semantic representation used as the Cache Components argument. */
+export function canonicalizeFarmsQuery(query: FarmsQuery): FarmsQuery {
+  const canton = query.canton?.trim().toUpperCase();
+  const categories = query.categories
+    ? [
+        ...new Set(
+          query.categories.map((value) => value.trim()).filter(Boolean),
+        ),
+      ].sort((left, right) => left.localeCompare(right))
+    : [];
+
+  // Construct keys in one fixed order. Cache keys must not depend on the
+  // insertion order of an equivalent object supplied by a caller.
+  return {
+    ...(canton ? { canton } : {}),
+    ...(categories.length > 0 ? { categories } : {}),
+    ...(query.sort && query.sort !== "newest" ? { sort: query.sort } : {}),
+  };
 }
 
 function appendFarmsQuery(url: URL, query: FarmsQuery) {
@@ -306,7 +328,7 @@ export async function getFarms(
   locale: Locale = DEFAULT_LOCALE,
   query: FarmsQuery = {},
 ): Promise<Farm[]> {
-  const result = await cachedFarms(locale, query);
+  const result = await cachedFarms(locale, canonicalizeFarmsQuery(query));
   if ("failure" in result) {
     throw new FarmsApiError(result.failure.message, result.failure.status);
   }
@@ -353,7 +375,7 @@ async function walkDirectory(
     for (const farm of page.farms) {
       if (!seen.has(farm.id)) {
         seen.add(farm.id);
-        farms.push(farm);
+        farms.push(normalizeFarm(farm));
       }
     }
   };
@@ -385,7 +407,7 @@ async function walkDirectory(
   // The older backend returns everything at once and sets no cursor.
   if (!first.nextCursor) {
     cacheLife(FULL_CACHE_LIFE);
-    return farms.map(normalizeFarm);
+    return farms;
   }
 
   // `next_cursor` is the next OFFSET to request. If page 0 hands back exactly
@@ -414,7 +436,7 @@ async function walkDirectory(
         `[farms] pagination budget spent after ${farms.length} farms; serving partial directory`,
       );
       cacheLife(DEGRADED_CACHE_LIFE);
-      return farms.map(normalizeFarm);
+      return farms;
     }
 
     const wave = Array.from(
@@ -446,7 +468,7 @@ async function walkDirectory(
           result.reason,
         );
         cacheLife(DEGRADED_CACHE_LIFE);
-        return farms.map(normalizeFarm);
+        return farms;
       }
       collect(result.value);
       // The cursor is the backend's own statement about whether more exists,
@@ -461,7 +483,7 @@ async function walkDirectory(
     }
     if (reachedEnd) {
       cacheLife(FULL_CACHE_LIFE);
-      return farms.map(normalizeFarm);
+      return farms;
     }
     page += wave.length;
     waveSize = Math.min(waveSize * 2, FARMS_PAGE_CONCURRENCY);
@@ -475,7 +497,7 @@ async function walkDirectory(
     `[farms] page cap reached after ${farms.length} farms; serving partial directory`,
   );
   cacheLife(DEGRADED_CACHE_LIFE);
-  return farms.map(normalizeFarm);
+  return farms;
 }
 
 /**
@@ -502,7 +524,7 @@ async function walkSequentially(
         `[farms] pagination budget spent after ${farms.length} farms; serving partial directory`,
       );
       cacheLife(DEGRADED_CACHE_LIFE);
-      return farms.map(normalizeFarm);
+      return farms;
     }
     let parsed: FarmsPage;
     try {
@@ -518,12 +540,12 @@ async function walkSequentially(
         error,
       );
       cacheLife(DEGRADED_CACHE_LIFE);
-      return farms.map(normalizeFarm);
+      return farms;
     }
     for (const farm of parsed.farms) {
       if (!seen.has(farm.id)) {
         seen.add(farm.id);
-        farms.push(farm);
+        farms.push(normalizeFarm(farm));
       }
     }
     nextOffset = parsed.nextCursor;
@@ -539,7 +561,7 @@ async function walkSequentially(
   } else {
     cacheLife(FULL_CACHE_LIFE);
   }
-  return farms.map(normalizeFarm);
+  return farms;
 }
 
 /**
@@ -556,6 +578,40 @@ async function walkSequentially(
  */
 /** Cache tag for the facet counts — see {@link getFarmFacets}. */
 export const FACETS_CACHE_TAG = "farm-facets";
+export const TAXONOMY_CACHE_TAG = "farm-taxonomy";
+
+/**
+ * Live category/product vocabulary for the requested locale. Like facets,
+ * taxonomy is an enhancement with a durable local fallback, so an unavailable
+ * or older backend returns `null` instead of failing a page or prerender.
+ */
+export async function getFarmTaxonomy(
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<FarmTaxonomy | null> {
+  "use cache";
+  cacheTag(TAXONOMY_CACHE_TAG);
+
+  const url = new URL(`${getFarmsApiBaseUrl()}/taxonomy`);
+  url.searchParams.set("lang", locale);
+
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      cacheLife(
+        response.status === 404 ? FULL_CACHE_LIFE : DEGRADED_CACHE_LIFE,
+      );
+      return null;
+    }
+    const taxonomy = parseFarmTaxonomy(await response.json());
+    cacheLife(taxonomy ? FULL_CACHE_LIFE : DEGRADED_CACHE_LIFE);
+    return taxonomy;
+  } catch {
+    cacheLife(DEGRADED_CACHE_LIFE);
+    return null;
+  }
+}
 
 /**
  * How many farms sit behind each filter option, across the whole directory.

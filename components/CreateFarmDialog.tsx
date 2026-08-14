@@ -13,15 +13,13 @@ import {
   toCreateFarmInput,
   validateFarmForm,
 } from "@/lib/farm-form";
-import {
-  KNOWN_CATEGORY_KEYS,
-  categoryEmoji,
-  categoryLabel,
-} from "@/lib/categories";
-import { PRODUCTS_BY_GROUP, productLabel } from "@/lib/products";
+import { KNOWN_CATEGORY_KEYS, categoryEmoji } from "@/lib/categories";
+import { PRODUCTS_BY_GROUP, productSlug } from "@/lib/products";
+import { taxonomyCategoryLabel, taxonomyProductLabel } from "@/lib/taxonomy";
 import { SWISS_CANTONS } from "@/lib/farms";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { useFocusTrap } from "@/components/ui/useFocusTrap";
+import { useFarmTaxonomy } from "@/components/taxonomy/useFarmTaxonomy";
 import type { FarmFormErrors, FarmFormValues } from "@/types/farm";
 
 interface CreateFarmDialogProps {
@@ -42,6 +40,7 @@ export default function CreateFarmDialog({
   onSuccess,
 }: CreateFarmDialogProps) {
   const { locale, t } = useLanguage();
+  const taxonomy = useFarmTaxonomy({ enabled: open, locale });
   const [values, setValues] = useState<FarmFormValues>(EMPTY_FARM_FORM_VALUES);
   const [errors, setErrors] = useState<FarmFormErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
@@ -116,7 +115,7 @@ export default function CreateFarmDialog({
   };
 
   const setFieldValue = (
-    field: Exclude<keyof FarmFormValues, "categories">,
+    field: Exclude<keyof FarmFormValues, "categories" | "products">,
     value: string,
   ) => {
     setValues((currentValues) => ({
@@ -126,12 +125,13 @@ export default function CreateFarmDialog({
     clearFieldError(field);
   };
 
-  const toggleCategory = (key: string) => {
+  const toggleProduct = (key: string) => {
+    const slug = productSlug(key);
     setValues((currentValues) => ({
       ...currentValues,
-      categories: currentValues.categories.includes(key)
-        ? currentValues.categories.filter((value) => value !== key)
-        : [...currentValues.categories, key],
+      products: currentValues.products.includes(slug)
+        ? currentValues.products.filter((value) => value !== slug)
+        : [...currentValues.products, slug],
     }));
     clearFieldError("categories");
   };
@@ -346,7 +346,7 @@ export default function CreateFarmDialog({
               {KNOWN_CATEGORY_KEYS.map((group) => {
                 const products = PRODUCTS_BY_GROUP[group] ?? [];
                 const selectedCount = products.filter((product) =>
-                  values.categories.includes(product),
+                  values.products.includes(productSlug(product)),
                 ).length;
                 const isExpanded = expandedGroup === group;
 
@@ -365,7 +365,7 @@ export default function CreateFarmDialog({
                     >
                       <span aria-hidden="true">{categoryEmoji(group)}</span>
                       <span className="text-sm font-semibold text-ink">
-                        {categoryLabel(group, locale)}
+                        {taxonomyCategoryLabel(taxonomy, group, locale)}
                       </span>
                       {selectedCount > 0 ? (
                         <span className="rounded-chip bg-pine/10 px-2 py-0.5 text-xs font-bold text-pine">
@@ -381,8 +381,9 @@ export default function CreateFarmDialog({
                     {isExpanded ? (
                       <div className="flex flex-wrap gap-1.5 border-t border-line px-4 py-3">
                         {products.map((product) => {
-                          const isSelected =
-                            values.categories.includes(product);
+                          const isSelected = values.products.includes(
+                            productSlug(product),
+                          );
                           return (
                             <button
                               aria-pressed={isSelected}
@@ -392,10 +393,10 @@ export default function CreateFarmDialog({
                                   : "border-line bg-cloud text-ink/70 hover:border-ink/30 hover:text-ink"
                               }`}
                               key={product}
-                              onClick={() => toggleCategory(product)}
+                              onClick={() => toggleProduct(product)}
                               type="button"
                             >
-                              {productLabel(product, locale)}
+                              {taxonomyProductLabel(taxonomy, product, locale)}
                             </button>
                           );
                         })}

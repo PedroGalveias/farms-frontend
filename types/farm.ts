@@ -36,12 +36,36 @@ export interface Farm {
   photos?: string[];
 }
 
+/** Minimal farm record used by the global command palette. */
+export type CommandFarm = Pick<Farm, "id" | "name" | "address" | "canton">;
+
+/**
+ * Farm data required by quick search and its result/detail UI. Product
+ * matching needs only stable slugs; the remaining product metadata belongs on
+ * the full farm detail route and is intentionally not serialized here.
+ */
+export type QuickSearchFarm = Pick<
+  Farm,
+  | "id"
+  | "name"
+  | "address"
+  | "canton"
+  | "coordinates"
+  | "categories"
+  | "created_at"
+> & {
+  products?: Array<Pick<FarmProduct, "slug">>;
+};
+
 export interface CreateFarmInput {
   name: string;
   address: string;
   canton: string;
   coordinates: string;
+  /** Stable taxonomy category slugs. */
   categories: string[];
+  /** Stable taxonomy product slugs. */
+  products: string[];
 }
 
 export interface CreateFarmPayload extends CreateFarmInput {
@@ -55,6 +79,7 @@ export interface FarmFormValues {
   latitude: string;
   longitude: string;
   categories: string[];
+  products: string[];
 }
 
 export type FarmFormErrors = Partial<Record<keyof FarmFormValues, string>>;

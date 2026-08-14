@@ -63,6 +63,10 @@ export function useFarmDirectory(
   // — correct only while the directory holds every farm, which is exactly the
   // constraint that has kept it fetching all of them. See lib/directory-facets.
   initialFacets?: DirectoryFacets,
+  // The server fetched only the URL's matching subset. Any subsequent filter
+  // change may widen beyond that subset and therefore has to re-run the server
+  // component instead of filtering the partial array in place.
+  isNarrowed = false,
 ) {
   const router = useRouter();
   const t = useT();
@@ -143,7 +147,10 @@ export function useFarmDirectory(
   }, []);
 
   // Mirror the active filters into the URL (shareable, Back-button friendly).
-  // replaceState keeps it client-side — no navigation or server refetch.
+  // A full initial directory can keep this client-side. A server-narrowed
+  // initial directory cannot: reset or switching facets may need farms that
+  // are not in `initialFarms`, so navigate and let the server fetch the new
+  // candidate set.
   useEffect(() => {
     if (!hydrated) {
       return;
@@ -175,11 +182,17 @@ export function useFarmDirectory(
       params.set("view", viewMode);
     }
     const query = params.toString();
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
-    );
+    const href = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (href === current) {
+      return;
+    }
+
+    if (isNarrowed) {
+      startRefreshTransition(() => router.replace(href, { scroll: false }));
+    } else {
+      window.history.replaceState(null, "", href);
+    }
   }, [
     hydrated,
     searchTerm,
@@ -190,6 +203,8 @@ export function useFarmDirectory(
     originCoords,
     radiusKm,
     viewMode,
+    isNarrowed,
+    router,
   ]);
 
   const facets = useMemo(
@@ -304,37 +319,55 @@ export function useFarmDirectory(
   // Facet counts are *contextual*: each facet reflects the other active filters
   // but not itself (disjunctive faceting), so a count tells you what you'd get
   // by toggling that value given everything else you've already chosen.
-  const categoryCounts = useMemo(
-    () =>
-      getCategoryCounts(
-        initialFarms.filter(
-          (farm) =>
-            matchesSearch(farm, normalizedSearchTerm) &&
-            matchesCanton(farm, selectedCanton) &&
-            passesRadius(farm),
-        ),
+  const categoryCounts = useMemo(() => {
+    // A category-narrowed payload cannot answer how many farms sit behind a
+    // different category. Whole-directory API counts are the truthful
+    // fallback until the next server navigation supplies that category.
+    if (isNarrowed && initialParams.selectedCategories.length > 0) {
+      return facets.categoryCounts;
+    }
+    return getCategoryCounts(
+      initialFarms.filter(
+        (farm) =>
+          matchesSearch(farm, normalizedSearchTerm) &&
+          matchesCanton(farm, selectedCanton) &&
+          passesRadius(farm),
       ),
-    [initialFarms, normalizedSearchTerm, selectedCanton, passesRadius],
-  );
+    );
+  }, [
+    facets.categoryCounts,
+    initialFarms,
+    initialParams.selectedCategories.length,
+    isNarrowed,
+    normalizedSearchTerm,
+    selectedCanton,
+    passesRadius,
+  ]);
 
-  const cantonCounts = useMemo(
-    () =>
-      getCantonCounts(
-        initialFarms.filter(
-          (farm) =>
-            matchesSearch(farm, normalizedSearchTerm) &&
-            matchesCategories(farm, selectedCategories, categoryMatchMode) &&
-            passesRadius(farm),
-        ),
+  const cantonCounts = useMemo(() => {
+    // A canton-narrowed payload contains zero farms for every other canton,
+    // so local counts would turn valid choices into a wall of “(0)”.
+    if (isNarrowed && initialParams.selectedCanton !== "all") {
+      return facets.cantonCounts;
+    }
+    return getCantonCounts(
+      initialFarms.filter(
+        (farm) =>
+          matchesSearch(farm, normalizedSearchTerm) &&
+          matchesCategories(farm, selectedCategories, categoryMatchMode) &&
+          passesRadius(farm),
       ),
-    [
-      initialFarms,
-      normalizedSearchTerm,
-      selectedCategories,
-      categoryMatchMode,
-      passesRadius,
-    ],
-  );
+    );
+  }, [
+    facets.cantonCounts,
+    initialFarms,
+    initialParams.selectedCanton,
+    isNarrowed,
+    normalizedSearchTerm,
+    selectedCategories,
+    categoryMatchMode,
+    passesRadius,
+  ]);
 
   // The result list: every active filter applied, distances attached, sorted.
   const ranked = useMemo(() => {
@@ -492,6 +525,8 @@ export function useFarmDirectory(
     orderedCategoryOptions,
     categoryCounts,
     cantonCounts,
+    allCantonCounts: facets.cantonCounts,
+    directoryFarmCount: facets.total,
     mostWanted,
     distanceByFarmId,
     visibleFarms,

@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FarmDetail from "@/components/FarmDetail";
 import { getFarmById } from "@/lib/farms-service";
-import { DEFAULT_LOCALE, isLocale, localeAlternates } from "@/lib/i18n";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  localeAlternates,
+  type Locale,
+} from "@/lib/i18n";
 import { farmJsonLd, farmMetaDescription, serializeJsonLd } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site";
 import type { Farm } from "@/types/farm";
@@ -12,15 +17,11 @@ import type { Farm } from "@/types/farm";
 // single record — on the strength of a comment claiming no single-farm
 // endpoint existed. `GET /farms/{id}` has been there since the taxonomy work.
 //
-// Returns null on any failure so the page can render a clean 404: a missing
-// farm and an unreachable service look the same to a visitor following a
-// stale link, and neither should be a stack trace.
-async function findFarm(id: string): Promise<Farm | null> {
-  try {
-    return await getFarmById(id);
-  } catch {
-    return null;
-  }
+// `getFarmById` already turns a real upstream 404 into null. Other failures
+// must keep propagating to the route error boundary; presenting an outage as a
+// missing farm produces a false, cacheable 404 for a perfectly valid URL.
+async function findFarm(id: string, locale: Locale): Promise<Farm | null> {
+  return getFarmById(id, locale);
 }
 
 /**
@@ -44,14 +45,14 @@ export async function generateMetadata({
   params: Promise<{ lang: string; id: string }>;
 }): Promise<Metadata> {
   const { lang, id } = await params;
-  const farm = await findFarm(id);
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const farm = await findFarm(id, locale);
 
   if (!farm) {
     return { title: "Farm not found" };
   }
 
   // Localize the description from the URL's locale segment.
-  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const description = farmMetaDescription(farm, locale);
   return {
     title: farm.name,
@@ -75,8 +76,9 @@ export default async function FarmPage({
   params: Promise<{ lang: string; id: string }>;
   searchParams: Promise<{ from?: string; products?: string }>;
 }) {
-  const { id } = await params;
-  const farm = await findFarm(id);
+  const { id, lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const farm = await findFarm(id, locale);
 
   if (!farm) {
     notFound();

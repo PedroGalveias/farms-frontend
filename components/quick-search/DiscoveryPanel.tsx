@@ -15,7 +15,7 @@ import type {
   QuickSearchLocation,
   QuickSearchResult,
 } from "@/lib/quick-search";
-import type { Farm } from "@/types/farm";
+import type { QuickSearchFarm } from "@/types/farm";
 
 type Step = "location" | "products" | "results";
 
@@ -42,7 +42,7 @@ const LABELLED_RESULTS = 3;
 const MAP_INSET = { bottom: 0.3, left: 0.08, right: 0.06, top: 0.16 };
 
 interface PanelProps {
-  farms: Farm[];
+  farms: QuickSearchFarm[];
   location: QuickSearchLocation;
   results: QuickSearchResult[];
   selectedProducts: string[];

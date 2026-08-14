@@ -24,7 +24,7 @@ export function FavoriteButton({
   farm,
   className = "",
 }: {
-  farm: Farm;
+  farm: Pick<Farm, "id">;
   className?: string;
 }) {
   const t = useT();

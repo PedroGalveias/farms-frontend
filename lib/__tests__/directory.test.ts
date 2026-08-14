@@ -9,6 +9,8 @@ import {
   matchesCanton,
   matchesCategories,
   matchesSearch,
+  toCommandFarm,
+  toQuickSearchFarm,
   withinRadius,
 } from "@/lib/directory";
 import type { Farm } from "@/types/farm";
@@ -119,11 +121,11 @@ describe("facet counts", () => {
     expect(Object.keys(counts)).not.toContain("");
   });
 
-  it("folds a padded code into the same bucket", () => {
+  it("folds padded and lowercase codes into the same bucket", () => {
     expect(
       getCantonCounts([
         makeFarm({ canton: "ZH" }),
-        makeFarm({ canton: " ZH" }),
+        makeFarm({ canton: " zh " }),
       ]),
     ).toEqual({ ZH: 2 });
   });
@@ -178,5 +180,30 @@ describe("isRecentlyAdded", () => {
 describe("RADIUS_OPTIONS", () => {
   it("offers ascending km choices", () => {
     expect([...RADIUS_OPTIONS]).toEqual([10, 25, 50]);
+  });
+});
+
+describe("client payload projections", () => {
+  const product = {
+    slug: "carrots",
+    name_en: "Carrots",
+    group: "vegetables",
+    status: "AVAILABLE" as const,
+    last_confirmed_at: null,
+  };
+
+  it("keeps only the command palette search index fields", () => {
+    expect(toCommandFarm(makeFarm({ products: [product] }))).toEqual({
+      id: "f1",
+      name: "Test Farm",
+      address: "Main Street 1",
+      canton: "BE",
+    });
+  });
+
+  it("keeps only product slugs in the quick-search payload", () => {
+    const projected = toQuickSearchFarm(makeFarm({ products: [product] }));
+    expect(projected.products).toEqual([{ slug: "carrots" }]);
+    expect(projected).not.toHaveProperty("updated_at");
   });
 });

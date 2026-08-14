@@ -8,9 +8,13 @@
 //     the background.
 //
 // Bump CACHE_VERSION to invalidate everything on a breaking change.
-const CACHE_VERSION = "farms-cache-v2";
+const CACHE_VERSION = "farms-cache-v3";
 const OFFLINE_URL = "/offline";
 const FARMS_API_URL = "/api/farms";
+// A single bounded cache keeps the implementation small while preventing
+// navigations and arbitrary `/api/farms?...` combinations from accumulating
+// forever. Hashed static assets naturally age out with the oldest entries.
+const MAX_DYNAMIC_ENTRIES = 80;
 
 self.addEventListener("install", (event) => {
   // Don't skipWaiting here: an updated worker should *wait* so the page can
@@ -40,7 +44,7 @@ self.addEventListener("activate", (event) => {
 // Let the app's update banner activate a newly installed worker immediately.
 self.addEventListener("message", (event) => {
   // 1. Explicitly verify that the message comes from the same origin
-  if (event.origin !== self.location.origin) {
+  if (event.origin && event.origin !== self.location.origin) {
     return;
   }
 
@@ -82,9 +86,19 @@ function cacheResponse(request, response) {
     return Promise.resolve();
   }
 
-  return caches
-    .open(CACHE_VERSION)
-    .then((cache) => cache.put(request, response.clone()));
+  return caches.open(CACHE_VERSION).then(async (cache) => {
+    await cache.put(request, response.clone());
+    const keys = await cache.keys();
+    const removable = keys.filter(
+      (key) => new URL(key.url).pathname !== OFFLINE_URL,
+    );
+    const overflow = removable.length - MAX_DYNAMIC_ENTRIES;
+    if (overflow > 0) {
+      await Promise.all(
+        removable.slice(0, overflow).map((key) => cache.delete(key)),
+      );
+    }
+  });
 }
 
 self.addEventListener("fetch", (event) => {

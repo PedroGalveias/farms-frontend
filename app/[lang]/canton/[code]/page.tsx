@@ -1,12 +1,17 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CantonView, { type CantonSibling } from "@/components/canton/CantonView";
-import { getFarms } from "@/lib/farms-service";
+import RouteDataSkeleton from "@/components/RouteDataSkeleton";
+import { getFarmFacets, getFarms, type FarmsQuery } from "@/lib/farms-service";
+import { facetsFromApi } from "@/lib/directory-facets";
+import { getCantonCounts } from "@/lib/directory";
 import {
   DEFAULT_LOCALE,
   isLocale,
   translate,
   localeAlternates,
+  type Locale,
 } from "@/lib/i18n";
 import {
   SWISS_CANTONS,
@@ -26,9 +31,12 @@ export function generateStaticParams() {
   return SWISS_CANTONS.map((canton) => ({ code: canton.code.toLowerCase() }));
 }
 
-async function safeGetFarms(): Promise<Farm[]> {
+async function safeGetFarms(
+  locale: Locale,
+  query: FarmsQuery = {},
+): Promise<Farm[]> {
   try {
-    return await getFarms();
+    return await getFarms(locale, query);
   } catch {
     return [];
   }
@@ -61,7 +69,19 @@ export async function generateMetadata({
   };
 }
 
-export default async function CantonPage({
+export default function CantonPage({
+  params,
+}: {
+  params: Promise<{ lang: string; code: string }>;
+}) {
+  return (
+    <Suspense fallback={<RouteDataSkeleton />}>
+      <CantonContent params={params} />
+    </Suspense>
+  );
+}
+
+async function CantonContent({
   params,
 }: {
   params: Promise<{ lang: string; code: string }>;
@@ -75,11 +95,18 @@ export default async function CantonPage({
   const upper = code.toUpperCase();
   const name = getCantonName(upper);
   const regionKey = getRegionKeyForCanton(upper);
-  const allFarms = await safeGetFarms();
+  const apiFacets = await getFarmFacets(locale);
+  const [cantonFarms, fallbackFarms] = await Promise.all([
+    safeGetFarms(locale, { canton: upper, sort: "name" }),
+    apiFacets ? Promise.resolve([]) : safeGetFarms(locale),
+  ]);
 
-  const farms = allFarms
+  const farms = cantonFarms
     .filter((farm) => farm.canton.toUpperCase() === upper)
     .sort((a, b) => a.name.localeCompare(b.name));
+  const cantonCounts = apiFacets
+    ? facetsFromApi(apiFacets).cantonCounts
+    : getCantonCounts(fallbackFarms);
 
   // Cap the rendered cards: each is a backdrop-filter glass pane, and a big
   // canton has 1000+ farms — mounting them all exhausts iOS GPU memory (the
@@ -97,7 +124,7 @@ export default async function CantonPage({
     .map((c) => ({
       code: c.toLowerCase(),
       name: getCantonName(c),
-      count: allFarms.filter((farm) => farm.canton.toUpperCase() === c).length,
+      count: cantonCounts[c] ?? 0,
     }))
     .filter((sibling) => sibling.count > 0);
 

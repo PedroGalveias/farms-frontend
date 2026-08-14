@@ -15,6 +15,7 @@ function validValues(overrides: Partial<FarmFormValues> = {}): FarmFormValues {
     latitude: "46.948",
     longitude: "7.4474",
     categories: ["Gemüse", "Milchprodukte"],
+    products: [],
     ...overrides,
   };
 }
@@ -70,10 +71,18 @@ describe("validateFarmForm", () => {
     expect(errors.longitude).toBe("form_err_coords_ch");
   });
 
-  it("requires at least one category", () => {
+  it("requires at least one category or product", () => {
     expect(
       validateFarmForm(validValues({ categories: [] })).categories,
     ).toBeDefined();
+  });
+
+  it("accepts a granular product without a coarse category", () => {
+    expect(
+      validateFarmForm(
+        validValues({ categories: [], products: ["Erdbeeren"] }),
+      ),
+    ).toEqual({});
   });
 });
 
@@ -84,6 +93,7 @@ describe("toCreateFarmInput", () => {
         canton: "be",
         name: "  Hof  ",
         categories: ["Milchprodukte", "Milchprodukte"],
+        products: ["Milch", "Milch"],
       }),
     );
     expect(input).toEqual({
@@ -91,7 +101,8 @@ describe("toCreateFarmInput", () => {
       address: "Dorfstrasse 12, 3011 Bern",
       canton: "BE",
       coordinates: "46.948,7.4474",
-      categories: ["Milchprodukte"],
+      categories: ["dairy"],
+      products: ["milk"],
     });
   });
 });

@@ -1,6 +1,6 @@
 import { canonicalCategory } from "@/lib/categories";
 import { productGroupOf } from "@/lib/products";
-import { getCategoryCounts } from "@/lib/directory";
+import { getCantonCounts, getCategoryCounts } from "@/lib/directory";
 import { getUniqueFarmCantons, getUniqueFarmCategories } from "@/lib/farms";
 import type { Farm } from "@/types/farm";
 
@@ -21,6 +21,8 @@ export interface DirectoryFacets {
   categories: string[];
   /** Canonical category key → farms in it across the whole directory. */
   categoryCounts: Record<string, number>;
+  /** Canton code → farms in it across the whole directory. */
+  cantonCounts: Record<string, number>;
   /** Every farm in the directory, not just the ones on screen. */
   total: number;
 }
@@ -83,7 +85,10 @@ export function parseApiFacets(body: unknown): ApiFacets | null {
   }
   return {
     total: candidate.total,
-    cantons: candidate.cantons,
+    cantons: candidate.cantons.map((entry) => ({
+      ...entry,
+      code: entry.code.trim().toUpperCase(),
+    })),
     categories: candidate.categories,
   };
 }
@@ -111,6 +116,7 @@ export function parseApiFacets(body: unknown): ApiFacets | null {
  */
 export function facetsFromApi(api: ApiFacets): DirectoryFacets {
   const categoryCounts: Record<string, number> = {};
+  const cantonCounts: Record<string, number> = {};
   for (const entry of api.categories) {
     if (entry.count <= 0) {
       continue;
@@ -120,11 +126,16 @@ export function facetsFromApi(api: ApiFacets): DirectoryFacets {
     categoryCounts[key] = (categoryCounts[key] ?? 0) + entry.count;
   }
 
+  for (const entry of api.cantons) {
+    const code = entry.code.trim().toUpperCase();
+    if (entry.count > 0 && code.length > 0) {
+      cantonCounts[code] = (cantonCounts[code] ?? 0) + entry.count;
+    }
+  }
+
   return {
-    cantons: api.cantons
-      .filter((entry) => entry.count > 0)
-      .map((entry) => entry.code)
-      .sort((a, b) => a.localeCompare(b)),
+    cantons: Object.keys(cantonCounts).sort((a, b) => a.localeCompare(b)),
+    cantonCounts,
     categories: Object.keys(categoryCounts).sort((a, b) => a.localeCompare(b)),
     categoryCounts,
     total: api.total,
@@ -142,6 +153,7 @@ export function facetsFromApi(api: ApiFacets): DirectoryFacets {
 export function facetsFromFarms(farms: Farm[]): DirectoryFacets {
   return {
     cantons: getUniqueFarmCantons(farms),
+    cantonCounts: getCantonCounts(farms),
     categories: getUniqueFarmCategories(farms),
     categoryCounts: getCategoryCounts(farms),
     total: farms.length,

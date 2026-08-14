@@ -2,28 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import CantonRail from "@/components/home/CantonRail";
-import type { Farm } from "@/types/farm";
 
-function farm(id: string, canton: string): Farm {
-  return {
-    id,
-    name: `Farm ${id}`,
-    address: "Dorfstrasse 1",
-    canton,
-    coordinates: "46.9,7.4",
-    categories: ["Vegetables"],
-    created_at: "2026-01-01T00:00:00Z",
-    updated_at: null,
-  };
-}
-
-const FARMS = [farm("a", "BE"), farm("b", "BE"), farm("c", "ZH")];
+const CANTON_COUNTS = { BE: 2, ZH: 1 };
 
 function renderRail(selectedCanton = "all", onSelectCanton = vi.fn()) {
   render(
     <LanguageProvider>
       <CantonRail
-        farms={FARMS}
+        cantonCounts={CANTON_COUNTS}
         onSelectCanton={onSelectCanton}
         selectedCanton={selectedCanton}
       />
@@ -33,10 +19,14 @@ function renderRail(selectedCanton = "all", onSelectCanton = vi.fn()) {
 }
 
 describe("CantonRail", () => {
-  it("renders nothing without farms", () => {
+  it("renders nothing without canton counts", () => {
     const { container } = render(
       <LanguageProvider>
-        <CantonRail farms={[]} onSelectCanton={vi.fn()} selectedCanton="all" />
+        <CantonRail
+          cantonCounts={{}}
+          onSelectCanton={vi.fn()}
+          selectedCanton="all"
+        />
       </LanguageProvider>,
     );
     expect(container.querySelector("section")).toBeNull();
@@ -61,7 +51,7 @@ describe("CantonRail", () => {
     render(
       <LanguageProvider>
         <CantonRail
-          farms={FARMS}
+          cantonCounts={CANTON_COUNTS}
           onSelectCanton={onSelectActive}
           selectedCanton="BE"
         />
@@ -73,5 +63,20 @@ describe("CantonRail", () => {
     expect(active).toBeDefined();
     fireEvent.click(active!);
     expect(onSelectActive).toHaveBeenCalledWith("all");
+  });
+
+  it("ignores malformed blank canton entries", () => {
+    render(
+      <LanguageProvider>
+        <CantonRail
+          cantonCounts={{ "": 10, BE: 2 }}
+          onSelectCanton={vi.fn()}
+          selectedCanton="all"
+        />
+      </LanguageProvider>,
+    );
+
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(screen.getByRole("button")).toHaveTextContent(/Bern/);
   });
 });

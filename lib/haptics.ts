@@ -8,6 +8,8 @@
 //   which all our call sites are (save/copy/plan/tab handlers).
 // - Anywhere else: a graceful no-op.
 
+import { readStorage, removeStorage, writeStorage } from "@/lib/safe-storage";
+
 let iosSwitch: HTMLInputElement | null = null;
 let iosLabel: HTMLLabelElement | null = null;
 
@@ -70,20 +72,12 @@ const HAPTICS_KEY = "farms.haptics";
 
 /** Whether haptic feedback is enabled (on unless explicitly disabled). */
 export function hapticsEnabled(): boolean {
-  try {
-    return localStorage.getItem(HAPTICS_KEY) !== "off";
-  } catch {
-    return true;
-  }
+  return readStorage(HAPTICS_KEY) !== "off";
 }
 
 export function setHapticsEnabled(on: boolean): void {
-  try {
-    if (on) localStorage.removeItem(HAPTICS_KEY);
-    else localStorage.setItem(HAPTICS_KEY, "off");
-  } catch {
-    /* storage unavailable */
-  }
+  if (on) removeStorage(HAPTICS_KEY);
+  else writeStorage(HAPTICS_KEY, "off");
 }
 
 export function haptic(durationMs = 10): void {

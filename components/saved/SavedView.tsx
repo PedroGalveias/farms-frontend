@@ -15,7 +15,7 @@ import {
 import FarmCard from "@/components/FarmCard";
 import FarmDetailSheet from "@/components/quick-search/FarmDetailSheet";
 import AddToCollectionMenu from "@/components/saved/AddToCollectionMenu";
-import { useT } from "@/components/i18n/LanguageProvider";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { farmsToCsv } from "@/lib/export";
 import {
@@ -49,7 +49,7 @@ function neededFarmIds(
 }
 
 export default function SavedView() {
-  const t = useT();
+  const { locale, t } = useLanguage();
   const {
     favorites,
     collections,
@@ -88,7 +88,7 @@ export default function SavedView() {
     }
 
     const controller = new AbortController();
-    fetch(`/api/farms?ids=${encodeURIComponent(wantedKey)}`, {
+    fetch(`/api/farms?ids=${encodeURIComponent(wantedKey)}&lang=${locale}`, {
       signal: controller.signal,
     })
       .then((response) => (response.ok ? response.json() : null))
@@ -105,7 +105,7 @@ export default function SavedView() {
       });
 
     return () => controller.abort();
-  }, [wantedKey]);
+  }, [locale, wantedKey]);
 
   // With nothing saved there is nothing to resolve, and the stale cache must
   // not resurrect farms the visitor has just un-saved.

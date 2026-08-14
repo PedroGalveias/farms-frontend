@@ -25,7 +25,7 @@ import HapticTap from "@/components/ui/HapticTap";
 import { useFocusTrap } from "@/components/ui/useFocusTrap";
 import { farmPath } from "@/lib/share";
 import { shouldAnimateViewTransitions } from "@/lib/view-transitions";
-import type { Farm } from "@/types/farm";
+import type { QuickSearchFarm } from "@/types/farm";
 
 const DRAG_CLOSE_THRESHOLD_PX = 110;
 const SNAP_THRESHOLD_PX = 44;
@@ -36,7 +36,7 @@ const SECONDARY_BTN =
   "relative inline-flex w-full items-center justify-center gap-2 rounded-chip border px-4 py-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-ink/20";
 
 interface FarmDetailSheetProps {
-  farm: Farm;
+  farm: QuickSearchFarm;
   onClose: () => void;
   selectedProducts: string[];
   /** Extra query (e.g. "?from=quick-search&products=…") for the full-page link

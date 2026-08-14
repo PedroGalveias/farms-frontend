@@ -71,6 +71,7 @@ export default function FarmsPageShell({
     initialFarms,
     initialParams,
     initialFacets,
+    isNarrowed,
   );
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -169,6 +170,7 @@ export default function FarmsPageShell({
           <section className="relative pt-10 sm:pt-14">
             <HomeHero
               cantonCount={directory.cantonOptions.length}
+              farmCount={directory.directoryFarmCount}
               farms={initialFarms}
               onAddFarm={requestAddFarm}
               onOpenFarm={openFarm}
@@ -239,7 +241,7 @@ export default function FarmsPageShell({
               and a sibling below would give the sticky room to travel and sit
               exactly on top of the rail. */}
           <CantonRail
-            farms={initialFarms}
+            cantonCounts={directory.allCantonCounts}
             onSelectCanton={directory.setSelectedCanton}
             selectedCanton={directory.selectedCanton}
           />

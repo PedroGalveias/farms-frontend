@@ -7,7 +7,8 @@ import {
   getFarms,
 } from "@/lib/farms-service";
 import { isSameOrigin } from "@/lib/auth";
-import { toDirectoryFarm } from "@/lib/directory";
+import { toCommandFarm, toDirectoryFarm } from "@/lib/directory";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
 import type { CreateFarmInput } from "@/types/farm";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -43,7 +44,9 @@ function isCreateFarmInput(value: unknown): value is CreateFarmInput {
     typeof candidate.canton === "string" &&
     typeof candidate.coordinates === "string" &&
     Array.isArray(candidate.categories) &&
-    candidate.categories.every((item) => typeof item === "string")
+    candidate.categories.every((item) => typeof item === "string") &&
+    Array.isArray(candidate.products) &&
+    candidate.products.every((item) => typeof item === "string")
   );
 }
 
@@ -54,7 +57,9 @@ function isCreateFarmInput(value: unknown): value is CreateFarmInput {
 const MAX_IDS = 200;
 
 /**
- * `GET /api/farms` — the whole directory.
+ * `GET /api/farms` — the whole directory, projected to card fields.
+ *
+ * `GET /api/farms?view=command` — the smaller command-palette search index.
  *
  * `GET /api/farms?ids=a,b,c` — only those farms, projected to what a card
  * renders. `/saved` uses this: favourites live in the browser, so the server
@@ -69,13 +74,21 @@ const MAX_IDS = 200;
  * `getFarmById` would be N real requests against a free-tier backend.
  */
 export async function GET(request: Request) {
-  const idsParam = new URL(request.url).searchParams.get("ids");
+  const searchParams = new URL(request.url).searchParams;
+  const idsParam = searchParams.get("ids");
+  const view = searchParams.get("view");
+  const requestedLocale = searchParams.get("lang") ?? "";
+  const locale = isLocale(requestedLocale) ? requestedLocale : DEFAULT_LOCALE;
 
   try {
-    const farms = await getFarms();
+    const farms = await getFarms(locale);
 
     if (idsParam === null) {
-      return NextResponse.json(farms);
+      return NextResponse.json(
+        view === "command"
+          ? farms.map(toCommandFarm)
+          : farms.map(toDirectoryFarm),
+      );
     }
 
     const wanted = new Set(

@@ -2,6 +2,8 @@
 // recently-viewed history. Pure list operations live here (easy to test); the
 // React state + storage wiring lives in PersonalizationProvider.
 
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
+
 export const FAVORITES_STORAGE_KEY = "farms.favorites";
 export const RECENT_STORAGE_KEY = "farms.recent";
 
@@ -9,35 +11,15 @@ export const RECENT_STORAGE_KEY = "farms.recent";
 export const MAX_RECENT = 12;
 
 function readIds(key: string): string[] {
-  if (typeof window === "undefined") {
-    return [];
-  }
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) {
-      return [];
-    }
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return parsed.filter(
-        (value): value is string => typeof value === "string",
-      );
-    }
-  } catch {
-    // Corrupt JSON or storage disabled — treat as empty.
+  const parsed = readStorageJson(key);
+  if (Array.isArray(parsed)) {
+    return parsed.filter((value): value is string => typeof value === "string");
   }
   return [];
 }
 
 function writeIds(key: string, ids: string[]): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  try {
-    window.localStorage.setItem(key, JSON.stringify(ids));
-  } catch {
-    // Storage full or disabled — non-fatal.
-  }
+  writeStorageJson(key, ids);
 }
 
 /** Add or remove an id, returning a new array (order preserved, newest last). */

@@ -1,4 +1,5 @@
 import type { Farm } from "@/types/farm";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 
 export const FARM_CACHE_STORAGE_KEY = "farms.offline.cache.v1";
 
@@ -38,24 +39,10 @@ function isFarm(value: unknown): value is Farm {
 }
 
 export function readCachedFarms(key = FARM_CACHE_STORAGE_KEY): Farm[] {
-  if (typeof window === "undefined") {
-    return [];
+  const parsed = readStorageJson(key) as Partial<CachedFarms> | null;
+  if (Array.isArray(parsed?.farms)) {
+    return parsed.farms.filter(isFarm);
   }
-
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) {
-      return [];
-    }
-
-    const parsed = JSON.parse(raw) as Partial<CachedFarms>;
-    if (Array.isArray(parsed.farms)) {
-      return parsed.farms.filter(isFarm);
-    }
-  } catch {
-    // Corrupt or unavailable storage: treat as no offline cache.
-  }
-
   return [];
 }
 
@@ -63,16 +50,8 @@ export function writeCachedFarms(
   farms: Farm[],
   key = FARM_CACHE_STORAGE_KEY,
 ): void {
-  if (typeof window === "undefined" || farms.length === 0) {
+  if (farms.length === 0) {
     return;
   }
-
-  try {
-    window.localStorage.setItem(
-      key,
-      JSON.stringify({ farms, savedAt: new Date().toISOString() }),
-    );
-  } catch {
-    // Storage can be full or disabled; offline cache is best-effort.
-  }
+  writeStorageJson(key, { farms, savedAt: new Date().toISOString() });
 }

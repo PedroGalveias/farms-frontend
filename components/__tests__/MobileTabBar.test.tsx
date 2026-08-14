@@ -82,6 +82,15 @@ describe("MobileTabBar", () => {
     );
   });
 
+  it("marks Quick search active on a locale-prefixed route", () => {
+    pathname.value = "/de/quick-search";
+    renderBar();
+    expect(screen.getByRole("link", { name: /quick search/i })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
   it("marks Saved active and shows the persisted favourite count", async () => {
     pathname.value = "/saved";
     window.localStorage.setItem(

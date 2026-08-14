@@ -29,6 +29,16 @@ describe("parseApiFacets", () => {
     ).not.toBeNull();
   });
 
+  it("normalizes validated canton codes", () => {
+    expect(
+      parseApiFacets({
+        total: 1,
+        cantons: [{ code: " be ", count: 1 }],
+        categories: [],
+      })?.cantons,
+    ).toEqual([{ code: "BE", count: 1 }]);
+  });
+
   it.each([
     ["not an object", 42],
     ["null", null],
@@ -63,6 +73,7 @@ describe("facetsFromApi", () => {
     // The API speaks slugs; chips, icons and counts all speak German keys.
     expect(facets.categories).toEqual(["Früchte", "Milchprodukte"]);
     expect(facets.categoryCounts).toEqual({ Früchte: 4, Milchprodukte: 6 });
+    expect(facets.cantonCounts).toEqual({ BE: 10 });
     expect(facets.total).toBe(10);
   });
 
@@ -97,6 +108,35 @@ describe("facetsFromApi", () => {
     expect(facets.cantons).toEqual(["BE"]);
     expect(facets.categories).toEqual(["Früchte"]);
   });
+
+  it("drops blank canton buckets even when the API reports farms behind them", () => {
+    const facets = facetsFromApi({
+      total: 11,
+      cantons: [
+        { code: "BE", count: 1 },
+        { code: "", count: 10 },
+        { code: "  ", count: 3 },
+      ],
+      categories: [],
+    });
+
+    expect(facets.cantons).toEqual(["BE"]);
+    expect(facets.cantonCounts).toEqual({ BE: 1 });
+  });
+
+  it("normalizes and combines canton count keys", () => {
+    const facets = facetsFromApi({
+      total: 3,
+      cantons: [
+        { code: " be ", count: 1 },
+        { code: "BE", count: 2 },
+      ],
+      categories: [],
+    });
+
+    expect(facets.cantons).toEqual(["BE"]);
+    expect(facets.cantonCounts).toEqual({ BE: 3 });
+  });
 });
 
 describe("facetsFromFarms", () => {
@@ -107,6 +147,7 @@ describe("facetsFromFarms", () => {
     ]);
 
     expect(facets.cantons).toEqual(["BE", "ZH"]);
+    expect(facets.cantonCounts).toEqual({ BE: 1, ZH: 1 });
     expect(facets.categoryCounts).toEqual({ Früchte: 2, Gemüse: 1 });
     expect(facets.total).toBe(2);
   });
