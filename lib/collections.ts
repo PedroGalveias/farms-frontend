@@ -2,6 +2,8 @@
 // persisted in localStorage (alongside favorites). Pure list operations live
 // here; the React state + storage wiring is in PersonalizationProvider.
 
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
+
 export const COLLECTIONS_STORAGE_KEY = "farms.collections";
 
 export interface Collection {
@@ -22,52 +24,30 @@ function newId(): string {
 }
 
 export function readCollections(): Collection[] {
-  if (typeof window === "undefined") {
+  const parsed = readStorageJson(COLLECTIONS_STORAGE_KEY);
+  if (!Array.isArray(parsed)) {
     return [];
   }
-  try {
-    const raw = window.localStorage.getItem(COLLECTIONS_STORAGE_KEY);
-    if (!raw) {
-      return [];
-    }
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed
-      .filter(
-        (entry): entry is Collection =>
-          !!entry &&
-          typeof entry === "object" &&
-          typeof (entry as Collection).id === "string" &&
-          typeof (entry as Collection).name === "string" &&
-          Array.isArray((entry as Collection).farmIds),
-      )
-      .map((entry) => ({
-        id: entry.id,
-        name: entry.name,
-        farmIds: entry.farmIds.filter(
-          (value): value is string => typeof value === "string",
-        ),
-      }));
-  } catch {
-    // Corrupt JSON or storage disabled — treat as none.
-  }
-  return [];
+  return parsed
+    .filter(
+      (entry): entry is Collection =>
+        !!entry &&
+        typeof entry === "object" &&
+        typeof (entry as Collection).id === "string" &&
+        typeof (entry as Collection).name === "string" &&
+        Array.isArray((entry as Collection).farmIds),
+    )
+    .map((entry) => ({
+      id: entry.id,
+      name: entry.name,
+      farmIds: entry.farmIds.filter(
+        (value): value is string => typeof value === "string",
+      ),
+    }));
 }
 
 export function writeCollections(collections: Collection[]): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  try {
-    window.localStorage.setItem(
-      COLLECTIONS_STORAGE_KEY,
-      JSON.stringify(collections),
-    );
-  } catch {
-    // Storage full or disabled — non-fatal.
-  }
+  writeStorageJson(COLLECTIONS_STORAGE_KEY, collections);
 }
 
 /** A new collection with a fresh id, or null for a blank name. */

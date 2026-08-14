@@ -2,6 +2,8 @@
 // soft "tick" synthesised with the Web Audio API — no asset to load, works on
 // every engine, and stays silent until a real user gesture (all call sites are
 // click handlers, so the AudioContext is allowed to start).
+
+import { readStorage, removeStorage, writeStorage } from "@/lib/safe-storage";
 //
 // Deliberately quiet and brief so it reads as a subtle confirmation, never a
 // notification. Reuses one AudioContext across the session.
@@ -10,20 +12,12 @@ const SOUND_KEY = "farms.sound";
 
 /** Whether the confirmation tick is enabled (on unless explicitly muted). */
 export function soundEnabled(): boolean {
-  try {
-    return localStorage.getItem(SOUND_KEY) !== "off";
-  } catch {
-    return true;
-  }
+  return readStorage(SOUND_KEY) !== "off";
 }
 
 export function setSoundEnabled(on: boolean): void {
-  try {
-    if (on) localStorage.removeItem(SOUND_KEY);
-    else localStorage.setItem(SOUND_KEY, "off");
-  } catch {
-    /* storage unavailable */
-  }
+  if (on) removeStorage(SOUND_KEY);
+  else writeStorage(SOUND_KEY, "off");
 }
 
 let ctx: AudioContext | null = null;

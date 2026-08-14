@@ -8,6 +8,7 @@ import { haptic } from "@/lib/haptics";
 import { useSlidingIndicator } from "@/components/motion/useSlidingIndicator";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
+import { unlocalizedPath } from "@/lib/i18n-core";
 
 function tabTextClassName(isActive: boolean) {
   return `relative z-10 flex flex-1 items-center justify-center gap-2 rounded-chip px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
@@ -22,7 +23,7 @@ function tabTextClassName(isActive: boolean) {
  * SideRail takes over.
  */
 export default function MobileTabBar() {
-  const pathname = usePathname();
+  const pathname = unlocalizedPath(usePathname());
   const t = useT();
   const { favoritesCount } = usePersonalization();
   const active =

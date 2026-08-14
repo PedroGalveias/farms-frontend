@@ -83,7 +83,7 @@ export function groupCantonsByRegion(cantonCodes: string[]) {
  * The farms themselves stay in the directory — only the canton *vocabulary*
  * derived from them is cleaned, so nothing disappears from the listing.
  */
-export function getUniqueFarmCantons(farms: Farm[]) {
+export function getUniqueFarmCantons(farms: Array<Pick<Farm, "canton">>) {
   const codes = farms
     .map((farm) => farm.canton?.trim() ?? "")
     .filter((code) => code.length > 0);

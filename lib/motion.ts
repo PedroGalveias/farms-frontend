@@ -11,6 +11,8 @@
 // The class is applied pre-hydration by the inline bootstrap in app/layout.tsx
 // (same pattern as the theme class) so there's no flash of frozen UI.
 
+import { readStorage, removeStorage, writeStorage } from "@/lib/safe-storage";
+
 export const MOTION_STORAGE_KEY = "farms.motion";
 /** Fired on window whenever the override changes, so live animation loops
  *  (GlassLight, the WebGL hero) can restart without a reload. */
@@ -18,11 +20,7 @@ export const MOTION_EVENT = "farms:motion";
 
 /** Whether the user has explicitly forced animations on for this device. */
 export function motionForced(): boolean {
-  try {
-    return window.localStorage.getItem(MOTION_STORAGE_KEY) === "on";
-  } catch {
-    return false;
-  }
+  return readStorage(MOTION_STORAGE_KEY) === "on";
 }
 
 /**
@@ -37,16 +35,8 @@ export function prefersReducedMotion(): boolean {
 
 /** Persist the override, flip the html class, and notify live consumers. */
 export function setMotionForced(on: boolean): void {
-  try {
-    if (on) {
-      window.localStorage.setItem(MOTION_STORAGE_KEY, "on");
-    } else {
-      window.localStorage.removeItem(MOTION_STORAGE_KEY);
-    }
-  } catch {
-    // Storage can be unavailable (private mode) — the class still applies for
-    // this page view.
-  }
+  if (on) writeStorage(MOTION_STORAGE_KEY, "on");
+  else removeStorage(MOTION_STORAGE_KEY);
   document.documentElement.classList.toggle("force-motion", on);
   window.dispatchEvent(new Event(MOTION_EVENT));
 }

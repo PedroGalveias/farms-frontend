@@ -52,6 +52,7 @@ function seedCollections(
 function stubFarmsApi() {
   return vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
     const url = new URL(String(input), "http://localhost");
+    expect(url.searchParams.get("lang")).toBe("en");
     const ids = new Set(
       (url.searchParams.get("ids") ?? "").split(",").filter(Boolean),
     );

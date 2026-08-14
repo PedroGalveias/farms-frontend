@@ -4,6 +4,7 @@
 // list. Mirrors the personalization storage helpers.
 
 import { parseQuickSearchCoordinates } from "@/lib/coordinates";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 
 export const TRIP_STORAGE_KEY = "farms.trip";
 
@@ -31,36 +32,15 @@ function isStop(value: unknown): value is TripStop {
 }
 
 export function readTrip(): TripStop[] {
-  if (typeof window === "undefined") {
+  const parsed = readStorageJson(TRIP_STORAGE_KEY);
+  if (!Array.isArray(parsed)) {
     return [];
   }
-  try {
-    const raw = window.localStorage.getItem(TRIP_STORAGE_KEY);
-    if (!raw) {
-      return [];
-    }
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed.filter(isStop).slice(0, MAX_TRIP_STOPS);
-  } catch {
-    return [];
-  }
+  return parsed.filter(isStop).slice(0, MAX_TRIP_STOPS);
 }
 
 export function writeTrip(stops: TripStop[]): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  try {
-    window.localStorage.setItem(
-      TRIP_STORAGE_KEY,
-      JSON.stringify(stops.slice(0, MAX_TRIP_STOPS)),
-    );
-  } catch {
-    // Storage full / disabled — non-fatal.
-  }
+  writeStorageJson(TRIP_STORAGE_KEY, stops.slice(0, MAX_TRIP_STOPS));
 }
 
 /**

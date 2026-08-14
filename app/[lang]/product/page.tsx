@@ -1,19 +1,23 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import ProductHub, { type ProductEntry } from "@/components/product/ProductHub";
-import { getFarms } from "@/lib/farms-service";
+import RouteDataSkeleton from "@/components/RouteDataSkeleton";
+import { getFarmFacets, getFarms } from "@/lib/farms-service";
+import { facetsFromApi } from "@/lib/directory-facets";
 import {
   DEFAULT_LOCALE,
   isLocale,
   translate,
   localeAlternates,
+  type Locale,
 } from "@/lib/i18n";
 import { getFarmGroups } from "@/lib/farms";
 import { categoryForSlug, getProductSlugs } from "@/lib/product-pages";
 import type { Farm } from "@/types/farm";
 
-async function safeGetFarms(): Promise<Farm[]> {
+async function safeGetFarms(locale: Locale): Promise<Farm[]> {
   try {
-    return await getFarms();
+    return await getFarms(locale);
   } catch {
     return [];
   }
@@ -36,18 +40,39 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductHubPage({
+export default function ProductHubPage({
   params,
 }: {
   params: Promise<{ lang: string }>;
 }) {
-  const [{ lang }, farms] = await Promise.all([params, safeGetFarms()]);
+  return (
+    <Suspense fallback={<RouteDataSkeleton />}>
+      <ProductHubContent params={params} />
+    </Suspense>
+  );
+}
+
+async function ProductHubContent({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
   const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
 
+  const apiFacets = await getFarmFacets(locale);
   const counts = new Map<string, number>();
-  for (const farm of farms) {
-    for (const group of getFarmGroups(farm)) {
-      counts.set(group, (counts.get(group) ?? 0) + 1);
+  if (apiFacets) {
+    for (const [category, count] of Object.entries(
+      facetsFromApi(apiFacets).categoryCounts,
+    )) {
+      counts.set(category, count);
+    }
+  } else {
+    for (const farm of await safeGetFarms(locale)) {
+      for (const group of getFarmGroups(farm)) {
+        counts.set(group, (counts.get(group) ?? 0) + 1);
+      }
     }
   }
 

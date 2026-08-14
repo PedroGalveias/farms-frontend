@@ -31,7 +31,8 @@ import QuickSearchCoach from "@/components/quick-search/QuickSearchCoach";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
-import { PRODUCTS, tagLabel } from "@/lib/products";
+import { PRODUCTS } from "@/lib/products";
+import { taxonomyTagLabel } from "@/lib/taxonomy";
 import { readSearchCounts, topKeys, trackSearch } from "@/lib/search-stats";
 import { haptic } from "@/lib/haptics";
 import { playTick } from "@/lib/sound";
@@ -49,7 +50,8 @@ import {
   type QuickSearchLocation,
   type QuickSearchMatchMode,
 } from "@/lib/quick-search";
-import type { Farm, ServiceStatus } from "@/types/farm";
+import type { QuickSearchFarm, ServiceStatus } from "@/types/farm";
+import type { FarmTaxonomy } from "@/types/taxonomy";
 
 type QuickSearchStep = "location" | "products" | "results";
 
@@ -108,15 +110,17 @@ const GHOST_BUTTON_CLASS =
   "inline-flex w-full items-center justify-center gap-2 rounded-chip border border-line bg-cloud px-6 py-4 text-sm font-semibold text-ink/75 transition-all duration-300 hover:border-ink/25 hover:text-ink active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ink/20";
 
 interface QuickSearchExperienceProps {
-  farms: Farm[];
+  farms: QuickSearchFarm[];
   loadError: string | null;
   serviceStatus: ServiceStatus;
+  taxonomy: FarmTaxonomy | null;
 }
 
 export default function QuickSearchExperience({
   farms,
   loadError,
   serviceStatus,
+  taxonomy,
 }: QuickSearchExperienceProps) {
   const { locale, t } = useLanguage();
   const { recordView } = usePersonalization();
@@ -128,7 +132,7 @@ export default function QuickSearchExperience({
   const [geoMessage, setGeoMessage] = useState<string | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [matchMode, setMatchMode] = useState<QuickSearchMatchMode>("all");
-  const [activeFarm, setActiveFarm] = useState<Farm | null>(null);
+  const [activeFarm, setActiveFarm] = useState<QuickSearchFarm | null>(null);
   const [resultsVisit, setResultsVisit] = useState(0);
   const [resumable, setResumable] = useState<{
     matchMode: QuickSearchMatchMode;
@@ -390,7 +394,7 @@ export default function QuickSearchExperience({
   };
 
   const openFarm = useCallback(
-    (farm: Farm, sourceEl?: HTMLElement | null) => {
+    (farm: QuickSearchFarm, sourceEl?: HTMLElement | null) => {
       recordView(farm.id);
       runViewTransition(() => setActiveFarm(farm), sourceEl);
     },
@@ -412,7 +416,7 @@ export default function QuickSearchExperience({
         ? t("qs_nothing_picked")
         : selectedProducts
             .slice(0, 3)
-            .map((category) => tagLabel(category, locale))
+            .map((category) => taxonomyTagLabel(taxonomy, category, locale))
             .join(", ") +
           (selectedProducts.length > 3
             ? ` +${selectedProducts.length - 3}`
@@ -476,6 +480,7 @@ export default function QuickSearchExperience({
           onToggleProduct={toggleProduct}
           products={products}
           selectedProducts={selectedProducts}
+          taxonomy={taxonomy}
         />
       );
     }
@@ -590,7 +595,7 @@ export default function QuickSearchExperience({
                 {t("qs_resume_chip", {
                   items: resumable.products
                     .slice(0, 3)
-                    .map((key) => tagLabel(key, locale))
+                    .map((key) => taxonomyTagLabel(taxonomy, key, locale))
                     .join(", "),
                 })}
                 {resumable.products.length > 3

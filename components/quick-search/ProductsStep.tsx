@@ -2,13 +2,19 @@
 
 import { Fragment, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, Search, X } from "lucide-react";
-import { categoryEmoji, categoryLabel } from "@/lib/categories";
-import { PRODUCTS_BY_GROUP, productLabel, tagLabel } from "@/lib/products";
+import { categoryEmoji } from "@/lib/categories";
+import { PRODUCTS_BY_GROUP } from "@/lib/products";
+import {
+  taxonomyCategoryLabel,
+  taxonomyProductLabel,
+  taxonomyTagLabel,
+} from "@/lib/taxonomy";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type {
   QuickSearchMatchMode,
   QuickSearchProduct,
 } from "@/lib/quick-search";
+import type { FarmTaxonomy } from "@/types/taxonomy";
 
 interface ProductsStepProps {
   matchCount: number;
@@ -21,6 +27,7 @@ interface ProductsStepProps {
   products: QuickSearchProduct[];
   selectedProducts: string[];
   starterKeys: string[];
+  taxonomy: FarmTaxonomy | null;
 }
 
 export default function ProductsStep({
@@ -33,6 +40,7 @@ export default function ProductsStep({
   products,
   selectedProducts,
   starterKeys,
+  taxonomy,
 }: ProductsStepProps) {
   const { locale, t } = useLanguage();
   const selectedCount = selectedProducts.length;
@@ -60,11 +68,13 @@ export default function ProductsStep({
     const matchedSubs = new Set<string>();
     for (const product of products) {
       const group = product.category;
-      const groupHit = categoryLabel(group, locale)
+      const groupHit = taxonomyCategoryLabel(taxonomy, group, locale)
         .toLowerCase()
         .includes(query);
       const subHits = (PRODUCTS_BY_GROUP[group] ?? []).filter((key) =>
-        productLabel(key, locale).toLowerCase().includes(query),
+        taxonomyProductLabel(taxonomy, key, locale)
+          .toLowerCase()
+          .includes(query),
       );
       if (groupHit || subHits.length > 0) {
         visible.push(product);
@@ -74,7 +84,7 @@ export default function ProductsStep({
       }
     }
     return { matchedSubs, visible };
-  }, [locale, products, query]);
+  }, [locale, products, query, taxonomy]);
 
   const isFiltering = query.length > 0;
 
@@ -162,7 +172,7 @@ export default function ProductsStep({
                   type="button"
                 >
                   {isSelected ? <Check className="h-3 w-3" /> : null}
-                  {tagLabel(key, locale)}
+                  {taxonomyTagLabel(taxonomy, key, locale)}
                 </button>
               );
             })}
@@ -273,7 +283,7 @@ export default function ProductsStep({
                       </span>
                     )}
                     <span className="min-w-0 flex-1 truncate text-left">
-                      {categoryLabel(group, locale)}
+                      {taxonomyCategoryLabel(taxonomy, group, locale)}
                     </span>
                     {product.farmCount > 0 ? (
                       <span
@@ -330,7 +340,7 @@ export default function ProductsStep({
                         {isProductSelected ? (
                           <Check className="h-3 w-3" />
                         ) : null}
-                        {productLabel(key, locale)}
+                        {taxonomyProductLabel(taxonomy, key, locale)}
                       </button>
                     );
                   })}

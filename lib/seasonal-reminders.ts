@@ -1,4 +1,5 @@
 import { SEASONAL_PRODUCE } from "@/lib/seasonal";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 
 // Device-local seasonal reminders. The visitor subscribes to a produce key on
 // the seasonal calendar; when that item is in season we nudge them in-app (web
@@ -7,68 +8,40 @@ import { SEASONAL_PRODUCE } from "@/lib/seasonal";
 const SUBS_KEY = "farms.seasonalReminders";
 const ACK_KEY = "farms.seasonalReminders.ack";
 
-function isBrowser(): boolean {
-  return typeof window !== "undefined";
-}
-
 /** Produce keys the visitor wants to be reminded about. */
 export function readReminders(): string[] {
-  if (!isBrowser()) return [];
-  try {
-    const raw = window.localStorage.getItem(SUBS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    // Keep only keys we still know about, de-duplicated.
-    return Array.from(
-      new Set(
-        parsed.filter(
-          (key): key is string =>
-            typeof key === "string" && key in SEASONAL_PRODUCE,
-        ),
+  const parsed = readStorageJson(SUBS_KEY);
+  if (!Array.isArray(parsed)) return [];
+  // Keep only keys we still know about, de-duplicated.
+  return Array.from(
+    new Set(
+      parsed.filter(
+        (key): key is string =>
+          typeof key === "string" && key in SEASONAL_PRODUCE,
       ),
-    );
-  } catch {
-    return [];
-  }
+    ),
+  );
 }
 
 export function writeReminders(keys: string[]): void {
-  if (!isBrowser()) return;
-  try {
-    window.localStorage.setItem(SUBS_KEY, JSON.stringify(keys));
-  } catch {
-    // Storage may be full or blocked — reminders are best-effort.
-  }
+  writeStorageJson(SUBS_KEY, keys);
 }
 
 /** Per-key acknowledgement, recording the year the nudge was last dismissed. */
 export function readAck(): Record<string, number> {
-  if (!isBrowser()) return {};
-  try {
-    const raw = window.localStorage.getItem(ACK_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      return {};
-    }
-    const out: Record<string, number> = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (typeof value === "number") out[key] = value;
-    }
-    return out;
-  } catch {
+  const parsed = readStorageJson(ACK_KEY);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     return {};
   }
+  const out: Record<string, number> = {};
+  for (const [key, value] of Object.entries(parsed)) {
+    if (typeof value === "number") out[key] = value;
+  }
+  return out;
 }
 
 export function writeAck(ack: Record<string, number>): void {
-  if (!isBrowser()) return;
-  try {
-    window.localStorage.setItem(ACK_KEY, JSON.stringify(ack));
-  } catch {
-    // Best-effort.
-  }
+  writeStorageJson(ACK_KEY, ack);
 }
 
 /**

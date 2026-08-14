@@ -27,13 +27,15 @@ export default function CountUp({
   suffix = "",
 }: CountUpProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
-  const [display, setDisplay] = useState(0);
+  // Render the honest value in server HTML and on the first client paint.
+  // Later prop changes still roll from the value currently on screen.
+  const [display, setDisplay] = useState(value);
   const factor = 10 ** decimals;
   // Odometer (§7): roll from wherever the number currently sits to the new
   // value, so a filter change rolls the digits instead of hard-swapping. The
   // first paint rolls 0 → value once the number scrolls into view; every later
   // value change rolls from the last shown number.
-  const fromRef = useRef(0);
+  const fromRef = useRef(value);
   const seenRef = useRef(false);
 
   useEffect(() => {

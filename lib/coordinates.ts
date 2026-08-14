@@ -33,6 +33,13 @@ export function parseQuickSearchCoordinates(
     return null;
   }
 
+  // The live dataset contains a few missing coordinates serialised as 0,0.
+  // Treat that sentinel as unknown so it never participates in nearest-farm
+  // sorting or trip-distance calculations as a real point in the Atlantic.
+  if (latitude === 0 && longitude === 0) {
+    return null;
+  }
+
   return { latitude, longitude };
 }
 

@@ -4,7 +4,7 @@ import {
   parseQuickSearchCoordinates,
   type QuickSearchCoordinates,
 } from "@/lib/coordinates";
-import type { Farm } from "@/types/farm";
+import type { CommandFarm, Farm, QuickSearchFarm } from "@/types/farm";
 
 export type CategoryMatchMode = "all" | "any";
 
@@ -181,5 +181,31 @@ export function toDirectoryFarm(farm: Farm): DirectoryFarm {
     id: farm.id,
     name: farm.name,
     updated_at: farm.updated_at,
+  };
+}
+
+/** Projection used by ⌘K: only fields its fuzzy index reads. */
+export function toCommandFarm(farm: Farm): CommandFarm {
+  return {
+    address: farm.address,
+    canton: farm.canton,
+    id: farm.id,
+    name: farm.name,
+  };
+}
+
+/** Projection used by quick search and its lightweight detail sheet. */
+export function toQuickSearchFarm(farm: Farm): QuickSearchFarm {
+  return {
+    address: farm.address,
+    canton: farm.canton,
+    categories: farm.categories,
+    coordinates: farm.coordinates,
+    created_at: farm.created_at,
+    id: farm.id,
+    name: farm.name,
+    ...(farm.products
+      ? { products: farm.products.map((product) => ({ slug: product.slug })) }
+      : {}),
   };
 }

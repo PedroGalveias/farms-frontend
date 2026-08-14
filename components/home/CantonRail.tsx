@@ -6,7 +6,6 @@ import { ArrowRight, MapPin } from "lucide-react";
 import { getCantonName } from "@/lib/farms";
 import { haptic } from "@/lib/haptics";
 import { useT } from "@/components/i18n/LanguageProvider";
-import type { Farm } from "@/types/farm";
 
 /**
  * Canton quick-filter rail — a horizontally scrollable row of canton chips
@@ -19,25 +18,21 @@ import type { Farm } from "@/types/farm";
  * the rail stays stable while other filters change.
  */
 export default function CantonRail({
-  farms,
+  cantonCounts,
   selectedCanton,
   onSelectCanton,
 }: {
-  farms: Farm[];
+  cantonCounts: Record<string, number>;
   selectedCanton: string;
   onSelectCanton: (canton: string) => void;
 }) {
   const t = useT();
   const railRef = useRef<HTMLDivElement | null>(null);
 
-  const counts = new Map<string, number>();
-  for (const farm of farms) {
-    const code = farm.canton.toUpperCase();
-    counts.set(code, (counts.get(code) ?? 0) + 1);
-  }
-  const cantons = [...counts.entries()].sort(
-    (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
-  );
+  const cantons = Object.entries(cantonCounts)
+    .map(([code, count]) => [code.trim().toUpperCase(), count] as const)
+    .filter(([code, count]) => code.length > 0 && count > 0)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 
   // Keep the active chip in view when the canton arrives from the URL or the
   // toolbar select rather than a tap on the rail itself.

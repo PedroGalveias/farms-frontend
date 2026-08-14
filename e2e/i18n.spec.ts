@@ -37,3 +37,17 @@ test.describe("language switcher", () => {
     await expect(heroDe).toBeVisible(streamed);
   });
 });
+
+test.describe("localized primary navigation", () => {
+  for (const path of ["/quick-search", "/de/quick-search"]) {
+    test(`marks the mobile tab active on ${path}`, async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(path);
+      await expect(
+        page
+          .locator(".mobile-tab-bar")
+          .getByRole("link", { name: /quick search|schnellsuche/i }),
+      ).toHaveAttribute("aria-current", "page");
+    });
+  }
+});

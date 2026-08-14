@@ -14,7 +14,8 @@ export {
 
 import { getCantonName } from "@/lib/farms";
 import { PRODUCTS, productGroupOf, productSlug } from "@/lib/products";
-import type { Farm } from "@/types/farm";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
+import type { QuickSearchFarm } from "@/types/farm";
 
 export type QuickSearchMatchMode = "all" | "any";
 
@@ -31,7 +32,7 @@ export interface QuickSearchProduct {
 
 export interface QuickSearchResult {
   distanceKm: number | null;
-  farm: Farm;
+  farm: QuickSearchFarm;
   locationScore: number;
   matchedProducts: string[];
 }
@@ -76,7 +77,7 @@ export function productMatchesCategory(product: string, category: string) {
 // its group and match on the farm's categories, with a fuzzy text fallback.
 // This keeps behaviour identical against today's product-less backend and
 // sharpens automatically once product data arrives.
-function farmMatchesProduct(farm: Farm, product: string) {
+function farmMatchesProduct(farm: QuickSearchFarm, product: string) {
   if (farm.products && PRODUCTS[product]) {
     const slug = productSlug(product);
     return farm.products.some((item) => item.slug === slug);
@@ -97,7 +98,9 @@ function farmMatchesProduct(farm: Farm, product: string) {
  * Each entry's `category` is the canonical key (German); translate it for
  * display with `categoryLabel` from `lib/categories`.
  */
-export function getQuickSearchProducts(farms: Farm[]): QuickSearchProduct[] {
+export function getQuickSearchProducts(
+  farms: QuickSearchFarm[],
+): QuickSearchProduct[] {
   const farmCountByCategory = new Map<string, number>();
 
   for (const farm of farms) {
@@ -131,7 +134,7 @@ export function getQuickSearchProducts(farms: Farm[]): QuickSearchProduct[] {
 }
 
 function getLocationScore(
-  farm: Farm,
+  farm: QuickSearchFarm,
   normalizedQuery: string,
   queryTokens: string[],
 ) {
@@ -169,7 +172,7 @@ export function getQuickSearchResults({
   matchMode,
   selectedProducts,
 }: {
-  farms: Farm[];
+  farms: QuickSearchFarm[];
   location: QuickSearchLocation;
   matchMode: QuickSearchMatchMode;
   selectedProducts: string[];
@@ -240,11 +243,11 @@ export function getQuickSearchResults({
   });
 }
 
-export function getNearestFarm(
-  farms: Farm[],
+export function getNearestFarm<T extends Pick<QuickSearchFarm, "coordinates">>(
+  farms: T[],
   coordinates: QuickSearchCoordinates,
-): { farm: Farm; distanceKm: number } | null {
-  let nearest: { farm: Farm; distanceKm: number } | null = null;
+): { farm: T; distanceKm: number } | null {
+  let nearest: { farm: T; distanceKm: number } | null = null;
 
   for (const farm of farms) {
     const farmCoordinates = parseQuickSearchCoordinates(farm.coordinates);
@@ -261,8 +264,8 @@ export function getNearestFarm(
   return nearest;
 }
 
-export interface FarmDistance {
-  farm: Farm;
+export interface FarmDistance<T = QuickSearchFarm> {
+  farm: T;
   distanceKm: number;
 }
 
@@ -270,12 +273,12 @@ export interface FarmDistance {
  * The `limit` farms closest to `coordinates`, nearest first. Farms without
  * parseable coordinates are skipped. Used by the "near me" sheet.
  */
-export function getNearestFarms(
-  farms: Farm[],
+export function getNearestFarms<T extends Pick<QuickSearchFarm, "coordinates">>(
+  farms: T[],
   coordinates: QuickSearchCoordinates,
   limit = 10,
-): FarmDistance[] {
-  const withDistance: FarmDistance[] = [];
+): FarmDistance<T>[] {
+  const withDistance: FarmDistance<T>[] = [];
 
   for (const farm of farms) {
     const farmCoordinates = parseQuickSearchCoordinates(farm.coordinates);
@@ -322,47 +325,29 @@ export interface LastQuickSearch {
 }
 
 export function readLastQuickSearch(): LastQuickSearch | null {
-  if (typeof window === "undefined") {
+  const parsed = readStorageJson(LAST_SEARCH_STORAGE_KEY);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     return null;
   }
-  try {
-    const raw = window.localStorage.getItem(LAST_SEARCH_STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      return null;
-    }
-    const candidate = parsed as Partial<LastQuickSearch>;
-    const products = Array.isArray(candidate.products)
-      ? candidate.products.filter(
-          (value): value is string =>
-            typeof value === "string" && value.length > 0 && value.length < 80,
-        )
-      : [];
-    if (products.length === 0) {
-      return null;
-    }
-    return {
-      matchMode: candidate.matchMode === "any" ? "any" : "all",
-      products: products.slice(0, 24),
-    };
-  } catch {
+  const candidate = parsed as Partial<LastQuickSearch>;
+  const products = Array.isArray(candidate.products)
+    ? candidate.products.filter(
+        (value): value is string =>
+          typeof value === "string" && value.length > 0 && value.length < 80,
+      )
+    : [];
+  if (products.length === 0) {
     return null;
   }
+  return {
+    matchMode: candidate.matchMode === "any" ? "any" : "all",
+    products: products.slice(0, 24),
+  };
 }
 
 export function writeLastQuickSearch(search: LastQuickSearch): void {
-  if (typeof window === "undefined" || search.products.length === 0) {
+  if (search.products.length === 0) {
     return;
   }
-  try {
-    window.localStorage.setItem(
-      LAST_SEARCH_STORAGE_KEY,
-      JSON.stringify(search),
-    );
-  } catch {
-    // Storage full or disabled — non-fatal.
-  }
+  writeStorageJson(LAST_SEARCH_STORAGE_KEY, search);
 }

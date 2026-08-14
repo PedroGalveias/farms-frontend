@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cacheLife } from "next/cache";
 import {
+  canonicalizeFarmsQuery,
   FarmsApiError,
   getFarmById,
   getFarmFacets,
@@ -30,6 +31,25 @@ function chosenRevalidate(): number | undefined {
 
 const FULL_REVALIDATE = 300;
 const DEGRADED_REVALIDATE = 10;
+
+describe("canonicalizeFarmsQuery", () => {
+  it("gives semantically equivalent queries one stable representation", () => {
+    expect(
+      canonicalizeFarmsQuery({
+        sort: "newest",
+        categories: ["vegetables", "fruits", "vegetables"],
+        canton: " be ",
+      }),
+    ).toEqual({ canton: "BE", categories: ["fruits", "vegetables"] });
+
+    expect(
+      canonicalizeFarmsQuery({
+        canton: "BE",
+        categories: ["fruits", "vegetables"],
+      }),
+    ).toEqual({ canton: "BE", categories: ["fruits", "vegetables"] });
+  });
+});
 
 beforeEach(() => {
   vi.mocked(cacheLife).mockClear();

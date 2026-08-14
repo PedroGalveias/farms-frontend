@@ -1,5 +1,12 @@
 import QuickSearchExperience from "@/components/quick-search/QuickSearchExperience";
-import { FarmsApiError, getFarms, getFarmsHealth } from "@/lib/farms-service";
+import {
+  FarmsApiError,
+  getFarms,
+  getFarmsHealth,
+  getFarmTaxonomy,
+} from "@/lib/farms-service";
+import { toQuickSearchFarm } from "@/lib/directory";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
 import type { ServiceStatus } from "@/types/farm";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -14,13 +21,22 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
-export default async function QuickSearchPage() {
-  const [healthResult, farmsResult] = await Promise.allSettled([
+export default async function QuickSearchPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  const [healthResult, farmsResult, taxonomyResult] = await Promise.allSettled([
     getFarmsHealth(),
-    getFarms(),
+    getFarms(locale),
+    getFarmTaxonomy(locale),
   ]);
 
-  const farms = farmsResult.status === "fulfilled" ? farmsResult.value : [];
+  const farms = (
+    farmsResult.status === "fulfilled" ? farmsResult.value : []
+  ).map(toQuickSearchFarm);
   const loadError =
     farmsResult.status === "rejected"
       ? getErrorMessage(
@@ -42,6 +58,9 @@ export default async function QuickSearchPage() {
       farms={farms}
       loadError={loadError}
       serviceStatus={serviceStatus}
+      taxonomy={
+        taxonomyResult.status === "fulfilled" ? taxonomyResult.value : null
+      }
     />
   );
 }

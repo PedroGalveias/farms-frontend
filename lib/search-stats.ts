@@ -6,6 +6,8 @@
 // per-device with an availability-based fallback; a future endpoint can supply
 // real cross-user counts to `globalCounts` without touching the call sites.
 
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
+
 export const SEARCH_STATS_STORAGE_KEY = "farms.searchStats";
 
 export type SearchCounts = Record<string, number>;
@@ -20,47 +22,26 @@ function isSafeKey(key: string): boolean {
 }
 
 export function readSearchCounts(): SearchCounts {
-  if (typeof window === "undefined") {
-    return {};
-  }
-  try {
-    const raw = window.localStorage.getItem(SEARCH_STATS_STORAGE_KEY);
-    if (!raw) {
-      return {};
-    }
-    const parsed = JSON.parse(raw) as unknown;
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      const counts = new Map<string, number>();
-      for (const [key, value] of Object.entries(parsed)) {
-        if (
-          isSafeKey(key) &&
-          typeof value === "number" &&
-          Number.isFinite(value) &&
-          value > 0
-        ) {
-          counts.set(key, value);
-        }
+  const parsed = readStorageJson(SEARCH_STATS_STORAGE_KEY);
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+    const counts = new Map<string, number>();
+    for (const [key, value] of Object.entries(parsed)) {
+      if (
+        isSafeKey(key) &&
+        typeof value === "number" &&
+        Number.isFinite(value) &&
+        value > 0
+      ) {
+        counts.set(key, value);
       }
-      return Object.fromEntries(counts);
     }
-  } catch {
-    // Corrupt JSON or storage disabled — treat as no stats.
+    return Object.fromEntries(counts);
   }
   return {};
 }
 
 export function writeSearchCounts(counts: SearchCounts): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  try {
-    window.localStorage.setItem(
-      SEARCH_STATS_STORAGE_KEY,
-      JSON.stringify(counts),
-    );
-  } catch {
-    // Storage full or disabled — non-fatal.
-  }
+  writeStorageJson(SEARCH_STATS_STORAGE_KEY, counts);
 }
 
 /** Pure: return a new counts map with each key incremented by one. */

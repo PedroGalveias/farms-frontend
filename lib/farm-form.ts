@@ -1,4 +1,6 @@
 import { SWISS_CANTONS } from "@/lib/farms";
+import { categorySlug } from "@/lib/categories";
+import { productSlug } from "@/lib/products";
 import type {
   CreateFarmInput,
   FarmFormErrors,
@@ -27,6 +29,7 @@ export const EMPTY_FARM_FORM_VALUES: FarmFormValues = {
   latitude: "",
   longitude: "",
   name: "",
+  products: [],
 };
 
 // Trim, drop blanks, and de-duplicate a list of selected category keys.
@@ -83,7 +86,10 @@ export function validateFarmForm(values: FarmFormValues): FarmFormErrors {
     errors.longitude = "form_err_coords_ch";
   }
 
-  if (normalizeCategories(values.categories).length === 0) {
+  if (
+    normalizeCategories(values.categories).length === 0 &&
+    normalizeCategories(values.products).length === 0
+  ) {
     errors.categories = "form_err_categories";
   }
 
@@ -97,8 +103,12 @@ export function toCreateFarmInput(values: FarmFormValues): CreateFarmInput {
   return {
     address: values.address.trim(),
     canton: values.canton.trim().toUpperCase(),
-    categories: normalizeCategories(values.categories),
+    // The API resolves taxonomy identities, never localized display text.
+    categories: normalizeCategories(values.categories).map(
+      (value) => categorySlug(value) ?? value,
+    ),
     coordinates: `${latitude},${longitude}`,
     name: values.name.trim(),
+    products: normalizeCategories(values.products).map(productSlug),
   };
 }

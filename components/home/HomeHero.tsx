@@ -39,12 +39,14 @@ export default function HomeHero({
   serviceStatus,
   onAddFarm,
   farms,
+  farmCount,
   cantonCount,
   onOpenFarm,
 }: {
   serviceStatus: ServiceStatus;
   onAddFarm: () => void;
   farms: Farm[];
+  farmCount: number;
   cantonCount: number;
   onOpenFarm: (farm: Farm) => void;
 }) {
@@ -123,6 +125,7 @@ export default function HomeHero({
           season, the newest farms, and coverage — real data over decoration. */}
       <HeroLivePanel
         cantonCount={cantonCount}
+        farmCount={farmCount}
         farms={farms}
         onOpenFarm={onOpenFarm}
       />

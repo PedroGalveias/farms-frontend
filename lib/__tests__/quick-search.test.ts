@@ -51,6 +51,10 @@ describe("parseQuickSearchCoordinates", () => {
     expect(parseQuickSearchCoordinates("91,7")).toBeNull();
     expect(parseQuickSearchCoordinates("46,181")).toBeNull();
   });
+
+  it("rejects the 0,0 sentinel used for missing farm coordinates", () => {
+    expect(parseQuickSearchCoordinates("0,0")).toBeNull();
+  });
 });
 
 describe("productMatchesCategory", () => {
@@ -91,6 +95,15 @@ describe("getNearestFarm", () => {
   it("skips farms with unparseable coordinates", () => {
     const broken = makeFarm({ id: "broken", coordinates: "not-a-coord" });
     const result = getNearestFarm([broken, far], {
+      latitude: 47.37,
+      longitude: 8.54,
+    });
+    expect(result?.farm.id).toBe("far");
+  });
+
+  it("skips Null Island records in nearest-farm selection", () => {
+    const missing = makeFarm({ id: "missing", coordinates: "0,0" });
+    const result = getNearestFarm([missing, far], {
       latitude: 47.37,
       longitude: 8.54,
     });

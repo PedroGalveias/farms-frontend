@@ -113,7 +113,9 @@ export function projectToSwissMap(
 }
 
 /** Every farm with parseable in-bounds coordinates, projected once. */
-export function buildFarmMapPoints(farms: Farm[]): FarmMapPoint[] {
+export function buildFarmMapPoints(
+  farms: Array<Pick<Farm, "id" | "coordinates">>,
+): FarmMapPoint[] {
   const points: FarmMapPoint[] = [];
   for (const farm of farms) {
     const coords = parseQuickSearchCoordinates(farm.coordinates);

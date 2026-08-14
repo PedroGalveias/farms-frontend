@@ -20,12 +20,14 @@ import {
 import { rankCommands, type CommandItem } from "@/lib/command";
 import { getCantonName, SWISS_CANTONS } from "@/lib/farms";
 import { motionForced, setMotionForced } from "@/lib/motion";
-import { PRODUCTS, productLabel } from "@/lib/products";
+import { PRODUCTS } from "@/lib/products";
+import { taxonomyProductLabel } from "@/lib/taxonomy";
+import { useFarmTaxonomy } from "@/components/taxonomy/useFarmTaxonomy";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { COMMAND_PALETTE_OPEN_EVENT } from "@/components/command/events";
-import type { Farm } from "@/types/farm";
+import type { CommandFarm } from "@/types/farm";
 
 /** A command plus how to act on it (kept out of the serialisable CommandItem). */
 interface ResolvedCommand extends CommandItem {
@@ -63,11 +65,13 @@ export default function CommandPalette({
   const [open, setOpen] = useState(initiallyOpen);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
-  const [farms, setFarms] = useState<Farm[] | null>(null);
+  const [farms, setFarms] = useState<CommandFarm[] | null>(null);
+  const [farmsLocale, setFarmsLocale] = useState<string | null>(null);
   const [farmsError, setFarmsError] = useState(false);
   // The animations override (see lib/motion.ts) — read lazily on open so the
   // label reflects reality even when another tab changed it.
   const [motionOn, setMotionOn] = useState(false);
+  const taxonomy = useFarmTaxonomy({ enabled: open, locale });
   useEffect(() => {
     if (open) queueMicrotask(() => setMotionOn(motionForced()));
   }, [open]);
@@ -133,23 +137,29 @@ export default function CommandPalette({
 
   // Lazily pull the farm list the first time the palette is opened.
   useEffect(() => {
-    if (!open || farms !== null) return;
+    if (!open || (farms !== null && farmsLocale === locale)) return;
     let cancelled = false;
-    fetch("/api/farms")
+    fetch(`/api/farms?view=command&lang=${locale}`)
       .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then((data: Farm[]) => {
-        if (!cancelled) setFarms(Array.isArray(data) ? data : []);
+      .then((data: CommandFarm[]) => {
+        if (!cancelled) {
+          setFarms(Array.isArray(data) ? data : []);
+          setFarmsLocale(locale);
+          setFarmsError(false);
+        }
       })
       .catch(() => {
         if (!cancelled) {
-          setFarms([]);
+          // Leave the requested locale unloaded. Closing and reopening the
+          // palette then retries instead of treating a transient failure as a
+          // successfully loaded empty directory for the rest of the session.
           setFarmsError(true);
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [open, farms]);
+  }, [open, farms, farmsLocale, locale]);
 
   // ---- Candidate commands -------------------------------------------------
   const pages = useMemo<ResolvedCommand[]>(
@@ -239,13 +249,13 @@ export default function CommandPalette({
       Object.keys(PRODUCTS).map((key) => ({
         id: `product:${key}`,
         kind: "product",
-        label: productLabel(key, locale),
+        label: taxonomyProductLabel(taxonomy, key, locale),
         hint: t("command_kind_product"),
         keywords: key,
         icon: Leaf,
         href: `/quick-search?products=${encodeURIComponent(key)}&match=any`,
       })),
-    [locale, t],
+    [locale, t, taxonomy],
   );
 
   const farmItems = useMemo<ResolvedCommand[]>(
