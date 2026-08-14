@@ -1,12 +1,12 @@
 import QuickSearchExperience from "@/components/quick-search/QuickSearchExperience";
 import {
   FarmsApiError,
-  getFarms,
+  getFarmsSnapshot,
   getFarmsHealth,
   getFarmTaxonomy,
 } from "@/lib/farms-service";
 import { toQuickSearchFarm } from "@/lib/directory";
-import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
+import { DEFAULT_LOCALE, isLocale, translate } from "@/lib/i18n";
 import type { ServiceStatus } from "@/types/farm";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -30,12 +30,12 @@ export default async function QuickSearchPage({
   const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const [healthResult, farmsResult, taxonomyResult] = await Promise.allSettled([
     getFarmsHealth(),
-    getFarms(locale),
+    getFarmsSnapshot(locale),
     getFarmTaxonomy(locale),
   ]);
 
   const farms = (
-    farmsResult.status === "fulfilled" ? farmsResult.value : []
+    farmsResult.status === "fulfilled" ? farmsResult.value.farms : []
   ).map(toQuickSearchFarm);
   const loadError =
     farmsResult.status === "rejected"
@@ -43,7 +43,9 @@ export default async function QuickSearchPage({
           farmsResult.reason,
           "Unable to load the farm directory right now.",
         )
-      : null;
+      : farmsResult.value.complete
+        ? null
+        : translate(locale, "data_partial");
 
   let serviceStatus: ServiceStatus = "online";
 

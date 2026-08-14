@@ -19,6 +19,12 @@ async function loadWorker() {
   await import(/* @vite-ignore */ workerPath);
 }
 
+function navigationRequest(url: string) {
+  const request = new Request(url);
+  Object.defineProperty(request, "mode", { value: "navigate" });
+  return request;
+}
+
 async function dispatchFetch(request: Request) {
   let responsePromise: Promise<Response> | undefined;
   const lifetimePromises: Promise<unknown>[] = [];
@@ -135,6 +141,44 @@ describe("service worker asset caching", () => {
     expect(cache.delete).toHaveBeenCalledTimes(2);
     expect(cache.delete).toHaveBeenNthCalledWith(1, cachedRequests[0]);
     expect(cache.delete).toHaveBeenNthCalledWith(2, cachedRequests[1]);
+  });
+});
+
+describe("service worker navigation caching", () => {
+  it("never caches verification tokens or Web Share Target content", async () => {
+    vi.mocked(fetch).mockResolvedValue(new Response("fresh"));
+
+    const tokenRequest = navigationRequest(
+      "https://farms.test/verify-email?token=secret",
+    );
+    const sharedRequest = navigationRequest(
+      "https://farms.test/quick-search?title=Apples&url=https%3A%2F%2Fexample.test",
+    );
+
+    const tokenResult = await dispatchFetch(tokenRequest);
+    const sharedResult = await dispatchFetch(sharedRequest);
+    await Promise.all([tokenResult.settle(), sharedResult.settle()]);
+
+    expect(tokenResult.event.waitUntil).not.toHaveBeenCalled();
+    expect(sharedResult.event.waitUntil).not.toHaveBeenCalled();
+    expect(cache.put).not.toHaveBeenCalled();
+  });
+
+  it("uses the matching locale's offline page", async () => {
+    vi.mocked(fetch).mockRejectedValue(new TypeError("offline"));
+    cachesMock.match.mockImplementation(async (request) => {
+      return request === "/de/offline"
+        ? new Response("Deutsch offline")
+        : undefined;
+    });
+
+    const { response, settle } = await dispatchFetch(
+      navigationRequest("https://farms.test/de/quick-search"),
+    );
+
+    await settle();
+    await expect(response.text()).resolves.toBe("Deutsch offline");
+    expect(cachesMock.match).toHaveBeenLastCalledWith("/de/offline");
   });
 });
 

@@ -5,12 +5,12 @@ import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 // the seasonal calendar; when that item is in season we nudge them in-app (web
 // push is unreliable on iOS, so we deliberately keep this client-side and
 // surface it the next time the app is opened during the season).
-const SUBS_KEY = "farms.seasonalReminders";
-const ACK_KEY = "farms.seasonalReminders.ack";
+export const SEASONAL_REMINDERS_STORAGE_KEY = "farms.seasonalReminders";
+export const SEASONAL_ACK_STORAGE_KEY = "farms.seasonalReminders.ack";
 
 /** Produce keys the visitor wants to be reminded about. */
 export function readReminders(): string[] {
-  const parsed = readStorageJson(SUBS_KEY);
+  const parsed = readStorageJson(SEASONAL_REMINDERS_STORAGE_KEY);
   if (!Array.isArray(parsed)) return [];
   // Keep only keys we still know about, de-duplicated.
   return Array.from(
@@ -24,12 +24,12 @@ export function readReminders(): string[] {
 }
 
 export function writeReminders(keys: string[]): void {
-  writeStorageJson(SUBS_KEY, keys);
+  writeStorageJson(SEASONAL_REMINDERS_STORAGE_KEY, keys);
 }
 
 /** Per-key acknowledgement, recording the year the nudge was last dismissed. */
 export function readAck(): Record<string, number> {
-  const parsed = readStorageJson(ACK_KEY);
+  const parsed = readStorageJson(SEASONAL_ACK_STORAGE_KEY);
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     return {};
   }
@@ -41,7 +41,7 @@ export function readAck(): Record<string, number> {
 }
 
 export function writeAck(ack: Record<string, number>): void {
-  writeStorageJson(ACK_KEY, ack);
+  writeStorageJson(SEASONAL_ACK_STORAGE_KEY, ack);
 }
 
 /**

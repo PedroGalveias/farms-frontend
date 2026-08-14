@@ -450,8 +450,12 @@ export function useFarmDirectory(
   ].filter(Boolean).length;
 
   const refreshDirectory = useCallback(() => {
-    startRefreshTransition(() => {
-      router.refresh();
+    startRefreshTransition(async () => {
+      try {
+        await fetch("/api/farms/refresh", { method: "POST" });
+      } finally {
+        router.refresh();
+      }
     });
   }, [router]);
 

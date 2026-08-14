@@ -34,6 +34,15 @@ const fieldClassName =
 const labelClassName =
   "text-xs font-bold uppercase tracking-[0.08em] text-ink/60";
 
+const FIELD_FOCUS_ORDER: (keyof FarmFormValues)[] = [
+  "name",
+  "address",
+  "canton",
+  "latitude",
+  "longitude",
+  "categories",
+];
+
 export default function CreateFarmDialog({
   open,
   onClose,
@@ -154,6 +163,22 @@ export default function CreateFarmDialog({
     const nextErrors = validateFarmForm(values);
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
+      requestAnimationFrame(() => {
+        const firstInvalid = FIELD_FOCUS_ORDER.find(
+          (field) => nextErrors[field],
+        );
+        const selector =
+          firstInvalid === "categories"
+            ? "[data-category-toggle]"
+            : firstInvalid
+              ? `[name="${firstInvalid}"]`
+              : null;
+        if (selector) {
+          dialogRef.current
+            ?.querySelector<HTMLElement>(selector)
+            ?.focus({ preventScroll: false });
+        }
+      });
       return;
     }
 
@@ -237,6 +262,9 @@ export default function CreateFarmDialog({
             <label className="block">
               <span className={labelClassName}>{t("create_name_label")}</span>
               <input
+                aria-describedby={errors.name ? "create-name-error" : undefined}
+                aria-invalid={Boolean(errors.name)}
+                aria-label={t("create_name_label")}
                 className={fieldClassName}
                 name="name"
                 onChange={(event) => setFieldValue("name", event.target.value)}
@@ -244,7 +272,13 @@ export default function CreateFarmDialog({
                 value={values.name}
               />
               {errors.name ? (
-                <p className="mt-2 text-sm text-rose-600">{t(errors.name)}</p>
+                <p
+                  className="mt-2 text-sm text-rose-600"
+                  id="create-name-error"
+                  role="alert"
+                >
+                  {t(errors.name)}
+                </p>
               ) : null}
             </label>
 
@@ -253,6 +287,11 @@ export default function CreateFarmDialog({
                 {t("create_address_label")}
               </span>
               <input
+                aria-describedby={
+                  errors.address ? "create-address-error" : undefined
+                }
+                aria-invalid={Boolean(errors.address)}
+                aria-label={t("create_address_label")}
                 className={fieldClassName}
                 name="address"
                 onChange={(event) =>
@@ -262,7 +301,11 @@ export default function CreateFarmDialog({
                 value={values.address}
               />
               {errors.address ? (
-                <p className="mt-2 text-sm text-rose-600">
+                <p
+                  className="mt-2 text-sm text-rose-600"
+                  id="create-address-error"
+                  role="alert"
+                >
                   {t(errors.address)}
                 </p>
               ) : null}
@@ -271,6 +314,11 @@ export default function CreateFarmDialog({
             <label className="block">
               <span className={labelClassName}>{t("create_canton_label")}</span>
               <select
+                aria-describedby={
+                  errors.canton ? "create-canton-error" : undefined
+                }
+                aria-invalid={Boolean(errors.canton)}
+                aria-label={t("create_canton_label")}
                 className={fieldClassName}
                 name="canton"
                 onChange={(event) =>
@@ -286,7 +334,13 @@ export default function CreateFarmDialog({
                 ))}
               </select>
               {errors.canton ? (
-                <p className="mt-2 text-sm text-rose-600">{t(errors.canton)}</p>
+                <p
+                  className="mt-2 text-sm text-rose-600"
+                  id="create-canton-error"
+                  role="alert"
+                >
+                  {t(errors.canton)}
+                </p>
               ) : null}
             </label>
 
@@ -296,6 +350,11 @@ export default function CreateFarmDialog({
                   {t("create_latitude_label")}
                 </span>
                 <input
+                  aria-describedby={
+                    errors.latitude ? "create-latitude-error" : undefined
+                  }
+                  aria-invalid={Boolean(errors.latitude)}
+                  aria-label={t("create_latitude_label")}
                   className={fieldClassName}
                   inputMode="decimal"
                   name="latitude"
@@ -306,7 +365,11 @@ export default function CreateFarmDialog({
                   value={values.latitude}
                 />
                 {errors.latitude ? (
-                  <p className="mt-2 text-sm text-rose-600">
+                  <p
+                    className="mt-2 text-sm text-rose-600"
+                    id="create-latitude-error"
+                    role="alert"
+                  >
                     {t(errors.latitude)}
                   </p>
                 ) : null}
@@ -317,6 +380,11 @@ export default function CreateFarmDialog({
                   {t("create_longitude_label")}
                 </span>
                 <input
+                  aria-describedby={
+                    errors.longitude ? "create-longitude-error" : undefined
+                  }
+                  aria-invalid={Boolean(errors.longitude)}
+                  aria-label={t("create_longitude_label")}
                   className={fieldClassName}
                   inputMode="decimal"
                   name="longitude"
@@ -327,7 +395,11 @@ export default function CreateFarmDialog({
                   value={values.longitude}
                 />
                 {errors.longitude ? (
-                  <p className="mt-2 text-sm text-rose-600">
+                  <p
+                    className="mt-2 text-sm text-rose-600"
+                    id="create-longitude-error"
+                    role="alert"
+                  >
                     {t(errors.longitude)}
                   </p>
                 ) : null}
@@ -335,7 +407,13 @@ export default function CreateFarmDialog({
             </div>
           </div>
 
-          <fieldset className="mt-5 block">
+          <fieldset
+            aria-describedby={
+              errors.categories ? "create-categories-error" : undefined
+            }
+            aria-invalid={Boolean(errors.categories)}
+            className="mt-5 block"
+          >
             <legend className={labelClassName}>
               {t("create_categories_label")}
             </legend>
@@ -358,6 +436,7 @@ export default function CreateFarmDialog({
                     <button
                       aria-expanded={isExpanded}
                       className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition hover:bg-tone/50"
+                      data-category-toggle
                       onClick={() =>
                         setExpandedGroup(isExpanded ? null : group)
                       }
@@ -407,14 +486,21 @@ export default function CreateFarmDialog({
               })}
             </div>
             {errors.categories ? (
-              <p className="mt-2 text-sm text-rose-600">
+              <p
+                className="mt-2 text-sm text-rose-600"
+                id="create-categories-error"
+                role="alert"
+              >
                 {t(errors.categories)}
               </p>
             ) : null}
           </fieldset>
 
           {serverError ? (
-            <div className="mt-5 rounded-field border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
+            <div
+              className="mt-5 rounded-field border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700"
+              role="alert"
+            >
               {serverError}
             </div>
           ) : null}

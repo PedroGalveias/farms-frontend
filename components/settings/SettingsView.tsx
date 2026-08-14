@@ -32,7 +32,8 @@ import {
 import { motionForced, setMotionForced } from "@/lib/motion";
 import { hapticsEnabled, setHapticsEnabled, haptic } from "@/lib/haptics";
 import { playTick, setSoundEnabled, soundEnabled } from "@/lib/sound";
-import { COLLECTIONS_STORAGE_KEY } from "@/lib/collections";
+import { usePersonalization } from "@/components/personalization/PersonalizationProvider";
+import { USER_DATA_STORAGE_KEYS } from "@/lib/local-data";
 
 /**
  * The web app's settings — a native-style preferences screen. Everything here
@@ -285,15 +286,12 @@ function FeedbackSection() {
 /** Local data controls — clear history or start over. */
 function DataSection() {
   const t = useT();
+  const { clearRecent } = usePersonalization();
   const [confirmReset, setConfirmReset] = useState(false);
   const [cleared, setCleared] = useState(false);
 
-  const clearRecent = () => {
-    try {
-      localStorage.removeItem("farms.recent");
-    } catch {
-      /* ignore */
-    }
+  const handleClearRecent = () => {
+    clearRecent();
     setCleared(true);
     window.setTimeout(() => setCleared(false), 2000);
   };
@@ -305,14 +303,7 @@ function DataSection() {
       return;
     }
     try {
-      for (const key of [
-        "farms.favorites",
-        "farms.recent",
-        COLLECTIONS_STORAGE_KEY,
-        "farms.location",
-        "farms.searchStats",
-        "farms.seasonalReminders",
-      ]) {
+      for (const key of USER_DATA_STORAGE_KEYS) {
         localStorage.removeItem(key);
       }
     } catch {
@@ -340,7 +331,7 @@ function DataSection() {
           </div>
           <button
             className="shrink-0 rounded-chip border border-line bg-cloud px-4 py-2 text-[13px] font-semibold text-ink/75 transition hover:border-ink/25 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
-            onClick={clearRecent}
+            onClick={handleClearRecent}
             type="button"
           >
             {cleared ? t("settings_cleared") : t("settings_clear")}

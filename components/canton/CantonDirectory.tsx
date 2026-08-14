@@ -46,7 +46,7 @@ export default function CantonDirectory({
   return (
     <main className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
       <nav
-        aria-label="Breadcrumb"
+        aria-label={t("a11y_breadcrumb")}
         className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-ink/50"
       >
         {trail.map((crumb) => (

@@ -182,7 +182,7 @@ export default function ProductsStep({
 
       <div className="flex flex-wrap items-center gap-3">
         <div
-          aria-label="How selected products should match"
+          aria-label={t("qs_match_mode_aria")}
           className="inline-flex rounded-chip bg-tone p-1"
           role="group"
         >

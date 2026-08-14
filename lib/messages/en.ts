@@ -5,6 +5,18 @@
 import type { Dict } from "@/lib/i18n-core";
 
 export const en: Dict = {
+  a11y_primaryNav: "Primary navigation",
+  a11y_breadcrumb: "Breadcrumb",
+  theme_switchLight: "Switch to light mode",
+  theme_switchDark: "Switch to dark mode",
+  not_found_title_lead: "This page wandered",
+  not_found_title_accent: "off the map.",
+  not_found_body:
+    "The page you're looking for isn't here. Head back to where you were, or use the navigation to browse the directory or quick search.",
+  data_partial:
+    "Some farms could not be loaded. The results below may be incomplete; refresh to try again.",
+  qs_match_mode_aria: "How selected products should match",
+  qs_map_eyebrow: "Swiss farm map",
   // --- auth ---
   account_login: "Log in",
   account_logout: "Log out",

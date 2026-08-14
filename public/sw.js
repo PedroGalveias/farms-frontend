@@ -2,14 +2,21 @@
 //
 // Strategy:
 //   • Navigations (pages): network-first, falling back to the last cached copy
-//     of that page, then to a generic offline page. This is what makes the
+//     of that page, then to a locale-matched offline page. This is what makes the
 //     directory you last loaded available "in the field" with no signal.
 //   • Static assets (/_next/static, fonts, images): cache-first, revalidated in
 //     the background.
 //
 // Bump CACHE_VERSION to invalidate everything on a breaking change.
-const CACHE_VERSION = "farms-cache-v3";
-const OFFLINE_URL = "/offline";
+const CACHE_VERSION = "farms-cache-v4";
+const OFFLINE_URLS = [
+  "/offline",
+  "/de/offline",
+  "/fr/offline",
+  "/it/offline",
+  "/rm/offline",
+];
+const OFFLINE_PATHS = new Set(OFFLINE_URLS);
 const FARMS_API_URL = "/api/farms";
 // A single bounded cache keeps the implementation small while preventing
 // navigations and arbitrary `/api/farms?...` combinations from accumulating
@@ -22,7 +29,7 @@ self.addEventListener("install", (event) => {
   // in (SKIP_WAITING below). The first-ever worker has nothing to wait behind,
   // so it still activates immediately.
   event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => cache.add(OFFLINE_URL)),
+    caches.open(CACHE_VERSION).then((cache) => cache.addAll(OFFLINE_URLS)),
   );
 });
 
@@ -77,6 +84,26 @@ function isCacheableAsset(url) {
   );
 }
 
+function localizedOfflineUrl(pathname) {
+  const locale = pathname.split("/")[1];
+  return ["de", "fr", "it", "rm"].includes(locale)
+    ? `/${locale}/offline`
+    : "/offline";
+}
+
+// Navigations can carry credentials or Web Share Target content in the query
+// string. Serving the response remains network-first, but those request URLs
+// and their rendered responses must never be written to Cache Storage.
+function isPrivateNavigation(url) {
+  if (url.pathname.endsWith("/verify-email")) {
+    return true;
+  }
+
+  return ["token", "code", "state", "title", "text", "url"].some((key) =>
+    url.searchParams.has(key),
+  );
+}
+
 // Keep cache writes alive after the response has been handed to the page.
 // Without waitUntil, a worker may be stopped before cache.put finishes — most
 // visible on a slow device as an unexpectedly empty offline cache. Never let a
@@ -90,7 +117,7 @@ function cacheResponse(request, response) {
     await cache.put(request, response.clone());
     const keys = await cache.keys();
     const removable = keys.filter(
-      (key) => new URL(key.url).pathname !== OFFLINE_URL,
+      (key) => !OFFLINE_PATHS.has(new URL(key.url).pathname),
     );
     const overflow = removable.length - MAX_DYNAMIC_ENTRIES;
     if (overflow > 0) {
@@ -118,15 +145,19 @@ self.addEventListener("fetch", (event) => {
     const network = fetch(request);
     // Register the lifetime extension synchronously. Calling waitUntil only
     // after fetch resolves is too late in some browsers.
-    event.waitUntil(
-      network
-        .then((response) => cacheResponse(request, response))
-        .catch(() => undefined),
-    );
+    if (!isPrivateNavigation(url)) {
+      event.waitUntil(
+        network
+          .then((response) => cacheResponse(request, response))
+          .catch(() => undefined),
+      );
+    }
     event.respondWith(
       network.catch(async () => {
-        const cached = await caches.match(request);
-        return cached || caches.match(OFFLINE_URL);
+        const cached = isPrivateNavigation(url)
+          ? undefined
+          : await caches.match(request);
+        return cached || caches.match(localizedOfflineUrl(url.pathname));
       }),
     );
     return;

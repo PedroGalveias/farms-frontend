@@ -154,8 +154,8 @@ export function getRegionKeys() {
   return SWISS_REGIONS.map((region) => region.key);
 }
 
-export function formatFarmDate(value: string) {
-  return new Intl.DateTimeFormat("en-CH", {
+export function formatFarmDate(value: string, locale = "en") {
+  return new Intl.DateTimeFormat(`${locale}-CH`, {
     day: "numeric",
     month: "short",
     year: "numeric",

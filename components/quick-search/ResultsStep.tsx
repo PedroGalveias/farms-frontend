@@ -235,7 +235,7 @@ function ResultRow({
       <FavoriteButton className="absolute right-2.5 top-2.5" farm={farm} />
       <button
         className="glass glass-card glass-interactive group w-full rounded-card p-3.5 text-left sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-elev-3 focus-visible:ring-2 focus-visible:ring-ink/20"
-        data-cursor="Open"
+        data-cursor={t("command_hint_select")}
         onClick={(event) => onOpen(farm, event.currentTarget)}
         type="button"
       >

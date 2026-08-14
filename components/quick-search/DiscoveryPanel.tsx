@@ -25,10 +25,10 @@ const STEP_INDEX: Record<Step, number> = {
   results: 2,
 };
 
-const STEP_NODES: { icon: LucideIcon; id: Step; label: string }[] = [
-  { icon: MapPin, id: "location", label: "Location" },
-  { icon: ShoppingBasket, id: "products", label: "Products" },
-  { icon: Sprout, id: "results", label: "Farms" },
+const STEP_NODES: { icon: LucideIcon; id: Step; labelKey: string }[] = [
+  { icon: MapPin, id: "location", labelKey: "qs_step_location" },
+  { icon: ShoppingBasket, id: "products", labelKey: "qs_step_products" },
+  { icon: Sprout, id: "results", labelKey: "qs_step_results" },
 ];
 
 // How many nearest results get a connection line, and how many get a name.
@@ -370,7 +370,7 @@ export default function DiscoveryPanel({
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />
-                {node.label}
+                {t(node.labelKey)}
               </div>
             </div>
           );
@@ -380,10 +380,10 @@ export default function DiscoveryPanel({
       {/* Headline + live count */}
       <div className="absolute bottom-12 left-12 right-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">
-          Swiss farm map
+          {t("qs_map_eyebrow")}
         </p>
         <h2 className="mt-3 text-display font-black leading-[0.92] tracking-[-0.04em] text-white">
-          Nearest <span className="text-white/80">first.</span>
+          {t("bento_nearestFirst")}
         </h2>
         {selectedProducts.length > 0 ? (
           <p className="mt-3 text-sm font-semibold text-white/75">

@@ -135,7 +135,7 @@ describe("MobileTabBar", () => {
       renderBar();
       await Promise.resolve();
     });
-    const navigation = screen.getByRole("navigation", { name: "Primary" });
+    const navigation = screen.getByRole("navigation", { name: /Primary/ });
 
     Object.defineProperty(window, "scrollY", {
       configurable: true,

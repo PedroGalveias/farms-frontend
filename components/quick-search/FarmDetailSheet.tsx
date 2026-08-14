@@ -212,7 +212,7 @@ export default function FarmDetailSheet({
             {farm.coordinates}
           </InfoCard>
           <InfoCard label={t("detail_added")}>
-            {formatFarmDate(farm.created_at)}
+            {formatFarmDate(farm.created_at, locale)}
           </InfoCard>
         </div>
 

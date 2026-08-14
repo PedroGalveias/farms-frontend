@@ -102,7 +102,7 @@ test.describe("settings is reachable signed out", () => {
     await page.setViewportSize({ width: 390, height: 780 });
     await page.goto("/");
 
-    const tabBar = page.locator('nav[aria-label="Primary"]:visible');
+    const tabBar = page.locator('nav[aria-label="Primary navigation"]:visible');
     await expect(tabBar.locator("a")).toHaveCount(3);
     await expect(tabBar.locator('a[href$="/settings"]')).toHaveCount(0);
   });

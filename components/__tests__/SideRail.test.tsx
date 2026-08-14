@@ -105,7 +105,7 @@ describe("SideRail settings entry", () => {
     auth.user = null;
     renderRail("/de/saved");
 
-    const nav = screen.getByRole("navigation", { name: "Primary" });
+    const nav = screen.getByRole("navigation", { name: /Primary/ });
     expect(nav.querySelector('[aria-current="page"]')).not.toBeNull();
   });
 
@@ -115,7 +115,7 @@ describe("SideRail settings entry", () => {
     auth.user = null;
     renderRail("/settings");
 
-    const nav = screen.getByRole("navigation", { name: "Primary" });
+    const nav = screen.getByRole("navigation", { name: /Primary/ });
     expect(nav.querySelector('a[href*="/settings"]')).toBeNull();
   });
 });

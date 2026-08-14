@@ -10,6 +10,7 @@ const authState: {
   loading: boolean;
 } = { user: null, loading: false };
 const logout = vi.fn();
+const clearRecent = vi.fn(() => localStorage.removeItem("farms.recent"));
 const router = vi.hoisted(() => ({
   back: vi.fn(),
   push: vi.fn(),
@@ -18,6 +19,10 @@ const router = vi.hoisted(() => ({
 
 vi.mock("@/components/auth/AuthProvider", () => ({
   useAuth: () => ({ ...authState, openAuth: vi.fn(), logout }),
+}));
+
+vi.mock("@/components/personalization/PersonalizationProvider", () => ({
+  usePersonalization: () => ({ clearRecent }),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -144,6 +149,7 @@ describe("SettingsView", () => {
     localStorage.setItem("farms.recent", JSON.stringify(["x1", "x2"]));
     renderSettings();
     fireEvent.click(screen.getByRole("button", { name: /^clear$/i }));
+    expect(clearRecent).toHaveBeenCalledOnce();
     expect(localStorage.getItem("farms.recent")).toBeNull();
     expect(
       screen.getByRole("button", { name: /cleared/i }),

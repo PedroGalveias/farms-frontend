@@ -34,6 +34,7 @@ import { KNOWN_CATEGORY_KEYS } from "@/lib/categories";
 import { PRODUCTS } from "@/lib/products";
 import { taxonomyTagLabel } from "@/lib/taxonomy";
 import { readSearchCounts, topKeys, trackSearch } from "@/lib/search-stats";
+import { productsFromShareTarget } from "@/lib/share-target";
 import { haptic } from "@/lib/haptics";
 import { playTick } from "@/lib/sound";
 import { geolocationErrorKey, requestCurrentPosition } from "@/lib/geolocation";
@@ -175,9 +176,11 @@ export default function QuickSearchExperience({
   const location = useMemo<QuickSearchLocation>(
     () => ({
       coordinates: sharedCoordinates ?? typedCoordinates,
-      label: sharedCoordinates ? "your current location" : locationInput.trim(),
+      label: sharedCoordinates
+        ? t("qs_current_location")
+        : locationInput.trim(),
     }),
-    [locationInput, sharedCoordinates, typedCoordinates],
+    [locationInput, sharedCoordinates, t, typedCoordinates],
   );
 
   const results = useMemo(
@@ -219,6 +222,7 @@ export default function QuickSearchExperience({
       .filter(
         (value) => KNOWN_CATEGORY_KEYS.includes(value) || value in PRODUCTS,
       );
+    const sharedKeys = raw ? [] : productsFromShareTarget(params);
     const stored = readLastQuickSearch();
 
     // Defer out of the effect body (repo lint: no sync setState in effects).
@@ -228,6 +232,11 @@ export default function QuickSearchExperience({
         if (params.get("match") === "any") {
           setMatchMode("any");
         }
+      } else if (sharedKeys.length > 0) {
+        setSelectedProducts(sharedKeys);
+        // Shared items should be reviewed before a search runs; location is
+        // deliberately never inferred from someone else's share payload.
+        setStep("products");
       } else if (params.get("resume") === "1" && stored) {
         // The "Repeat last search" PWA shortcut: jump straight to results.
         setSelectedProducts(stored.products);
@@ -237,6 +246,17 @@ export default function QuickSearchExperience({
       } else if (stored) {
         // A previous search exists — offer it as a one-tap resume chip.
         setResumable(stored);
+      }
+      if (["title", "text", "url"].some((key) => params.has(key))) {
+        params.delete("title");
+        params.delete("text");
+        params.delete("url");
+        const query = params.toString();
+        window.history.replaceState(
+          null,
+          "",
+          `${window.location.pathname}${query ? `?${query}` : ""}`,
+        );
       }
       urlHydratedRef.current = true;
     });
@@ -253,6 +273,9 @@ export default function QuickSearchExperience({
     params.delete("products");
     params.delete("match");
     params.delete("resume");
+    params.delete("title");
+    params.delete("text");
+    params.delete("url");
     if (selectedProducts.length > 0) {
       params.set("products", selectedProducts.join(","));
       if (matchMode === "any") {

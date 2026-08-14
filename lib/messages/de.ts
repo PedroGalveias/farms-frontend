@@ -5,6 +5,18 @@
 import type { Dict } from "@/lib/i18n-core";
 
 export const de: Dict = {
+  a11y_primaryNav: "Hauptnavigation",
+  a11y_breadcrumb: "Brotkrümelnavigation",
+  theme_switchLight: "Zum hellen Modus wechseln",
+  theme_switchDark: "Zum dunklen Modus wechseln",
+  not_found_title_lead: "Diese Seite ist",
+  not_found_title_accent: "von der Karte verschwunden.",
+  not_found_body:
+    "Die gesuchte Seite ist nicht hier. Geh zurück oder nutze die Navigation, um das Verzeichnis oder die Schnellsuche zu öffnen.",
+  data_partial:
+    "Einige Höfe konnten nicht geladen werden. Die Ergebnisse sind möglicherweise unvollständig; aktualisiere die Seite, um es erneut zu versuchen.",
+  qs_match_mode_aria: "Wie ausgewählte Produkte übereinstimmen sollen",
+  qs_map_eyebrow: "Schweizer Hofkarte",
   // --- auth ---
   account_login: "Anmelden",
   account_logout: "Abmelden",

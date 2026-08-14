@@ -5,6 +5,18 @@
 import type { Dict } from "@/lib/i18n-core";
 
 export const fr: Dict = {
+  a11y_primaryNav: "Navigation principale",
+  a11y_breadcrumb: "Fil d’Ariane",
+  theme_switchLight: "Passer au mode clair",
+  theme_switchDark: "Passer au mode sombre",
+  not_found_title_lead: "Cette page s’est",
+  not_found_title_accent: "égarée hors de la carte.",
+  not_found_body:
+    "La page recherchée n’est pas ici. Revenez en arrière ou utilisez la navigation pour parcourir l’annuaire ou lancer une recherche rapide.",
+  data_partial:
+    "Certaines fermes n’ont pas pu être chargées. Les résultats peuvent être incomplets ; actualisez la page pour réessayer.",
+  qs_match_mode_aria: "Comment les produits sélectionnés doivent correspondre",
+  qs_map_eyebrow: "Carte des fermes suisses",
   // --- auth ---
   account_login: "Se connecter",
   account_logout: "Se déconnecter",

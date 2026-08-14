@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageProvider from "@/components/i18n/LanguageProvider";
 
 afterEach(() => {
   document.documentElement.classList.remove("dark");
@@ -11,9 +12,11 @@ afterEach(() => {
 
 function renderToggle() {
   return render(
-    <ThemeProvider>
-      <ThemeToggle />
-    </ThemeProvider>,
+    <LanguageProvider>
+      <ThemeProvider>
+        <ThemeToggle />
+      </ThemeProvider>
+    </LanguageProvider>,
   );
 }
 

@@ -5,6 +5,18 @@
 import type { Dict } from "@/lib/i18n-core";
 
 export const rm: Dict = {
+  a11y_primaryNav: "Navigaziun principala",
+  a11y_breadcrumb: "Percurs da navigaziun",
+  theme_switchLight: "Midar al modus cler",
+  theme_switchDark: "Midar al modus stgir",
+  not_found_title_lead: "Questa pagina è",
+  not_found_title_accent: "svanida da la charta.",
+  not_found_body:
+    "La pagina tschertgada n’è betg qua. Va enavos u dovra la navigaziun per sfegliar il register u avrir la tschertga svelta.",
+  data_partial:
+    "Intgins manaschis n’han betg pudì vegnir chargiads. Ils resultats pon esser incumplets; actualisescha la pagina per empruvar danovamain.",
+  qs_match_mode_aria: "Co ils products tschernids duain correspunder",
+  qs_map_eyebrow: "Charta dals manaschis svizzers",
   // --- auth ---
   account_login: "S'annunziar",
   account_logout: "Sa deconnectar",
