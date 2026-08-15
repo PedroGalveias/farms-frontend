@@ -4,7 +4,7 @@ import LanguageProvider from "@/components/i18n/LanguageProvider";
 import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import SideRail from "@/components/SideRail";
-import { translate } from "@/lib/i18n";
+import { MESSAGES, translate, type Locale } from "@/lib/i18n";
 
 const pathname = vi.hoisted(() => ({ value: "/" }));
 // Signed out by default — the state the settings link exists for.
@@ -33,10 +33,10 @@ vi.mock("@/components/auth/AuthProvider", () => ({
   }),
 }));
 
-function renderRail(path = "/") {
+function renderRail(path = "/", locale: Locale = "en") {
   pathname.value = path;
   return render(
-    <LanguageProvider>
+    <LanguageProvider initialLocale={locale} messages={MESSAGES[locale]}>
       <ThemeProvider>
         <PersonalizationProvider>
           <SideRail />
@@ -102,20 +102,26 @@ describe("SideRail settings entry", () => {
   });
 
   it("marks the primary nav current on a locale-prefixed route", () => {
+    const locale: Locale = "de";
     auth.user = null;
-    renderRail("/de/saved");
+    renderRail("/de/saved", locale);
 
-    const nav = screen.getByRole("navigation", { name: /Primary/ });
+    const nav = screen.getByRole("navigation", {
+      name: translate(locale, "a11y_primaryNav"),
+    });
     expect(nav.querySelector('[aria-current="page"]')).not.toBeNull();
   });
 
   it("leaves the primary navigation alone", () => {
+    const locale: Locale = "en";
     // Settings belongs to the utility cluster. Putting it in <nav> would hand
     // it to the sliding indicator, which is positioned within that element.
     auth.user = null;
-    renderRail("/settings");
+    renderRail("/settings", locale);
 
-    const nav = screen.getByRole("navigation", { name: /Primary/ });
+    const nav = screen.getByRole("navigation", {
+      name: translate(locale, "a11y_primaryNav"),
+    });
     expect(nav.querySelector('a[href*="/settings"]')).toBeNull();
   });
 });

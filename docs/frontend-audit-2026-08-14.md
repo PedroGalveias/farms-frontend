@@ -108,7 +108,7 @@ land-then-change sequence today, which is why this shipped.
 `npm run build` failed on the first run of this audit and passed on the second, with
 no code change between them:
 
-```
+```text
 Error: Route "/[lang]/region/[key]": Uncached data was accessed outside of <Suspense>.
 Error occurred prerendering page "/it/region/region_mittelland".
 Export encountered an error on /[lang]/region/[key]/page, exiting the build.
@@ -145,7 +145,7 @@ latent bug.
 **b) The build is coupled to a flaky free-tier backend.** The failing build logged
 real upstream 500s:
 
-```
+```text
 [farms] page 2 failed after 200 farms; serving partial directory
   FarmsApiError: Failed to load farm categories. { status: 500 }
 ```
@@ -171,7 +171,7 @@ partial failure by design, but "partial" is precisely what trips (a).
 [`CommandPalette.tsx:138`](components/command/CommandPalette.tsx#L138) fetches
 `/api/farms` with no projection the first time the palette opens. Measured:
 
-```
+```text
 GET /api/farms → 200 · 1,829,018 bytes · 3,155 farms · 259,820 bytes gzipped
 ```
 
@@ -273,7 +273,7 @@ data — the asymmetry, not the empty string, is the real defect.
 
 On `/?canton=BE`, the canton picker renders:
 
-```
+```text
 All cantons · GE · Geneva (0) · VD · Vaud (0) · VS · Valais (0)
 · BE · Bern (727) · FR · Fribourg (0) · … · TI · Ticino (0) · · (0)
 ```
@@ -673,7 +673,7 @@ contracts and reviewed translations exist.
 | Format | pass |
 | ESLint | pass, zero warnings |
 | TypeScript | pass |
-| Unit/component | 810/810 pass across 91 files on current `origin/main` |
+| Unit/component | 812/812 pass across 91 files on current `origin/main` |
 | Coverage | 93.81% statements · 85.60% branches · 92.88% functions · 94.62% lines |
 | Production build | pass; incomplete upstream pagination is now surfaced instead of silently trusted |
 | Playwright | Full multi-engine/device run: 263 pass, 66 intentional skips, one transient Chromium listbox timing failure; the exact failed case passed immediately on rerun |

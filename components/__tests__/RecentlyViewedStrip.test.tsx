@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import LanguageProvider from "@/components/i18n/LanguageProvider";
-import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
+import PersonalizationProvider, {
+  usePersonalization,
+} from "@/components/personalization/PersonalizationProvider";
 import RecentlyViewedStrip from "@/components/personalization/RecentlyViewedStrip";
 import { RECENT_STORAGE_KEY } from "@/lib/personalization";
 import type { Farm } from "@/types/farm";
@@ -43,6 +45,15 @@ function renderStrip(farms = FARMS) {
   );
 }
 
+function ClearRecentButton() {
+  const { clearRecent } = usePersonalization();
+  return (
+    <button onClick={clearRecent} type="button">
+      Clear recent
+    </button>
+  );
+}
+
 afterEach(() => {
   window.localStorage.clear();
 });
@@ -76,5 +87,29 @@ describe("RecentlyViewedStrip", () => {
       await screen.findByRole("link", { name: /Bauernhof Grünmatt/i }),
     ).toBeInTheDocument();
     expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+
+  it("clears provider state and persists the canonical empty history", async () => {
+    seedRecent(["bern"]);
+    render(
+      <LanguageProvider>
+        <PersonalizationProvider>
+          <RecentlyViewedStrip farms={FARMS} />
+          <ClearRecentButton />
+        </PersonalizationProvider>
+      </LanguageProvider>,
+    );
+
+    expect(
+      await screen.findByRole("link", { name: /Hof Sonnenmatt/i }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Clear recent" }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("link", { name: /Hof Sonnenmatt/i }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(window.localStorage.getItem(RECENT_STORAGE_KEY)).toBe("[]");
   });
 });

@@ -10,7 +10,7 @@ const authState: {
   loading: boolean;
 } = { user: null, loading: false };
 const logout = vi.fn();
-const clearRecent = vi.fn(() => localStorage.removeItem("farms.recent"));
+const clearRecent = vi.fn();
 const router = vi.hoisted(() => ({
   back: vi.fn(),
   push: vi.fn(),
@@ -146,11 +146,9 @@ describe("SettingsView", () => {
   });
 
   it("clears recently-viewed and confirms with a transient label", async () => {
-    localStorage.setItem("farms.recent", JSON.stringify(["x1", "x2"]));
     renderSettings();
     fireEvent.click(screen.getByRole("button", { name: /^clear$/i }));
     expect(clearRecent).toHaveBeenCalledOnce();
-    expect(localStorage.getItem("farms.recent")).toBeNull();
     expect(
       screen.getByRole("button", { name: /cleared/i }),
     ).toBeInTheDocument();

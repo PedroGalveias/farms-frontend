@@ -239,6 +239,16 @@ describe("useFarmDirectory", () => {
     expect(result.current.visibleFarms).toHaveLength(FARMS.length);
   });
 
+  it("still refreshes when cache invalidation cannot reach the server", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")));
+    const { result } = await setup();
+
+    act(() => result.current.refreshDirectory());
+
+    await waitFor(() => expect(router.refresh).toHaveBeenCalledOnce());
+    expect(result.current.visibleFarms).toHaveLength(FARMS.length);
+  });
+
   it("uses a granted location for nearest sorting and can clear it again", async () => {
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
