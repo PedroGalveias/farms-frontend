@@ -94,6 +94,45 @@ describe("POST /api/farms", () => {
     expect(mocks.createFarm).not.toHaveBeenCalled();
   });
 
+  it("rejects semantically invalid farms before contacting the backend", async () => {
+    const invalid = new NextRequest(`${ORIGIN}/api/farms`, {
+      body: JSON.stringify({
+        ...validPayload,
+        canton: "XX",
+        coordinates: "not coordinates",
+        name: "   ",
+      }),
+      headers: {
+        "content-type": "application/json",
+        host: "localhost:3000",
+        origin: ORIGIN,
+      },
+      method: "POST",
+    });
+
+    const response = await POST(invalid);
+
+    expect(response.status).toBe(400);
+    expect(mocks.createFarm).not.toHaveBeenCalled();
+  });
+
+  it("rejects unknown taxonomy slugs", async () => {
+    const invalid = new NextRequest(`${ORIGIN}/api/farms`, {
+      body: JSON.stringify({ ...validPayload, products: ["mystery-item"] }),
+      headers: {
+        "content-type": "application/json",
+        host: "localhost:3000",
+        origin: ORIGIN,
+      },
+      method: "POST",
+    });
+
+    const response = await POST(invalid);
+
+    expect(response.status).toBe(400);
+    expect(mocks.createFarm).not.toHaveBeenCalled();
+  });
+
   it("forwards a same-origin authenticated creation and invalidates the list", async () => {
     mocks.createFarm.mockResolvedValue(undefined);
 
@@ -103,6 +142,8 @@ describe("POST /api/farms", () => {
     expect(mocks.createFarm).toHaveBeenCalledWith(
       expect.objectContaining({
         ...validPayload,
+        address: "Dorfstrasse 1",
+        name: "Bauernhof Meier",
         idempotency_key: expect.any(String),
       }),
       "farms-session=abc",

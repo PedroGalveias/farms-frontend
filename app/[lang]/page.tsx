@@ -2,11 +2,16 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import FarmsPageShell from "@/components/FarmsPageShell";
 import HomeSkeleton from "@/components/home/HomeSkeleton";
-import { DEFAULT_LOCALE, isLocale, localeAlternates } from "@/lib/i18n";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  localeAlternates,
+  translate,
+} from "@/lib/i18n";
 import {
   FarmsApiError,
   getFarmFacets,
-  getFarms,
+  getFarmsSnapshot,
   getFarmsHealth,
 } from "@/lib/farms-service";
 import {
@@ -102,13 +107,13 @@ async function HomeDirectory({
 
   const [healthResult, farmsResult] = await Promise.allSettled([
     getFarmsHealth(),
-    getFarms(locale, query),
+    getFarmsSnapshot(locale, query),
   ]);
 
   // Only what the list renders crosses to the browser. The full farms —
   // products included — stay on the server for anything that needs them.
   const farms = (
-    farmsResult.status === "fulfilled" ? farmsResult.value : []
+    farmsResult.status === "fulfilled" ? farmsResult.value.farms : []
   ).map(toDirectoryFarm);
   const loadError =
     farmsResult.status === "rejected"
@@ -116,7 +121,9 @@ async function HomeDirectory({
           farmsResult.reason,
           "Unable to load the farm data right now.",
         )
-      : null;
+      : farmsResult.value.complete
+        ? null
+        : translate(locale, "data_partial");
 
   let serviceStatus: ServiceStatus = "online";
 

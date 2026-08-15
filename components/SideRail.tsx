@@ -94,7 +94,7 @@ export default function SideRail() {
   return (
     <aside className="glass glass-chrome cursor-zone fixed bottom-3 left-3 top-3 z-40 hidden w-[64px] flex-col items-center justify-between rounded-panel py-5 [view-transition-name:site-rail] lg:flex">
       <Link
-        aria-label="farms — home"
+        aria-label={`farms — ${t("breadcrumb_home")}`}
         className="block h-11 w-11 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-rotate-6 hover:scale-105"
         href="/"
       >
@@ -102,7 +102,7 @@ export default function SideRail() {
       </Link>
 
       <nav
-        aria-label="Primary"
+        aria-label={t("a11y_primaryNav")}
         className="relative flex flex-col items-center gap-2"
         ref={navRef}
       >

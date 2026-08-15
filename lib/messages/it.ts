@@ -5,6 +5,18 @@
 import type { Dict } from "@/lib/i18n-core";
 
 export const it: Dict = {
+  a11y_primaryNav: "Navigazione principale",
+  a11y_breadcrumb: "Percorso di navigazione",
+  theme_switchLight: "Passa alla modalità chiara",
+  theme_switchDark: "Passa alla modalità scura",
+  not_found_title_lead: "Questa pagina è",
+  not_found_title_accent: "uscita dalla mappa.",
+  not_found_body:
+    "La pagina che cerchi non è qui. Torna indietro o usa la navigazione per sfogliare l’elenco o avviare la ricerca rapida.",
+  data_partial:
+    "Non è stato possibile caricare alcune fattorie. I risultati potrebbero essere incompleti; aggiorna la pagina per riprovare.",
+  qs_match_mode_aria: "Come devono corrispondere i prodotti selezionati",
+  qs_map_eyebrow: "Mappa delle fattorie svizzere",
   // --- auth ---
   account_login: "Accedi",
   account_logout: "Esci",

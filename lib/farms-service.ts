@@ -131,6 +131,18 @@ export interface FarmsQuery {
   sort?: "newest" | "name" | "canton";
 }
 
+/**
+ * A directory response plus whether pagination reached the backend's end.
+ *
+ * Most server consumers only need the rows and can keep using `getFarms`.
+ * Directory UIs use this richer result so a timed-out tail is never presented
+ * as though it were the complete Swiss farm directory.
+ */
+export interface FarmsSnapshot {
+  farms: Farm[];
+  complete: boolean;
+}
+
 /** Stable semantic representation used as the Cache Components argument. */
 export function canonicalizeFarmsQuery(query: FarmsQuery): FarmsQuery {
   const canton = query.canton?.trim().toUpperCase();
@@ -328,6 +340,13 @@ export async function getFarms(
   locale: Locale = DEFAULT_LOCALE,
   query: FarmsQuery = {},
 ): Promise<Farm[]> {
+  return (await getFarmsSnapshot(locale, query)).farms;
+}
+
+export async function getFarmsSnapshot(
+  locale: Locale = DEFAULT_LOCALE,
+  query: FarmsQuery = {},
+): Promise<FarmsSnapshot> {
   const result = await cachedFarms(locale, canonicalizeFarmsQuery(query));
   if ("failure" in result) {
     throw new FarmsApiError(result.failure.message, result.failure.status);
@@ -338,7 +357,7 @@ export async function getFarms(
 async function cachedFarms(
   locale: Locale,
   query: FarmsQuery,
-): Promise<FarmsResult<Farm[]>> {
+): Promise<FarmsResult<FarmsSnapshot>> {
   "use cache";
   // `locale` and `query` are arguments, so they become part of the cache key
   // automatically — each filter combination gets its own entry rather than one
@@ -358,7 +377,7 @@ async function cachedFarms(
 async function walkDirectory(
   locale: Locale,
   query: FarmsQuery,
-): Promise<Farm[]> {
+): Promise<FarmsSnapshot> {
   // The lifetime is NOT set here. `use cache` stores the return value, and a
   // walk that ends early still returns the farms it collected — a directory
   // missing its tail is worth far more to a visitor than no directory at all.
@@ -407,7 +426,7 @@ async function walkDirectory(
   // The older backend returns everything at once and sets no cursor.
   if (!first.nextCursor) {
     cacheLife(FULL_CACHE_LIFE);
-    return farms;
+    return { farms, complete: true };
   }
 
   // `next_cursor` is the next OFFSET to request. If page 0 hands back exactly
@@ -436,7 +455,7 @@ async function walkDirectory(
         `[farms] pagination budget spent after ${farms.length} farms; serving partial directory`,
       );
       cacheLife(DEGRADED_CACHE_LIFE);
-      return farms;
+      return { farms, complete: false };
     }
 
     const wave = Array.from(
@@ -468,7 +487,7 @@ async function walkDirectory(
           result.reason,
         );
         cacheLife(DEGRADED_CACHE_LIFE);
-        return farms;
+        return { farms, complete: false };
       }
       collect(result.value);
       // The cursor is the backend's own statement about whether more exists,
@@ -483,7 +502,7 @@ async function walkDirectory(
     }
     if (reachedEnd) {
       cacheLife(FULL_CACHE_LIFE);
-      return farms;
+      return { farms, complete: true };
     }
     page += wave.length;
     waveSize = Math.min(waveSize * 2, FARMS_PAGE_CONCURRENCY);
@@ -497,7 +516,7 @@ async function walkDirectory(
     `[farms] page cap reached after ${farms.length} farms; serving partial directory`,
   );
   cacheLife(DEGRADED_CACHE_LIFE);
-  return farms;
+  return { farms, complete: false };
 }
 
 /**
@@ -515,7 +534,7 @@ async function walkSequentially(
   deadline: number,
   locale: Locale,
   query: FarmsQuery,
-): Promise<Farm[]> {
+): Promise<FarmsSnapshot> {
   let nextOffset: string | undefined = startOffset;
 
   for (let page = 1; page < FARMS_MAX_PAGES && nextOffset; page++) {
@@ -524,7 +543,7 @@ async function walkSequentially(
         `[farms] pagination budget spent after ${farms.length} farms; serving partial directory`,
       );
       cacheLife(DEGRADED_CACHE_LIFE);
-      return farms;
+      return { farms, complete: false };
     }
     let parsed: FarmsPage;
     try {
@@ -540,7 +559,7 @@ async function walkSequentially(
         error,
       );
       cacheLife(DEGRADED_CACHE_LIFE);
-      return farms;
+      return { farms, complete: false };
     }
     for (const farm of parsed.farms) {
       if (!seen.has(farm.id)) {
@@ -558,10 +577,11 @@ async function walkSequentially(
       `[farms] page cap reached after ${farms.length} farms; serving partial directory`,
     );
     cacheLife(DEGRADED_CACHE_LIFE);
+    return { farms, complete: false };
   } else {
     cacheLife(FULL_CACHE_LIFE);
+    return { farms, complete: true };
   }
-  return farms;
 }
 
 /**

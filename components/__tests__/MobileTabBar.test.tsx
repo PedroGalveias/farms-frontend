@@ -9,6 +9,7 @@ import {
 import LanguageProvider from "@/components/i18n/LanguageProvider";
 import PersonalizationProvider from "@/components/personalization/PersonalizationProvider";
 import MobileTabBar from "@/components/MobileTabBar";
+import { MESSAGES, translate, type Locale } from "@/lib/i18n";
 import { FAVORITES_STORAGE_KEY } from "@/lib/personalization";
 
 const pathname = vi.hoisted(() => ({ value: "/" }));
@@ -28,9 +29,9 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-function renderBar() {
+function renderBar(locale: Locale = "en") {
   return render(
-    <LanguageProvider>
+    <LanguageProvider initialLocale={locale} messages={MESSAGES[locale]}>
       <PersonalizationProvider>
         <MobileTabBar />
       </PersonalizationProvider>
@@ -126,16 +127,19 @@ describe("MobileTabBar", () => {
   });
 
   it("hides while scrolling down and restores keyboard access while scrolling up", async () => {
+    const locale: Locale = "en";
     vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
       queueMicrotask(() => callback(0));
       return 1;
     });
     vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
     await act(async () => {
-      renderBar();
+      renderBar(locale);
       await Promise.resolve();
     });
-    const navigation = screen.getByRole("navigation", { name: "Primary" });
+    const navigation = screen.getByRole("navigation", {
+      name: translate(locale, "a11y_primaryNav"),
+    });
 
     Object.defineProperty(window, "scrollY", {
       configurable: true,

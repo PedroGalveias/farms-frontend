@@ -19,15 +19,16 @@ export default async function NotFoundPage() {
           className="rise-in mt-5 max-w-3xl text-display font-extrabold leading-[0.9] tracking-[-0.045em] text-ink"
           style={{ ["--rise-delay" as string]: "80ms" }}
         >
-          This page wandered <span className="text-pine">off the map.</span>
+          {MESSAGES[locale].not_found_title_lead}{" "}
+          <span className="text-pine">
+            {MESSAGES[locale].not_found_title_accent}
+          </span>
         </h1>
         <p
           className="rise-in mt-6 max-w-xl text-lg leading-8 text-ink/60"
           style={{ ["--rise-delay" as string]: "180ms" }}
         >
-          The page you&apos;re looking for isn&apos;t here. Head back to where
-          you were, or use the bar below to browse the directory or quick
-          search.
+          {MESSAGES[locale].not_found_body}
         </p>
 
         <div

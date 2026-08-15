@@ -42,6 +42,7 @@ interface PersonalizationValue {
   toggleFavorite: (id: string) => void;
   recent: string[];
   recordView: (id: string) => void;
+  clearRecent: () => void;
   collections: Collection[];
   collectionsForFarm: (farmId: string) => string[];
   createCollection: (name: string, seedFarmId?: string) => string;
@@ -140,6 +141,11 @@ export default function PersonalizationProvider({
     });
   }, []);
 
+  const clearRecent = useCallback(() => {
+    writeRecent([]);
+    setRecent([]);
+  }, []);
+
   const createCollectionCb = useCallback(
     (name: string, seedFarmId?: string): string => {
       const created = makeCollection(name, seedFarmId ? [seedFarmId] : []);
@@ -200,6 +206,7 @@ export default function PersonalizationProvider({
       toggleFavorite,
       recent,
       recordView,
+      clearRecent,
       collections,
       collectionsForFarm: (farmId: string) =>
         collections
@@ -216,6 +223,7 @@ export default function PersonalizationProvider({
       collections,
       toggleFavorite,
       recordView,
+      clearRecent,
       createCollectionCb,
       renameCollectionCb,
       deleteCollectionCb,

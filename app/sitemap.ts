@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getFarms } from "@/lib/farms-service";
+import { getFarmsSnapshot } from "@/lib/farms-service";
 import { SWISS_CANTONS, getRegionKeys } from "@/lib/farms";
 import { LOCALE_CODES, localizedPath } from "@/lib/i18n";
 import { getProductSlugs } from "@/lib/product-pages";
@@ -79,8 +79,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   staticRoutes.push(...cantonRoutes, ...regionRoutes, ...productRoutes);
 
   try {
-    const farms = await getFarms();
-    const farmRoutes: MetadataRoute.Sitemap = farms.map((farm) => ({
+    const snapshot = await getFarmsSnapshot();
+    // Never publish a truncated farm index as though it were authoritative.
+    // Static discovery routes remain useful and the short degraded cache lets
+    // the next sitemap request retry the complete walk soon.
+    if (!snapshot.complete) {
+      return staticRoutes;
+    }
+    const farmRoutes: MetadataRoute.Sitemap = snapshot.farms.map((farm) => ({
       url: `${siteUrl}/farm/${encodeURIComponent(farm.id)}`,
       lastModified: farm.updated_at ?? farm.created_at,
       changeFrequency: "monthly",

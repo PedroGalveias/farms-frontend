@@ -9,12 +9,12 @@ import {
   writeStorageJson,
 } from "@/lib/safe-storage";
 
-const STORAGE_KEY = "farms.recentSearches";
+export const RECENT_SEARCHES_STORAGE_KEY = "farms.recentSearches";
 const MAX_RECENT = 6;
 const MAX_LENGTH = 80;
 
 export function readRecentSearches(): string[] {
-  const parsed = readStorageJson(STORAGE_KEY);
+  const parsed = readStorageJson(RECENT_SEARCHES_STORAGE_KEY);
   return Array.isArray(parsed)
     ? parsed
         .filter((x): x is string => typeof x === "string")
@@ -33,11 +33,11 @@ export function addRecentSearch(term: string): string[] {
     (item) => item.toLowerCase() !== trimmed.toLowerCase(),
   );
   const next = [trimmed, ...existing].slice(0, MAX_RECENT);
-  writeStorageJson(STORAGE_KEY, next);
+  writeStorageJson(RECENT_SEARCHES_STORAGE_KEY, next);
   return next;
 }
 
 export function clearRecentSearches(): string[] {
-  removeStorage(STORAGE_KEY);
+  removeStorage(RECENT_SEARCHES_STORAGE_KEY);
   return [];
 }

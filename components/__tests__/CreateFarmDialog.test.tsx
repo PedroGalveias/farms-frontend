@@ -50,4 +50,16 @@ describe("CreateFarmDialog category picker", () => {
       screen.getByRole("button", { name: /fruits.*1|1.*fruits/i }),
     ).toBeInTheDocument();
   });
+
+  it("associates validation errors and focuses the first invalid field", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.click(screen.getByRole("button", { name: "Create farm" }));
+
+    const name = screen.getByRole("textbox", { name: "Farm name" });
+    await waitFor(() => expect(name).toHaveFocus());
+    expect(name).toHaveAttribute("aria-invalid", "true");
+    expect(name).toHaveAccessibleDescription("Add a farm name.");
+  });
 });

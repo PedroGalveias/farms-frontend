@@ -185,7 +185,7 @@ function Breadcrumb({
 }) {
   return (
     <nav
-      aria-label="Breadcrumb"
+      aria-label={translate(locale, "a11y_breadcrumb")}
       className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-ink/50"
     >
       {trail.map((crumb) => (

@@ -209,7 +209,7 @@ export default function FarmDetail({
             <span className="tabular-nums">{farm.coordinates}</span>
           </InfoCard>
           <InfoCard label={t("detail_added")}>
-            {formatFarmDate(farm.created_at)}
+            {formatFarmDate(farm.created_at, locale)}
           </InfoCard>
         </div>
 

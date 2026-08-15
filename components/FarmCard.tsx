@@ -162,6 +162,7 @@ export default function FarmCard({
       ? "glass glass-card glass-card-live"
       : "glass glass-card";
   const t = useT();
+  const { locale } = useLanguage();
   const { latitude, longitude } = splitCoordinates(farm.coordinates);
   // Display at 4 decimals (~11 m — plenty for "where is this farm") so the
   // readout is one line on every card; full precision survives only in the
@@ -192,7 +193,7 @@ export default function FarmCard({
       <button
         aria-label={`${t("nearest_view")}: ${farm.name}`}
         className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
-        data-cursor="Open"
+        data-cursor={t("command_hint_select")}
         {...press}
         // Instant navigation (§7): warm the lazy map chunk the moment the user
         // signals intent — hovering, or the first touch of a press — so the
@@ -289,7 +290,7 @@ export default function FarmCard({
 
       <div className="pointer-events-none mt-5 flex items-center justify-between gap-3 text-xs">
         <span className="font-semibold uppercase tracking-[0.1em] text-ink/60">
-          {t("card_added")} {formatFarmDate(farm.created_at)}
+          {t("card_added")} {formatFarmDate(farm.created_at, locale)}
         </span>
         <a
           className="pointer-events-auto relative z-10 inline-flex items-center gap-1 font-semibold text-pine transition-colors hover:text-ink"

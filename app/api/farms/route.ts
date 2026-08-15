@@ -7,8 +7,12 @@ import {
   getFarms,
 } from "@/lib/farms-service";
 import { isSameOrigin } from "@/lib/auth";
+import { KNOWN_CATEGORY_KEYS, categorySlug } from "@/lib/categories";
+import { parseQuickSearchCoordinates } from "@/lib/coordinates";
 import { toCommandFarm, toDirectoryFarm } from "@/lib/directory";
+import { toCreateFarmInput, validateFarmForm } from "@/lib/farm-form";
 import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
+import { PRODUCTS, productSlug } from "@/lib/products";
 import type { CreateFarmInput } from "@/types/farm";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -55,6 +59,12 @@ function isCreateFarmInput(value: unknown): value is CreateFarmInput {
  * entire directory. Comfortably above any plausible number of favourites.
  */
 const MAX_IDS = 200;
+const CATEGORY_SLUGS = new Set(
+  KNOWN_CATEGORY_KEYS.map(categorySlug).filter(
+    (value): value is string => value !== undefined,
+  ),
+);
+const PRODUCT_SLUGS = new Set(Object.keys(PRODUCTS).map(productSlug));
 
 /**
  * `GET /api/farms` — the whole directory, projected to card fields.
@@ -133,10 +143,38 @@ export async function POST(request: Request) {
     );
   }
 
+  const coordinates = parseQuickSearchCoordinates(body.coordinates);
+  const hasUnknownTaxonomy =
+    body.categories.some((slug) => !CATEGORY_SLUGS.has(slug.trim())) ||
+    body.products.some((slug) => !PRODUCT_SLUGS.has(slug.trim()));
+  if (!coordinates || hasUnknownTaxonomy) {
+    return NextResponse.json(
+      { error: "Invalid farm payload." },
+      { status: 400 },
+    );
+  }
+
+  const formValues = {
+    address: body.address,
+    canton: body.canton,
+    categories: body.categories,
+    latitude: String(coordinates.latitude),
+    longitude: String(coordinates.longitude),
+    name: body.name,
+    products: body.products,
+  };
+  if (Object.keys(validateFarmForm(formValues)).length > 0) {
+    return NextResponse.json(
+      { error: "Invalid farm payload." },
+      { status: 400 },
+    );
+  }
+  const normalizedBody = toCreateFarmInput(formValues);
+
   try {
     await createFarm(
       {
-        ...body,
+        ...normalizedBody,
         idempotency_key: crypto.randomUUID(),
       },
       request.headers.get("cookie") ?? undefined,

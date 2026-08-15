@@ -6,6 +6,7 @@ import {
   getFarmById,
   getFarmFacets,
   getFarms,
+  getFarmsSnapshot,
 } from "@/lib/farms-service";
 import type { Farm, FarmProduct } from "@/types/farm";
 
@@ -342,6 +343,27 @@ describe("getFarmFacets — a failure must not disable filtering for everyone", 
 });
 
 describe("getFarms — partial-failure tolerance", () => {
+  it("marks a completed walk as complete", async () => {
+    mockFetchSequence(
+      jsonResponse({ farms: [makeFarm({ id: "f1" })], next_cursor: null }),
+    );
+
+    await expect(getFarmsSnapshot()).resolves.toMatchObject({ complete: true });
+  });
+
+  it("marks a truncated walk as incomplete", async () => {
+    const spy = vi.spyOn(globalThis, "fetch");
+    spy.mockResolvedValueOnce(
+      jsonResponse({ farms: [makeFarm({ id: "f1" })], next_cursor: "100" }),
+    );
+    spy.mockRejectedValueOnce(new DOMException("timed out", "TimeoutError"));
+
+    await expect(getFarmsSnapshot()).resolves.toMatchObject({
+      complete: false,
+      farms: [expect.objectContaining({ id: "f1" })],
+    });
+  });
+
   it("serves the pages that arrived when a later page fails", async () => {
     const spy = vi.spyOn(globalThis, "fetch");
     spy.mockResolvedValueOnce(

@@ -78,7 +78,7 @@ export default function MobileTabBar() {
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label={t("a11y_primaryNav")}
       className="glass glass-chrome mobile-tab-bar fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[min(92%,360px)] items-center gap-1.5 rounded-chip p-1.5 [view-transition-name:tab-bar] lg:hidden"
       data-hidden={hidden || undefined}
       // While hidden-on-scroll, remove the nav from the a11y tree and tab order

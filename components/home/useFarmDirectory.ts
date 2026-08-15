@@ -450,8 +450,15 @@ export function useFarmDirectory(
   ].filter(Boolean).length;
 
   const refreshDirectory = useCallback(() => {
-    startRefreshTransition(() => {
-      router.refresh();
+    startRefreshTransition(async () => {
+      try {
+        await fetch("/api/farms/refresh", { method: "POST" });
+      } catch {
+        // Cache invalidation is best effort; router.refresh remains the
+        // offline-safe fallback when the request cannot reach the server.
+      } finally {
+        router.refresh();
+      }
     });
   }, [router]);
 

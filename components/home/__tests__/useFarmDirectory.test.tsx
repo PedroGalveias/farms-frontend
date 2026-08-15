@@ -71,6 +71,7 @@ async function setup(
 }
 
 afterEach(() => {
+  vi.unstubAllGlobals();
   window.localStorage.clear();
   window.history.replaceState(null, "", "/");
   Reflect.deleteProperty(navigator, "geolocation");
@@ -225,9 +226,26 @@ describe("useFarmDirectory", () => {
   });
 
   it("refreshes through the Next router without changing directory state", async () => {
+    const refresh = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", refresh);
     const { result } = await setup();
     act(() => result.current.refreshDirectory());
-    expect(router.refresh).toHaveBeenCalledOnce();
+    await waitFor(() => expect(router.refresh).toHaveBeenCalledOnce());
+    expect(refresh).toHaveBeenCalledWith("/api/farms/refresh", {
+      method: "POST",
+    });
+    expect(result.current.visibleFarms).toHaveLength(FARMS.length);
+  });
+
+  it("still refreshes when cache invalidation cannot reach the server", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")));
+    const { result } = await setup();
+
+    act(() => result.current.refreshDirectory());
+
+    await waitFor(() => expect(router.refresh).toHaveBeenCalledOnce());
     expect(result.current.visibleFarms).toHaveLength(FARMS.length);
   });
 

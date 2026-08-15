@@ -2,6 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 export default function ThemeToggle({
   className = "",
@@ -9,18 +10,20 @@ export default function ThemeToggle({
   className?: string;
 }) {
   const { theme, toggleTheme } = useTheme();
+  const t = useT();
   const isDark = theme === "dark";
+  const label = isDark ? t("theme_switchLight") : t("theme_switchDark");
 
   return (
     <button
       aria-checked={isDark}
-      aria-label="Toggle dark mode"
+      aria-label={label}
       className={`relative inline-flex h-7 w-[52px] shrink-0 items-center rounded-chip border transition-colors duration-300 ${
         isDark ? "border-white/10 bg-[#1d2026]" : "border-black/5 bg-[#e8e7e0]"
       } ${className}`}
       onClick={(event) => toggleTheme({ x: event.clientX, y: event.clientY })}
       role="switch"
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={label}
       type="button"
     >
       <span

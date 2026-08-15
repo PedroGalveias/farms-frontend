@@ -101,7 +101,18 @@ const nextConfig: NextConfig = {
   // Inlined into the client bundle so the footer can show the deployed version.
   env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      {
+        // Apple requires this extensionless file to be JSON over HTTPS with no redirect.
+        // The proxy already excludes dot-paths, so the public asset reaches this rule directly.
+        source: "/.well-known/apple-app-site-association",
+        headers: [
+          { key: "Content-Type", value: "application/json" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+        ],
+      },
+      { source: "/:path*", headers: securityHeaders },
+    ];
   },
 };
 
